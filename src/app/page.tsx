@@ -99,27 +99,27 @@ export default function Home() {
 
           {/* Mission Videos */}
           <div className="sidebar-box">
-            <div className="sidebar-box-header">Mission Videos</div>
+            <div className="sidebar-box-header">Battle Guides</div>
             <div className="sidebar-box-content">
-              <p className="video-section-title">Looking for mission team suggestions?<br />Check out the channels below:</p>
+              <p className="video-section-title">Looking for team suggestions?<br />Check out the channels below:</p>
               <div className="video-section">
                 <div className="video-link">
                   <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                  <Link href="#">Fable (Youtube)</Link>
+                  <Link href="#">PokeTuber (Youtube)</Link>
                 </div>
                 <div className="video-link">
                   <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                  <Link href="#">Rizeth (Youtube)</Link>
+                  <Link href="#">PokeGuides (Youtube)</Link>
                 </div>
               </div>
-              <p className="video-section-title">Recent Mission Videos:</p>
+              <p className="video-section-title">Recent Battle Videos:</p>
               <div className="video-link">
                 <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                <Link href="#">Unlocking Deva Path Pein (S)</Link>
+                <Link href="#">Unlocking Mewtwo (S)</Link>
               </div>
               <div className="video-link">
                 <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                <Link href="#">Unlocking Hiruko Sasori (S)</Link>
+                <Link href="#">Unlocking Charizard (S)</Link>
               </div>
             </div>
           </div>
@@ -132,17 +132,17 @@ export default function Home() {
               <div className="video-section">
                 <div className="video-link">
                   <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                  <Link href="#">SHAR (Youtube)</Link>
+                  <Link href="#">PokeRanker (Youtube)</Link>
                 </div>
                 <div className="video-link">
                   <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                  <Link href="#">DaniloSTB (Youtube)</Link>
+                  <Link href="#">ArenaChamp (Youtube)</Link>
                 </div>
               </div>
               <p className="video-section-title">Recent Ladder Videos:</p>
               <div className="video-link">
                 <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-                <Link href="#">Becoming a Beginner | New Player Teams</Link>
+                <Link href="#">Becoming a Pokemon Trainer | New Player Teams</Link>
               </div>
               <div className="video-link">
                 <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
@@ -269,18 +269,18 @@ export default function Home() {
               <p className="news-section-title">Balance:</p>
               <p>
                 <strong>Nerfs:</strong>{' '}
-                <Link href="#" className="news-link-red">Tobi (S)</Link>,{' '}
-                <Link href="#" className="news-link-red">Naraka Path Pein (S)</Link>,{' '}
-                <Link href="#" className="news-link-red">Shinobi Alliance Temari (S)</Link>.
+                <Link href="#" className="news-link-red">Mewtwo (S)</Link>,{' '}
+                <Link href="#" className="news-link-red">Rayquaza (S)</Link>,{' '}
+                <Link href="#" className="news-link-red">Garchomp (S)</Link>.
               </p>
               <p>
                 <strong>Boosts:</strong>{' '}
                 <Link href="#" className="news-link-green">Pikachu (S)</Link>,{' '}
-                <Link href="#" className="news-link-green">Edo Tensei Nagato (S)</Link>.
+                <Link href="#" className="news-link-green">Charizard (S)</Link>.
               </p>
               <p>
                 <strong>Tweaks/Minor Reworks/Rollbacks:</strong>{' '}
-                <Link href="#" className="news-link-blue">Yakushi Kabuto</Link>.
+                <Link href="#" className="news-link-blue">Gengar</Link>.
               </p>
 
               {/* Character Stats Example */}
@@ -293,7 +293,7 @@ export default function Home() {
                   <span className="char-stats-matches">6250 (4.20%)</span>
                 </div>
                 <div className="skill-change">
-                  <div className="skill-name">Tobi Sharingan</div>
+                  <div className="skill-name">Psystrike</div>
                   <div className="skill-desc">
                     This skill no longer ignores stun.<br />
                     This skill now grants 10 points of unpierceable damage reduction, instead of 30% unpierceable damage reduction.
@@ -480,37 +480,37 @@ export default function Home() {
               <div className="top-list">
                 <div className="top-list-item">
                   <span className="top-rank top-rank-1">01</span>
-                  <span className="top-name"><Link href="/clan/hoshigama">Hoshigama</Link></span>
+                  <span className="top-name"><Link href="/clan/team-valor">Team Valor</Link></span>
                   <span className="top-value">251</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank top-rank-2">02</span>
-                  <span className="top-name"><Link href="/clan/kaminari-o-shiri">Kaminari O Shiri</Link></span>
+                  <span className="top-name"><Link href="/clan/team-mystic">Team Mystic</Link></span>
                   <span className="top-value">206</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank top-rank-3">03</span>
-                  <span className="top-name"><Link href="/clan/one-piece">One Piece</Link></span>
+                  <span className="top-name"><Link href="/clan/team-instinct">Team Instinct</Link></span>
                   <span className="top-value">188</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">04</span>
-                  <span className="top-name"><Link href="/clan/juryoku">Juryoku</Link></span>
+                  <span className="top-name"><Link href="/clan/pokemon-masters">Pokemon Masters</Link></span>
                   <span className="top-value">154</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">05</span>
-                  <span className="top-name"><Link href="/clan/imperium">Imperium</Link></span>
+                  <span className="top-name"><Link href="/clan/pallet-town">Pallet Town</Link></span>
                   <span className="top-value">151</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">06</span>
-                  <span className="top-name"><Link href="/clan/kyaouuko">Kyaouuko</Link></span>
+                  <span className="top-name"><Link href="/clan/indigo-league">Indigo League</Link></span>
                   <span className="top-value">126</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">07</span>
-                  <span className="top-name"><Link href="/clan/shock">Shock</Link></span>
+                  <span className="top-name"><Link href="/clan/thunderbolts">Thunderbolts</Link></span>
                   <span className="top-value">123</span>
                 </div>
                 <div className="top-list-item">
@@ -520,12 +520,12 @@ export default function Home() {
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">09</span>
-                  <span className="top-name"><Link href="/clan/kokuryukai">Kokuryukai</Link></span>
+                  <span className="top-name"><Link href="/clan/dragon-tamers">Dragon Tamers</Link></span>
                   <span className="top-value">108</span>
                 </div>
                 <div className="top-list-item">
                   <span className="top-rank">10</span>
-                  <span className="top-name"><Link href="/clan/black-bulls">Black Bulls</Link></span>
+                  <span className="top-name"><Link href="/clan/ghost-squad">Ghost Squad</Link></span>
                   <span className="top-value">97</span>
                 </div>
               </div>

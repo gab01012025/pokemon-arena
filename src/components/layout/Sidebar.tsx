@@ -65,27 +65,27 @@ export function LeftSidebar() {
         </div>
       </div>
 
-      {/* Mission Videos */}
+      {/* Battle Guides */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Mission Videos</div>
+        <div className="sidebar-box-header">Battle Guides</div>
         <div className="sidebar-box-content">
-          <p className="video-section-title">Looking for mission team suggestions?<br />Check out the channels below:</p>
+          <p className="video-section-title">Looking for team suggestions?<br />Check out the channels below:</p>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Fable (Youtube)</Link>
+            <Link href="#">PokeTuber (Youtube)</Link>
           </div>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Rizeth (Youtube)</Link>
+            <Link href="#">PokeGuides (Youtube)</Link>
           </div>
-          <p className="video-section-title">Recent Mission Videos:</p>
+          <p className="video-section-title">Recent Battle Videos:</p>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Unlocking Deva Path Pein (S)</Link>
+            <Link href="#">Unlocking Mewtwo (S)</Link>
           </div>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Unlocking Hiruko Sasori (S)</Link>
+            <Link href="#">Unlocking Charizard (S)</Link>
           </div>
         </div>
       </div>
@@ -98,17 +98,17 @@ export function LeftSidebar() {
           <div className="video-section">
             <div className="video-link">
               <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-              <Link href="#">SHAR (Youtube)</Link>
+              <Link href="#">PokeRanker (Youtube)</Link>
             </div>
             <div className="video-link">
               <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-              <Link href="#">DaniloSTB (Youtube)</Link>
+              <Link href="#">ArenaChamp (Youtube)</Link>
             </div>
           </div>
           <p className="video-section-title">Recent Ladder Videos:</p>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Becoming a Beginner | New Player Teams</Link>
+            <Link href="#">Becoming a Pokemon Trainer | New Player Teams</Link>
           </div>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
