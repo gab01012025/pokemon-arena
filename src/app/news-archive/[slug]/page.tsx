@@ -24,7 +24,7 @@ const getNewsDetails = (slug: string) => {
         </ul>
         <hr />
         <p>So for now, we didn't want to leave the game with no update, so we're bringing a new BU with 3 nerfs and 3 buffs to shake up the META!</p>
-        <p class="news-post-signature">~ Naruto-Arena Classic Staff</p>
+        <p class="news-post-signature">~ Pokemon Arena Classic Staff</p>
       `
     },
     'balance-update-1.3.9-+-event-missions': {
@@ -34,7 +34,7 @@ const getNewsDetails = (slug: string) => {
       content: `
         <p>Balance Update 1.3.9 is here with new Event Missions!</p>
         <p>Complete special missions during the holiday season to earn exclusive rewards.</p>
-        <p class="news-post-signature">~ Naruto-Arena Classic Staff</p>
+        <p class="news-post-signature">~ Pokemon Arena Classic Staff</p>
       `
     },
     'balance-update-1.3.8': {
@@ -44,7 +44,7 @@ const getNewsDetails = (slug: string) => {
       content: `
         <p>Balance Update 1.3.8 brings important changes to the meta.</p>
         <p>Check the changelog for details on all the changes.</p>
-        <p class="news-post-signature">~ Naruto-Arena Classic Staff</p>
+        <p class="news-post-signature">~ Pokemon Arena Classic Staff</p>
       `
     }
   };

@@ -19,7 +19,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
   const clanData = {
     name: formattedName,
     tag: '[' + formattedName.substring(0, 3).toUpperCase() + ']',
-    description: 'A powerful clan of elite ninjas dedicated to becoming the best in the arena.',
+    description: 'A powerful clan of elite trainers dedicated to becoming the best in the arena.',
     leader: 'Rafa',
     coLeaders: ['HalfDead-', 'Eight'],
     members: 45,
@@ -53,12 +53,12 @@ export default async function ClanPage({ params }: ClanPageProps) {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 

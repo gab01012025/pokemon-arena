@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 
-export default function NinjaMissions() {
+export default function PokemonMissions() {
   return (
     <div className="page-wrapper">
       <div className="main-container">
@@ -14,25 +14,25 @@ export default function NinjaMissions() {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
         <LeftSidebar />
 
         <main className="center-content">
-          <h1 className="page-title">Ninja Missions</h1>
+          <h1 className="page-title">Pokemon Missions</h1>
           <div className="breadcrumb">
-            <Link href="/">Naruto Arena</Link> &gt; <span className="current">Ninja Missions</span>
+            <Link href="/">Pokemon Arena</Link> &gt; <span className="current">Pokemon Missions</span>
           </div>
 
           <div className="section-content">
-            <p>Ninja Missions are tasks that can be done to unlock more characters.</p>
+            <p>Pokemon Missions are tasks that can be done to unlock more characters.</p>
             <p><strong>Step-by-step guide to do a mission:</strong></p>
             <ol>
               <li>Be the required rank or higher.</li>
@@ -72,7 +72,7 @@ export default function NinjaMissions() {
                 <span className="section-icon">⭐</span>
                 <span className="section-title">Tales Missions</span>
               </div>
-              <p className="mission-desc">With the Tales Mission, you are able to unlock ninjas that participated in past events.</p>
+              <p className="mission-desc">With the Tales Mission, you are able to unlock pokemon that participated in past events.</p>
               <Link href="#" className="mission-link">Check out the Tales Missions Missions!</Link>
             </div>
             <div className="mission-images">
@@ -88,7 +88,7 @@ export default function NinjaMissions() {
                 <span className="section-icon">⭐</span>
                 <span className="section-title">D and C Rank Missions</span>
               </div>
-              <p className="mission-desc">The D and C Rank Missions are assigned to new and unexperienced ninja. With these missions you are able to unlock notably the Sound ninja.</p>
+              <p className="mission-desc">The D and C Rank Missions are assigned to new and unexperienced trainers. With these missions you are able to unlock notably the Team Rocket members.</p>
               <Link href="#" className="mission-link">Check out the D and C Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
@@ -104,7 +104,7 @@ export default function NinjaMissions() {
                 <span className="section-icon">⭐</span>
                 <span className="section-title">B Rank Missions</span>
               </div>
-              <p className="mission-desc">The B Rank Missions are only assigned to to experienced ninja. With these missions you are able to unlock villains and subordinates of the most dangerous ninjas.</p>
+              <p className="mission-desc">The B Rank Missions are only assigned to to experienced trainers. With these missions you are able to unlock villains and subordinates of the most dangerous pokemon.</p>
               <Link href="#" className="mission-link">Check out the B Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
@@ -120,7 +120,7 @@ export default function NinjaMissions() {
                 <span className="section-icon">⭐</span>
                 <span className="section-title">A Rank Missions</span>
               </div>
-              <p className="mission-desc">The A Rank Missions are only assigned to to highly experienced ninja. With these missions you are able to unlock teamleaders.</p>
+              <p className="mission-desc">The A Rank Missions are only assigned to to highly experienced trainers. With these missions you are able to unlock teamleaders.</p>
               <Link href="#" className="mission-link">Check out the A Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
@@ -136,7 +136,7 @@ export default function NinjaMissions() {
                 <span className="section-icon">⭐</span>
                 <span className="section-title">S Rank Missions</span>
               </div>
-              <p className="mission-desc">The S Rank Missions are only assigned to the best of the best. With these missions you are able to unlock legendary ninja and hokages.</p>
+              <p className="mission-desc">The S Rank Missions are only assigned to the best of the best. With these missions you are able to unlock legendary pokemon and champions.</p>
               <Link href="#" className="mission-link">Check out the S Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
@@ -145,47 +145,47 @@ export default function NinjaMissions() {
             </div>
           </div>
 
-          {/* Shippuuden Missions */}
+          {/* Evolution Missions */}
           <div className="mission-card">
             <div className="mission-text">
               <div className="section-header">
                 <span className="section-icon">⭐</span>
-                <span className="section-title">Shippuuden Missions</span>
+                <span className="section-title">Evolution Missions</span>
               </div>
-              <p className="mission-desc">The Shippuuden Missions are the newest missions in town! With these missions you are able to unlock many new characters and upgrades to existing characters.</p>
-              <Link href="#" className="mission-link">Check out the Shippuuden Missions Missions!</Link>
+              <p className="mission-desc">The Evolution Missions are the newest missions in town! With these missions you are able to unlock many new characters and upgrades to existing characters.</p>
+              <Link href="#" className="mission-link">Check out the Evolution Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/shippuuden1.png" alt="Shippuuden" />
-              <img src="https://i.imgur.com/shippuuden2.png" alt="Shippuuden" />
+              <img src="https://i.imgur.com/shippuuden1.png" alt="Evolution" />
+              <img src="https://i.imgur.com/shippuuden2.png" alt="Evolution" />
             </div>
           </div>
 
-          {/* Five Kage Summit Missions */}
+          {/* Elite Four Summit Missions */}
           <div className="mission-card">
             <div className="mission-text">
               <div className="section-header">
                 <span className="section-icon">⭐</span>
-                <span className="section-title">Five Kage Summit Missions</span>
+                <span className="section-title">Elite Four Summit Missions</span>
               </div>
-              <p className="mission-desc">The five kages are reunited to discuss how to deal with Akatsuki. With these missions you are able to unlock ninjas that participated in Five Kage Summit Arc.</p>
-              <Link href="#" className="mission-link">Check out the Five Kage Summit Missions Missions!</Link>
+              <p className="mission-desc">The elite four are reunited to discuss how to deal with Team Rocket. With these missions you are able to unlock pokemon that participated in Elite Four Summit Arc.</p>
+              <Link href="#" className="mission-link">Check out the Elite Four Summit Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/fivekage1.png" alt="Five Kage" />
-              <img src="https://i.imgur.com/fivekage2.png" alt="Five Kage" />
+              <img src="https://i.imgur.com/fivekage1.png" alt="Elite Four" />
+              <img src="https://i.imgur.com/fivekage2.png" alt="Elite Four" />
             </div>
           </div>
 
-          {/* Fourth Shinobi World War Pt. 1 Missions */}
+          {/* Pokemon League Tournament Pt. 1 Missions */}
           <div className="mission-card">
             <div className="mission-text">
               <div className="section-header">
                 <span className="section-icon">⭐</span>
-                <span className="section-title">Fourth Shinobi World War Pt. 1 Missions</span>
+                <span className="section-title">Pokemon League Tournament Pt. 1 Missions</span>
               </div>
-              <p className="mission-desc">Tobi declared war against the five Kages and the leader of the Land of Iron. With these missions you are able to unlock ninjas that participated in the beginning of Fourth Shinobi World War.</p>
-              <Link href="#" className="mission-link">Check out the Fourth Shinobi World War Pt. 1 Missions Missions!</Link>
+              <p className="mission-desc">Giovanni declared war against the Elite Four and the leader of the Pokemon League. With these missions you are able to unlock pokemon that participated in the beginning of Pokemon League Tournament.</p>
+              <Link href="#" className="mission-link">Check out the Pokemon League Tournament Pt. 1 Missions!</Link>
             </div>
             <div className="mission-images">
               <img src="https://i.imgur.com/war1.png" alt="War" />

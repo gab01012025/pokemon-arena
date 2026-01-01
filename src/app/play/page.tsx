@@ -14,19 +14,19 @@ export default function PlayPage() {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
         <LeftSidebar />
 
         <main className="center-content">
-          <h1 className="page-title">Play Naruto Arena</h1>
+          <h1 className="page-title">Play Pokemon Arena</h1>
             
             {/* Team Selection */}
             <div className="content-section">
@@ -59,45 +59,45 @@ export default function PlayPage() {
               <div className="section-content">
                 <div className="character-categories">
                   <div className="category-group">
-                    <h3 className="category-title">Konoha Village</h3>
+                    <h3 className="category-title">Kanto Region</h3>
                     <div className="character-grid">
-                      <Link href="/chars/naruto" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Naruto" />
-                        <span>Naruto</span>
+                      <Link href="/chars/pikachu" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Pikachu" />
+                        <span>Pikachu</span>
                       </Link>
-                      <Link href="/chars/sasuke" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Sasuke" />
-                        <span>Sasuke</span>
+                      <Link href="/chars/charizard" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Charizard" />
+                        <span>Charizard</span>
                       </Link>
-                      <Link href="/chars/sakura" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Sakura" />
-                        <span>Sakura</span>
+                      <Link href="/chars/bulbasaur" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Bulbasaur" />
+                        <span>Bulbasaur</span>
                       </Link>
-                      <Link href="/chars/kakashi" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Kakashi" />
-                        <span>Kakashi</span>
+                      <Link href="/chars/mewtwo" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Mewtwo" />
+                        <span>Mewtwo</span>
                       </Link>
                     </div>
                   </div>
                   
                   <div className="category-group">
-                    <h3 className="category-title">Akatsuki</h3>
+                    <h3 className="category-title">Team Rocket</h3>
                     <div className="character-grid">
-                      <Link href="/chars/itachi" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Itachi" />
-                        <span>Itachi</span>
+                      <Link href="/chars/giovanni" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Giovanni" />
+                        <span>Giovanni</span>
                       </Link>
-                      <Link href="/chars/deidara" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Deidara" />
-                        <span>Deidara</span>
+                      <Link href="/chars/meowth" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Meowth" />
+                        <span>Meowth</span>
                       </Link>
-                      <Link href="/chars/sasori" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Sasori" />
-                        <span>Sasori</span>
+                      <Link href="/chars/arbok" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Arbok" />
+                        <span>Arbok</span>
                       </Link>
-                      <Link href="/chars/pain" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Pain" />
-                        <span>Pain</span>
+                      <Link href="/chars/weezing" className="character-thumb">
+                        <img src="https://i.imgur.com/placeholder.png" alt="Weezing" />
+                        <span>Weezing</span>
                       </Link>
                     </div>
                   </div>

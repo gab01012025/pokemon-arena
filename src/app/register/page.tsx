@@ -14,12 +14,12 @@ export default function Register() {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
@@ -86,7 +86,7 @@ export default function Register() {
             <div className="info-box">
               <div className="info-box-icon">🏆</div>
               <h3>Ranking System</h3>
-              <p>Climb the ladder from Academy Student to Kage and become a legend!</p>
+              <p>Climb the ladder from Beginner to Champion and become a legend!</p>
             </div>
             <div className="info-box">
               <div className="info-box-icon">👥</div>

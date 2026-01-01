@@ -27,12 +27,12 @@ export default function ClansPage() {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
@@ -80,7 +80,7 @@ export default function ClansPage() {
               <div className="section-content">
                 <p>Want to start your own clan? You need to meet the following requirements:</p>
                 <ul className="requirements-list">
-                  <li>Be at least Rank 30 (Jonin)</li>
+                  <li>Be at least Rank 30 (Advanced)</li>
                   <li>Have at least 500 wins</li>
                   <li>Have at least 3 founding members ready to join</li>
                   <li>Pay the clan creation fee of 1000 points</li>

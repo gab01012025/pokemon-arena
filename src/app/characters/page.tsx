@@ -4,75 +4,75 @@ import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 
 const characterCategories = [
   {
-    name: 'Konoha Village',
+    name: 'Kanto Region',
     characters: [
-      { id: 'naruto', name: 'Naruto Uzumaki' },
-      { id: 'sasuke', name: 'Sasuke Uchiha' },
-      { id: 'sakura', name: 'Sakura Haruno' },
-      { id: 'kakashi', name: 'Kakashi Hatake' },
-      { id: 'rock-lee', name: 'Rock Lee' },
-      { id: 'neji', name: 'Neji Hyuga' },
-      { id: 'tenten', name: 'Tenten' },
-      { id: 'hinata', name: 'Hinata Hyuga' },
-      { id: 'shino', name: 'Shino Aburame' },
-      { id: 'kiba', name: 'Kiba Inuzuka' },
-      { id: 'shikamaru', name: 'Shikamaru Nara' },
-      { id: 'choji', name: 'Choji Akimichi' },
-      { id: 'ino', name: 'Ino Yamanaka' },
+      { id: 'pikachu', name: 'Pikachu' },
+      { id: 'charizard', name: 'Charizard' },
+      { id: 'bulbasaur', name: 'Bulbasaur' },
+      { id: 'squirtle', name: 'Squirtle' },
+      { id: 'mewtwo', name: 'Mewtwo' },
+      { id: 'mew', name: 'Mew' },
+      { id: 'gengar', name: 'Gengar' },
+      { id: 'alakazam', name: 'Alakazam' },
+      { id: 'machamp', name: 'Machamp' },
+      { id: 'gyarados', name: 'Gyarados' },
+      { id: 'dragonite', name: 'Dragonite' },
+      { id: 'snorlax', name: 'Snorlax' },
+      { id: 'lapras', name: 'Lapras' },
     ]
   },
   {
-    name: 'Akatsuki',
+    name: 'Team Rocket',
     characters: [
-      { id: 'itachi', name: 'Itachi Uchiha' },
-      { id: 'kisame', name: 'Kisame Hoshigaki' },
-      { id: 'deidara', name: 'Deidara' },
-      { id: 'sasori', name: 'Sasori' },
-      { id: 'hidan', name: 'Hidan' },
-      { id: 'kakuzu', name: 'Kakuzu' },
-      { id: 'pain', name: 'Pain' },
-      { id: 'konan', name: 'Konan' },
-      { id: 'tobi', name: 'Tobi' },
-      { id: 'zetsu', name: 'Zetsu' },
+      { id: 'giovanni', name: 'Giovanni' },
+      { id: 'meowth', name: 'Meowth' },
+      { id: 'arbok', name: 'Arbok' },
+      { id: 'weezing', name: 'Weezing' },
+      { id: 'persian', name: 'Persian' },
+      { id: 'nidoking', name: 'Nidoking' },
+      { id: 'rhydon', name: 'Rhydon' },
+      { id: 'kangaskhan', name: 'Kangaskhan' },
+      { id: 'dugtrio', name: 'Dugtrio' },
+      { id: 'victreebel', name: 'Victreebel' },
     ]
   },
   {
-    name: 'Sand Village',
+    name: 'Johto Region',
     characters: [
-      { id: 'gaara', name: 'Gaara' },
-      { id: 'temari', name: 'Temari' },
-      { id: 'kankuro', name: 'Kankuro' },
+      { id: 'typhlosion', name: 'Typhlosion' },
+      { id: 'feraligatr', name: 'Feraligatr' },
+      { id: 'meganium', name: 'Meganium' },
     ]
   },
   {
-    name: 'Sound Village',
+    name: 'Hoenn Region',
     characters: [
-      { id: 'orochimaru', name: 'Orochimaru' },
-      { id: 'kabuto', name: 'Kabuto Yakushi' },
-      { id: 'kimimaro', name: 'Kimimaro' },
-      { id: 'tayuya', name: 'Tayuya' },
-      { id: 'sakon', name: 'Sakon' },
-      { id: 'kidomaru', name: 'Kidomaru' },
-      { id: 'jirobo', name: 'Jirobo' },
+      { id: 'blaziken', name: 'Blaziken' },
+      { id: 'swampert', name: 'Swampert' },
+      { id: 'sceptile', name: 'Sceptile' },
+      { id: 'rayquaza', name: 'Rayquaza' },
+      { id: 'groudon', name: 'Groudon' },
+      { id: 'kyogre', name: 'Kyogre' },
+      { id: 'deoxys', name: 'Deoxys' },
     ]
   },
   {
-    name: 'Legendary Sannin',
+    name: 'Legendary Pokemon',
     characters: [
-      { id: 'jiraiya', name: 'Jiraiya' },
-      { id: 'tsunade', name: 'Tsunade' },
-      { id: 'orochimaru-sannin', name: 'Orochimaru' },
+      { id: 'articuno', name: 'Articuno' },
+      { id: 'zapdos', name: 'Zapdos' },
+      { id: 'moltres', name: 'Moltres' },
     ]
   },
   {
-    name: 'Shippuden',
+    name: 'Evolution Forms',
     characters: [
-      { id: 'naruto-shippuden', name: 'Naruto (S)' },
-      { id: 'sasuke-shippuden', name: 'Sasuke (S)' },
-      { id: 'sakura-shippuden', name: 'Sakura (S)' },
-      { id: 'sage-naruto', name: 'Sage Naruto' },
-      { id: 'kcm-naruto', name: 'KCM Naruto' },
-      { id: 'ems-sasuke', name: 'EMS Sasuke' },
+      { id: 'pikachu-evolved', name: 'Raichu' },
+      { id: 'charizard-mega', name: 'Mega Charizard' },
+      { id: 'blastoise', name: 'Blastoise' },
+      { id: 'venusaur', name: 'Venusaur' },
+      { id: 'mewtwo-mega', name: 'Mega Mewtwo' },
+      { id: 'gengar-mega', name: 'Mega Gengar' },
     ]
   },
 ];
@@ -89,12 +89,12 @@ export default function CharactersPage() {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
@@ -107,7 +107,7 @@ export default function CharactersPage() {
               <div className="section-title">All Characters</div>
               <div className="section-content">
                 <p className="characters-intro">
-                  Browse all available characters in Naruto Arena. Click on a character to view their skills and abilities.
+                  Browse all available characters in Pokemon Arena. Click on a character to view their skills and abilities.
                 </p>
                 
                 {characterCategories.map((category) => (
@@ -148,24 +148,24 @@ export default function CharactersPage() {
                     </div>
                   </div>
                   <div className="class-item">
-                    <div className="class-icon ninjutsu">N</div>
+                    <div className="class-icon ninjutsu">S</div>
                     <div className="class-info">
-                      <strong>Ninjutsu</strong>
-                      <p>Chakra-based techniques</p>
+                      <strong>Special</strong>
+                      <p>Energy-based techniques</p>
                     </div>
                   </div>
                   <div className="class-item">
-                    <div className="class-icon taijutsu">T</div>
+                    <div className="class-icon taijutsu">P</div>
                     <div className="class-info">
-                      <strong>Taijutsu</strong>
+                      <strong>Physical</strong>
                       <p>Physical combat skills</p>
                     </div>
                   </div>
                   <div className="class-item">
-                    <div className="class-icon genjutsu">G</div>
+                    <div className="class-icon genjutsu">St</div>
                     <div className="class-info">
-                      <strong>Genjutsu</strong>
-                      <p>Illusion techniques</p>
+                      <strong>Status</strong>
+                      <p>Status effect techniques</p>
                     </div>
                   </div>
                 </div>

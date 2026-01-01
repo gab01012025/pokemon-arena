@@ -15,7 +15,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const userData = {
     username: username,
     avatar: 'https://i.imgur.com/BHkYpfb.png',
-    level: 'Kage',
+    level: 'Champion',
     rank: 1,
     wins: 1250,
     losses: 320,
@@ -26,13 +26,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     clan: 'Hoshigama',
     joinDate: 'January 15, 2024',
     lastOnline: '2 hours ago',
-    favoriteCharacters: ['Naruto (S)', 'Sasuke (S)', 'Kakashi'],
+    favoriteCharacters: ['Pikachu', 'Charizard', 'Mewtwo'],
     recentMatches: [
       { result: 'win', opponent: 'Player123', date: '2 hours ago' },
-      { result: 'win', opponent: 'NinjaKing', date: '3 hours ago' },
+      { result: 'win', opponent: 'TrainerKing', date: '3 hours ago' },
       { result: 'loss', opponent: 'ShadowMaster', date: '5 hours ago' },
-      { result: 'win', opponent: 'LeafNinja', date: '6 hours ago' },
-      { result: 'win', opponent: 'AkatsukiFan', date: '8 hours ago' },
+      { result: 'win', opponent: 'PokeFan', date: '6 hours ago' },
+      { result: 'win', opponent: 'RocketFan', date: '8 hours ago' },
     ],
   };
 
@@ -47,12 +47,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 

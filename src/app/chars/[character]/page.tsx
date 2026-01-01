@@ -16,7 +16,7 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
   const charData = {
     name: charName,
     image: 'https://i.imgur.com/BHkYpfb.png',
-    description: 'A powerful ninja from the Hidden Leaf Village with exceptional abilities.',
+    description: 'A powerful Pokemon with exceptional abilities.',
     stats: {
       health: 100,
       wins: 3744,
@@ -26,41 +26,41 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
     },
     skills: [
       {
-        name: 'Shadow Clone Jutsu',
-        description: 'Creates shadow clones that deal 15 damage to one enemy and provide 10 destructible defense to the user.',
-        cost: [{ type: 'ninjutsu', amount: 1 }, { type: 'random', amount: 1 }],
+        name: 'Thunder Shock',
+        description: 'Creates electric sparks that deal 15 damage to one enemy and provide 10 destructible defense to the user.',
+        cost: [{ type: 'special', amount: 1 }, { type: 'random', amount: 1 }],
         cooldown: 0,
-        classes: ['Chakra', 'Ranged', 'Instant'],
+        classes: ['Energy', 'Ranged', 'Instant'],
       },
       {
-        name: 'Rasengan',
+        name: 'Thunderbolt',
         description: 'Deals 35 piercing damage to one enemy. This skill ignores invulnerability.',
-        cost: [{ type: 'ninjutsu', amount: 2 }, { type: 'taijutsu', amount: 1 }],
+        cost: [{ type: 'special', amount: 2 }, { type: 'physical', amount: 1 }],
         cooldown: 1,
-        classes: ['Chakra', 'Melee', 'Instant'],
+        classes: ['Energy', 'Melee', 'Instant'],
       },
       {
-        name: 'Uzumaki Barrage',
+        name: 'Quick Attack',
         description: 'Deals 25 damage to one enemy and stuns their physical and mental skills for 1 turn.',
-        cost: [{ type: 'taijutsu', amount: 2 }],
+        cost: [{ type: 'physical', amount: 2 }],
         cooldown: 1,
         classes: ['Physical', 'Melee', 'Instant'],
       },
       {
-        name: 'Shadow Clone Defense',
+        name: 'Agility',
         description: 'This character becomes invulnerable for 1 turn.',
         cost: [{ type: 'random', amount: 1 }],
         cooldown: 4,
-        classes: ['Chakra', 'Instant'],
+        classes: ['Status', 'Instant'],
       },
     ],
   };
 
-  const getChakraColor = (type: string) => {
+  const getEnergyColor = (type: string) => {
     const colors: Record<string, string> = {
-      taijutsu: '#cc0000',
-      ninjutsu: '#0066cc',
-      genjutsu: '#9900cc',
+      physical: '#cc0000',
+      special: '#0066cc',
+      status: '#9900cc',
       bloodline: '#00cc00',
       random: '#ffffff',
     };
@@ -78,12 +78,12 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/ninja-missions" className="nav-btn-top">Ninja Missions</Link>
-              <a href="https://discord.gg/narutoarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Naruto Arena Banner" className="header-logo" />
+            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
           </div>
         </div>
 
@@ -138,8 +138,8 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
                         {skill.cost.map((c, i) => (
                           <span
                             key={i}
-                            className="chakra-cost"
-                            style={{ backgroundColor: getChakraColor(c.type) }}
+                            className="energy-cost"
+                            style={{ backgroundColor: getEnergyColor(c.type) }}
                             title={c.type}
                           >
                             {c.amount}

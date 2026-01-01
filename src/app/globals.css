@@ -7,7 +7,7 @@
 }
 
 :root {
-  /* Cores do Naruto Arena Original */
+  /* Cores do Pokemon Arena Original */
   --bg-orange: #FFA500;
   --bg-orange-light: #FFB733;
   --bg-cream: #FFF8DC;
@@ -338,7 +338,7 @@ a:hover {
   font-size: 11px;
 }
 
-/* ===== RIKUDOU SENNIN ===== */
+/* ===== POKEMON MASTER ===== */
 .rikudou-item {
   display: flex;
   align-items: center;
@@ -350,7 +350,7 @@ a:hover {
   height: 40px;
 }
 
-/* ===== KAGES ===== */
+/* ===== ELITE ===== */
 .kage-item {
   display: flex;
   align-items: center;

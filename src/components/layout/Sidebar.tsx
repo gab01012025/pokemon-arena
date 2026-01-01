@@ -26,23 +26,23 @@ export function LeftSidebar() {
         </div>
       </div>
 
-      {/* Naruto-Boards */}
+      {/* Pokemon-Boards */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Naruto-Boards</div>
+        <div className="sidebar-box-header">Pokemon-Boards</div>
         <div className="sidebar-box-content">
           <p>Visit the</p>
-          <p><Link href="#">Naruto-Boards.site</Link></p>
-          <p>The official Naruto Arena Forums.</p>
+          <p><Link href="#">Pokemon-Boards.site</Link></p>
+          <p>The official Pokemon Arena Forums.</p>
         </div>
       </div>
 
-      {/* Naruto Helper */}
+      {/* Pokemon Helper */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Naruto Helper</div>
+        <div className="sidebar-box-header">Pokemon Helper</div>
         <div className="sidebar-box-content">
           <p>Visit the</p>
-          <p><Link href="#">Naruto Helper Site</Link></p>
-          <p>The official Naruto Arena Helper.</p>
+          <p><Link href="#">Pokemon Helper Site</Link></p>
+          <p>The official Pokemon Arena Helper.</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export function LeftSidebar() {
           <p className="video-section-title">Recent Ladder Videos:</p>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
-            <Link href="#">Becoming a Genin | New Player Teams</Link>
+            <Link href="#">Becoming a Beginner | New Player Teams</Link>
           </div>
           <div className="video-link">
             <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
@@ -190,12 +190,12 @@ export function RightSidebar() {
         </div>
       </div>
 
-      {/* Rikudou Sennin */}
+      {/* Pokemon Master */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Rikudou Sennin</div>
+        <div className="sidebar-box-header">Pokemon Master</div>
         <div className="sidebar-box-content">
           <div className="rikudou-item">
-            <img src="https://i.imgur.com/BHkYpfb.png" alt="Rikudou" className="rikudou-icon" />
+            <img src="https://i.imgur.com/BHkYpfb.png" alt="Pokemon Master" className="rikudou-icon" />
             <div className="rikudou-info">
               <div className="rikudou-name"><Link href="/profile/TaigiCiaAs">TaigiCiaAs</Link></div>
               <div className="rikudou-rank">1</div>
@@ -204,41 +204,41 @@ export function RightSidebar() {
         </div>
       </div>
 
-      {/* Great Five Kages */}
+      {/* Elite Four + Champion */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Great Five Kages</div>
+        <div className="sidebar-box-header">Elite Four + Champion</div>
         <div className="sidebar-box-content">
           <div className="kage-item">
-            <img src="https://imgur.com/4f5yXZV.png" alt="Hokage" className="kage-icon" />
+            <img src="https://imgur.com/4f5yXZV.png" alt="Champion" className="kage-icon" />
             <span className="kage-name"><Link href="/profile/ransfordwest">ransfordwest</Link></span>
             <span className="kage-streak">39</span>
           </div>
           <div className="kage-item">
-            <img src="https://i.imgur.com/fMdAQbr.png" alt="Raikage" className="kage-icon" />
+            <img src="https://i.imgur.com/fMdAQbr.png" alt="Elite 1" className="kage-icon" />
             <span className="kage-name"><Link href="/profile/Cemito">Cemito</Link></span>
             <span className="kage-streak">36</span>
           </div>
           <div className="kage-item">
-            <img src="https://i.imgur.com/5yQwRWE.png" alt="Tsuchikage" className="kage-icon" />
+            <img src="https://i.imgur.com/5yQwRWE.png" alt="Elite 2" className="kage-icon" />
             <span className="kage-name"><Link href="/profile/Trevor">Trevor</Link></span>
             <span className="kage-streak">36</span>
           </div>
           <div className="kage-item">
-            <img src="https://i.imgur.com/uXjWKi8.png" alt="Kazekage" className="kage-icon" />
+            <img src="https://i.imgur.com/uXjWKi8.png" alt="Elite 3" className="kage-icon" />
             <span className="kage-name"><Link href="/profile/Kershark">Kershark</Link></span>
             <span className="kage-streak">1</span>
           </div>
           <div className="kage-item">
-            <img src="https://i.imgur.com/w79ztu2.png" alt="Mizukage" className="kage-icon" />
+            <img src="https://i.imgur.com/w79ztu2.png" alt="Elite 4" className="kage-icon" />
             <span className="kage-name"><Link href="/profile/tsogu">tsogu</Link></span>
             <span className="kage-streak">25</span>
           </div>
         </div>
       </div>
 
-      {/* Road To Hokage */}
+      {/* Road To Champion */}
       <div className="sidebar-box">
-        <div className="sidebar-box-header">Road To Hokage</div>
+        <div className="sidebar-box-header">Road To Champion</div>
         <div className="sidebar-box-content">
           <div className="top-list">
             {[
