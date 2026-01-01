@@ -7,23 +7,23 @@
 }
 
 :root {
-  /* Cores do Pokemon Arena - Tema Pokeball */
-  --bg-red: #DC0A2D;
-  --bg-red-light: #E53945;
-  --bg-cream: #F5F5F5;
+  /* Cores do Pokemon Arena - Estilo Original */
+  --bg-orange: #F5A623;
+  --bg-orange-light: #FFB84D;
+  --bg-cream: #FFF8DC;
   --bg-white: #FFFFFF;
-  --header-red: #B71C1C;
-  --header-red-dark: #8B0000;
-  --text-dark: #1a1a1a;
-  --text-yellow: #FFCB05;
+  --header-blue: #1a1a6e;
+  --header-blue-dark: #0d0d4d;
+  --text-dark: #000000;
+  --text-orange: #FF6600;
   --text-red: #CC0000;
-  --link-blue: #3B4CCA;
-  --link-hover: #5865F2;
-  --border-dark: #2A2A2A;
-  --bar-blue: #3B4CCA;
+  --link-blue: #0066CC;
+  --link-hover: #0099FF;
+  --border-brown: #8B4513;
+  --bar-blue: #4169E1;
   --bar-blue-dark: #1E3A8A;
   --button-bg: #FFFFFF;
-  --button-border: #2A2A2A;
+  --button-border: #000000;
   --pokemon-yellow: #FFCB05;
   --pokemon-blue: #3B4CCA;
   --pokemon-red: #DC0A2D;
@@ -144,7 +144,7 @@ a:hover {
 /* ===== SIDEBARS ===== */
 .sidebar-left,
 .sidebar-right {
-  background: var(--bg-red);
+  background: var(--bg-orange);
   padding: 5px;
   display: flex;
   flex-direction: column;
@@ -160,13 +160,13 @@ a:hover {
 
 /* ===== SIDEBAR BOX ===== */
 .sidebar-box {
-  background: var(--bg-red);
+  background: var(--bg-orange);
   margin-bottom: 5px;
 }
 
 .sidebar-box-header {
-  background: linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%);
-  color: var(--pokemon-yellow);
+  background: linear-gradient(180deg, var(--header-blue) 0%, var(--header-blue-dark) 100%);
+  color: var(--bg-orange);
   padding: 5px 8px;
   font-size: 12px;
   font-weight: bold;
@@ -175,8 +175,8 @@ a:hover {
 .sidebar-box-content {
   padding: 8px;
   font-size: 11px;
-  background: var(--bg-red);
-  color: #ffffff;
+  background: var(--bg-orange);
+  color: #000000;
 }
 
 /* ===== USERS ONLINE ===== */
@@ -338,7 +338,7 @@ a:hover {
 /* ===== SEASON TIMER ===== */
 .season-timer-value {
   font-weight: bold;
-  color: #ffffff;
+  color: #000000;
   font-size: 11px;
 }
 
@@ -393,7 +393,7 @@ a:hover {
 .top-rank {
   font-weight: bold;
   min-width: 20px;
-  color: #ffffff;
+  color: #000000;
 }
 
 .top-rank-1 { color: #FFD700; }
@@ -427,19 +427,19 @@ a:hover {
 /* ===== VERSION INFO ===== */
 .version-info {
   font-size: 10px;
-  color: #ffffff;
+  color: #000000;
 }
 
 /* ===== PAGE TITLE ===== */
 .page-title {
-  color: var(--pokemon-red);
+  color: var(--header-blue);
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
 }
 
 .page-subtitle {
-  color: var(--pokemon-blue);
+  color: var(--text-orange);
   font-size: 14px;
   margin-bottom: 15px;
 }
@@ -528,7 +528,7 @@ a:hover {
 }
 
 .mission-link {
-  color: var(--pokemon-blue);
+  color: var(--text-orange);
   font-size: 11px;
 }
 
@@ -572,7 +572,7 @@ a:hover {
 }
 
 .ladder-link {
-  color: var(--pokemon-blue);
+  color: var(--text-orange);
   font-size: 11px;
 }
 
@@ -594,7 +594,7 @@ a:hover {
 .news-post-title {
   font-size: 16px;
   font-weight: bold;
-  color: var(--pokemon-red);
+  color: var(--header-blue);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -778,7 +778,7 @@ a:hover {
 }
 
 .data-table th {
-  background: var(--pokemon-red);
+  background: var(--header-blue);
   color: white;
   padding: 8px 10px;
   text-align: left;
@@ -847,7 +847,7 @@ a:hover {
 }
 
 .profile-info h2 {
-  color: var(--pokemon-red);
+  color: var(--header-blue);
   margin-bottom: 5px;
 }
 
@@ -877,7 +877,7 @@ a:hover {
 }
 
 .character-info h2 {
-  color: var(--pokemon-red);
+  color: var(--header-blue);
   margin-bottom: 5px;
 }
 
@@ -911,7 +911,7 @@ a:hover {
 
 .skill-details h4 {
   margin-bottom: 5px;
-  color: var(--pokemon-blue);
+  color: var(--header-blue);
 }
 
 .skill-details p {
