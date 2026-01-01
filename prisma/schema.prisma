@@ -1,0 +1,166 @@
+// Pokemon Arena - Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ==================== TRAINERS (Users) ====================
+model Trainer {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  email         String    @unique
+  password      String
+  avatar        String    @default("default")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  level         Int       @default(1)
+  experience    Int       @default(0)
+  wins          Int       @default(0)
+  losses        Int       @default(0)
+  streak        Int       @default(0)
+  maxStreak     Int       @default(0)
+  ladderPoints  Int       @default(0)
+  
+  team          Team?     @relation(fields: [teamId], references: [id])
+  teamId        String?
+  
+  unlockedPokemon TrainerPokemon[]
+  battlesAsP1   Battle[]  @relation("BattlePlayer1")
+  battlesAsP2   Battle[]  @relation("BattlePlayer2")
+  wonBattles    Battle[]  @relation("BattleWinner")
+  
+  sessions      Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  trainerId    String
+  expires      DateTime
+  trainer      Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+}
+
+// ==================== TEAMS ====================
+model Team {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  tag         String   @unique
+  description String?
+  leaderId    String
+  points      Int      @default(0)
+  createdAt   DateTime @default(now())
+  
+  members     Trainer[]
+}
+
+// ==================== POKEMON ====================
+model Pokemon {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  types       String   // JSON array of Pokemon types
+  category    String   // Starter, Legendary, etc.
+  health      Int      @default(100)
+  traits      String   // JSON array of traits
+  
+  moves       Move[]
+  
+  isStarter   Boolean  @default(false)
+  unlockCost  Int      @default(0)
+  
+  trainers    TrainerPokemon[]
+  battleSlots BattleSlot[]
+}
+
+model Move {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  classes     String    // JSON array: Physical, Special, Status, etc.
+  cost        String    // JSON: {fire: 1, water: 0, etc.}
+  cooldown    Int       @default(0)
+  duration    Int       @default(0)
+  damage      Int       @default(0)
+  healing     Int       @default(0)
+  effects     String    // JSON array of effects
+  target      String    @default("OneEnemy")
+  
+  pokemon     Pokemon   @relation(fields: [pokemonId], references: [id])
+  pokemonId   String
+  slot        Int       // 0-3 for the 4 move slots
+}
+
+model TrainerPokemon {
+  id          String    @id @default(cuid())
+  trainer     Trainer   @relation(fields: [trainerId], references: [id])
+  trainerId   String
+  pokemon     Pokemon   @relation(fields: [pokemonId], references: [id])
+  pokemonId   String
+  unlockedAt  DateTime  @default(now())
+  
+  @@unique([trainerId, pokemonId])
+}
+
+// ==================== BATTLE TEAMS ====================
+model BattleTeam {
+  id        String       @id @default(cuid())
+  name      String?
+  slots     BattleSlot[]
+  
+  battlesP1 Battle[]     @relation("TeamPlayer1")
+  battlesP2 Battle[]     @relation("TeamPlayer2")
+}
+
+model BattleSlot {
+  id          String      @id @default(cuid())
+  team        BattleTeam  @relation(fields: [teamId], references: [id])
+  teamId      String
+  pokemon     Pokemon     @relation(fields: [pokemonId], references: [id])
+  pokemonId   String
+  position    Int         // 0, 1, 2 for the 3 Pokemon slots
+  
+  @@unique([teamId, position])
+}
+
+// ==================== BATTLES ====================
+model Battle {
+  id          String      @id @default(cuid())
+  
+  player1     Trainer     @relation("BattlePlayer1", fields: [player1Id], references: [id])
+  player1Id   String
+  player2     Trainer     @relation("BattlePlayer2", fields: [player2Id], references: [id])
+  player2Id   String
+  
+  team1       BattleTeam  @relation("TeamPlayer1", fields: [team1Id], references: [id])
+  team1Id     String
+  team2       BattleTeam  @relation("TeamPlayer2", fields: [team2Id], references: [id])
+  team2Id     String
+  
+  status      String      @default("active") // active, finished, surrendered
+  turn        Int         @default(1)
+  currentPlayer Int       @default(1)
+  gameState   String      // JSON with full battle state
+  
+  winner      Trainer?    @relation("BattleWinner", fields: [winnerId], references: [id])
+  winnerId    String?
+  
+  startedAt   DateTime    @default(now())
+  finishedAt  DateTime?
+  battleType  String      @default("quick") // quick, ranked, tournament
+}
+
+// ==================== MATCHMAKING QUEUE ====================
+model MatchQueue {
+  id          String   @id @default(cuid())
+  oderId      String
+  username    String
+  team        String   // JSON with team Pokemon IDs
+  queueType   String   @default("quick")
+  rating      Int      @default(1000)
+  joinedAt    DateTime @default(now())
+}
