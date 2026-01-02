@@ -78,7 +78,7 @@
 }
 
 html, body {
-  background: #FFCB05 !important; /* Amarelo Pikachu sólido - SEM BRANCO */
+  background: #FFFFFF !important; /* Fundo branco nas laterais */
   color: var(--text-dark);
   font-family: 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
@@ -163,7 +163,7 @@ a:hover {
 .page-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: #FFCB05; /* Amarelo Pikachu - SEM BRANCO */
+  background: #FFFFFF; /* Fundo branco */
 }
 
 .main-container {
@@ -172,6 +172,7 @@ a:hover {
   display: grid;
   grid-template-columns: 180px 1fr 180px;
   gap: 0;
+  background: #FFCB05; /* Amarelo no centro */
 }
 
 /* ===== HEADER BANNER ===== */
