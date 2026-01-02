@@ -18,7 +18,7 @@ export default function Ladders() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export default function Ladders() {
               <Link href="/road-to-champion" className="ladder-link">View Road to Champion</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/road-champion.png" alt="Road to Champion" />
+              <img src="/images/pokemon-adventure.jpg" alt="Road to Champion" />
             </div>
           </div>
 
@@ -60,7 +60,7 @@ export default function Ladders() {
               <Link href="/hall-of-fame" className="ladder-link">View Hall of Fame</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/hall-fame.png" alt="Hall of Fame" />
+              <img src="/images/all-pokemon-2.webp" alt="Hall of Fame" />
             </div>
           </div>
 
@@ -75,7 +75,7 @@ export default function Ladders() {
               <Link href="/trainer-ladder" className="ladder-link">View Trainer Ladder</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/trainer-ladder.png" alt="Trainer Ladder" />
+              <img src="/images/pokemon-battle.webp" alt="Trainer Ladder" />
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export default function Ladders() {
               <Link href="/clans" className="ladder-link">View Clan Ladder</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/clan-ladder.png" alt="Clan Ladder" />
+              <img src="/images/pokemon-characters.webp" alt="Clan Ladder" />
             </div>
           </div>
         </main>

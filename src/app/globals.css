@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap');
 
 * {
   margin: 0;
@@ -7,44 +7,96 @@
 }
 
 :root {
-  /* Cores do Pokemon Arena - Estilo Original */
-  --bg-orange: #F5A623;
-  --bg-orange-light: #FFB84D;
-  --bg-cream: #FFF8DC;
-  --bg-white: #FFFFFF;
-  --header-blue: #1a1a6e;
-  --header-blue-dark: #0d0d4d;
-  --text-dark: #000000;
-  --text-orange: #FF6600;
-  --text-red: #CC0000;
-  --link-blue: #0066CC;
-  --link-hover: #0099FF;
-  --border-brown: #8B4513;
-  --bar-blue: #4169E1;
-  --bar-blue-dark: #1E3A8A;
-  --button-bg: #FFFFFF;
-  --button-border: #000000;
-  --pokemon-yellow: #FFCB05;
+  /* 🔴⚪ Tema Pokébola + Pikachu ⚡💛 - PROFISSIONAL */
+  
+  /* Cores Principais - Pokébola */
+  --pokeball-red: #DC0A2D;
+  --pokeball-red-dark: #A00820;
+  --pokeball-red-light: #FF1F4B;
+  --pokeball-white: #FFFFFF;
+  --pokeball-black: #1D1D1D;
+  --pokeball-button: #F0F0F0;
+  
+  /* Cores Pikachu */
+  --pikachu-yellow: #FFCB05;
+  --pikachu-yellow-dark: #E6B800;
+  --pikachu-yellow-light: #FFE066;
+  --pikachu-orange: #FF9500;
+  --pikachu-brown: #8B4513;
+  --pikachu-cheeks: #FF6B6B;
+  
+  /* Cores Complementares */
   --pokemon-blue: #3B4CCA;
-  --pokemon-red: #DC0A2D;
+  --pokemon-blue-dark: #2A3A9E;
+  --pokemon-green: #4CAF50;
+  --pokemon-purple: #7B68EE;
+  
+  /* Cores de UI */
+  --bg-main: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: linear-gradient(180deg, #FFCB05 0%, #E6B800 100%);
+  --shadow-soft: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+  --shadow-strong: 0 8px 30px rgba(0,0,0,0.2);
+  
+  /* Aplicação das cores */
+  --bg-orange: var(--pikachu-yellow);
+  --bg-orange-light: #FFE066;
+  --bg-cream: #F8F9FA;
+  --bg-white: #FFFFFF;
+  --header-blue: var(--pokeball-red);
+  --header-blue-dark: var(--pokeball-red-dark);
+  --text-dark: #1D1D1D;
+  --text-muted: #6C757D;
+  --text-orange: var(--pikachu-orange);
+  --text-red: var(--pokeball-red);
+  --link-blue: #2563EB;
+  --link-hover: var(--pokeball-red);
+  --border-light: #E0E0E0;
+  --border-brown: var(--pokeball-black);
+  --bar-blue: var(--pokeball-red);
+  --bar-blue-dark: var(--pokeball-red-dark);
+  --button-bg: var(--pokeball-white);
+  --button-border: var(--pokeball-black);
+  --pokemon-yellow: var(--pikachu-yellow);
+  --pokemon-red: var(--pokeball-red);
+  
+  /* Gradientes Profissionais */
+  --gradient-pokeball: linear-gradient(180deg, var(--pokeball-red) 0%, var(--pokeball-red) 45%, var(--pokeball-black) 45%, var(--pokeball-black) 55%, var(--pokeball-white) 55%, var(--pokeball-white) 100%);
+  --gradient-header: linear-gradient(135deg, var(--pokeball-red) 0%, var(--pokeball-red-dark) 100%);
+  --gradient-header-shine: linear-gradient(135deg, var(--pokeball-red-light) 0%, var(--pokeball-red) 50%, var(--pokeball-red-dark) 100%);
+  --gradient-pikachu: linear-gradient(135deg, var(--pikachu-yellow-light) 0%, var(--pikachu-yellow) 50%, var(--pikachu-yellow-dark) 100%);
+  --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  --gradient-dark: linear-gradient(135deg, #2D2D2D 0%, #1A1A1A 100%);
+  
+  /* Bordas e Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-full: 50px;
 }
 
 html, body {
-  background-color: var(--bg-cream);
+  background: #FFCB05 !important; /* Amarelo Pikachu sólido - SEM BRANCO */
   color: var(--text-dark);
-  font-family: 'Roboto', Verdana, Arial, sans-serif;
-  font-size: 11px;
-  line-height: 1.4;
+  font-family: 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: var(--link-blue);
-  text-decoration: underline;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 a:hover {
   color: var(--link-hover);
+  text-decoration: underline;
 }
 
 /* ===== TOP NAVIGATION ===== */
@@ -66,42 +118,52 @@ a:hover {
 
 .nav-btn-top {
   display: block;
-  background: var(--button-bg);
-  border: 1px solid var(--button-border);
-  padding: 6px 10px;
+  background: var(--pokeball-white);
+  border: 2px solid var(--pokeball-black);
+  padding: 10px 12px;
   text-align: center;
   font-size: 11px;
-  font-weight: bold;
-  color: var(--text-dark);
+  font-weight: 600;
+  color: var(--pokeball-black);
   text-decoration: none;
   text-transform: uppercase;
+  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-soft);
 }
 
 .nav-btn-top:hover {
-  background: #f0f0f0;
+  background: var(--gradient-header);
+  color: var(--pokeball-white);
+  border-color: var(--pokeball-red-dark);
   text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
 }
 
 .discord-btn {
-  background: #5865F2;
-  color: white;
-  border: 1px solid #4752C4;
+  background: linear-gradient(135deg, #7289DA 0%, #5865F2 100%);
+  color: white !important;
+  border: 2px solid #4752C4;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 8px;
+  font-weight: 700;
 }
 
 .discord-btn:hover {
-  background: #4752C4;
-  color: white;
+  background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
+  color: white !important;
+  border-color: #3C45A5;
 }
 
 /* ===== MAIN LAYOUT ===== */
 .page-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: var(--bg-cream);
+  background: #FFCB05; /* Amarelo Pikachu - SEM BRANCO */
 }
 
 .main-container {
@@ -128,97 +190,249 @@ a:hover {
 
 .header-banner {
   flex: 1;
-  background: url('https://i.imgur.com/GNheiTq.png') no-repeat center;
-  background-size: cover;
-  min-height: 150px;
+  background: linear-gradient(135deg, var(--pokeball-red) 0%, var(--pokeball-red-dark) 50%, var(--pikachu-yellow) 100%);
+  min-height: 180px;
+  max-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.header-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/images/pokemon-anime.jpg') no-repeat center center;
+  background-size: cover;
+  opacity: 0.3;
+  z-index: 0;
 }
 
 .header-logo {
-  max-width: 100%;
+  max-width: 600px;
+  max-height: 160px;
+  width: auto;
   height: auto;
+  object-fit: contain;
+  z-index: 1;
+  position: relative;
+  display: none; /* Esconder a imagem do logo, usar só o background */
+}
+
+/* Título do Banner */
+.header-banner h1 {
+  color: var(--pokeball-white);
+  font-size: 48px;
+  font-weight: 800;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+  z-index: 1;
+  letter-spacing: 2px;
 }
 
 /* ===== SIDEBARS ===== */
 .sidebar-left,
 .sidebar-right {
-  background: var(--bg-orange);
-  padding: 5px;
+  background: #FFCB05; /* Amarelo Pikachu sólido - igual ao centro */
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
 }
 
 /* ===== CENTER CONTENT ===== */
 .center-content {
-  background: var(--bg-white);
-  padding: 15px;
+  background: #FFCB05; /* Amarelo Pikachu - igual às sidebars */
+  padding: 20px;
   min-height: 500px;
+  border-left: 3px solid #E6B800;
+  border-right: 3px solid #E6B800;
+}
+
+/* Controle de imagens no conteúdo */
+.center-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+/* ===== SITE HEADER CENTER ===== */
+.center-header {
+  margin-bottom: 15px;
+}
+
+.site-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 5px;
+}
+
+.site-subtitle {
+  font-size: 14px;
+  color: var(--pokeball-red);
+  font-weight: 500;
+}
+
+/* Imagem de destaque (banner interno) */
+.content-banner {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Imagem de notícia */
+.news-image {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin: 15px 0;
+}
+
+/* Banner container */
+.banner-container {
+  margin-bottom: 20px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Imagem thumbnail */
+.thumbnail-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-light);
+}
+
+/* Grid de imagens */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.image-grid img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  transition: transform 0.2s ease;
+}
+
+.image-grid img:hover {
+  transform: scale(1.05);
 }
 
 /* ===== SIDEBAR BOX ===== */
 .sidebar-box {
-  background: var(--bg-orange);
-  margin-bottom: 5px;
+  background: #FFFFFF;
+  margin-bottom: 0;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  border: 1px solid #333;
 }
 
 .sidebar-box-header {
-  background: linear-gradient(180deg, var(--header-blue) 0%, var(--header-blue-dark) 100%);
-  color: var(--bg-orange);
-  padding: 5px 8px;
-  font-size: 12px;
+  background: var(--pokeball-red); /* Vermelho Pokébola */
+  color: #FFFFFF;
+  padding: 6px 10px;
+  font-size: 11px;
   font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-box-header::after {
+  content: '⊕';
+  font-size: 12px;
+  color: #FFFFFF;
 }
 
 .sidebar-box-content {
-  padding: 8px;
+  padding: 10px;
   font-size: 11px;
-  background: var(--bg-orange);
-  color: #000000;
+  background: #FFFFFF;
+  color: #333;
+  line-height: 1.4;
 }
 
 /* ===== USERS ONLINE ===== */
 .users-online-count {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 12px;
+  padding: 5px 0;
 }
 
 .users-online-icon {
-  width: 20px;
-  height: 20px;
-  background: #00ff00;
+  width: 24px;
+  height: 24px;
+  background: var(--gradient-pokeball);
   border-radius: 50%;
   display: inline-block;
+  border: 2px solid var(--pokeball-black);
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .users-online-number {
-  background: #333;
-  color: white;
-  padding: 3px 15px;
-  border-radius: 3px;
-  font-weight: bold;
+  background: var(--gradient-dark);
+  color: var(--pokeball-white);
+  padding: 8px 20px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: var(--shadow-soft);
 }
 
 /* ===== PATREON ===== */
 .patreon-button {
   display: block;
-  background: linear-gradient(180deg, #FF424D 0%, #f96854 100%);
+  background: linear-gradient(135deg, #FF424D 0%, #f96854 100%);
   color: white;
-  padding: 8px 15px;
+  padding: 12px 20px;
   text-align: center;
-  border-radius: 5px;
-  font-weight: bold;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
   text-decoration: none;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .patreon-button:hover {
-  background: linear-gradient(180deg, #f96854 0%, #FF424D 100%);
+  background: linear-gradient(135deg, #f96854 0%, #FF424D 100%);
   color: white;
   text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
 }
 
 .patreon-desc {
@@ -246,32 +460,61 @@ a:hover {
 
 .login-buttons {
   display: flex;
-  gap: 5px;
-  margin: 5px 0;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
 }
 
 .btn-login,
 .btn-register {
-  padding: 4px 10px;
-  font-size: 10px;
-  border: 1px solid #333;
+  padding: 12px 20px;
+  font-size: 13px;
+  border: none;
   cursor: pointer;
   text-decoration: none;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  display: block;
+  box-shadow: var(--shadow-soft);
 }
 
 .btn-login {
-  background: #ddd;
-  color: #333;
+  background: var(--bg-white);
+  color: var(--pokeball-black);
+  border: 2px solid var(--pokeball-black);
+}
+
+.btn-login:hover {
+  background: var(--gradient-pikachu);
+  border-color: var(--pikachu-yellow-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  text-decoration: none;
+  color: var(--pokeball-black);
 }
 
 .btn-register {
-  background: #ddd;
-  color: #333;
+  background: var(--gradient-header);
+  color: var(--pokeball-white);
+  border: 2px solid var(--pokeball-red-dark);
+}
+
+.btn-register:hover {
+  background: var(--gradient-header-shine);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  text-decoration: none;
+  color: var(--pokeball-white);
 }
 
 .lost-password {
-  font-size: 10px;
-  margin-top: 5px;
+  font-size: 12px;
+  margin-top: 10px;
+  text-align: center;
 }
 
 /* ===== ACCOUNT LINKS (LOGGED IN) ===== */
@@ -290,71 +533,200 @@ a:hover {
 
 /* ===== VIDEO LINKS ===== */
 .video-section-title {
-  font-weight: bold;
-  margin: 5px 0;
-  font-size: 10px;
+  font-weight: 600;
+  margin: 10px 0 8px 0;
+  font-size: 12px;
+  color: var(--text-dark);
 }
 
 .video-link {
   display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  margin: 3px 0;
-  font-size: 10px;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.video-link::before {
+  content: '▶';
+  color: var(--pokeball-red);
+  font-size: 8px;
 }
 
 .video-link img {
-  width: 10px;
-  height: 10px;
-  margin-top: 2px;
+  display: none; /* Esconder as imagens de bullet */
+}
+
+.video-link a {
+  color: var(--link-blue);
+  transition: color 0.2s ease;
+}
+
+.video-link a:hover {
+  color: var(--pokeball-red);
 }
 
 /* ===== NEWS ARCHIVE LIST ===== */
 .news-archive-item {
   display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  margin: 3px 0;
-  font-size: 10px;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.news-archive-item:last-child {
+  border-bottom: none;
+}
+
+.news-archive-item::before {
+  content: '📰';
+  font-size: 12px;
 }
 
 .news-archive-item img {
-  width: 10px;
-  height: 10px;
-  margin-top: 2px;
+  display: none; /* Esconder as imagens de bullet */
 }
 
 .see-more {
-  margin-top: 10px;
+  margin-top: 12px;
   text-align: right;
+  font-weight: 600;
+}
+
+/* ===== SCREENSHOT BOX ===== */
+.screenshot-box {
+  padding: 0 !important;
+}
+
+.screenshot-box img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: opacity 0.2s ease;
+}
+
+.screenshot-box img:hover {
+  opacity: 0.9;
 }
 
 /* ===== FIRST TIME PLAYING ===== */
 .first-time-note {
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dark);
 }
 
 /* ===== SEASON TIMER ===== */
 .season-timer-value {
-  font-weight: bold;
-  color: #000000;
-  font-size: 11px;
+  font-weight: 700;
+  color: var(--pokeball-red);
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 0;
 }
 
 /* ===== POKEMON MASTER ===== */
 .rikudou-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 8px 0;
 }
 
 .rikudou-icon {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--pikachu-yellow);
+  box-shadow: var(--shadow-soft);
 }
 
-/* ===== ELITE ===== */
+/* ===== CHAMPION LIST (Elite Four + Champion) ===== */
+.champion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.champion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.champion-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--pokeball-red);
+}
+
+.champion-name {
+  font-weight: 500;
+}
+
+.champion-name a {
+  color: #333;
+}
+
+.champion-name a:hover {
+  color: var(--pokeball-red);
+}
+
+/* ===== KAGE LIST (Great Five Kages / Elite Four style) ===== */
+.kage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kage-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.kage-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FFD700;
+}
+
+.kage-name {
+  flex: 1;
+  font-size: 11px;
+  color: #333;
+}
+
+.kage-bar {
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  border-radius: 3px;
+  min-width: 35px;
+  text-align: center;
+}
+
+.kage-bar-1 { background: linear-gradient(180deg, #8B0000 0%, #5C0000 100%); }
+.kage-bar-2 { background: linear-gradient(180deg, #B22222 0%, #8B0000 100%); }
+.kage-bar-3 { background: linear-gradient(180deg, #CD5C5C 0%, #B22222 100%); }
+.kage-bar-4 { background: linear-gradient(180deg, #DC143C 0%, #B22222 100%); }
+.kage-bar-5 { background: linear-gradient(180deg, #FF6347 0%, #DC143C 100%); }
+
+/* ===== KAGE ITEM (Elite Four sidebar) ===== */
 .kage-item {
   display: flex;
   align-items: center;
@@ -364,19 +736,26 @@ a:hover {
 }
 
 .kage-icon {
-  width: 25px;
-  height: 25px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--pokeball-red);
 }
 
-.kage-name {
+.kage-item .kage-name {
   flex: 1;
+  font-size: 11px;
 }
 
 .kage-streak {
-  background: var(--bar-blue);
+  background: linear-gradient(180deg, #8B0000 0%, #5C0000 100%);
   color: white;
   padding: 2px 8px;
   font-size: 10px;
+  font-weight: bold;
+  border-radius: 3px;
   min-width: 30px;
   text-align: center;
 }
@@ -444,6 +823,32 @@ a:hover {
   margin-bottom: 15px;
 }
 
+/* ===== CONTENT BOX (para páginas internas) ===== */
+.content-box {
+  background: #FFFFFF;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.content-box-header {
+  background: var(--pokeball-red);
+  color: #FFFFFF;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.content-box-header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.content-box-body {
+  padding: 20px;
+}
+
 /* ===== BREADCRUMB ===== */
 .breadcrumb {
   font-size: 11px;
@@ -475,9 +880,25 @@ a:hover {
 }
 
 .section-title {
-  color: var(--text-red);
+  color: var(--pokeball-red);
   font-size: 14px;
   font-weight: bold;
+  text-transform: uppercase;
+  position: relative;
+  padding-left: 15px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(180deg, var(--pokeball-red) 0%, var(--pokeball-red) 45%, var(--pokeball-black) 45%, var(--pokeball-black) 55%, var(--pokeball-white) 55%, var(--pokeball-white) 100%);
+  border-radius: 50%;
+  border: 1px solid var(--pokeball-black);
 }
 
 .section-content {
@@ -534,13 +955,64 @@ a:hover {
 
 .mission-images {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
 .mission-images img {
-  width: 50px;
-  height: 50px;
-  border: 1px solid #999;
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.mission-images img:hover {
+  transform: scale(1.1);
+  border-color: var(--pokeball-red);
+}
+
+/* ===== BANNER CONTAINER ===== */
+.banner-container {
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-medium);
+}
+
+.banner-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+/* ===== NEWS POST IMAGE ===== */
+.news-post-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  margin: 20px 0;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ===== NEWS ICON ===== */
+.news-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ===== RANDOM SCREENSHOT ===== */
+.random-screenshot {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
 }
 
 /* ===== LADDER SECTIONS ===== */
@@ -584,17 +1056,21 @@ a:hover {
 
 /* ===== NEWS POST ===== */
 .news-post {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #FFFFFF;
+  border: 1px solid #333;
+  border-radius: 4px;
 }
 
 .news-post-header {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .news-post-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  color: var(--header-blue);
+  color: var(--pokeball-red); /* Vermelho Pokébola */
   display: flex;
   align-items: center;
   gap: 5px;
@@ -607,13 +1083,15 @@ a:hover {
 
 .news-post-date {
   font-size: 11px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 3px;
+  font-style: italic;
 }
 
 .news-post-content {
   font-size: 12px;
   line-height: 1.6;
+  color: var(--text-dark);
 }
 
 .news-post-content p {
@@ -629,9 +1107,13 @@ a:hover {
   margin-bottom: 5px;
 }
 
+.news-post-content li::marker {
+  color: var(--pokeball-red);
+}
+
 .news-post-content hr {
   border: none;
-  border-top: 1px solid #ccc;
+  border-top: 2px dashed var(--pikachu-yellow);
   margin: 15px 0;
 }
 
@@ -639,6 +1121,8 @@ a:hover {
   max-width: 100%;
   height: auto;
   margin: 15px 0;
+  border-radius: var(--radius-md);
+  border: 2px solid rgba(220, 10, 45, 0.2);
 }
 
 .news-post-signature {
@@ -933,7 +1417,7 @@ a:hover {
 
 /* ===== INGAME STYLES ===== */
 .ingame-wrapper {
-  background: url('https://i.imgur.com/fire-bg.jpg') repeat;
+  background: url('/images/pokemon-adventure.jpg') repeat;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -1026,9 +1510,9 @@ a:hover {
 
 /* ===== AUTH FORMS ===== */
 .auth-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 100%;
+  padding: 0;
+  background: transparent;
 }
 
 .auth-form {
@@ -1046,7 +1530,7 @@ a:hover {
 .auth-form label {
   font-weight: bold;
   font-size: 12px;
-  color: var(--text-dark);
+  color: #333;
 }
 
 .auth-form input[type="text"],
@@ -1054,14 +1538,15 @@ a:hover {
 .auth-form input[type="password"] {
   width: 100%;
   padding: 10px 12px;
-  border: 2px solid #ddd;
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 13px;
   transition: border-color 0.2s;
+  background: #fff;
 }
 
 .auth-form input:focus {
-  border-color: var(--header-blue);
+  border-color: var(--pokeball-red);
   outline: none;
 }
 
@@ -1104,28 +1589,37 @@ a:hover {
   width: 16px;
   height: 16px;
   cursor: pointer;
+  accent-color: var(--pokeball-red);
 }
 
 .forgot-link {
-  color: var(--link-blue);
+  color: var(--pokeball-red);
   font-size: 11px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: var(--pokeball-red-dark);
+  text-decoration: underline;
 }
 
 .auth-form .btn-submit {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(180deg, var(--header-blue) 0%, var(--header-blue-dark) 100%);
+  background: var(--pokeball-red);
   color: white;
-  border: none;
+  border: 2px solid #8B0000;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   cursor: pointer;
-  transition: opacity 0.2s;
+  text-transform: uppercase;
 }
 
 .auth-form .btn-submit:hover {
-  opacity: 0.9;
+  background: #B22222;
 }
 
 .auth-form .btn-submit:disabled {
@@ -1137,11 +1631,11 @@ a:hover {
   text-align: center;
   font-size: 12px;
   color: #666;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .auth-switch a {
-  color: var(--link-blue);
+  color: var(--pokeball-red);
   font-weight: bold;
 }
 
@@ -1167,7 +1661,7 @@ a:hover {
 }
 
 .info-box h3 {
-  color: var(--header-blue);
+  color: var(--pokeball-red);
   font-size: 14px;
   margin-bottom: 8px;
 }
@@ -1176,6 +1670,72 @@ a:hover {
   font-size: 11px;
   color: #666;
   line-height: 1.4;
+}
+
+/* ===== TEMA POKÉBOLA + PIKACHU - EXTRAS ===== */
+
+/* Efeito nos links */
+a:hover {
+  color: var(--pokeball-red);
+}
+
+/* Bordas elegantes do conteúdo */
+.center-content {
+  border-top: 4px solid var(--pokeball-red);
+  position: relative;
+}
+
+/* Inputs com tema */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 15px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: var(--pokeball-red);
+  box-shadow: 0 0 0 3px rgba(220, 10, 45, 0.1);
+}
+
+/* Checkbox estilizado */
+input[type="checkbox"] {
+  accent-color: var(--pokeball-red);
+}
+
+/* Scrollbar temática */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pokeball-red);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--pokeball-red-dark);
+}
+
+/* Animação suave para botões especiais */
+@keyframes gentlePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(88, 101, 242, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(88, 101, 242, 0); }
+}
+
+.discord-btn {
+  animation: gentlePulse 2s infinite;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -1195,5 +1755,9 @@ a:hover {
   
   .info-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .header-banner h1 {
+    font-size: 32px;
   }
 }

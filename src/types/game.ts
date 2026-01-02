@@ -148,7 +148,14 @@ export type PokemonTrait =
   | 'DarkType'
   | 'SteelType'
   | 'FairyType'
-  | 'GhostType';
+  | 'GhostType'
+  | 'RockType'
+  | 'GroundType'
+  | 'PoisonType'
+  | 'IceType'
+  | 'BugType'
+  | 'NormalType'
+  | 'FlyingType';
 
 // Alias for compatibility
 export type CharacterTrait = PokemonTrait;

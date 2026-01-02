@@ -92,7 +92,7 @@ export default function NewsArchive() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -113,7 +113,7 @@ export default function NewsArchive() {
                     <div className="news-list-header">
                       <h3>
                         <Link href={`/news-archive/${news.slug}`}>
-                          <img src="https://i.imgur.com/TpjIGzV.gif" alt="icon" className="news-icon" />
+                          <img src="/images/pokemon-characters.webp" alt="icon" className="news-icon" />
                           {news.title}
                         </Link>
                       </h3>

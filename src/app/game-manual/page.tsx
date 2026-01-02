@@ -19,7 +19,7 @@ export default function GameManual() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ export default function GameManual() {
               <Link href="/the-basics" className="ladder-link">Read more about The basics</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/basics.png" alt="The Basics" />
+              <img src="/images/pokemon-saga.jpg" alt="The Basics" />
             </div>
           </div>
 
@@ -61,7 +61,7 @@ export default function GameManual() {
               <Link href="/characters" className="ladder-link">Read more about Characters and Skills</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/characters.png" alt="Characters" />
+              <img src="/images/all-pokemon-1.webp" alt="Characters" />
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export default function GameManual() {
               <Link href="/ladders" className="ladder-link">Read more about The trainer ladder</Link>
             </div>
             <div className="ladder-image">
-              <img src="https://i.imgur.com/ladder.png" alt="Trainer Ladder" />
+              <img src="/images/pokemon-poster.jpg" alt="Trainer Ladder" />
             </div>
           </div>
         </main>

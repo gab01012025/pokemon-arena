@@ -20,8 +20,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="header-banner">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 

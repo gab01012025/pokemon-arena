@@ -32,7 +32,7 @@ export default function ClansPage() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 

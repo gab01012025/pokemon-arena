@@ -14,7 +14,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // Mock user data - in real app this would come from database
   const userData = {
     username: username,
-    avatar: 'https://i.imgur.com/BHkYpfb.png',
+    avatar: '/images/ash-ketchum.webp',
     level: 'Champion',
     rank: 1,
     wins: 1250,
@@ -52,7 +52,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 

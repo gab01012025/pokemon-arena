@@ -19,7 +19,7 @@ export default function PokemonMissions() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -60,8 +60,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the Special Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/special1.png" alt="Special" />
-              <img src="https://i.imgur.com/special2.png" alt="Special" />
+              <img src="/images/pokemon-group-1.jpg" alt="Special" />
+              <img src="/images/pokemon-group-2.jpg" alt="Special" />
             </div>
           </div>
 
@@ -76,8 +76,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the Tales Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/tales1.png" alt="Tales" />
-              <img src="https://i.imgur.com/tales2.png" alt="Tales" />
+              <img src="/images/pokemon-saga.jpg" alt="Tales" />
+              <img src="/images/pokemon-anime.jpg" alt="Tales" />
             </div>
           </div>
 
@@ -92,8 +92,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the D and C Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/dcrank1.png" alt="D/C Rank" />
-              <img src="https://i.imgur.com/dcrank2.png" alt="D/C Rank" />
+              <img src="/images/bulbasaur.jpg" alt="D/C Rank" />
+              <img src="/images/pokemon-pikachu.jpg" alt="D/C Rank" />
             </div>
           </div>
 
@@ -108,8 +108,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the B Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/brank1.png" alt="B Rank" />
-              <img src="https://i.imgur.com/brank2.png" alt="B Rank" />
+              <img src="/images/pokemon-artwork.jpg" alt="B Rank" />
+              <img src="/images/pokemon-battle.webp" alt="B Rank" />
             </div>
           </div>
 
@@ -124,8 +124,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the A Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/arank1.png" alt="A Rank" />
-              <img src="https://i.imgur.com/arank2.png" alt="A Rank" />
+              <img src="/images/all-pokemon-1.webp" alt="A Rank" />
+              <img src="/images/all-pokemon-2.webp" alt="A Rank" />
             </div>
           </div>
 
@@ -140,8 +140,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the S Rank Missions Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/srank1.png" alt="S Rank" />
-              <img src="https://i.imgur.com/srank2.png" alt="S Rank" />
+              <img src="/images/pokemon-adventure.jpg" alt="S Rank" />
+              <img src="/images/pokemon-poster.jpg" alt="S Rank" />
             </div>
           </div>
 
@@ -156,8 +156,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the Evolution Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/shippuuden1.png" alt="Evolution" />
-              <img src="https://i.imgur.com/shippuuden2.png" alt="Evolution" />
+              <img src="/images/pokemon-characters.webp" alt="Evolution" />
+              <img src="/images/ash-ketchum.webp" alt="Evolution" />
             </div>
           </div>
 
@@ -172,8 +172,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the Elite Four Summit Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/fivekage1.png" alt="Elite Four" />
-              <img src="https://i.imgur.com/fivekage2.png" alt="Elite Four" />
+              <img src="/images/pokemon-anime.jpg" alt="Elite Four" />
+              <img src="/images/pokemon-saga.jpg" alt="Elite Four" />
             </div>
           </div>
 
@@ -188,8 +188,8 @@ export default function PokemonMissions() {
               <Link href="#" className="mission-link">Check out the Pokemon League Tournament Pt. 1 Missions!</Link>
             </div>
             <div className="mission-images">
-              <img src="https://i.imgur.com/war1.png" alt="War" />
-              <img src="https://i.imgur.com/war2.png" alt="War" />
+              <img src="/images/pokemon-battle.webp" alt="War" />
+              <img src="/images/pokemon-adventure.jpg" alt="War" />
             </div>
           </div>
         </main>

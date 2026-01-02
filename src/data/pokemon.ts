@@ -835,6 +835,318 @@ export const flareon: Pokemon = {
   ],
 };
 
+// ==================== ADDITIONAL POKEMON ====================
+
+export const arcanine: Pokemon = {
+  id: 'arcanine',
+  name: 'Arcanine',
+  description: 'A legendary Pokémon in China. Many people are Pokemon of its grand mane.',
+  types: ['Fire'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 115,
+  traits: ['Kanto', 'FireType'],
+  isStarter: false,
+  unlockCost: 500,
+  moves: [
+    createMove(0, 'Flamethrower', 'Arcanine breathes a powerful flame dealing 25 damage.', 'Fire', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(1),
+      damage: 25,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 25 }],
+    }),
+    createMove(1, 'Extreme Speed', 'A blindingly fast attack that deals 35 damage and ignores defense.', 'Normal', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 1,
+      damage: 35,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 35 }, { type: 'pierce', duration: 1 }],
+    }),
+    createMove(2, 'Morning Sun', 'Arcanine restores 25 HP by basking in sunlight.', 'Fire', {
+      classes: ['Status'],
+      cost: cost(1),
+      cooldown: 3,
+      healing: 25,
+      target: 'Self',
+      effects: [{ type: 'heal', value: 25 }],
+    }),
+    protect('Flame Wheel', 'Arcanine', ['Physical']),
+  ],
+};
+
+export const exeggutor: Pokemon = {
+  id: 'exeggutor',
+  name: 'Exeggutor',
+  description: 'A walking tropical tree with three heads that think independently.',
+  types: ['Grass', 'Psychic'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 110,
+  traits: ['Kanto', 'GrassType', 'PsychicType'],
+  isStarter: false,
+  unlockCost: 500,
+  moves: [
+    createMove(0, 'Seed Bomb', 'Exeggutor hurls explosive seeds dealing 20 damage.', 'Grass', {
+      classes: ['Physical', 'Ranged'],
+      cost: cost(0, 0, 1),
+      damage: 20,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 20 }],
+    }),
+    createMove(1, 'Psychic', 'A powerful psychic attack dealing 40 damage.', 'Psychic', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(0, 0, 1, 0, 1),
+      cooldown: 1,
+      damage: 40,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 40 }],
+    }),
+    createMove(2, 'Hypnosis', 'Exeggutor hypnotizes the enemy, stunning them for 1 turn.', 'Psychic', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 3,
+      target: 'OneEnemy',
+      effects: [{ type: 'stun', duration: 1 }],
+    }),
+    protect('Barrage', 'Exeggutor', ['Physical']),
+  ],
+};
+
+export const golem: Pokemon = {
+  id: 'golem',
+  name: 'Golem',
+  description: 'A boulder Pokémon with incredible defense. It sheds its skin once a year.',
+  types: ['Rock', 'Ground'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 120,
+  traits: ['Kanto', 'RockType', 'GroundType'],
+  isStarter: false,
+  unlockCost: 500,
+  moves: [
+    createMove(0, 'Rock Throw', 'Golem hurls rocks at the enemy dealing 20 damage.', 'Rock', {
+      classes: ['Physical', 'Ranged'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 20,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 20 }],
+    }),
+    createMove(1, 'Earthquake', 'A devastating ground attack dealing 35 damage to all enemies.', 'Ground', {
+      classes: ['Physical'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 2,
+      damage: 35,
+      target: 'AllEnemies',
+      effects: [{ type: 'damage', value: 35 }],
+    }),
+    createMove(2, 'Harden', 'Golem hardens its body, reducing damage by 25 for 3 turns.', 'Normal', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 4,
+      duration: 3,
+      target: 'Self',
+      effects: [{ type: 'reduce', value: 25, duration: 3 }],
+    }),
+    protect('Rollout', 'Golem', ['Physical']),
+  ],
+};
+
+export const lapras: Pokemon = {
+  id: 'lapras',
+  name: 'Lapras',
+  description: 'A gentle sea creature that ferries people across the water.',
+  types: ['Water', 'Ice'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 130,
+  traits: ['Kanto', 'WaterType', 'IceType'],
+  isStarter: false,
+  unlockCost: 750,
+  moves: [
+    createMove(0, 'Water Gun', 'Lapras shoots water at the enemy dealing 20 damage.', 'Water', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(0, 1),
+      damage: 20,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 20 }],
+    }),
+    createMove(1, 'Ice Beam', 'A freezing beam dealing 40 damage with a chance to freeze.', 'Ice', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(0, 2),
+      cooldown: 1,
+      damage: 40,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 40 }, { type: 'stun', duration: 1 }],
+    }),
+    createMove(2, 'Sing', 'Lapras sings a lullaby, stunning one enemy for 2 turns.', 'Normal', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 4,
+      target: 'OneEnemy',
+      effects: [{ type: 'stun', duration: 2 }],
+    }),
+    protect('Perish Song', 'Lapras', ['Status']),
+  ],
+};
+
+export const nidoking: Pokemon = {
+  id: 'nidoking',
+  name: 'Nidoking',
+  description: 'A powerful Poison/Ground type with a thick tail and horn.',
+  types: ['Poison', 'Ground'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 110,
+  traits: ['Kanto', 'PoisonType', 'GroundType'],
+  isStarter: false,
+  unlockCost: 500,
+  moves: [
+    createMove(0, 'Poison Jab', 'Nidoking stabs with a poisoned horn dealing 25 damage.', 'Poison', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 25,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 25 }, { type: 'weaken', value: 5, duration: 2 }],
+    }),
+    createMove(1, 'Earth Power', 'A ground-based attack dealing 35 damage.', 'Ground', {
+      classes: ['Special'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 1,
+      damage: 35,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 35 }],
+    }),
+    createMove(2, 'Toxic', 'Nidoking poisons the enemy, dealing 10 damage per turn for 3 turns.', 'Poison', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 3,
+      duration: 3,
+      target: 'OneEnemy',
+      effects: [{ type: 'afflict', value: 10, duration: 3 }],
+    }),
+    protect('Horn Attack', 'Nidoking', ['Physical']),
+  ],
+};
+
+export const scizor: Pokemon = {
+  id: 'scizor',
+  name: 'Scizor',
+  description: 'A Bug/Steel type with powerful pincers that can crush anything.',
+  types: ['Bug', 'Steel'],
+  generation: 'Gen2',
+  category: 'Starter',
+  hp: 105,
+  traits: ['Johto', 'BugType', 'SteelType'],
+  isStarter: false,
+  unlockCost: 750,
+  moves: [
+    createMove(0, 'Bullet Punch', 'Scizor strikes with rapid punches dealing 20 damage.', 'Steel', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 20,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 20 }],
+    }),
+    createMove(1, 'X-Scissor', 'A powerful cross-slash dealing 40 damage.', 'Bug', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 1,
+      damage: 40,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 40 }],
+    }),
+    createMove(2, 'Swords Dance', 'Scizor boosts its attack, dealing 15 extra damage for 3 turns.', 'Normal', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 3,
+      duration: 3,
+      target: 'Self',
+      effects: [{ type: 'strengthen', value: 15, duration: 3 }],
+    }),
+    protect('Iron Defense', 'Scizor', ['Status']),
+  ],
+};
+
+export const snorlax: Pokemon = {
+  id: 'snorlax',
+  name: 'Snorlax',
+  description: 'A massive Pokémon that spends most of its time sleeping and eating.',
+  types: ['Normal'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 160,
+  traits: ['Kanto', 'NormalType'],
+  isStarter: false,
+  unlockCost: 750,
+  moves: [
+    createMove(0, 'Body Slam', 'Snorlax throws its weight dealing 25 damage.', 'Normal', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 25,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 25 }],
+    }),
+    createMove(1, 'Giga Impact', 'A devastating attack dealing 50 damage but causes recoil.', 'Normal', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 3),
+      cooldown: 2,
+      damage: 50,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 50 }],
+    }),
+    createMove(2, 'Rest', 'Snorlax sleeps to recover 50 HP but is stunned for 1 turn.', 'Psychic', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 1),
+      cooldown: 4,
+      healing: 50,
+      target: 'Self',
+      effects: [{ type: 'heal', value: 50 }, { type: 'stun', duration: 1 }],
+    }),
+    protect('Sleep Talk', 'Snorlax', ['Status']),
+  ],
+};
+
+export const tyranitar: Pokemon = {
+  id: 'tyranitar',
+  name: 'Tyranitar',
+  description: 'A pseudo-legendary Rock/Dark type with immense power.',
+  types: ['Rock', 'Dark'],
+  generation: 'Gen2',
+  category: 'Legendary',
+  hp: 125,
+  traits: ['Johto', 'RockType', 'DarkType'],
+  isStarter: false,
+  unlockCost: 1000,
+  moves: [
+    createMove(0, 'Crunch', 'Tyranitar bites with dark energy dealing 30 damage.', 'Dark', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 30,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 30 }],
+    }),
+    createMove(1, 'Stone Edge', 'Sharp stones strike the enemy dealing 45 damage.', 'Rock', {
+      classes: ['Physical'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 1,
+      damage: 45,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 45 }],
+    }),
+    createMove(2, 'Sandstorm', 'Tyranitar summons a sandstorm, dealing 10 damage to all enemies for 3 turns.', 'Rock', {
+      classes: ['Status'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 4,
+      duration: 3,
+      target: 'AllEnemies',
+      effects: [{ type: 'afflict', value: 10, duration: 3 }],
+    }),
+    protect('Dark Pulse', 'Tyranitar', ['Special']),
+  ],
+};
+
 // ==================== COLLECTION ====================
 
 export const allPokemon: Pokemon[] = [
@@ -847,16 +1159,18 @@ export const allPokemon: Pokemon[] = [
   machamp,
   dragonite,
   mewtwo,
-  mew,
-  typhlosion,
-  feraligatr,
-  meganium,
   lucario,
   garchomp,
-  eevee,
   vaporeon,
   jolteon,
-  flareon,
+  arcanine,
+  exeggutor,
+  golem,
+  lapras,
+  nidoking,
+  scizor,
+  snorlax,
+  tyranitar,
 ];
 
 export const starterPokemon: Pokemon[] = allPokemon.filter(p => p.isStarter);

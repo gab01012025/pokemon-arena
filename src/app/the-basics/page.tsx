@@ -19,7 +19,7 @@ export default function TheBasics() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -42,7 +42,7 @@ export default function TheBasics() {
               <span className="section-title">Selection Screen</span>
             </div>
             <div className="section-content">
-              <img src="https://i.imgur.com/selection-screen.png" alt="Selection Screen" style={{ width: '100%', maxWidth: 600, marginBottom: 15 }} />
+              <img src="/images/all-pokemon-2.webp" alt="Selection Screen" style={{ width: '100%', maxWidth: 600, marginBottom: 15 }} />
               
               <p>The first thing you will see when beginning a game of Pokemon Arena is the screen below (without the big blue letters). This is the Character Selection screen and what ever is and does is explained below.</p>
               

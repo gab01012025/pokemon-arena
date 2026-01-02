@@ -94,7 +94,7 @@ export default function CharactersPage() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -122,7 +122,7 @@ export default function CharactersPage() {
                         >
                           <div className="character-avatar">
                             <img 
-                              src={`https://i.imgur.com/placeholder.png`} 
+                              src={`/images/pokemon-artwork.jpg`} 
                               alt={char.name} 
                             />
                           </div>

@@ -15,7 +15,7 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
   // Mock character data
   const charData = {
     name: charName,
-    image: 'https://i.imgur.com/BHkYpfb.png',
+    image: '/images/ash-ketchum.webp',
     description: 'A powerful Pokemon with exceptional abilities.',
     stats: {
       health: 100,
@@ -83,7 +83,7 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 

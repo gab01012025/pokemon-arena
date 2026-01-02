@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
+import { AccountBox } from '@/components/auth/AccountBox';
 
 export default function Home() {
   return (
@@ -23,11 +24,7 @@ export default function Home() {
           
           {/* Banner */}
           <div className="header-banner">
-            <img 
-              src="https://i.imgur.com/GNheiTq.png" 
-              alt="Pokemon Arena Banner" 
-              className="header-logo"
-            />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -76,26 +73,7 @@ export default function Home() {
           </div>
 
           {/* Account */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Account</div>
-            <div className="sidebar-box-content">
-              <form className="login-form">
-                <input type="text" placeholder="Username" />
-                <input type="password" placeholder="Password" />
-                <label className="remember-me">
-                  <input type="checkbox" />
-                  Remember Me
-                </label>
-                <div className="login-buttons">
-                  <button type="submit" className="btn-login">Login</button>
-                  <Link href="/register" className="btn-register">Register</Link>
-                </div>
-                <p className="lost-password">
-                  <Link href="/forgot-password">Lost your password?</Link>
-                </p>
-              </form>
-            </div>
-          </div>
+          <AccountBox />
 
           {/* Mission Videos */}
           <div className="sidebar-box">
@@ -104,21 +82,21 @@ export default function Home() {
               <p className="video-section-title">Looking for team suggestions?<br />Check out the channels below:</p>
               <div className="video-section">
                 <div className="video-link">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">PokeTuber (Youtube)</Link>
                 </div>
                 <div className="video-link">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">PokeGuides (Youtube)</Link>
                 </div>
               </div>
               <p className="video-section-title">Recent Battle Videos:</p>
               <div className="video-link">
-                <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                 <Link href="#">Unlocking Mewtwo (S)</Link>
               </div>
               <div className="video-link">
-                <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                 <Link href="#">Unlocking Charizard (S)</Link>
               </div>
             </div>
@@ -131,21 +109,21 @@ export default function Home() {
               <p className="video-section-title">Looking for teams to rank up in Ladder Game?<br />Check out the channels below:</p>
               <div className="video-section">
                 <div className="video-link">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">PokeRanker (Youtube)</Link>
                 </div>
                 <div className="video-link">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">ArenaChamp (Youtube)</Link>
                 </div>
               </div>
               <p className="video-section-title">Recent Ladder Videos:</p>
               <div className="video-link">
-                <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                 <Link href="#">Becoming a Pokemon Trainer | New Player Teams</Link>
               </div>
               <div className="video-link">
-                <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                 <Link href="#">+26 STARTER TEAM</Link>
               </div>
             </div>
@@ -157,27 +135,27 @@ export default function Home() {
             <div className="sidebar-box-content">
               <div className="news-archive-list">
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Balance Update 1.3.9.5</Link>
                 </div>
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Balance Update 1.3.9 + Event Missions</Link>
                 </div>
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Balance Update 1.3.8</Link>
                 </div>
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Balance Update 1.3.7</Link>
                 </div>
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Balance 03/11/2025</Link>
                 </div>
                 <div className="news-archive-item">
-                  <img src="https://i.imgur.com/NAlZ4gn.gif" alt="bullet" />
+                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
                   <Link href="#">Major Update 1.3.6 + Ladder Reset</Link>
                 </div>
               </div>
@@ -199,41 +177,19 @@ export default function Home() {
           {/* Banner */}
           <div className="banner-container">
             <img 
-              src="https://i.imgur.com/GNheiTq.png" 
+              src="/images/pokemon-anime.jpg" 
               alt="Pokemon Arena Banner" 
               className="banner-image"
             />
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="nav-buttons">
-            <Link href="/play" className="nav-btn">
-              <div className="nav-btn-icon">▶</div>
-              Start Playing
-            </Link>
-            <Link href="/play" className="nav-btn">
-              <div className="nav-btn-icon">▶</div>
-              Start Playing
-            </Link>
-            <Link href="/play" className="nav-btn">
-              <div className="nav-btn-icon">▶</div>
-              Start Playing
-            </Link>
-            <Link href="/play" className="nav-btn">
-              <div className="nav-btn-icon">▶</div>
-              Start Playing
-            </Link>
-            <Link href="/play" className="nav-btn">
-              <div className="nav-btn-icon">▶</div>
-              Start Playing
-            </Link>
-          </div>
+
 
           {/* News Post */}
           <article className="news-post">
             <div className="news-post-header">
               <div className="news-post-title">
-                <img src="https://i.imgur.com/TpjIGzV.gif" alt="icon" />
+                <img src="/images/pokemon-characters.webp" alt="icon" />
                 Balance Update 1.3.9.5
               </div>
               <div className="news-post-date">
@@ -260,7 +216,7 @@ export default function Home() {
               <p className="news-post-signature">~ Pokemon Arena Classic Staff</p>
 
               <img 
-                src="https://i.imgur.com/PPyxDke.png" 
+                src="/images/all-pokemon-1.webp" 
                 alt="Christmas Banner" 
                 className="news-post-image"
               />
@@ -330,7 +286,7 @@ export default function Home() {
           {/* Footer Nav */}
           <div className="footer-nav">
             <Link href="/game-manual" className="footer-nav-item">
-              <img src="https://i.imgur.com/khPXzVM.gif" alt="Game Manual" />
+              <img src="/images/pokemon-saga.jpg" alt="Game Manual" />
             </Link>
           </div>
         </main>
@@ -342,7 +298,7 @@ export default function Home() {
             <div className="sidebar-box-header">Random Screenshot</div>
             <div className="sidebar-box-content screenshot-box">
               <Link href="#">
-                <img src="https://i.imgur.com/keSQK8h.jpg" alt="Random Screenshot" />
+                <img src="/images/pokemon-battle.webp" alt="Random Screenshot" />
               </Link>
             </div>
           </div>
@@ -373,7 +329,7 @@ export default function Home() {
             <div className="sidebar-box-header">Pokemon Master</div>
             <div className="sidebar-box-content">
               <div className="rikudou-item">
-                <img src="https://i.imgur.com/BHkYpfb.png" alt="Pokemon Master" className="rikudou-icon" />
+                <img src="/images/ash-ketchum.webp" alt="Pokemon Master" className="rikudou-icon" />
                 <div className="rikudou-info">
                   <div className="rikudou-name"><Link href="/profile/TaigiCiaAs">TaigiCiaAs</Link></div>
                   <div className="rikudou-rank">1</div>
@@ -386,30 +342,32 @@ export default function Home() {
           <div className="sidebar-box">
             <div className="sidebar-box-header">Elite Four + Champion</div>
             <div className="sidebar-box-content">
-              <div className="kage-item">
-                <img src="https://imgur.com/4f5yXZV.png" alt="Champion" className="kage-icon" />
-                <span className="kage-name"><Link href="/profile/ransfordwest">ransfordwest</Link></span>
-                <span className="kage-streak">39</span>
-              </div>
-              <div className="kage-item">
-                <img src="https://i.imgur.com/fMdAQbr.png" alt="Elite 1" className="kage-icon" />
-                <span className="kage-name"><Link href="/profile/Cemito">Cemito</Link></span>
-                <span className="kage-streak">36</span>
-              </div>
-              <div className="kage-item">
-                <img src="https://i.imgur.com/5yQwRWE.png" alt="Elite 2" className="kage-icon" />
-                <span className="kage-name"><Link href="/profile/Trevor">Trevor</Link></span>
-                <span className="kage-streak">36</span>
-              </div>
-              <div className="kage-item">
-                <img src="https://i.imgur.com/uXjWKi8.png" alt="Elite 3" className="kage-icon" />
-                <span className="kage-name"><Link href="/profile/Kershark">Kershark</Link></span>
-                <span className="kage-streak">1</span>
-              </div>
-              <div className="kage-item">
-                <img src="https://i.imgur.com/w79ztu2.png" alt="Elite 4" className="kage-icon" />
-                <span className="kage-name"><Link href="/profile/tsogu">tsogu</Link></span>
-                <span className="kage-streak">25</span>
+              <div className="kage-list">
+                <div className="kage-row">
+                  <img src="/images/pokemon-poster.jpg" alt="Champion" className="kage-avatar" />
+                  <span className="kage-name">ransfordwest</span>
+                  <span className="kage-bar kage-bar-1">42</span>
+                </div>
+                <div className="kage-row">
+                  <img src="/images/bulbasaur.jpg" alt="Elite 1" className="kage-avatar" />
+                  <span className="kage-name">Cemito</span>
+                  <span className="kage-bar kage-bar-2">36</span>
+                </div>
+                <div className="kage-row">
+                  <img src="/images/pokemon-group-1.jpg" alt="Elite 2" className="kage-avatar" />
+                  <span className="kage-name">Trevor</span>
+                  <span className="kage-bar kage-bar-3">15</span>
+                </div>
+                <div className="kage-row">
+                  <img src="/images/pokemon-group-2.jpg" alt="Elite 3" className="kage-avatar" />
+                  <span className="kage-name">Kershark</span>
+                  <span className="kage-bar kage-bar-4">1</span>
+                </div>
+                <div className="kage-row">
+                  <img src="/images/pokemon-pikachu.jpg" alt="Elite 4" className="kage-avatar" />
+                  <span className="kage-name">tsogu</span>
+                  <span className="kage-bar kage-bar-5">25</span>
+                </div>
               </div>
             </div>
           </div>

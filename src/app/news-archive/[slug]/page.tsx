@@ -89,7 +89,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
               <article className="news-post">
                 <div className="news-post-header">
                   <div className="news-post-title">
-                    <img src="https://i.imgur.com/TpjIGzV.gif" alt="icon" />
+                    <img src="/images/pokemon-characters.webp" alt="icon" />
                     {news.title}
                   </div>
                   <div className="news-post-date">

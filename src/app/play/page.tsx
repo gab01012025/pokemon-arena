@@ -19,7 +19,7 @@ export default function PlayPage() {
             </div>
           </div>
           <div className="header-banner">
-            <img src="https://i.imgur.com/GNheiTq.png" alt="Pokemon Arena Banner" className="header-logo" />
+            <h1>⚡ POKEMON ARENA ⚡</h1>
           </div>
         </div>
 
@@ -62,19 +62,19 @@ export default function PlayPage() {
                     <h3 className="category-title">Kanto Region</h3>
                     <div className="character-grid">
                       <Link href="/chars/pikachu" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Pikachu" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Pikachu" />
                         <span>Pikachu</span>
                       </Link>
                       <Link href="/chars/charizard" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Charizard" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Charizard" />
                         <span>Charizard</span>
                       </Link>
                       <Link href="/chars/bulbasaur" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Bulbasaur" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Bulbasaur" />
                         <span>Bulbasaur</span>
                       </Link>
                       <Link href="/chars/mewtwo" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Mewtwo" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Mewtwo" />
                         <span>Mewtwo</span>
                       </Link>
                     </div>
@@ -84,19 +84,19 @@ export default function PlayPage() {
                     <h3 className="category-title">Team Rocket</h3>
                     <div className="character-grid">
                       <Link href="/chars/giovanni" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Giovanni" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Giovanni" />
                         <span>Giovanni</span>
                       </Link>
                       <Link href="/chars/meowth" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Meowth" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Meowth" />
                         <span>Meowth</span>
                       </Link>
                       <Link href="/chars/arbok" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Arbok" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Arbok" />
                         <span>Arbok</span>
                       </Link>
                       <Link href="/chars/weezing" className="character-thumb">
-                        <img src="https://i.imgur.com/placeholder.png" alt="Weezing" />
+                        <img src="/images/pokemon-artwork.jpg" alt="Weezing" />
                         <span>Weezing</span>
                       </Link>
                     </div>
