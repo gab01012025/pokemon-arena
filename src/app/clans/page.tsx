@@ -1,21 +1,37 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
+import { prisma } from '@/lib/prisma';
 
-const topClans = [
-  { rank: 1, name: 'Hoshigama', slug: 'hoshigama', points: 251, members: 25 },
-  { rank: 2, name: 'Kaminari O Shiri', slug: 'kaminari-o-shiri', points: 206, members: 22 },
-  { rank: 3, name: 'One Piece', slug: 'one-piece', points: 188, members: 20 },
-  { rank: 4, name: 'Juryoku', slug: 'juryoku', points: 154, members: 18 },
-  { rank: 5, name: 'Imperium', slug: 'imperium', points: 151, members: 19 },
-  { rank: 6, name: 'Kyaouuko', slug: 'kyaouuko', points: 126, members: 15 },
-  { rank: 7, name: 'Shock', slug: 'shock', points: 123, members: 14 },
-  { rank: 8, name: 'Elite Four', slug: 'elite-four', points: 121, members: 12 },
-  { rank: 9, name: 'Kokuryukai', slug: 'kokuryukai', points: 108, members: 11 },
-  { rank: 10, name: 'Black Bulls', slug: 'black-bulls', points: 97, members: 10 },
-];
+async function getTopClans() {
+  const clans = await prisma.clan.findMany({
+    select: {
+      id: true,
+      name: true,
+      tag: true,
+      points: true,
+      _count: {
+        select: { members: true }
+      }
+    },
+    orderBy: { points: 'desc' },
+    take: 50
+  });
 
-export default function ClansPage() {
+  return clans.map((clan, index) => ({
+    rank: index + 1,
+    id: clan.id,
+    name: clan.name,
+    tag: clan.tag,
+    slug: clan.name.toLowerCase().replace(/\s+/g, '-'),
+    points: clan.points,
+    members: clan._count.members
+  }));
+}
+
+export default async function ClansPage() {
+  const topClans = await getTopClans();
+
   return (
     <div className="page-wrapper">
       <div className="main-container">
@@ -45,6 +61,9 @@ export default function ClansPage() {
             <div className="content-section">
               <div className="section-title">Clan Ladder - Top 50</div>
               <div className="section-content">
+                {topClans.length === 0 ? (
+                  <p className="no-data">No clans yet. Be the first to create one!</p>
+                ) : (
                 <table className="ladder-table">
                   <thead>
                     <tr>
@@ -71,6 +90,7 @@ export default function ClansPage() {
                     ))}
                   </tbody>
                 </table>
+                )}
               </div>
             </div>
 

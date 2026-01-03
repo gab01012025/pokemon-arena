@@ -12,8 +12,8 @@ const COOKIE_NAME = 'pokemon-arena-session';
 const protectedRoutes = [
   '/play',
   '/profile',
-  '/clan',
   '/settings',
+  '/battle',
 ];
 
 // Rotas que só podem ser acessadas sem autenticação

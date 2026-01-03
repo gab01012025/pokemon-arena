@@ -1,12 +1,9 @@
 // Pokemon Arena - Database Schema
-// Use PostgreSQL for production (Vercel) or SQLite for local development
 
 generator client {
   provider = "prisma-client-js"
 }
 
-// For Vercel/Production: Use PostgreSQL
-// For Local Development: Change to sqlite and use "file:./dev.db"
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")

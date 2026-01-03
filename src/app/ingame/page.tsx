@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { allPokemon } from '@/data/pokemon';
-import { Pokemon } from '@/types/game';
+import { Pokemon, Move } from '@/types/game';
 import { calculateDamage, TYPE_ICONS, TYPE_COLORS } from '@/lib/type-effectiveness';
+import { 
+  bypassesCounter, 
+  bypassesReflect, 
+  bypassesDefense,
+  triggersCounter,
+  canBeReflected
+} from '@/lib/battle-mechanics';
 import './ingame.css';
 
 // Mapeamento das extensões das imagens
@@ -308,13 +315,14 @@ interface Energy {
 interface BattleMessage {
   id: number;
   text: string;
-  type: 'damage' | 'heal' | 'status' | 'critical' | 'effective' | 'ineffective' | 'immune';
+  type: 'damage' | 'heal' | 'status' | 'critical' | 'effective' | 'ineffective' | 'immune' | 'counter' | 'reflect' | 'pierce';
 }
 
 // Status Effects
 interface StatusEffect {
-  type: 'burn' | 'poison' | 'paralysis' | 'freeze' | 'sleep';
+  type: 'burn' | 'poison' | 'paralysis' | 'freeze' | 'sleep' | 'stun' | 'counter' | 'reflect' | 'invulnerable' | 'strengthen' | 'weaken' | 'reduce';
   turnsRemaining: number;
+  value?: number;
 }
 
 interface BattlePokemonState {
@@ -322,6 +330,8 @@ interface BattlePokemonState {
   currentHP: number;
   maxHP: number;
   status: StatusEffect | null;
+  effects: StatusEffect[]; // Additional effects like counter, reflect, buffs
+  cooldowns: number[]; // Cooldown for each move
   statChanges: {
     attack: number;
     defense: number;
@@ -337,6 +347,8 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       currentHP: p!.hp,
       maxHP: p!.hp,
       status: null,
+      effects: [],
+      cooldowns: [0, 0, 0, 0],
       statChanges: { attack: 0, defense: 0, speed: 0 },
     }));
   };
@@ -351,6 +363,8 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       currentHP: p.hp,
       maxHP: p.hp,
       status: null,
+      effects: [],
+      cooldowns: [0, 0, 0, 0],
       statChanges: { attack: 0, defense: 0, speed: 0 },
     }));
   };
@@ -363,7 +377,34 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
   const [selectedMoves, setSelectedMoves] = useState<{[key: number]: number | null}>({0: null, 1: null, 2: null});
   const [selectedTargets, setSelectedTargets] = useState<{[key: number]: number | null}>({0: null, 1: null, 2: null});
   const [battleLog, setBattleLog] = useState<BattleMessage[]>([]);
-  const [messageId, setMessageId] = useState(0);
+  
+  // Turn Timer State
+  const [turnTimer, setTurnTimer] = useState(90); // 90 seconds per turn
+  const [showSurrenderModal, setShowSurrenderModal] = useState(false);
+  const [hoveredMove, setHoveredMove] = useState<{pokemon: Pokemon, move: Move, idx: number} | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Energy Exchange State
+  const [showEnergyExchange, setShowEnergyExchange] = useState(false);
+  
+  // Battle Result State
+  const [battleResultSent, setBattleResultSent] = useState(false);
+  const [battleRewards, setBattleRewards] = useState<{
+    exp: number;
+    streakBonus: number;
+    ladderPoints: number;
+    leveledUp: boolean;
+    newLevel: number | null;
+    stats: {
+      level: number;
+      experience: number;
+      expToNextLevel: number;
+      wins: number;
+      losses: number;
+      streak: number;
+      ladderPoints: number;
+    } | null;
+  } | null>(null);
 
   // Used for display purposes
   const _playerTeam = [team.slot1, team.slot2, team.slot3];
@@ -374,11 +415,41 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
   const enemyName = "TRAINER RED";
   const enemyRank = "POKEMON MASTER";
 
+  // State for auto-ready trigger
+  const [autoReady, setAutoReady] = useState(false);
+
+  // Turn Timer Effect
+  useEffect(() => {
+    if (!isReady) {
+      timerRef.current = setInterval(() => {
+        setTurnTimer(prev => {
+          if (prev <= 1) {
+            // Trigger auto-ready via state
+            setAutoReady(true);
+            return 90;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isReady, currentTurn]);
+
+  // Reset timer when turn changes (use functional approach)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTurnTimer(90);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [currentTurn]);
+
   // Add message to battle log
-  const addBattleMessage = (text: string, type: BattleMessage['type']) => {
-    setMessageId(prev => prev + 1);
-    setBattleLog(prev => [...prev.slice(-4), { id: messageId + 1, text, type }]);
-  };
+  const addBattleMessage = useCallback((text: string, type: BattleMessage['type']) => {
+    setBattleLog(prev => [...prev.slice(-4), { id: Date.now(), text, type }]);
+  }, []);
 
   // Calculate total energy cost of selected moves
   const getUsedEnergy = (): Energy => {
@@ -423,8 +494,22 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
     return true;
   };
 
+  // Energy Exchange - Convert typed energy to colorless (like Naruto Arena's chakra exchange)
+  const handleEnergyExchange = (fromType: keyof Energy) => {
+    if (fromType === 'colorless') return; // Can't exchange colorless
+    if (energy[fromType] < 1) return; // Need at least 1 energy to exchange
+    
+    setEnergy(prev => ({
+      ...prev,
+      [fromType]: prev[fromType] - 1,
+      colorless: prev.colorless + 1,
+    }));
+    
+    addBattleMessage(`Exchanged 1 ${fromType} energy for 1 colorless energy`, 'status');
+  };
+
   // Process status effects at end of turn
-  const processStatusEffects = (teamState: BattlePokemonState[]): BattlePokemonState[] => {
+  const processStatusEffects = useCallback((teamState: BattlePokemonState[]): BattlePokemonState[] => {
     return teamState.map(state => {
       if (!state.status || state.currentHP <= 0) return state;
 
@@ -470,7 +555,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
 
       return { ...state, currentHP: newHP, status: newStatus };
     });
-  };
+  }, [addBattleMessage]);
 
   const handleSelectMove = (pokemonIndex: number, moveIndex: number) => {
     const state = playerTeamState[pokemonIndex];
@@ -546,13 +631,19 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
     }
   };
 
-  const handleReady = () => {
+  const handleReady = useCallback(() => {
     if (!isReady) {
       setIsReady(true);
+      setAutoReady(false);
       
       setTimeout(() => {
         let newPlayerState = [...playerTeamState];
         let newEnemyState = [...enemyTeamState];
+        
+        // Helper function to check if target has a specific effect
+        const hasEffect = (state: BattlePokemonState, effectType: string): StatusEffect | undefined => {
+          return state.effects.find(e => e.type === effectType as StatusEffect['type']);
+        };
         
         // Process player moves with type effectiveness
         Object.entries(selectedMoves).forEach(([idx, moveIdx]) => {
@@ -574,9 +665,47 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
               if (move.target === 'OneEnemy' && targetIdx !== null && targetIdx >= 0) {
                 const defenderState = newEnemyState[targetIdx];
                 if (defenderState && defenderState.currentHP > 0) {
+                  
+                  // Check if target is invulnerable
+                  if (hasEffect(defenderState, 'invulnerable') && !bypassesDefense(move)) {
+                    addBattleMessage(`${defenderState.pokemon.name} is invulnerable! The attack missed!`, 'status');
+                    return;
+                  }
+                  
+                  // Check for Reflect effect (reflects non-Mental attacks)
+                  if (hasEffect(defenderState, 'reflect') && canBeReflected(move)) {
+                    // Reflect damage back to attacker
+                    const reflectDamage = Math.floor(baseDamage * 0.5);
+                    newPlayerState[pokemonIdx] = {
+                      ...attackerState,
+                      currentHP: Math.max(0, attackerState.currentHP - reflectDamage)
+                    };
+                    addBattleMessage(`${defenderState.pokemon.name} reflected ${reflectDamage} damage back!`, 'reflect');
+                    return;
+                  }
+                  
+                  // Calculate base damage with stat modifiers
+                  let modifiedDamage = baseDamage;
+                  
+                  // Apply attacker's stat changes (strengthen/weaken)
+                  const attackBoost = attackerState.statChanges.attack;
+                  if (attackBoost > 0) {
+                    modifiedDamage = Math.floor(modifiedDamage * (1 + attackBoost * 0.15));
+                  } else if (attackBoost < 0) {
+                    modifiedDamage = Math.floor(modifiedDamage * (1 + attackBoost * 0.1));
+                  }
+                  
+                  // Apply defender's defense stat
+                  const defenseBoost = defenderState.statChanges.defense;
+                  if (defenseBoost > 0 && !bypassesDefense(move)) {
+                    modifiedDamage = Math.floor(modifiedDamage * (1 - defenseBoost * 0.1));
+                  } else if (defenseBoost < 0) {
+                    modifiedDamage = Math.floor(modifiedDamage * (1 - defenseBoost * 0.1));
+                  }
+                  
                   // Calculate damage with type effectiveness and STAB
                   const damageResult = calculateDamage(
-                    baseDamage,
+                    modifiedDamage,
                     move.type,
                     attackerState.pokemon.types,
                     defenderState.pokemon.types
@@ -589,7 +718,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                   
                   // Add battle messages
                   addBattleMessage(
-                    `${attackerState.pokemon.name} used ${move.name}!`,
+                    `${attackerState.pokemon.name} used ${move.name}! (${damageResult.finalDamage} dmg)`,
                     'damage'
                   );
                   
@@ -601,6 +730,18 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                     const msgType = damageResult.typeMultiplier > 1 ? 'effective' : 
                                     damageResult.typeMultiplier < 1 ? 'ineffective' : 'immune';
                     addBattleMessage(damageResult.effectivenessMessage, msgType);
+                  }
+                  
+                  // Check for Counter effect (damages attacker if contact move)
+                  if (hasEffect(defenderState, 'counter') && triggersCounter(move)) {
+                    const counterDamage = Math.floor(damageResult.finalDamage * 0.5);
+                    if (counterDamage > 0) {
+                      newPlayerState[pokemonIdx] = {
+                        ...newPlayerState[pokemonIdx],
+                        currentHP: Math.max(0, newPlayerState[pokemonIdx].currentHP - counterDamage)
+                      };
+                      addBattleMessage(`${attackerState.pokemon.name} took ${counterDamage} counter damage!`, 'counter');
+                    }
                   }
                   
                   // Apply status effects from move
@@ -701,6 +842,16 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         newPlayerState = processStatusEffects(newPlayerState);
         newEnemyState = processStatusEffects(newEnemyState);
 
+        // Process cooldowns
+        newPlayerState = newPlayerState.map(s => ({
+          ...s,
+          cooldowns: s.cooldowns.map(cd => Math.max(0, cd - 1))
+        }));
+        newEnemyState = newEnemyState.map(s => ({
+          ...s,
+          cooldowns: s.cooldowns.map(cd => Math.max(0, cd - 1))
+        }));
+
         setPlayerTeamState(newPlayerState);
         setEnemyTeamState(newEnemyState);
         setCurrentTurn(prev => prev + 1);
@@ -725,21 +876,172 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         });
       }, 1500);
     }
+  }, [isReady, playerTeamState, enemyTeamState, selectedMoves, selectedTargets, addBattleMessage, processStatusEffects]);
+
+  // Auto-ready effect (when timer runs out)
+  useEffect(() => {
+    if (autoReady) {
+      // Use setTimeout to avoid cascading setState in effect
+      const timer = setTimeout(() => {
+        handleReady();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [autoReady, handleReady]);
+
+  // Surrender handler - update stats with loss
+  const handleSurrender = async () => {
+    setShowSurrenderModal(false);
+    
+    try {
+      const response = await fetch('/api/battle/result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          won: false,
+          surrendered: true,
+          opponentLevel: 5, // Simulated opponent level
+          opponentLadderPoints: 500 // Simulated opponent points
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBattleRewards(data.rewards);
+        setBattleResultSent(true);
+      }
+    } catch (error) {
+      console.error('Failed to update battle result:', error);
+    }
+    
+    onExit();
   };
 
+  // Send battle result to server
+  const sendBattleResult = useCallback(async (won: boolean) => {
+    if (battleResultSent) return;
+    
+    try {
+      const response = await fetch('/api/battle/result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          won,
+          surrendered: false,
+          opponentLevel: 5, // Simulated opponent level
+          opponentLadderPoints: 500 // Simulated opponent points
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setBattleRewards({
+          exp: data.rewards.exp,
+          streakBonus: data.rewards.streakBonus,
+          ladderPoints: data.rewards.ladderPoints,
+          leveledUp: data.rewards.leveledUp,
+          newLevel: data.rewards.newLevel,
+          stats: data.stats
+        });
+        setBattleResultSent(true);
+      }
+    } catch (error) {
+      console.error('Failed to update battle result:', error);
+    }
+  }, [battleResultSent]);
+
+  // Get move tooltip content
   const isGameOver = playerTeamState.every(s => s.currentHP <= 0) || enemyTeamState.every(s => s.currentHP <= 0);
   const playerWon = enemyTeamState.every(s => s.currentHP <= 0);
+
+  // Send battle result when game is over
+  useEffect(() => {
+    if (isGameOver && !battleResultSent) {
+      // Use setTimeout to avoid cascading setState
+      const timer = setTimeout(() => {
+        sendBattleResult(playerWon);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [isGameOver, playerWon, battleResultSent, sendBattleResult]);
 
   if (isGameOver) {
     return (
       <div className="battle-wrapper">
-        <div className="game-over-screen">
-          <h1>{playerWon ? '🏆 VICTORY!' : '💀 DEFEAT'}</h1>
-          <p>{playerWon ? 'You defeated your opponent!' : 'Your team was defeated...'}</p>
-          <div className="game-over-stats">
-            <p>Turns: {currentTurn}</p>
-            <p>Your Team: {playerTeamState.filter(s => s.currentHP > 0).length} remaining</p>
+        <div className={`game-over-screen ${playerWon ? 'victory' : 'defeat'}`}>
+          <div className="game-over-header">
+            <h1>{playerWon ? '🏆 VICTORY!' : '💀 DEFEAT'}</h1>
+            <p className="game-over-subtitle">{playerWon ? 'You defeated your opponent!' : 'Your team was defeated...'}</p>
           </div>
+          
+          <div className="game-over-stats">
+            <div className="stat-row">
+              <span className="stat-label">Battle Duration</span>
+              <span className="stat-value">{currentTurn} Turns</span>
+            </div>
+            <div className="stat-row">
+              <span className="stat-label">Pokemon Remaining</span>
+              <span className="stat-value">{playerTeamState.filter(s => s.currentHP > 0).length} / 3</span>
+            </div>
+          </div>
+
+          {/* EXP and Rewards Section */}
+          <div className="rewards-section">
+            <h3>📊 REWARDS</h3>
+            
+            {battleRewards ? (
+              <>
+                <div className="reward-item exp">
+                  <span className="reward-label">Experience</span>
+                  <span className="reward-value">+{battleRewards.exp} XP</span>
+                </div>
+                
+                {battleRewards.streakBonus > 0 && (
+                  <div className="reward-item streak">
+                    <span className="reward-label">🔥 Streak Bonus</span>
+                    <span className="reward-value">+{battleRewards.streakBonus} XP</span>
+                  </div>
+                )}
+                
+                <div className={`reward-item ladder ${battleRewards.ladderPoints >= 0 ? 'positive' : 'negative'}`}>
+                  <span className="reward-label">Ladder Points</span>
+                  <span className="reward-value">{battleRewards.ladderPoints >= 0 ? '+' : ''}{battleRewards.ladderPoints}</span>
+                </div>
+                
+                {battleRewards.leveledUp && (
+                  <div className="level-up-notification">
+                    <span className="level-up-icon">⬆️</span>
+                    <span className="level-up-text">LEVEL UP!</span>
+                    <span className="new-level">Level {battleRewards.newLevel}</span>
+                  </div>
+                )}
+                
+                {battleRewards.stats && (
+                  <div className="exp-bar-container">
+                    <div className="exp-bar-header">
+                      <span>Level {battleRewards.stats.level}</span>
+                      <span>{battleRewards.stats.experience} / {battleRewards.stats.expToNextLevel} XP</span>
+                    </div>
+                    <div className="exp-bar">
+                      <div 
+                        className="exp-bar-fill" 
+                        style={{ width: `${(battleRewards.stats.experience / battleRewards.stats.expToNextLevel) * 100}%` }}
+                      />
+                    </div>
+                    <div className="stats-summary">
+                      <span>Record: {battleRewards.stats.wins}W / {battleRewards.stats.losses}L</span>
+                      {battleRewards.stats.streak > 0 && <span>🔥 {battleRewards.stats.streak} Win Streak</span>}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="loading-rewards">
+                <span>Calculating rewards...</span>
+              </div>
+            )}
+          </div>
+          
           <button className="exit-btn" onClick={onExit}>RETURN TO LOBBY</button>
         </div>
       </div>
@@ -749,9 +1051,58 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
   // Get HP percentage for display
   const getHPPercent = (current: number, max: number) => Math.round((current / max) * 100);
   const getHPColor = (percent: number) => percent > 50 ? '#4CAF50' : percent > 25 ? '#FFC107' : '#F44336';
+  const getTimerColor = () => turnTimer > 30 ? '#4CAF50' : turnTimer > 10 ? '#FFC107' : '#F44336';
 
   return (
     <div className="battle-wrapper">
+      {/* Surrender Modal */}
+      {showSurrenderModal && (
+        <div className="surrender-modal-overlay">
+          <div className="surrender-modal">
+            <h2>⚠️ SURRENDER?</h2>
+            <p>Are you sure you want to surrender?</p>
+            <p className="surrender-warning">This will count as a loss.</p>
+            <div className="surrender-buttons">
+              <button className="surrender-confirm" onClick={handleSurrender}>YES, SURRENDER</button>
+              <button className="surrender-cancel" onClick={() => setShowSurrenderModal(false)}>CANCEL</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Skill Tooltip */}
+      {hoveredMove && (
+        <div className="skill-tooltip">
+          <div className="tooltip-header" style={{ backgroundColor: TYPE_COLORS[hoveredMove.move.type] }}>
+            <span className="tooltip-name">{hoveredMove.move.name}</span>
+            <span className="tooltip-type">{TYPE_ICONS[hoveredMove.move.type]} {hoveredMove.move.type}</span>
+          </div>
+          <div className="tooltip-body">
+            <p className="tooltip-desc">{hoveredMove.move.description}</p>
+            <div className="tooltip-stats">
+              {hoveredMove.move.damage > 0 && <span className="stat damage">⚔️ Damage: {hoveredMove.move.damage}</span>}
+              {hoveredMove.move.healing > 0 && <span className="stat healing">💚 Healing: {hoveredMove.move.healing}</span>}
+              <span className="stat cooldown">⏱️ Cooldown: {hoveredMove.move.cooldown || 0} turns</span>
+            </div>
+            <div className="tooltip-cost">
+              <span>Cost: </span>
+              {Object.entries(hoveredMove.move.cost || {}).map(([type, amount]) => 
+                amount && amount > 0 ? (
+                  <span key={type} className={`cost-icon ${type}`}>
+                    {TYPE_ICONS[type.charAt(0).toUpperCase() + type.slice(1) as keyof typeof TYPE_ICONS] || '⬜'} x{amount}
+                  </span>
+                ) : null
+              )}
+            </div>
+            {hoveredMove.move.classes.length > 0 && (
+              <div className="tooltip-classes">
+                Classes: {hoveredMove.move.classes.join(', ')}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Battle Log */}
       <div className="battle-log">
         {battleLog.map(msg => (
@@ -769,17 +1120,62 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         </div>
         
         <div className="turn-indicator">
-          <span className="turn-text">PRESS WHEN READY</span>
+          <div className="turn-timer" style={{ color: getTimerColor() }}>
+            <span className="timer-seconds">{turnTimer}</span>
+            <span className="timer-label">seconds</span>
+          </div>
           <div className="timer-bar">
-            <div className="timer-fill" />
+            <div className="timer-fill" style={{ width: `${(turnTimer / 90) * 100}%`, backgroundColor: getTimerColor() }} />
           </div>
           <div className="energy-bar">
-            {energy.fire > 0 && <span className="energy-icon fire" title="Fire">🔥 x{energy.fire}</span>}
-            {energy.water > 0 && <span className="energy-icon water" title="Water">💧 x{energy.water}</span>}
-            {energy.grass > 0 && <span className="energy-icon grass" title="Grass">🌿 x{energy.grass}</span>}
-            {energy.electric > 0 && <span className="energy-icon electric" title="Electric">⚡ x{energy.electric}</span>}
-            {energy.colorless > 0 && <span className="energy-icon colorless" title="Colorless">⬜ x{energy.colorless}</span>}
-            <span className="exchange-label">EXCHANGE ENERGY</span>
+            {energy.fire > 0 && (
+              <span 
+                className={`energy-icon fire ${showEnergyExchange ? 'exchangeable' : ''}`}
+                title="Fire - Click to exchange"
+                onClick={() => showEnergyExchange && handleEnergyExchange('fire')}
+              >
+                🔥 x{energy.fire}
+              </span>
+            )}
+            {energy.water > 0 && (
+              <span 
+                className={`energy-icon water ${showEnergyExchange ? 'exchangeable' : ''}`}
+                title="Water - Click to exchange"
+                onClick={() => showEnergyExchange && handleEnergyExchange('water')}
+              >
+                💧 x{energy.water}
+              </span>
+            )}
+            {energy.grass > 0 && (
+              <span 
+                className={`energy-icon grass ${showEnergyExchange ? 'exchangeable' : ''}`}
+                title="Grass - Click to exchange"
+                onClick={() => showEnergyExchange && handleEnergyExchange('grass')}
+              >
+                🌿 x{energy.grass}
+              </span>
+            )}
+            {energy.electric > 0 && (
+              <span 
+                className={`energy-icon electric ${showEnergyExchange ? 'exchangeable' : ''}`}
+                title="Electric - Click to exchange"
+                onClick={() => showEnergyExchange && handleEnergyExchange('electric')}
+              >
+                ⚡ x{energy.electric}
+              </span>
+            )}
+            {energy.colorless > 0 && (
+              <span className="energy-icon colorless" title="Colorless">
+                ⬜ x{energy.colorless}
+              </span>
+            )}
+            <button 
+              className={`exchange-btn ${showEnergyExchange ? 'active' : ''}`}
+              onClick={() => setShowEnergyExchange(!showEnergyExchange)}
+              title="Exchange colored energy for colorless"
+            >
+              {showEnergyExchange ? '✓ SELECT' : '⇄ EXCHANGE'}
+            </button>
           </div>
         </div>
         
@@ -817,21 +1213,33 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 </div>
               </div>
               
-              {/* Skills with Type Icons */}
+              {/* Skills with Type Icons and Cooldowns */}
               <div className="skills-row">
                 {state.pokemon.moves.map((move, moveIdx) => {
                   const isSelected = selectedMoves[idx] === moveIdx;
                   const canAfford = canAffordMove(state.pokemon, moveIdx);
+                  const cooldown = state.cooldowns[moveIdx] || 0;
+                  const onCooldown = cooldown > 0;
+                  const isDisabled = (!canAfford && !isSelected) || onCooldown || state.currentHP <= 0;
+                  
                   return (
                     <div 
                       key={moveIdx}
-                      className={`skill-box ${isSelected ? 'selected' : ''} ${!canAfford && !isSelected ? 'disabled' : ''}`}
-                      onClick={() => canAfford && handleSelectMove(idx, moveIdx)}
-                      title={`${move.name}: ${move.description} (${move.type})`}
+                      className={`skill-box ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${onCooldown ? 'on-cooldown' : ''}`}
+                      onClick={() => !isDisabled && handleSelectMove(idx, moveIdx)}
+                      onMouseEnter={() => setHoveredMove({ pokemon: state.pokemon, move, idx: moveIdx })}
+                      onMouseLeave={() => setHoveredMove(null)}
                       style={{ borderColor: TYPE_COLORS[move.type] }}
                     >
                       <span className="skill-type-icon">{TYPE_ICONS[move.type]}</span>
                       <span className="skill-damage">{move.damage > 0 ? move.damage : '⚡'}</span>
+                      {onCooldown && (
+                        <div className="cooldown-overlay">
+                          <span className="cooldown-number">{cooldown}</span>
+                        </div>
+                      )}
+                      {move.classes.includes('Priority') && <span className="priority-badge">!</span>}
+                      {move.classes.includes('Bypassing') && <span className="bypass-badge">⚔</span>}
                     </div>
                   );
                 })}
@@ -916,7 +1324,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       {/* Battle Footer */}
       <div className="battle-footer">
         <div className="footer-left">
-          <button className="footer-btn surrender-btn" onClick={onExit}>
+          <button className="footer-btn surrender-btn" onClick={() => setShowSurrenderModal(true)}>
             SURRENDER
           </button>
           <button className="footer-btn chat-btn">

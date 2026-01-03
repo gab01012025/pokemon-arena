@@ -1,0 +1,259 @@
+/* ===== MATCH HISTORY COMPONENT ===== */
+
+.match-history {
+  background: rgba(26, 26, 46, 0.95);
+  border-radius: 10px;
+  border: 2px solid #333;
+  padding: 15px;
+}
+
+.match-history.compact {
+  padding: 10px;
+}
+
+.match-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #444;
+}
+
+.match-history-header h3 {
+  margin: 0;
+  color: #FFD700;
+  font-size: 1.1rem;
+}
+
+.match-count {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Match List */
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.match-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.match-item:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateX(5px);
+}
+
+.match-item.victory {
+  border-left-color: #4CAF50;
+}
+
+.match-item.defeat {
+  border-left-color: #F44336;
+}
+
+/* Result Indicator */
+.match-result-indicator {
+  font-size: 1.3rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Opponent Info */
+.match-opponent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.opponent-name {
+  color: white;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.opponent-level {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+/* Match Details */
+.match-details {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.match-turns,
+.match-duration,
+.match-type {
+  font-size: 0.8rem;
+  color: #aaa;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.match-type {
+  text-transform: capitalize;
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.15);
+}
+
+/* Match Date */
+.match-date {
+  color: #666;
+  font-size: 0.8rem;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Pagination */
+.match-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+}
+
+.pagination-btn {
+  padding: 8px 15px;
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #444 0%, #333 100%);
+  border-color: #FFD700;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Loading State */
+.match-history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px;
+  color: #888;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 215, 0, 0.2);
+  border-top-color: #FFD700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.match-history-error {
+  padding: 20px;
+  text-align: center;
+  color: #F44336;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Empty State */
+.match-history-empty {
+  padding: 30px;
+  text-align: center;
+  color: #888;
+}
+
+.match-history-empty span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.match-history-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Compact Mode Adjustments */
+.match-history.compact .match-history-header {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+}
+
+.match-history.compact .match-item {
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+.match-history.compact .match-result-indicator {
+  font-size: 1rem;
+  min-width: 24px;
+}
+
+.match-history.compact .opponent-name {
+  font-size: 0.85rem;
+}
+
+.match-history.compact .match-details {
+  display: none;
+}
+
+.match-history.compact .match-date {
+  font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .match-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .match-details {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .match-date {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+  }
+  
+  .match-item {
+    position: relative;
+    padding-right: 90px;
+  }
+}

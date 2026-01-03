@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
+import { prisma } from '@/lib/prisma';
 
 interface ProfilePageProps {
   params: Promise<{
@@ -8,33 +10,121 @@ interface ProfilePageProps {
   }>;
 }
 
+async function getProfile(username: string) {
+  const trainer = await prisma.trainer.findFirst({
+    where: { 
+      username: username
+    },
+    select: {
+      id: true,
+      username: true,
+      avatar: true,
+      createdAt: true,
+      level: true,
+      experience: true,
+      wins: true,
+      losses: true,
+      streak: true,
+      maxStreak: true,
+      ladderPoints: true,
+      clanMember: {
+        select: {
+          role: true,
+          clan: {
+            select: { id: true, name: true, tag: true }
+          }
+        }
+      },
+      unlockedPokemon: {
+        select: {
+          pokemon: {
+            select: { id: true, name: true, types: true }
+          }
+        },
+        orderBy: { unlockedAt: 'desc' },
+        take: 6
+      }
+    }
+  });
+
+  if (!trainer) return null;
+
+  // Get recent battles
+  const recentBattles = await prisma.battle.findMany({
+    where: {
+      OR: [
+        { player1Id: trainer.id },
+        { player2Id: trainer.id }
+      ],
+      status: 'finished'
+    },
+    select: {
+      id: true,
+      winnerId: true,
+      finishedAt: true,
+      player1: { select: { username: true } },
+      player2: { select: { username: true } },
+      player1Id: true,
+    },
+    orderBy: { finishedAt: 'desc' },
+    take: 5
+  });
+
+  // Calculate rank
+  const rank = await prisma.trainer.count({
+    where: { ladderPoints: { gt: trainer.ladderPoints } }
+  }) + 1;
+
+  return {
+    ...trainer,
+    rank,
+    winRate: trainer.wins + trainer.losses > 0 
+      ? Math.round((trainer.wins / (trainer.wins + trainer.losses)) * 100) 
+      : 0,
+    recentBattles: recentBattles.map(b => ({
+      id: b.id,
+      result: b.winnerId === trainer.id ? 'win' as const : 'loss' as const,
+      opponent: b.player1Id === trainer.id ? b.player2.username : b.player1.username,
+      date: b.finishedAt,
+    }))
+  };
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  }).format(date);
+}
+
+function timeAgo(date: Date | null) {
+  if (!date) return 'Never';
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return 'Just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+  return `${Math.floor(seconds / 86400)} days ago`;
+}
+
+function getLevelTitle(level: number) {
+  if (level >= 50) return 'Champion';
+  if (level >= 40) return 'Elite';
+  if (level >= 30) return 'Veteran';
+  if (level >= 20) return 'Expert';
+  if (level >= 10) return 'Trainer';
+  return 'Rookie';
+}
+
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
+  const profile = await getProfile(decodeURIComponent(username));
 
-  // Mock user data - in real app this would come from database
-  const userData = {
-    username: username,
-    avatar: '/images/ash-ketchum.webp',
-    level: 'Champion',
-    rank: 1,
-    wins: 1250,
-    losses: 320,
-    winRate: '79.6%',
-    streak: 15,
-    maxStreak: 45,
-    exp: 62,
-    clan: 'Hoshigama',
-    joinDate: 'January 15, 2024',
-    lastOnline: '2 hours ago',
-    favoriteCharacters: ['Pikachu', 'Charizard', 'Mewtwo'],
-    recentMatches: [
-      { result: 'win', opponent: 'Player123', date: '2 hours ago' },
-      { result: 'win', opponent: 'TrainerKing', date: '3 hours ago' },
-      { result: 'loss', opponent: 'ShadowMaster', date: '5 hours ago' },
-      { result: 'win', opponent: 'PokeFan', date: '6 hours ago' },
-      { result: 'win', opponent: 'RocketFan', date: '8 hours ago' },
-    ],
-  };
+  if (!profile) {
+    notFound();
+  }
+
+  const levelTitle = getLevelTitle(profile.level);
 
   return (
     <div className="page-wrapper">
@@ -59,28 +149,35 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <LeftSidebar />
 
         <main className="center-content">
-          <h1 className="page-title">Profile: {userData.username}</h1>
+          <h1 className="page-title">Profile: {profile.username}</h1>
 
           {/* Profile Header */}
           <div className="content-box profile-header-box">
             <div className="profile-header">
               <div className="profile-avatar">
-                <img src={userData.avatar} alt={userData.username} />
-                <span className={`level-badge level-${userData.level.toLowerCase()}`}>
-                  {userData.level}
+                <img 
+                  src={profile.avatar === 'default' ? '/images/ash-ketchum.webp' : `/images/avatars/${profile.avatar}.png`} 
+                  alt={profile.username} 
+                />
+                <span className={`level-badge level-${levelTitle.toLowerCase()}`}>
+                  {levelTitle}
                 </span>
               </div>
               <div className="profile-info">
-                <h2 className="profile-username">{userData.username}</h2>
+                <h2 className="profile-username">{profile.username}</h2>
                 <div className="profile-meta">
-                  <span className="profile-rank">Rank #{userData.rank}</span>
-                  <span className="profile-clan">
-                    Clan: <Link href={`/clan/${userData.clan.toLowerCase()}`}>{userData.clan}</Link>
-                  </span>
+                  <span className="profile-rank">Rank #{profile.rank}</span>
+                  {profile.clanMember && (
+                    <span className="profile-clan">
+                      Clan: <Link href={`/clan/${profile.clanMember.clan.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                        [{profile.clanMember.clan.tag}] {profile.clanMember.clan.name}
+                      </Link>
+                    </span>
+                  )}
                 </div>
                 <div className="profile-dates">
-                  <span>Joined: {userData.joinDate}</span>
-                  <span>Last online: {userData.lastOnline}</span>
+                  <span>Joined: {formatDate(profile.createdAt)}</span>
+                  <span>Level: {profile.level}</span>
                 </div>
               </div>
               <div className="profile-actions">
@@ -98,51 +195,55 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="content-box-body">
               <div className="stats-grid">
                 <div className="stat-item">
-                  <span className="stat-value stat-wins">{userData.wins}</span>
+                  <span className="stat-value stat-wins">{profile.wins}</span>
                   <span className="stat-label">Wins</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value stat-losses">{userData.losses}</span>
+                  <span className="stat-value stat-losses">{profile.losses}</span>
                   <span className="stat-label">Losses</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value">{userData.winRate}</span>
+                  <span className="stat-value">{profile.winRate}%</span>
                   <span className="stat-label">Win Rate</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value stat-streak">{userData.streak}</span>
+                  <span className="stat-value stat-streak">
+                    {profile.streak > 0 ? `🔥 ${profile.streak}` : profile.streak}
+                  </span>
                   <span className="stat-label">Current Streak</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value">{userData.maxStreak}</span>
+                  <span className="stat-value">{profile.maxStreak}</span>
                   <span className="stat-label">Max Streak</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value">{userData.exp}</span>
-                  <span className="stat-label">EXP</span>
+                  <span className="stat-value">{profile.ladderPoints}</span>
+                  <span className="stat-label">Ladder Points</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Favorite Characters */}
-          <div className="content-box">
-            <div className="content-box-header">
-              <h2>Favorite Characters</h2>
-            </div>
-            <div className="content-box-body">
-              <div className="favorite-chars">
-                {userData.favoriteCharacters.map((char, i) => (
-                  <div key={i} className="favorite-char">
-                    <div className="char-placeholder">
-                      <span>{char.charAt(0)}</span>
+          {/* Unlocked Pokemon */}
+          {profile.unlockedPokemon.length > 0 && (
+            <div className="content-box">
+              <div className="content-box-header">
+                <h2>Recent Pokemon ({profile.unlockedPokemon.length})</h2>
+              </div>
+              <div className="content-box-body">
+                <div className="favorite-chars">
+                  {profile.unlockedPokemon.map((up) => (
+                    <div key={up.pokemon.id} className="favorite-char">
+                      <div className="char-placeholder">
+                        <span>{up.pokemon.name.charAt(0)}</span>
+                      </div>
+                      <span className="char-name">{up.pokemon.name}</span>
                     </div>
-                    <span className="char-name">{char}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Recent Matches */}
           <div className="content-box">
@@ -150,19 +251,23 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <h2>Recent Matches</h2>
             </div>
             <div className="content-box-body">
-              <div className="match-history">
-                {userData.recentMatches.map((match, i) => (
-                  <div key={i} className={`match-item match-${match.result}`}>
-                    <span className={`match-result result-${match.result}`}>
-                      {match.result.toUpperCase()}
-                    </span>
-                    <span className="match-opponent">
-                      vs <Link href={`/profile/${match.opponent}`}>{match.opponent}</Link>
-                    </span>
-                    <span className="match-date">{match.date}</span>
-                  </div>
-                ))}
-              </div>
+              {profile.recentBattles.length === 0 ? (
+                <p className="no-data">No battles yet</p>
+              ) : (
+                <div className="match-history">
+                  {profile.recentBattles.map((match) => (
+                    <div key={match.id} className={`match-item match-${match.result}`}>
+                      <span className={`match-result result-${match.result}`}>
+                        {match.result.toUpperCase()}
+                      </span>
+                      <span className="match-opponent">
+                        vs <Link href={`/profile/${match.opponent}`}>{match.opponent}</Link>
+                      </span>
+                      <span className="match-date">{timeAgo(match.date)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </main>
