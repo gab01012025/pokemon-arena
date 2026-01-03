@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 async function getTopClans() {
   const clans = await prisma.clan.findMany({
     select: {

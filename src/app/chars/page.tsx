@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { PokemonImage } from '@/components/PokemonImage';
 
+// Force dynamic rendering (no static generation)
+export const dynamic = 'force-dynamic';
+
 // Função para obter cor baseada no tipo
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
