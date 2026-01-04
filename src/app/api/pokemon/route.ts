@@ -36,18 +36,25 @@ export async function GET(request: NextRequest) {
     // Transform data to match expected frontend format
     const transformedPokemon = pokemon.map(p => {
       const types = JSON.parse(p.types);
-      const firstType = Array.isArray(types) ? types[0] : types;
+      const firstType = Array.isArray(types) ? types[0] : (typeof types === 'string' ? types : 'normal');
+      const secondType = Array.isArray(types) && types.length > 1 ? types[1] : null;
       
       const base: Record<string, unknown> = {
         id: p.id,
         name: p.name,
         description: p.description,
+        // For backwards compatibility, provide both formats
+        type: firstType,
+        secondaryType: secondType,
         types: Array.isArray(types) ? types.join(',') : types,
         category: p.category,
         health: p.health,
+        imageUrl: `/images/pokemon/${p.name.toLowerCase()}.png`,
         traits: JSON.parse(p.traits),
         isStarter: p.isStarter,
+        isUnlockable: !p.isStarter,
         unlockCost: p.unlockCost,
+        moves: [],  // Default empty array
       };
       
       if (includeMoves && 'moves' in p) {

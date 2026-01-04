@@ -239,7 +239,7 @@ export default function PlayPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: string | undefined | null) => {
     const colors: Record<string, string> = {
       electric: '#F7D02C',
       fire: '#EE8130',
@@ -250,7 +250,17 @@ export default function PlayPage() {
       ghost: '#735797',
       dragon: '#6F35FC',
       normal: '#A8A77A',
+      ice: '#96D9D6',
+      dark: '#705746',
+      fairy: '#D685AD',
+      steel: '#B7B7CE',
+      rock: '#B6A136',
+      ground: '#E2BF65',
+      flying: '#A98FF3',
+      bug: '#A6B91A',
+      poison: '#A33EA1',
     };
+    if (!type) return '#777';
     return colors[type.toLowerCase()] || '#777';
   };
 
