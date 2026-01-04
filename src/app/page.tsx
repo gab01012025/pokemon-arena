@@ -16,8 +16,8 @@ export default function Home() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/missions" className="nav-btn-top">📋 Missões</Link>
-              <Link href="/unlock-pokemon" className="nav-btn-top">🔓 Desbloquear Pokémon</Link>
-              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <Link href="/unlock-pokemon" className="nav-btn-top">🔓 Desbloquear</Link>
+              <Link href="/my-clan" className="nav-btn-top">🏰 Meu Clã</Link>
               <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">
                 🎮 DISCORD
               </a>
