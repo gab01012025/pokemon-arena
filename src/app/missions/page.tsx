@@ -93,6 +93,7 @@ export default function MissionsPage() {
   };
 
   const getDifficultyColor = (difficulty: string) => {
+    if (!difficulty) return '#9ca3af';
     switch (difficulty.toLowerCase()) {
       case 'easy': return '#4ade80';
       case 'normal': return '#60a5fa';

@@ -55,7 +55,7 @@ function getPokemonImage(name: string): string {
     'exeggutor': '/images/pokemon/exeggutor.png',
     'snorlax': '/images/pokemon/snrolax.webp',
   };
-  return imageMap[name.toLowerCase()] || '/images/pokemon-pikachu.jpg';
+  return imageMap[name?.toLowerCase() || 'pikachu'] || '/images/pokemon-pikachu.jpg';
 }
 
 async function getPokemon() {

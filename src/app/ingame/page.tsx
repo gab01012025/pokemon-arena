@@ -863,7 +863,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         const aliveTypes: string[] = [];
         newPlayerState.forEach(s => {
           if (s.currentHP > 0) {
-            s.pokemon.types.forEach(t => aliveTypes.push(t.toLowerCase()));
+            s.pokemon.types.forEach(t => t && aliveTypes.push(t.toLowerCase()));
           }
         });
         

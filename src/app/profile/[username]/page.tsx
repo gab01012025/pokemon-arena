@@ -162,7 +162,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   src={profile.avatar === 'default' ? '/images/ash-ketchum.webp' : `/images/avatars/${profile.avatar}.png`} 
                   alt={profile.username} 
                 />
-                <span className={`level-badge level-${levelTitle.toLowerCase()}`}>
+                <span className={`level-badge level-${levelTitle?.toLowerCase() || 'newbie'}`}>
                   {levelTitle}
                 </span>
               </div>
@@ -172,7 +172,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <span className="profile-rank">Rank #{profile.rank}</span>
                   {profile.clanMember && (
                     <span className="profile-clan">
-                      Clan: <Link href={`/clan/${profile.clanMember.clan.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                      Clan: <Link href={`/clan/${profile.clanMember.clan.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`}>
                         [{profile.clanMember.clan.tag}] {profile.clanMember.clan.name}
                       </Link>
                     </span>

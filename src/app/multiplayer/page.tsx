@@ -41,7 +41,7 @@ const pokemonImages: Record<string, string> = {
 };
 
 const getPokemonImage = (pokemonId: string): string => {
-  return pokemonImages[pokemonId.toLowerCase()] || '/images/pokemon/pikachu.jpg';
+  return pokemonImages[pokemonId?.toLowerCase() || 'pikachu'] || '/images/pokemon/pikachu.jpg';
 };
 
 type GamePhase = 'connecting' | 'lobby' | 'queue' | 'battle' | 'result';
@@ -362,8 +362,8 @@ export default function MultiplayerPage() {
                   <img src={getPokemonImage(pokemon.id)} alt={pokemon.name} />
                   <span className="pokemon-name">{pokemon.name}</span>
                   <div className="pokemon-types">
-                    {pokemon.types.map(type => (
-                      <span key={type} className={`type-badge ${type.toLowerCase()}`}>
+                    {pokemon.types.filter(t => t).map(type => (
+                      <span key={type} className={`type-badge ${type?.toLowerCase() || 'normal'}`}>
                         {TYPE_ICONS[type as keyof typeof TYPE_ICONS]}
                       </span>
                     ))}
@@ -715,8 +715,8 @@ export default function MultiplayerPage() {
                   </div>
                 </div>
                 <div className="pokemon-types">
-                  {pokemon.types.map(type => (
-                    <span key={type} className={`type-badge ${type.toLowerCase()}`}>
+                  {pokemon.types.filter(t => t).map(type => (
+                    <span key={type} className={`type-badge ${type?.toLowerCase() || 'normal'}`}>
                       {TYPE_ICONS[type as keyof typeof TYPE_ICONS]}
                     </span>
                   ))}

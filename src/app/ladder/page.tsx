@@ -84,7 +84,7 @@ export default function LadderPage() {
   };
 
   const filteredTrainers = searchTerm
-    ? trainers.filter(t => t.username.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? trainers.filter(t => t.username?.toLowerCase().includes(searchTerm.toLowerCase()))
     : trainers;
 
   return (

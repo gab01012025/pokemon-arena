@@ -31,8 +31,8 @@ export function ClansClient({ initialClans }: ClansClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClans = clans.filter(clan =>
-    clan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    clan.tag.toLowerCase().includes(searchTerm.toLowerCase())
+    clan.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    clan.tag?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleJoinClan = async () => {

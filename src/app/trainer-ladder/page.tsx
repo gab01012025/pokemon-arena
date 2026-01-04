@@ -118,7 +118,7 @@ export default async function TrainerLadder() {
                         </td>
                         <td>
                           {trainer.clan ? (
-                            <Link href={`/clan/${trainer.clan.toLowerCase().replace(/\s+/g, '-')}`} className="clan-link">
+                            <Link href={`/clan/${trainer.clan?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`} className="clan-link">
                               [{trainer.clanTag}] {trainer.clan}
                             </Link>
                           ) : (

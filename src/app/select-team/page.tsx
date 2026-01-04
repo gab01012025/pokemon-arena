@@ -169,7 +169,7 @@ export default function SelectTeamPage() {
   };
 
   const getImage = (name: string) => {
-    return IMAGE_MAP[name.toLowerCase()] || '/images/pokemon/pikachu.jpg';
+    return IMAGE_MAP[name?.toLowerCase() || 'pikachu'] || '/images/pokemon/pikachu.jpg';
   };
 
   const parseEnergyCost = (costStr: string): Record<string, number> => {
@@ -184,7 +184,7 @@ export default function SelectTeamPage() {
     const costs = parseEnergyCost(costStr);
     return Object.entries(costs).map(([type, count]) => (
       <span key={type} className="energy-icon" title={`${type}: ${count}`}>
-        {Array(count).fill(TYPE_ICONS[type.toLowerCase()] || '⭐').join('')}
+        {Array(count).fill(TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐').join('')}
       </span>
     ));
   };
@@ -252,9 +252,9 @@ export default function SelectTeamPage() {
                       <div className="slot-info">
                         <span className="slot-name">{pokemon.name}</span>
                         <div className="slot-types">
-                          {pokemon.types.split(',').map((type, i) => (
-                            <span key={i} className="mini-type" style={{ backgroundColor: TYPE_COLORS[type.toLowerCase()] }}>
-                              {TYPE_ICONS[type.toLowerCase()]}
+                          {pokemon.types.split(',').filter(t => t).map((type, i) => (
+                            <span key={i} className="mini-type" style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}>
+                              {TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'}
                             </span>
                           ))}
                         </div>
@@ -353,14 +353,14 @@ export default function SelectTeamPage() {
                     <h3 className="pokemon-name">{pokemon.name}</h3>
                     
                     <div className="type-badges">
-                      {pokemon.types.split(',').map((type, i) => (
+                      {pokemon.types.split(',').filter(t => t).map((type, i) => (
                         <span 
                           key={i} 
                           className="type-badge-v2"
-                          style={{ backgroundColor: TYPE_COLORS[type.toLowerCase()] }}
+                          style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}
                         >
-                          <span className="type-icon">{TYPE_ICONS[type.toLowerCase()]}</span>
-                          {type}
+                          <span className="type-icon">{TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'}</span>
+                          {type || 'Normal'}
                         </span>
                       ))}
                     </div>
@@ -408,13 +408,13 @@ export default function SelectTeamPage() {
               <h3 className="detail-name">{displayPokemon.name}</h3>
               
               <div className="detail-types">
-                {displayPokemon.types.split(',').map((type, i) => (
+                {displayPokemon.types.split(',').filter(t => t).map((type, i) => (
                   <span 
                     key={i} 
                     className="detail-type-badge"
-                    style={{ backgroundColor: TYPE_COLORS[type.toLowerCase()] }}
+                    style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}
                   >
-                    {TYPE_ICONS[type.toLowerCase()]} {type}
+                    {TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'} {type || 'Normal'}
                   </span>
                 ))}
               </div>

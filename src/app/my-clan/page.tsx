@@ -333,7 +333,7 @@ export default function MyClanPage() {
                 </Link>
               </div>
               <div className="col-rank">
-                <span className={`rank-badge ${member.role.toLowerCase()}`}>
+                <span className={`rank-badge ${member.role?.toLowerCase() || 'member'}`}>
                   {member.role === 'leader' ? '👑' : member.role === 'officer' ? '⚔️' : '🛡️'}
                   {' '}
                   {member.role === 'leader' ? 'Líder' : member.role === 'officer' ? 'Oficial' : 'Membro'}

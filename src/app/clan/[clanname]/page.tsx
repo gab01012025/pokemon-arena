@@ -178,7 +178,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
                         <Link href={`/profile/${member.name}`}>{member.name}</Link>
                       </td>
                       <td>
-                        <span className={`role-badge role-${member.role.toLowerCase().replace('-', '')}`}>
+                        <span className={`role-badge role-${member.role?.toLowerCase().replace('-', '') || 'member'}`}>
                           {member.role}
                         </span>
                       </td>

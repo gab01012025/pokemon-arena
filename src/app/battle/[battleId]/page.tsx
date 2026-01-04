@@ -138,8 +138,8 @@ export default function BattlePage() {
           team: battleData.yourTeam.map((p, idx) => ({
             id: `your-${idx}`,
             name: p.pokemon.name,
-            type: p.pokemon.types[0] || 'normal',
-            imageUrl: `/images/pokemon/${p.pokemon.name.toLowerCase()}.png`,
+            type: p.pokemon.types?.[0] || 'normal',
+            imageUrl: `/images/pokemon/${p.pokemon.name?.toLowerCase() || 'pikachu'}.png`,
             currentHealth: p.currentHP,
             maxHealth: p.maxHP,
             moves: p.pokemon.moves.map((m, mIdx) => ({
@@ -163,8 +163,8 @@ export default function BattlePage() {
           team: battleData.opponent.team.map((p, idx) => ({
             id: `opp-${idx}`,
             name: p.name,
-            type: p.types[0] || 'normal',
-            imageUrl: `/images/pokemon/${p.name.toLowerCase()}.png`,
+            type: p.types?.[0] || 'normal',
+            imageUrl: `/images/pokemon/${p.name?.toLowerCase() || 'pikachu'}.png`,
             currentHealth: p.currentHP,
             maxHealth: p.maxHP,
             moves: [],
@@ -515,6 +515,7 @@ export default function BattlePage() {
       dragon: '#6F35FC',
       normal: '#A8A77A',
     };
+    if (!type) return '#777';
     return colors[type.toLowerCase()] || '#777';
   };
 
