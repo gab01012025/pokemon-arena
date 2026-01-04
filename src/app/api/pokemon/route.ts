@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Force redeploy - v2.0.0
+// API Version 3.0.0 - Force redeploy with data transformation
 export async function GET(request: NextRequest) {
+  console.log('[API Pokemon] v3.0.0 - Starting request');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
