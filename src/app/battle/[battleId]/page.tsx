@@ -1,10 +1,11 @@
 'use client';
 
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useGameSocket, Energy } from '@/hooks/useGameSocket';
+import { useBattleAnimations, BattleAnimationManager, TurnTransition, AnimationType } from '@/components/battle/BattleAnimations';
 
 interface Move {
   id: string;
@@ -76,6 +77,11 @@ export default function BattlePage() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{text: string, sender: string}>>([]);
   const [chatInput, setChatInput] = useState('');
+  
+  // Battle Animations
+  const { animations, addAnimation, removeAnimation } = useBattleAnimations();
+  const prevBattleRef = useRef<BattleState | null>(null);
+  const [showTurnTransition, setShowTurnTransition] = useState(false);
 
   // Get user data
   useEffect(() => {
@@ -225,8 +231,125 @@ export default function BattlePage() {
       setSelectedMoves({});
       setSelectedTargets({});
       setSubmitting(false);
+      
+      // Show turn transition animation
+      setShowTurnTransition(true);
+      setTimeout(() => setShowTurnTransition(false), 1500);
     }
   }, [turnData, battle]);
+
+  // Detect HP changes and trigger animations
+  useEffect(() => {
+    if (!battle || !prevBattleRef.current) {
+      prevBattleRef.current = battle;
+      return;
+    }
+    
+    const prev = prevBattleRef.current;
+    
+    // Check player team HP changes
+    battle.player1.team.forEach((poke, idx) => {
+      const prevPoke = prev.player1.team[idx];
+      if (prevPoke) {
+        const hpDiff = prevPoke.currentHealth - poke.currentHealth;
+        if (hpDiff > 0) {
+          // Took damage
+          addAnimation({
+            type: hpDiff > 30 ? 'critical' : 'damage',
+            value: hpDiff,
+            targetId: `my-pokemon-${idx}`,
+            duration: 1000,
+          });
+        } else if (hpDiff < 0) {
+          // Healed
+          addAnimation({
+            type: 'heal',
+            value: Math.abs(hpDiff),
+            targetId: `my-pokemon-${idx}`,
+            duration: 1000,
+          });
+        }
+        
+        // Check for death
+        if (prevPoke.currentHealth > 0 && poke.currentHealth <= 0) {
+          addAnimation({
+            type: 'death',
+            targetId: `my-pokemon-${idx}`,
+            text: poke.name,
+            duration: 1500,
+          });
+        }
+        
+        // Check for status changes
+        if (poke.isStunned && !prevPoke.isStunned) {
+          addAnimation({
+            type: 'stun',
+            targetId: `my-pokemon-${idx}`,
+            text: 'Stunned!',
+            duration: 1200,
+          });
+        }
+      }
+    });
+    
+    // Check opponent team HP changes
+    battle.player2.team.forEach((poke, idx) => {
+      const prevPoke = prev.player2.team[idx];
+      if (prevPoke) {
+        const hpDiff = prevPoke.currentHealth - poke.currentHealth;
+        if (hpDiff > 0) {
+          addAnimation({
+            type: hpDiff > 30 ? 'critical' : 'damage',
+            value: hpDiff,
+            targetId: `opp-pokemon-${idx}`,
+            duration: 1000,
+          });
+        } else if (hpDiff < 0) {
+          addAnimation({
+            type: 'heal',
+            value: Math.abs(hpDiff),
+            targetId: `opp-pokemon-${idx}`,
+            duration: 1000,
+          });
+        }
+        
+        if (prevPoke.currentHealth > 0 && poke.currentHealth <= 0) {
+          addAnimation({
+            type: 'death',
+            targetId: `opp-pokemon-${idx}`,
+            text: poke.name,
+            duration: 1500,
+          });
+        }
+        
+        if (poke.isStunned && !prevPoke.isStunned) {
+          addAnimation({
+            type: 'stun',
+            targetId: `opp-pokemon-${idx}`,
+            text: 'Stunned!',
+            duration: 1200,
+          });
+        }
+      }
+    });
+    
+    // Check energy changes
+    const prevEnergy = prev.player1.energy;
+    const newEnergy = battle.player1.energy;
+    for (const type of Object.keys(newEnergy) as (keyof EnergyPool)[]) {
+      if (newEnergy[type] > prevEnergy[type]) {
+        addAnimation({
+          type: 'energyGain',
+          targetId: 'energy-pool',
+          value: newEnergy[type] - prevEnergy[type],
+          text: type,
+          duration: 800,
+        });
+      }
+    }
+    
+    prevBattleRef.current = battle;
+  }, [battle, addAnimation]);
 
   // Handle battle result
   useEffect(() => {
@@ -486,6 +609,20 @@ export default function BattlePage() {
 
       {/* Battle Field */}
       <div className="battle-field">
+        {/* Animation Overlay */}
+        <BattleAnimationManager 
+          animations={animations} 
+          onAnimationComplete={removeAnimation}
+        />
+        
+        {/* Turn Transition */}
+        {showTurnTransition && (
+          <TurnTransition 
+            turn={battle.turn} 
+            onComplete={() => setShowTurnTransition(false)}
+          />
+        )}
+        
         {/* Opponent Side */}
         <div className="opponent-side">
           <div className="player-info opponent">
@@ -499,7 +636,8 @@ export default function BattlePage() {
               
               return (
                 <div 
-                  key={poke.id} 
+                  key={poke.id}
+                  id={`opp-pokemon-${idx}`}
                   className={`battle-pokemon opponent ${isDead ? 'dead' : ''} ${isTargeted ? 'targeted' : ''}`}
                   onClick={() => !isDead && selectTarget(0, isTargeted ? null : idx)}
                 >
@@ -553,7 +691,11 @@ export default function BattlePage() {
               const selectedMoveIdx = selectedMoves[pokemonIdx];
               
               return (
-                <div key={poke.id} className={`battle-pokemon mine ${isDead ? 'dead' : ''} ${selectedMoveIdx !== undefined && selectedMoveIdx !== null ? 'has-action' : ''}`}>
+                <div 
+                  key={poke.id}
+                  id={`my-pokemon-${pokemonIdx}`}
+                  className={`battle-pokemon mine ${isDead ? 'dead' : ''} ${selectedMoveIdx !== undefined && selectedMoveIdx !== null ? 'has-action' : ''}`}
+                >
                   <div className="pokemon-sprite" style={{ borderColor: getTypeColor(poke.type) }}>
                     <img 
                       src={poke.imageUrl || '/images/pokemon/default.png'} 
