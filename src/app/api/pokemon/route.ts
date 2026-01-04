@@ -35,8 +35,13 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match expected frontend format
     const transformedPokemon = pokemon.map(p => {
-      const types = JSON.parse(p.types);
-      const firstType = Array.isArray(types) ? types[0] : (typeof types === 'string' ? types : 'normal');
+      let types: string | string[] = 'Normal';
+      try {
+        types = p.types ? JSON.parse(p.types) : 'Normal';
+      } catch {
+        types = p.types || 'Normal';
+      }
+      const firstType = Array.isArray(types) ? (types[0] || 'Normal') : (typeof types === 'string' ? types : 'Normal');
       const secondType = Array.isArray(types) && types.length > 1 ? types[1] : null;
       
       const base: Record<string, unknown> = {

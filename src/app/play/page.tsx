@@ -432,12 +432,12 @@ export default function PlayPage() {
                           <div className="pokemon-select-info">
                             <span className="pokemon-select-name">{poke.name}</span>
                             <span className="pokemon-select-type" style={{ backgroundColor: getTypeColor(poke.type) }}>
-                              {poke.type}
+                              {poke.type || 'Normal'}
                             </span>
                           </div>
                           <div className="pokemon-select-stats">
-                            <span>❤️ {poke.health} HP</span>
-                            <span>⚔️ {poke.moves.length} Moves</span>
+                            <span>❤️ {poke.health || 100} HP</span>
+                            <span>⚔️ {poke.moves?.length || 0} Moves</span>
                           </div>
                         </div>
                       ))}
