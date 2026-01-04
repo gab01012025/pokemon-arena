@@ -104,6 +104,33 @@ export default function PlayPage() {
     };
   }, [gameMode, wsLeaveQueue]);
 
+  // Helper function to extract type from various formats
+  const extractType = (pokemon: Record<string, unknown>): string => {
+    // If type is already a string, use it
+    if (typeof pokemon.type === 'string' && pokemon.type) {
+      return pokemon.type;
+    }
+    // If types is a JSON string like "[\"Water\"]"
+    if (typeof pokemon.types === 'string') {
+      try {
+        const parsed = JSON.parse(pokemon.types);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed[0];
+        }
+        return pokemon.types;
+      } catch {
+        // types might be "Water,Fire" format
+        const first = pokemon.types.split(',')[0];
+        return first || 'Normal';
+      }
+    }
+    // If types is an array
+    if (Array.isArray(pokemon.types) && pokemon.types.length > 0) {
+      return pokemon.types[0];
+    }
+    return 'Normal';
+  };
+
   // Fetch available Pokemon
   useEffect(() => {
     async function fetchPokemon() {
@@ -111,7 +138,14 @@ export default function PlayPage() {
         const res = await fetch('/api/pokemon');
         if (res.ok) {
           const data = await res.json();
-          setPokemon(data);
+          // Transform data to ensure type field exists
+          const transformed = data.map((p: Record<string, unknown>) => ({
+            ...p,
+            type: extractType(p),
+            health: p.health || 100,
+            moves: p.moves || [],
+          }));
+          setPokemon(transformed);
         }
       } catch {
         console.error('Failed to fetch Pokemon');

@@ -79,6 +79,30 @@ const IMAGE_MAP: Record<string, string> = {
   'alakazam': '/images/pokemon/alakazam.webp',
 };
 
+// Helper function to normalize types from API
+const normalizeTypes = (pokemon: Record<string, unknown>): string => {
+  // If types is already a simple string like "Water,Fire"
+  if (typeof pokemon.types === 'string') {
+    // Check if it's a JSON string like "[\"Water\"]"
+    if (pokemon.types.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(pokemon.types);
+        if (Array.isArray(parsed)) {
+          return parsed.join(',');
+        }
+      } catch {
+        // Not valid JSON, use as is
+      }
+    }
+    return pokemon.types;
+  }
+  // If types is an array
+  if (Array.isArray(pokemon.types)) {
+    return pokemon.types.join(',');
+  }
+  return 'Normal';
+};
+
 export default function SelectTeamPage() {
   const router = useRouter();
   const [starters, setStarters] = useState<Pokemon[]>([]);
@@ -97,7 +121,12 @@ export default function SelectTeamPage() {
         const res = await fetch('/api/pokemon?starters=true&includeMoves=true');
         if (res.ok) {
           const data = await res.json();
-          setStarters(data);
+          // Normalize types from API response
+          const normalized = data.map((p: Record<string, unknown>) => ({
+            ...p,
+            types: normalizeTypes(p),
+          }));
+          setStarters(normalized);
         }
       } catch {
         setError('Falha ao carregar Pokémon');
