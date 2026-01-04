@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PokemonSprite } from '@/components/PokemonSprite';
 import { getTypeColor } from '@/lib/pokemon-images';
+import { useBattleAnimations, BattleAnimationManager, TurnTransition } from '@/components/battle/BattleAnimations';
 
 interface Pokemon {
   id: number;
@@ -74,6 +75,10 @@ export default function AIBattlePage() {
   const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
   const [animatingAttack, setAnimatingAttack] = useState(false);
   const [lastDamage, setLastDamage] = useState<{ target: 'player' | 'ai'; amount: number } | null>(null);
+  const [showTurnTransition, setShowTurnTransition] = useState(false);
+  
+  // Battle Animations
+  const { animations, addAnimation, removeAnimation } = useBattleAnimations();
 
   // Carregar time do jogador
   const fetchPlayerTeam = useCallback(async () => {
@@ -239,6 +244,14 @@ export default function AIBattlePage() {
       };
       setAiTeam(newAiTeam);
       
+      // Disparar animação de dano
+      addAnimation({
+        type: damage > 25 ? 'critical' : 'damage',
+        targetId: 'ai-pokemon',
+        value: damage,
+        duration: 1000,
+      });
+      
       // Atualizar cooldown
       const newPlayerTeam = [...playerTeam];
       newPlayerTeam[activePokemonIndex] = {
@@ -262,6 +275,14 @@ export default function AIBattlePage() {
       
       // Verificar se o Pokémon da AI foi derrotado
       if (newAiTeam[aiActivePokemonIndex].currentHp <= 0) {
+        // Animação de morte
+        addAnimation({
+          type: 'death',
+          targetId: 'ai-pokemon',
+          text: newAiTeam[aiActivePokemonIndex].name,
+          duration: 1500,
+        });
+        
         addLog({
           turn,
           attacker: '',
@@ -366,6 +387,14 @@ export default function AIBattlePage() {
         currentHp: Math.max(0, newPlayerTeam[activePokemonIndex].currentHp - damage),
       };
       
+      // Disparar animação de dano no jogador
+      addAnimation({
+        type: damage > 25 ? 'critical' : 'damage',
+        targetId: 'player-pokemon',
+        value: damage,
+        duration: 1000,
+      });
+      
       // Atualizar cooldown da AI
       const newAiTeam = [...aiTeam];
       newAiTeam[aiActivePokemonIndex] = {
@@ -390,6 +419,14 @@ export default function AIBattlePage() {
       
       // Verificar se o Pokémon do jogador foi derrotado
       if (newPlayerTeam[activePokemonIndex].currentHp <= 0) {
+        // Animação de morte
+        addAnimation({
+          type: 'death',
+          targetId: 'player-pokemon',
+          text: playerPokemon.name,
+          duration: 1500,
+        });
+        
         addLog({
           turn,
           attacker: '',
@@ -583,8 +620,22 @@ export default function AIBattlePage() {
 
         {/* Arena de batalha */}
         <div className="battle-arena">
+          {/* Overlay de Animações */}
+          <BattleAnimationManager 
+            animations={animations} 
+            onAnimationComplete={removeAnimation}
+          />
+          
+          {/* Transição de Turno */}
+          {showTurnTransition && (
+            <TurnTransition 
+              turn={turn} 
+              onComplete={() => setShowTurnTransition(false)}
+            />
+          )}
+          
           {/* Lado do Jogador */}
-          <div className={`battle-side player ${lastDamage?.target === 'player' ? 'pokemon-damaged' : ''}`}>
+          <div id="player-pokemon" className={`battle-side player ${lastDamage?.target === 'player' ? 'pokemon-damaged' : ''}`}>
             <div className="pokemon-display">
               <PokemonSprite
                 name={activePokemon?.name || ''}
@@ -645,7 +696,7 @@ export default function AIBattlePage() {
           </div>
 
           {/* Lado da AI */}
-          <div className={`battle-side ai ${lastDamage?.target === 'ai' ? 'pokemon-damaged' : ''}`}>
+          <div id="ai-pokemon" className={`battle-side ai ${lastDamage?.target === 'ai' ? 'pokemon-damaged' : ''}`}>
             <div className="pokemon-display">
               <PokemonSprite
                 name={aiActivePokemon?.name || ''}
