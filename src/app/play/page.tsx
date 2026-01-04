@@ -10,13 +10,13 @@ import { useGameSocket } from '@/hooks/useGameSocket';
 interface Pokemon {
   id: string;
   name: string;
-  type: string;
-  secondaryType: string | null;
-  health: number;
-  imageUrl: string | null;
-  isStarter: boolean;
-  isUnlockable: boolean;
-  moves: { id: string; name: string }[];
+  type?: string;
+  secondaryType?: string | null;
+  health?: number;
+  imageUrl?: string | null;
+  isStarter?: boolean;
+  isUnlockable?: boolean;
+  moves?: { id: string; name: string }[];
 }
 
 interface UserData {

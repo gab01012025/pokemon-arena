@@ -164,6 +164,7 @@ export default function SelectTeamPage() {
   };
 
   const getTypeColor = (types: string) => {
+    if (!types) return '#777';
     const firstType = types.split(',')[0]?.toLowerCase() || 'normal';
     return TYPE_COLORS[firstType] || '#777';
   };
@@ -252,7 +253,7 @@ export default function SelectTeamPage() {
                       <div className="slot-info">
                         <span className="slot-name">{pokemon.name}</span>
                         <div className="slot-types">
-                          {pokemon.types.split(',').filter(t => t).map((type, i) => (
+                          {(pokemon.types || 'Normal').split(',').filter(t => t).map((type, i) => (
                             <span key={i} className="mini-type" style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}>
                               {TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'}
                             </span>
@@ -408,7 +409,7 @@ export default function SelectTeamPage() {
               <h3 className="detail-name">{displayPokemon.name}</h3>
               
               <div className="detail-types">
-                {displayPokemon.types.split(',').filter(t => t).map((type, i) => (
+                {(displayPokemon.types || 'Normal').split(',').filter(t => t).map((type, i) => (
                   <span 
                     key={i} 
                     className="detail-type-badge"
