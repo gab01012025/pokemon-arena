@@ -1,196 +1,213 @@
-/* Battle Arena - Naruto Arena Exact Clone */
+/* Naruto Arena Clone - Exact CSS */
 
-.battle-arena {
-  min-height: 100vh;
-  background: url('/images/pokemon-battle.webp') center center / cover no-repeat;
-  background-color: #2d5a27;
-  position: relative;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
   overflow: hidden;
 }
 
-.battle-arena::before {
-  content: '';
+/* Main battle container */
+.naruto-battle {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, #87CEEB 0%, #4a9d5f 40%, #2d5a27 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+/* Background forest/scenery */
+.battle-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('/images/pokemon-battle.webp') center center / cover no-repeat;
+  opacity: 0.7;
+  z-index: 0;
+}
+
+/* Top header bar */
+.battle-header {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.5) 100%);
-  pointer-events: none;
-}
-
-/* ============ TOP BAR - Header with players ============ */
-.top-bar {
+  height: 80px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 10px 20px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+  align-items: center;
+  padding: 0 30px;
+  z-index: 10;
 }
 
 .player-info {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.player-info.right {
-  flex-direction: row-reverse;
+  gap: 15px;
 }
 
 .player-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 5px;
-  border: 2px solid #8B0000;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #8B0000;
   object-fit: cover;
 }
 
-.player-details {
-  color: #fff;
-  text-shadow: 1px 1px 2px #000;
-}
-
 .player-name {
+  color: #FF6B6B;
+  font-size: 1.2rem;
   font-weight: bold;
-  font-size: 1.1rem;
-  color: #ffd700;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 3px #000;
 }
 
-.player-rank {
-  font-size: 0.85rem;
-  color: #ccc;
+.ai-name {
+  color: #6B9FFF;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 3px #000;
 }
 
-/* Center section - Turn info and chakra */
-.turn-section {
+/* Turn indicator */
+.turn-indicator {
   text-align: center;
   color: #fff;
 }
 
 .turn-status {
+  font-size: 1.1rem;
   font-weight: bold;
-  font-size: 1rem;
-  margin-bottom: 5px;
-  color: #ffd700;
-}
-
-.health-bar-main {
-  width: 200px;
-  height: 12px;
-  background: #333;
-  border: 2px solid #8B0000;
-  border-radius: 2px;
-  margin: 0 auto 10px;
-  overflow: hidden;
-}
-
-.health-bar-fill {
-  height: 100%;
-  background: linear-gradient(180deg, #ff6666 0%, #cc0000 50%, #990000 100%);
-  transition: width 0.3s;
+  color: #FFD700;
+  text-shadow: 2px 2px 3px #000;
+  margin-bottom: 8px;
 }
 
 /* Chakra display */
-.chakra-display {
+.chakra-bar {
   display: flex;
+  gap: 10px;
   justify-content: center;
-  gap: 8px;
-  margin-top: 5px;
+  align-items: center;
 }
 
 .chakra-item {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 0.9rem;
-}
-
-.chakra-orb {
-  width: 18px;
-  height: 18px;
+  gap: 5px;
+  background: rgba(0,0,0,0.5);
+  padding: 3px 8px;
   border-radius: 3px;
-  border: 1px solid rgba(0,0,0,0.5);
 }
 
-.chakra-orb.fire { background: linear-gradient(135deg, #ff6b6b, #cc0000); }
-.chakra-orb.water { background: linear-gradient(135deg, #6b9fff, #0066cc); }
-.chakra-orb.grass { background: linear-gradient(135deg, #7ac74c, #228b22); }
-.chakra-orb.electric { background: linear-gradient(135deg, #fff06b, #f7d02c); }
-.chakra-orb.random { background: linear-gradient(135deg, #ffffff, #cccccc); }
+.chakra-square {
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(0,0,0,0.8);
+  display: inline-block;
+}
+
+.chakra-square.green { background: #7AC74C; }
+.chakra-square.red { background: #EE8130; }
+.chakra-square.blue { background: #6390F0; }
+.chakra-square.yellow { background: #F7D02C; }
+.chakra-square.white { background: #FFFFFF; }
 
 .chakra-count {
   color: #fff;
+  font-size: 0.9rem;
   font-weight: bold;
-  text-shadow: 1px 1px 1px #000;
 }
 
-/* ============ MAIN BATTLE AREA ============ */
-.battle-field {
+/* Main battle area */
+.battle-main {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 200px;
   display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  min-height: 500px;
+  z-index: 5;
 }
 
-/* Character columns */
+/* Team columns */
 .team-column {
+  width: 350px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  width: 280px;
-}
-
-/* Character card - Naruto Arena style */
-.character-card {
-  display: flex;
-  align-items: stretch;
-  background: linear-gradient(180deg, #4a1a1a 0%, #2a0a0a 100%);
-  border: 3px solid #8B0000;
-  border-radius: 5px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.character-card:hover {
-  border-color: #ff4444;
-  transform: scale(1.02);
-}
-
-.character-card.dead {
-  opacity: 0.5;
-  filter: grayscale(0.8);
-}
-
-.character-card.selected {
-  border-color: #ffd700;
-  box-shadow: 0 0 10px #ffd700;
-}
-
-/* Portrait section */
-.char-portrait {
-  width: 80px;
-  min-height: 90px;
-  position: relative;
-  background: #1a1a1a;
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.char-portrait img {
-  width: 75px;
-  height: 75px;
-  object-fit: contain;
+.team-column.left {
+  padding-left: 30px;
 }
 
-.char-hp-bar {
+.team-column.right {
+  padding-right: 30px;
+}
+
+/* Character card - HORIZONTAL LAYOUT */
+.char-card {
+  display: flex;
+  background: linear-gradient(90deg, #1a0a0a 0%, #2a0a0a 40%, #1a0a0a 100%);
+  border: 3px solid #8B0000;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+.char-card:hover {
+  border-color: #FF4444;
+  transform: scale(1.02);
+}
+
+.char-card.selected {
+  border-color: #FFD700;
+  box-shadow: 0 0 15px #FFD700;
+}
+
+.char-card.dead {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+/* Portrait section - LEFT SIDE */
+.char-portrait {
+  width: 90px;
+  height: 90px;
+  position: relative;
+  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+  border-right: 2px solid #8B0000;
+  flex-shrink: 0;
+}
+
+.char-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+
+/* HP Bar over portrait */
+.char-hp {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 16px;
+  height: 20px;
   background: #000;
   display: flex;
   align-items: center;
@@ -201,8 +218,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, #44cc44 0%, #228822 100%);
+  height: 100%;
+  background: linear-gradient(90deg, #44dd44 0%, #228822 100%);
   transition: width 0.3s;
 }
 
@@ -210,88 +227,81 @@
   position: relative;
   z-index: 1;
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: bold;
-  text-shadow: 1px 1px 1px #000;
+  text-shadow: 1px 1px 2px #000;
 }
 
-/* Skills section */
+/* Skills section - RIGHT SIDE */
 .char-skills {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 3px;
-  padding: 5px;
   flex: 1;
-  background: rgba(0,0,0,0.3);
+  display: flex;
+  gap: 5px;
+  padding: 8px;
+  align-items: center;
 }
 
-.skill-icon {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
-  border: 2px solid #666;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Skill button */
+.skill-btn {
+  width: 65px;
+  height: 65px;
+  background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+  border: 2px solid #555;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s;
   position: relative;
   overflow: hidden;
+  transition: all 0.15s;
 }
 
-.skill-icon:hover:not(.disabled):not(.cooldown) {
-  border-color: #ffd700;
+.skill-btn:hover:not(.disabled):not(.on-cooldown) {
+  border-color: #FFD700;
   transform: scale(1.1);
   z-index: 10;
 }
 
-.skill-icon.selected {
-  border-color: #00ff00;
-  box-shadow: 0 0 8px #00ff00;
+.skill-btn.selected {
+  border-color: #00FF00;
+  box-shadow: 0 0 10px #00FF00;
 }
 
-.skill-icon.queued {
-  border-color: #ff8800;
-  box-shadow: 0 0 8px #ff8800;
-  background: linear-gradient(180deg, #664400 0%, #442200 100%);
+.skill-btn.queued {
+  border-color: #FF8800;
+  box-shadow: 0 0 10px #FF8800;
+  background: linear-gradient(135deg, #664400 0%, #442200 100%);
 }
 
-.skill-icon.disabled {
-  opacity: 0.4;
+.skill-btn.disabled {
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-.skill-icon.cooldown {
-  opacity: 0.6;
+.skill-btn.on-cooldown {
+  opacity: 0.5;
   cursor: not-allowed;
-  background: linear-gradient(180deg, #333 0%, #111 100%);
+  background: linear-gradient(135deg, #222 0%, #000 100%);
 }
 
-.skill-icon img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
+.skill-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.skill-icon .cooldown-number {
+.skill-cooldown {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 20px;
+  font-size: 28px;
   font-weight: bold;
-  color: #ff4444;
-  text-shadow: 2px 2px 2px #000;
+  color: #FF4444;
+  text-shadow: 2px 2px 4px #000;
+  z-index: 2;
 }
 
-.skill-icon .question-mark {
-  font-size: 24px;
-  color: #888;
-}
-
-/* Center character display */
-.center-display {
+/* Center display - Character showcase */
+.battle-center {
   flex: 1;
   display: flex;
   align-items: center;
@@ -299,195 +309,198 @@
   position: relative;
 }
 
-.center-character {
-  max-height: 400px;
-  max-width: 300px;
+.center-char {
+  max-width: 450px;
+  max-height: 450px;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.9));
+  animation: float 3s ease-in-out infinite;
 }
 
-/* ============ BOTTOM BAR ============ */
-.bottom-bar {
-  position: fixed;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* Bottom control panel */
+.battle-footer {
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, #4a1a1a 0%, #2a0a0a 100%);
+  height: 200px;
+  background: linear-gradient(180deg, rgba(26,10,10,0.95) 0%, rgba(0,0,0,0.98) 100%);
   border-top: 3px solid #8B0000;
-  padding: 15px 20px;
   display: flex;
+  padding: 15px 20px;
   gap: 20px;
+  z-index: 10;
 }
 
-/* Surrender / Chat section */
-.bottom-left {
+/* Left controls */
+.footer-left {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-width: 150px;
+  width: 150px;
 }
 
-.surrender-btn {
-  background: linear-gradient(180deg, #666 0%, #333 100%);
-  border: 2px solid #888;
+.control-btn {
+  padding: 12px;
+  border: 2px solid #555;
+  background: linear-gradient(135deg, #444 0%, #222 100%);
   color: #fff;
-  padding: 8px 15px;
   font-weight: bold;
+  border-radius: 5px;
   cursor: pointer;
-  border-radius: 3px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-size: 0.9rem;
 }
 
-.surrender-btn:hover {
-  background: linear-gradient(180deg, #888 0%, #555 100%);
+.control-btn:hover {
+  background: linear-gradient(135deg, #666 0%, #444 100%);
+  border-color: #888;
 }
 
-.chat-btn {
-  background: linear-gradient(180deg, #446644 0%, #224422 100%);
-  border: 2px solid #558855;
-  color: #fff;
-  padding: 8px 15px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 3px;
+.control-btn.chat {
+  background: linear-gradient(135deg, #446644 0%, #224422 100%);
+  border-color: #558855;
 }
 
-/* Skill tooltip */
+.control-btn.chat:hover {
+  background: linear-gradient(135deg, #558855 0%, #336633 100%);
+}
+
+/* Skill tooltip - CENTER */
 .skill-tooltip {
   flex: 1;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.7);
   border: 2px solid #8B0000;
-  border-radius: 5px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 20px;
   color: #fff;
 }
 
-.skill-tooltip-title {
-  font-size: 1.2rem;
+.tooltip-title {
+  font-size: 1.4rem;
   font-weight: bold;
-  color: #ffd700;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.skill-tooltip-desc {
-  font-size: 0.95rem;
-  line-height: 1.4;
+  color: #FFD700;
   margin-bottom: 10px;
-}
-
-.skill-tooltip-desc .highlight {
-  color: #ff6666;
-  font-weight: bold;
-}
-
-.skill-tooltip-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #aaa;
-}
-
-.skill-tooltip-classes {
   text-transform: uppercase;
 }
 
-.skill-tooltip-cooldown {
-  color: #ff6666;
+.tooltip-desc {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  color: #ddd;
 }
 
-/* Energy cost display */
-.skill-tooltip-energy {
+.tooltip-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 0.9rem;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.tooltip-meta span {
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
-.energy-label {
-  color: #aaa;
+.tooltip-energy {
+  color: #FFD700;
 }
 
-.energy-orbs {
-  display: flex;
-  gap: 3px;
+.tooltip-cooldown {
+  color: #FF6B6B;
 }
 
-.energy-orb-small {
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-/* ============ READY BUTTON ============ */
-.ready-section {
+/* Right controls - Ready button */
+.footer-right {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  min-width: 180px;
+  width: 180px;
 }
 
 .ready-btn {
-  background: linear-gradient(180deg, #44aa44 0%, #226622 100%);
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #44aa44 0%, #226622 100%);
   border: 3px solid #66cc66;
   color: #fff;
-  padding: 12px 30px;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 5px;
+  transition: all 0.2s;
   text-transform: uppercase;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
 
-.ready-btn:hover {
-  background: linear-gradient(180deg, #55bb55 0%, #338833 100%);
+.ready-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #55bb55 0%, #338833 100%);
+  transform: scale(1.05);
 }
 
 .ready-btn:disabled {
-  background: linear-gradient(180deg, #666 0%, #444 100%);
-  border-color: #888;
+  background: linear-gradient(135deg, #555 0%, #333 100%);
+  border-color: #777;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* ============ SETUP SCREEN ============ */
+.turn-display {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Setup screen */
 .setup-screen {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0a0a1e 0%, #16213e 50%, #0f0f23 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 30px;
-  padding: 20px;
+  gap: 40px;
   color: #fff;
 }
 
 .setup-title {
-  font-size: 2.5rem;
-  color: #ffd700;
-  text-shadow: 2px 2px 4px #000;
+  font-size: 3rem;
+  color: #FFD700;
+  text-shadow: 3px 3px 6px #000;
 }
 
 .team-preview {
   display: flex;
-  gap: 20px;
+  gap: 30px;
 }
 
-.preview-char {
+.preview-card {
   text-align: center;
 }
 
-.preview-char img {
-  width: 100px;
-  height: 100px;
+.preview-card img {
+  width: 120px;
+  height: 120px;
   border-radius: 10px;
   border: 3px solid #8B0000;
   background: #1a1a1a;
+  object-fit: contain;
+  padding: 10px;
 }
 
-.preview-char-name {
-  margin-top: 8px;
+.preview-name {
+  margin-top: 10px;
   font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .difficulty-section {
@@ -495,24 +508,25 @@
 }
 
 .difficulty-section h2 {
-  color: #ffd700;
+  color: #FFD700;
   margin-bottom: 20px;
+  font-size: 1.5rem;
 }
 
-.difficulty-options {
+.difficulty-btns {
   display: flex;
   gap: 20px;
 }
 
 .diff-btn {
+  width: 140px;
+  padding: 20px;
   background: rgba(255,255,255,0.1);
   border: 2px solid transparent;
   border-radius: 10px;
-  padding: 20px 30px;
   cursor: pointer;
   transition: all 0.3s;
   color: #fff;
-  min-width: 120px;
 }
 
 .diff-btn:hover {
@@ -520,90 +534,103 @@
 }
 
 .diff-btn.selected {
-  border-color: #ffd700;
+  border-color: #FFD700;
   background: rgba(255,215,0,0.2);
 }
 
+.diff-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.diff-label {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
 .start-btn {
-  background: linear-gradient(180deg, #44aa44 0%, #226622 100%);
+  padding: 18px 60px;
+  background: linear-gradient(135deg, #44aa44 0%, #226622 100%);
   border: 3px solid #66cc66;
   color: #fff;
-  padding: 15px 50px;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: bold;
-  cursor: pointer;
   border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .start-btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(68,170,68,0.5);
 }
 
 .back-btn {
   background: transparent;
   border: 2px solid #666;
   color: #aaa;
-  padding: 10px 30px;
-  cursor: pointer;
+  padding: 12px 40px;
+  font-size: 1rem;
   border-radius: 20px;
+  cursor: pointer;
 }
 
-/* ============ RESULT SCREEN ============ */
+.back-btn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* Result screen */
 .result-screen {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.9);
 }
 
 .result-modal {
-  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border: 3px solid #8B0000;
-  border-radius: 10px;
-  padding: 40px 60px;
+  border-radius: 15px;
+  padding: 50px 80px;
   text-align: center;
   color: #fff;
 }
 
 .result-modal.victory {
-  border-color: #ffd700;
+  border-color: #FFD700;
 }
 
 .result-modal h1 {
-  font-size: 2.5rem;
-  margin-bottom: 15px;
+  font-size: 3rem;
+  margin-bottom: 20px;
 }
 
 .result-modal.victory h1 {
-  color: #ffd700;
+  color: #FFD700;
 }
 
 .result-modal.defeat h1 {
-  color: #ff4444;
+  color: #FF4444;
 }
 
-.result-buttons {
+.result-btns {
   display: flex;
   gap: 20px;
-  justify-content: center;
   margin-top: 30px;
-}
-
-.result-buttons button {
-  padding: 12px 30px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
+  justify-content: center;
 }
 
 /* Loading */
 .loading-screen {
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a1a1a;
-  color: #ffd700;
-  font-size: 1.5rem;
+  color: #FFD700;
+  font-size: 2rem;
 }

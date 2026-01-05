@@ -4,31 +4,28 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import './battle.css';
 
-// Types
 interface Energy {
-  fire: number;
-  water: number;
-  grass: number;
-  electric: number;
-  random: number;
+  green: number;
+  red: number;
+  blue: number;
+  yellow: number;
+  white: number;
 }
 
 interface Skill {
   id: string;
   name: string;
   description: string;
-  classes: string[];
   cost: Partial<Energy>;
   cooldown: number;
   currentCooldown: number;
-  damage?: number;
+  damage: number;
 }
 
-interface BattleCharacter {
+interface Character {
   id: string;
   slot: number;
   name: string;
-  types: string[];
   health: number;
   maxHealth: number;
   alive: boolean;
@@ -36,52 +33,38 @@ interface BattleCharacter {
 }
 
 type Difficulty = 'easy' | 'normal' | 'hard';
-type GamePhase = 'loading' | 'setup' | 'battle' | 'victory' | 'defeat';
+type Phase = 'loading' | 'setup' | 'battle' | 'victory' | 'defeat';
 
 interface Pokemon {
   id: string;
   name: string;
-  type?: string;
   types?: string | string[];
   health?: number;
   hp?: number;
-  moves?: Move[];
-}
-
-interface Move {
-  id: string;
-  name: string;
-  description?: string;
-  damage?: number;
-  power?: number;
-  cooldown?: number;
-  energyCost?: string;
-  type?: string;
+  moves?: any[];
 }
 
 export default function BattlePage() {
   const router = useRouter();
   
-  const [phase, setPhase] = useState<GamePhase>('loading');
+  const [phase, setPhase] = useState<Phase>('loading');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [turn, setTurn] = useState(1);
-  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   
-  const [playerTeam, setPlayerTeam] = useState<BattleCharacter[]>([]);
-  const [playerEnergy, setPlayerEnergy] = useState<Energy>({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+  const [playerTeam, setPlayerTeam] = useState<Character[]>([]);
+  const [playerEnergy, setPlayerEnergy] = useState<Energy>({ green: 0, red: 0, blue: 0, yellow: 0, white: 1 });
   
-  const [aiTeam, setAiTeam] = useState<BattleCharacter[]>([]);
-  const [aiEnergy, setAiEnergy] = useState<Energy>({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+  const [aiTeam, setAiTeam] = useState<Character[]>([]);
+  const [aiEnergy, setAiEnergy] = useState<Energy>({ green: 0, red: 0, blue: 0, yellow: 0, white: 1 });
   
   const [selectedChar, setSelectedChar] = useState<number | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<{ charIndex: number; skillIndex: number } | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<{ char: BattleCharacter; skill: Skill } | null>(null);
-  const [queuedActions, setQueuedActions] = useState<Array<{ charIndex: number; skillIndex: number; targetIndex: number }>>([]);
+  const [selectedSkill, setSelectedSkill] = useState<{ charIdx: number; skillIdx: number } | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<{ char: Character; skill: Skill } | null>(null);
+  const [queuedActions, setQueuedActions] = useState<Array<{ charIdx: number; skillIdx: number; targetIdx: number }>>([]);
   
-  const [centerChar, setCenterChar] = useState<BattleCharacter | null>(null);
-  const [animating, setAnimating] = useState(false);
+  const [centerChar, setCenterChar] = useState<Character | null>(null);
+  const [isExecuting, setIsExecuting] = useState(false);
 
-  // Load player team
   useEffect(() => {
     loadPlayerTeam();
   }, []);
@@ -92,7 +75,7 @@ export default function BattlePage() {
       if (savedTeam) {
         const parsed = JSON.parse(savedTeam);
         if (Array.isArray(parsed) && parsed.length === 3) {
-          const team = parsed.map((p: Pokemon, idx: number) => createBattleCharacter(p, idx));
+          const team = parsed.map((p: Pokemon, idx: number) => createCharacter(p, idx));
           setPlayerTeam(team);
           setCenterChar(team[0]);
           localStorage.removeItem('selectedTeam');
@@ -114,7 +97,7 @@ export default function BattlePage() {
       }
       
       const team = profile.team.pokemon.map((tp: { pokemon: Pokemon }, idx: number) => 
-        createBattleCharacter(tp.pokemon, idx)
+        createCharacter(tp.pokemon, idx)
       );
       setPlayerTeam(team);
       setCenterChar(team[0]);
@@ -124,62 +107,44 @@ export default function BattlePage() {
     }
   };
 
-  const createBattleCharacter = (pokemon: Pokemon, slot: number): BattleCharacter => {
+  const createCharacter = (pokemon: Pokemon, slot: number): Character => {
     const health = pokemon.health || pokemon.hp || 100;
-    let types: string[] = ['Normal'];
-    
-    if (pokemon.types) {
-      if (Array.isArray(pokemon.types)) {
-        types = pokemon.types;
-      } else if (typeof pokemon.types === 'string') {
-        try {
-          types = JSON.parse(pokemon.types);
-        } catch {
-          types = pokemon.types.split(',').map(t => t.trim());
-        }
-      }
-    } else if (pokemon.type) {
-      types = [pokemon.type];
-    }
-    
-    const primaryType = types[0] || 'Normal';
     
     return {
       id: pokemon.id,
       slot,
       name: pokemon.name,
-      types,
       health,
       maxHealth: health,
       alive: true,
-      skills: (pokemon.moves || []).slice(0, 4).map((m, idx) => createSkill(m, idx, primaryType)),
+      skills: (pokemon.moves || []).slice(0, 4).map((m: any, idx: number) => createSkill(m, idx)),
     };
   };
 
-  const createSkill = (move: Move, index: number, pokemonType: string): Skill => {
+  const createSkill = (move: any, index: number): Skill => {
     const damage = move.damage || move.power || 20;
     let cost: Partial<Energy> = {};
     
     if (move.energyCost) {
       try {
-        cost = JSON.parse(move.energyCost);
+        const parsed = JSON.parse(move.energyCost);
+        // Map pokemon types to naruto chakra
+        if (parsed.grass) cost.green = parsed.grass;
+        if (parsed.fire) cost.red = parsed.fire;
+        if (parsed.water) cost.blue = parsed.water;
+        if (parsed.electric) cost.yellow = parsed.electric;
+        if (parsed.normal || parsed.colorless) cost.white = (parsed.normal || parsed.colorless);
       } catch {
-        cost = { random: 1 };
+        cost = { white: 1 };
       }
     } else {
-      const typeKey = pokemonType.toLowerCase() as keyof Energy;
-      if (['fire', 'water', 'grass', 'electric'].includes(typeKey)) {
-        cost[typeKey] = index === 3 ? 2 : 1;
-      } else {
-        cost.random = index === 3 ? 2 : 1;
-      }
+      cost = { white: index === 3 ? 2 : 1 };
     }
     
     return {
       id: move.id || `skill-${index}`,
       name: move.name,
       description: move.description || `Deals ${damage} damage.`,
-      classes: ['Physical'],
       cost,
       cooldown: move.cooldown || 0,
       currentCooldown: 0,
@@ -197,7 +162,7 @@ export default function BattlePage() {
       const shuffled = available.sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, 3);
       
-      const team = selected.map((p: Pokemon, idx: number) => createBattleCharacter(p, idx + 3));
+      const team = selected.map((p: Pokemon, idx: number) => createCharacter(p, idx + 3));
       setAiTeam(team);
     } catch {
       console.error('Failed to generate AI team');
@@ -208,13 +173,13 @@ export default function BattlePage() {
     await generateAITeam();
     setPhase('battle');
     setTurn(1);
-    setPlayerEnergy({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
-    setAiEnergy({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+    setPlayerEnergy({ green: 0, red: 0, blue: 0, yellow: 0, white: 1 });
+    setAiEnergy({ green: 0, red: 0, blue: 0, yellow: 0, white: 1 });
     generateEnergy();
   };
 
   const generateEnergy = () => {
-    const types: (keyof Energy)[] = ['fire', 'water', 'grass', 'electric'];
+    const types: (keyof Energy)[] = ['green', 'red', 'blue', 'yellow'];
     const pType = types[Math.floor(Math.random() * types.length)];
     setPlayerEnergy(prev => ({ ...prev, [pType]: prev[pType] + 1 }));
     const aType = types[Math.floor(Math.random() * types.length)];
@@ -224,119 +189,95 @@ export default function BattlePage() {
   const canAfford = useCallback((cost: Partial<Energy>, energy: Energy): boolean => {
     let remaining = { ...energy };
     for (const [type, amount] of Object.entries(cost)) {
-      if (type === 'random') continue;
       const typeKey = type as keyof Energy;
       if ((remaining[typeKey] || 0) < (amount || 0)) return false;
       remaining[typeKey] -= amount || 0;
     }
-    const randomNeeded = cost.random || 0;
-    const randomAvailable = remaining.fire + remaining.water + remaining.grass + remaining.electric;
-    return randomAvailable >= randomNeeded;
+    return true;
   }, []);
 
   const spendEnergy = (cost: Partial<Energy>, energy: Energy): Energy => {
     const result = { ...energy };
     for (const [type, amount] of Object.entries(cost)) {
-      if (type === 'random') continue;
       const typeKey = type as keyof Energy;
       result[typeKey] = Math.max(0, (result[typeKey] || 0) - (amount || 0));
-    }
-    let randomNeeded = cost.random || 0;
-    const types: (keyof Energy)[] = ['fire', 'water', 'grass', 'electric'];
-    for (const type of types) {
-      if (randomNeeded <= 0) break;
-      const spend = Math.min(result[type], randomNeeded);
-      result[type] -= spend;
-      randomNeeded -= spend;
     }
     return result;
   };
 
-  const selectSkill = (charIndex: number, skillIndex: number) => {
-    const char = playerTeam[charIndex];
+  const selectSkill = (charIdx: number, skillIdx: number) => {
+    const char = playerTeam[charIdx];
     if (!char.alive) return;
     
-    const skill = char.skills[skillIndex];
+    const skill = char.skills[skillIdx];
     if (!skill || skill.currentCooldown > 0) return;
     if (!canAfford(skill.cost, playerEnergy)) return;
     
-    // If already queued, remove it
-    const existingIdx = queuedActions.findIndex(a => a.charIndex === charIndex && a.skillIndex === skillIndex);
+    const existingIdx = queuedActions.findIndex(a => a.charIdx === charIdx && a.skillIdx === skillIdx);
     if (existingIdx >= 0) {
       setQueuedActions(prev => prev.filter((_, i) => i !== existingIdx));
       setSelectedSkill(null);
       return;
     }
     
-    setSelectedSkill({ charIndex, skillIndex });
+    setSelectedSkill({ charIdx, skillIdx });
+    setSelectedChar(charIdx);
   };
 
-  const selectTarget = (targetIndex: number) => {
+  const selectTarget = (targetIdx: number) => {
     if (!selectedSkill) return;
     
-    const { charIndex, skillIndex } = selectedSkill;
-    const char = playerTeam[charIndex];
-    const skill = char.skills[skillIndex];
+    const { charIdx, skillIdx } = selectedSkill;
+    const char = playerTeam[charIdx];
+    const skill = char.skills[skillIdx];
     
     setPlayerEnergy(prev => spendEnergy(skill.cost, prev));
-    setQueuedActions(prev => [...prev, { charIndex, skillIndex, targetIndex }]);
+    setQueuedActions(prev => [...prev, { charIdx, skillIdx, targetIdx }]);
     setSelectedSkill(null);
   };
 
   const executeActions = async () => {
-    if (animating) return;
-    setAnimating(true);
-    setIsPlayerTurn(false);
+    if (isExecuting) return;
+    setIsExecuting(true);
     
-    // Execute player actions
     for (const action of queuedActions) {
       await executeAction(action, true);
-      await delay(600);
+      await delay(700);
     }
     
-    // Check if AI lost
     if (!aiTeam.some(c => c.alive)) {
       setPhase('victory');
-      setAnimating(false);
+      setIsExecuting(false);
       return;
     }
     
-    // AI turn
     await executeAITurn();
     
-    // Check if player lost
     if (!playerTeam.some(c => c.alive)) {
       setPhase('defeat');
-      setAnimating(false);
+      setIsExecuting(false);
       return;
     }
     
-    // Next turn
     endTurn();
-    setAnimating(false);
-    setIsPlayerTurn(true);
+    setIsExecuting(false);
   };
 
-  const executeAction = async (action: { charIndex: number; skillIndex: number; targetIndex: number }, isPlayer: boolean) => {
-    const attacker = isPlayer ? playerTeam[action.charIndex] : aiTeam[action.charIndex - 3];
-    const defender = action.targetIndex < 3 ? playerTeam[action.targetIndex] : aiTeam[action.targetIndex - 3];
-    const skill = attacker.skills[action.skillIndex];
+  const executeAction = async (action: { charIdx: number; skillIdx: number; targetIdx: number }, isPlayer: boolean) => {
+    const attacker = isPlayer ? playerTeam[action.charIdx] : aiTeam[action.charIdx - 3];
+    const defender = action.targetIdx < 3 ? playerTeam[action.targetIdx] : aiTeam[action.targetIdx - 3];
+    const skill = attacker.skills[action.skillIdx];
     
     if (!attacker.alive || !defender.alive) return;
     
-    // Set center character to defender
     setCenterChar(defender);
     
-    const damage = skill.damage || 20;
-    defender.health = Math.max(0, defender.health - damage);
-    
-    if (defender.health <= 0) {
-      defender.alive = false;
-    }
+    defender.health = Math.max(0, defender.health - skill.damage);
+    if (defender.health <= 0) defender.alive = false;
     
     skill.currentCooldown = skill.cooldown;
     
-    if (action.targetIndex < 3) {
+    if (action.targetIdx < 3) {
       setPlayerTeam([...playerTeam]);
     } else {
       setAiTeam([...aiTeam]);
@@ -363,8 +304,8 @@ export default function BattlePage() {
       
       setAiEnergy(prev => spendEnergy(skill.cost, prev));
       
-      await executeAction({ charIndex: char.slot, skillIndex: skillIdx, targetIndex: target.slot }, false);
-      await delay(600);
+      await executeAction({ charIdx: char.slot, skillIdx, targetIdx: target.slot }, false);
+      await delay(700);
     }
   };
 
@@ -398,30 +339,23 @@ export default function BattlePage() {
     }
   };
 
-  const getSkillEnergyCost = (cost: Partial<Energy>) => {
-    const entries = Object.entries(cost).filter(([, v]) => v && v > 0);
-    if (entries.length === 0) return 'NONE';
-    return entries.map(([type, count]) => `${type.toUpperCase()}: ${count}`).join(', ');
-  };
-
-  // Render character card (Naruto Arena style)
-  const renderCharacterCard = (char: BattleCharacter, isPlayer: boolean) => {
-    const isQueued = (skillIdx: number) => queuedActions.some(a => a.charIndex === char.slot && a.skillIndex === skillIdx);
-    const isSelected = selectedSkill?.charIndex === char.slot;
+  const renderCharCard = (char: Character, isPlayer: boolean) => {
+    const isQueued = (skillIdx: number) => queuedActions.some(a => a.charIdx === char.slot && a.skillIdx === skillIdx);
+    const isSelected = selectedChar === char.slot;
     
     return (
       <div 
         key={char.id}
-        className={`character-card ${!char.alive ? 'dead' : ''} ${isSelected ? 'selected' : ''}`}
+        className={`char-card ${!char.alive ? 'dead' : ''} ${isSelected ? 'selected' : ''}`}
         onClick={() => {
           if (selectedSkill && !isPlayer && char.alive) {
             selectTarget(char.slot);
           } else if (isPlayer) {
             setCenterChar(char);
+            setSelectedChar(char.slot);
           }
         }}
       >
-        {/* Portrait with HP bar */}
         <div className="char-portrait">
           <img 
             src={`/images/pokemon/${char.name.toLowerCase()}.png`}
@@ -430,7 +364,7 @@ export default function BattlePage() {
               (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
             }}
           />
-          <div className="char-hp-bar">
+          <div className="char-hp">
             <div 
               className="char-hp-fill" 
               style={{ width: `${(char.health / char.maxHealth) * 100}%` }}
@@ -439,17 +373,17 @@ export default function BattlePage() {
           </div>
         </div>
         
-        {/* Skills grid */}
         <div className="char-skills">
           {char.skills.map((skill, idx) => {
             const affordable = canAfford(skill.cost, isPlayer ? playerEnergy : aiEnergy);
             const onCooldown = skill.currentCooldown > 0;
             const queued = isQueued(idx);
+            const skillSelected = selectedSkill?.charIdx === char.slot && selectedSkill?.skillIdx === idx;
             
             return (
               <div
                 key={skill.id}
-                className={`skill-icon ${!affordable ? 'disabled' : ''} ${onCooldown ? 'cooldown' : ''} ${queued ? 'queued' : ''} ${selectedSkill?.charIndex === char.slot && selectedSkill?.skillIndex === idx ? 'selected' : ''}`}
+                className={`skill-btn ${!affordable ? 'disabled' : ''} ${onCooldown ? 'on-cooldown' : ''} ${queued ? 'queued' : ''} ${skillSelected ? 'selected' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isPlayer && char.alive) {
@@ -461,17 +395,11 @@ export default function BattlePage() {
                 title={skill.name}
               >
                 {onCooldown ? (
-                  <span className="cooldown-number">{skill.currentCooldown}</span>
+                  <span className="skill-cooldown">{skill.currentCooldown}</span>
                 ) : (
                   <img 
                     src={`/images/pokemon/${char.name.toLowerCase()}.png`}
                     alt={skill.name}
-                    style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      objectFit: 'contain',
-                      filter: queued ? 'brightness(1.2)' : 'none',
-                    }}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
@@ -485,12 +413,10 @@ export default function BattlePage() {
     );
   };
 
-  // Loading screen
   if (phase === 'loading') {
     return <div className="loading-screen">Loading...</div>;
   }
 
-  // Setup screen
   if (phase === 'setup') {
     return (
       <div className="setup-screen">
@@ -498,7 +424,7 @@ export default function BattlePage() {
         
         <div className="team-preview">
           {playerTeam.map(char => (
-            <div key={char.id} className="preview-char">
+            <div key={char.id} className="preview-card">
               <img 
                 src={`/images/pokemon/${char.name.toLowerCase()}.png`}
                 alt={char.name}
@@ -506,48 +432,42 @@ export default function BattlePage() {
                   (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
                 }}
               />
-              <div className="preview-char-name">{char.name}</div>
+              <div className="preview-name">{char.name}</div>
             </div>
           ))}
         </div>
         
         <div className="difficulty-section">
           <h2>Select Difficulty</h2>
-          <div className="difficulty-options">
+          <div className="difficulty-btns">
             {(['easy', 'normal', 'hard'] as Difficulty[]).map(d => (
               <button
                 key={d}
                 className={`diff-btn ${difficulty === d ? 'selected' : ''}`}
                 onClick={() => setDifficulty(d)}
               >
-                <div style={{ fontSize: '2rem', marginBottom: '5px' }}>
+                <div className="diff-icon">
                   {d === 'easy' ? '😊' : d === 'normal' ? '😐' : '😈'}
                 </div>
-                <div style={{ fontWeight: 'bold' }}>{d.charAt(0).toUpperCase() + d.slice(1)}</div>
+                <div className="diff-label">{d.charAt(0).toUpperCase() + d.slice(1)}</div>
               </button>
             ))}
           </div>
         </div>
         
-        <button className="start-btn" onClick={startBattle}>
-          ⚔️ Start Battle
-        </button>
-        
-        <button className="back-btn" onClick={() => router.push('/play')}>
-          ← Back
-        </button>
+        <button className="start-btn" onClick={startBattle}>Start Battle</button>
+        <button className="back-btn" onClick={() => router.push('/play')}>← Back</button>
       </div>
     );
   }
 
-  // Victory/Defeat screen
   if (phase === 'victory' || phase === 'defeat') {
     return (
       <div className="result-screen">
         <div className={`result-modal ${phase}`}>
           <h1>{phase === 'victory' ? '🏆 VICTORY!' : '💔 DEFEAT'}</h1>
-          <p>{phase === 'victory' ? 'Congratulations! You won!' : "Don't give up!"}</p>
-          <div className="result-buttons">
+          <p>{phase === 'victory' ? 'You won!' : "Try again!"}</p>
+          <div className="result-btns">
             <button 
               className="start-btn"
               onClick={() => {
@@ -562,73 +482,62 @@ export default function BattlePage() {
             >
               Play Again
             </button>
-            <button className="back-btn" onClick={() => router.push('/play')}>
-              Back to Menu
-            </button>
+            <button className="back-btn" onClick={() => router.push('/play')}>Menu</button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Battle screen - Naruto Arena layout
   return (
-    <div className="battle-arena">
-      {/* TOP BAR - Player info and chakra */}
-      <div className="top-bar">
-        {/* Player info */}
+    <div className="naruto-battle">
+      <div className="battle-background" />
+      
+      {/* TOP HEADER */}
+      <div className="battle-header">
         <div className="player-info">
           <img 
             src="/images/trainer-avatar.png" 
-            alt="Player"
+            alt="You"
             className="player-avatar"
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
             }}
           />
-          <div className="player-details">
-            <div className="player-name">YOU</div>
-            <div className="player-rank">TRAINER</div>
-          </div>
+          <div className="player-name">YOU</div>
         </div>
         
-        {/* Center - Turn status and chakra */}
-        <div className="turn-section">
+        <div className="turn-indicator">
           <div className="turn-status">
-            {isPlayerTurn ? 'PRESS WHEN READY' : 'OPPONENT TURN...'}
-          </div>
-          <div className="health-bar-main">
-            <div className="health-bar-fill" style={{ width: '100%' }} />
+            {isExecuting ? 'OPPONENT TURN...' : 'PRESS WHEN READY'}
           </div>
           
-          {/* Chakra display */}
-          <div className="chakra-display">
+          <div className="chakra-bar">
             <div className="chakra-item">
-              <div className="chakra-orb grass" />
-              <span className="chakra-count">x{playerEnergy.grass}</span>
+              <span className="chakra-square green" />
+              <span className="chakra-count">x{playerEnergy.green}</span>
             </div>
             <div className="chakra-item">
-              <div className="chakra-orb fire" />
-              <span className="chakra-count">x{playerEnergy.fire}</span>
+              <span className="chakra-square red" />
+              <span className="chakra-count">x{playerEnergy.red}</span>
             </div>
             <div className="chakra-item">
-              <div className="chakra-orb water" />
-              <span className="chakra-count">x{playerEnergy.water}</span>
+              <span className="chakra-square blue" />
+              <span className="chakra-count">x{playerEnergy.blue}</span>
             </div>
             <div className="chakra-item">
-              <div className="chakra-orb electric" />
-              <span className="chakra-count">x{playerEnergy.electric}</span>
+              <span className="chakra-square yellow" />
+              <span className="chakra-count">x{playerEnergy.yellow}</span>
             </div>
             <div className="chakra-item">
-              <div className="chakra-orb random" />
-              <span className="chakra-count">x{playerEnergy.random}</span>
+              <span className="chakra-square white" />
+              <span className="chakra-count">x{playerEnergy.white}</span>
             </div>
           </div>
-          <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '5px' }}>EXCHANGE CHAKRA</div>
         </div>
         
-        {/* AI info */}
-        <div className="player-info right">
+        <div className="player-info">
+          <div className="ai-name">{getAIName().toUpperCase()}</div>
           <img 
             src="/images/trainer-avatar.png" 
             alt="AI"
@@ -637,27 +546,21 @@ export default function BattlePage() {
               (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
             }}
           />
-          <div className="player-details" style={{ textAlign: 'right' }}>
-            <div className="player-name">{getAIName().toUpperCase()}</div>
-            <div className="player-rank">{difficulty.toUpperCase()}</div>
-          </div>
         </div>
       </div>
 
-      {/* MAIN BATTLE FIELD */}
-      <div className="battle-field">
-        {/* Player team - LEFT */}
-        <div className="team-column">
-          {playerTeam.map(char => renderCharacterCard(char, true))}
+      {/* MAIN BATTLE AREA */}
+      <div className="battle-main">
+        <div className="team-column left">
+          {playerTeam.map(char => renderCharCard(char, true))}
         </div>
 
-        {/* Center character display */}
-        <div className="center-display">
+        <div className="battle-center">
           {centerChar && (
             <img 
               src={`/images/pokemon/${centerChar.name.toLowerCase()}.png`}
               alt={centerChar.name}
-              className="center-character"
+              className="center-char"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
               }}
@@ -665,60 +568,51 @@ export default function BattlePage() {
           )}
         </div>
 
-        {/* AI team - RIGHT */}
-        <div className="team-column">
-          {aiTeam.map(char => renderCharacterCard(char, false))}
+        <div className="team-column right">
+          {aiTeam.map(char => renderCharCard(char, false))}
         </div>
       </div>
 
-      {/* BOTTOM BAR - Tooltip and actions */}
-      <div className="bottom-bar">
-        {/* Left - Surrender and chat */}
-        <div className="bottom-left">
-          <button className="surrender-btn">SURRENDER</button>
-          <button className="chat-btn">OPEN CHAT</button>
+      {/* BOTTOM CONTROL PANEL */}
+      <div className="battle-footer">
+        <div className="footer-left">
+          <button className="control-btn">SURRENDER</button>
+          <button className="control-btn chat">OPEN CHAT</button>
         </div>
 
-        {/* Skill tooltip */}
         <div className="skill-tooltip">
           {hoveredSkill ? (
             <>
-              <div className="skill-tooltip-title">{hoveredSkill.skill.name}</div>
-              <div className="skill-tooltip-desc">
-                {hoveredSkill.skill.description}
-              </div>
-              <div className="skill-tooltip-meta">
-                <span className="skill-tooltip-classes">
-                  CLASSES: {hoveredSkill.skill.classes.join(', ')}
+              <div className="tooltip-title">{hoveredSkill.skill.name}</div>
+              <div className="tooltip-desc">{hoveredSkill.skill.description}</div>
+              <div className="tooltip-meta">
+                <span className="tooltip-energy">
+                  ENERGY: {Object.entries(hoveredSkill.skill.cost)
+                    .filter(([, v]) => v && v > 0)
+                    .map(([k, v]) => `${k.toUpperCase()}:${v}`)
+                    .join(', ') || 'NONE'}
                 </span>
-                <span className="skill-tooltip-energy">
-                  <span className="energy-label">ENERGY:</span>
-                  <span>{getSkillEnergyCost(hoveredSkill.skill.cost)}</span>
-                </span>
-                <span className="skill-tooltip-cooldown">
+                <span className="tooltip-cooldown">
                   COOLDOWN: {hoveredSkill.skill.cooldown}
                 </span>
               </div>
             </>
           ) : (
-            <div className="skill-tooltip-title">
+            <div className="tooltip-title">
               {selectedSkill ? 'SELECT A TARGET' : 'HOVER OVER A SKILL'}
             </div>
           )}
         </div>
 
-        {/* Ready button */}
-        <div className="ready-section">
+        <div className="footer-right">
           <button 
             className="ready-btn"
             onClick={executeActions}
-            disabled={animating || queuedActions.length === 0}
+            disabled={isExecuting || queuedActions.length === 0}
           >
-            {animating ? 'EXECUTING...' : `READY (${queuedActions.length})`}
+            {isExecuting ? 'EXECUTING...' : `READY (${queuedActions.length})`}
           </button>
-          <div style={{ color: '#aaa', fontSize: '0.85rem' }}>
-            Turn {turn}
-          </div>
+          <div className="turn-display">Turn {turn}</div>
         </div>
       </div>
     </div>
