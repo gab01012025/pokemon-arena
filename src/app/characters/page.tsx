@@ -1,83 +1,75 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
+import { prisma } from '@/lib/prisma';
 
-const characterCategories = [
-  {
-    name: 'Kanto Region',
-    characters: [
-      { id: 'pikachu', name: 'Pikachu' },
-      { id: 'charizard', name: 'Charizard' },
-      { id: 'bulbasaur', name: 'Bulbasaur' },
-      { id: 'squirtle', name: 'Squirtle' },
-      { id: 'mewtwo', name: 'Mewtwo' },
-      { id: 'mew', name: 'Mew' },
-      { id: 'gengar', name: 'Gengar' },
-      { id: 'alakazam', name: 'Alakazam' },
-      { id: 'machamp', name: 'Machamp' },
-      { id: 'gyarados', name: 'Gyarados' },
-      { id: 'dragonite', name: 'Dragonite' },
-      { id: 'snorlax', name: 'Snorlax' },
-      { id: 'lapras', name: 'Lapras' },
-    ]
-  },
-  {
-    name: 'Team Rocket',
-    characters: [
-      { id: 'giovanni', name: 'Giovanni' },
-      { id: 'meowth', name: 'Meowth' },
-      { id: 'arbok', name: 'Arbok' },
-      { id: 'weezing', name: 'Weezing' },
-      { id: 'persian', name: 'Persian' },
-      { id: 'nidoking', name: 'Nidoking' },
-      { id: 'rhydon', name: 'Rhydon' },
-      { id: 'kangaskhan', name: 'Kangaskhan' },
-      { id: 'dugtrio', name: 'Dugtrio' },
-      { id: 'victreebel', name: 'Victreebel' },
-    ]
-  },
-  {
-    name: 'Johto Region',
-    characters: [
-      { id: 'typhlosion', name: 'Typhlosion' },
-      { id: 'feraligatr', name: 'Feraligatr' },
-      { id: 'meganium', name: 'Meganium' },
-    ]
-  },
-  {
-    name: 'Hoenn Region',
-    characters: [
-      { id: 'blaziken', name: 'Blaziken' },
-      { id: 'swampert', name: 'Swampert' },
-      { id: 'sceptile', name: 'Sceptile' },
-      { id: 'rayquaza', name: 'Rayquaza' },
-      { id: 'groudon', name: 'Groudon' },
-      { id: 'kyogre', name: 'Kyogre' },
-      { id: 'deoxys', name: 'Deoxys' },
-    ]
-  },
-  {
-    name: 'Legendary Pokemon',
-    characters: [
-      { id: 'articuno', name: 'Articuno' },
-      { id: 'zapdos', name: 'Zapdos' },
-      { id: 'moltres', name: 'Moltres' },
-    ]
-  },
-  {
-    name: 'Evolution Forms',
-    characters: [
-      { id: 'pikachu-evolved', name: 'Raichu' },
-      { id: 'charizard-mega', name: 'Mega Charizard' },
-      { id: 'blastoise', name: 'Blastoise' },
-      { id: 'venusaur', name: 'Venusaur' },
-      { id: 'mewtwo-mega', name: 'Mega Mewtwo' },
-      { id: 'gengar-mega', name: 'Mega Gengar' },
-    ]
-  },
-];
+interface Pokemon {
+  id: string;
+  name: string;
+  types: string;
+  category: string;
+  isStarter: boolean;
+  health: number;
+}
 
-export default function CharactersPage() {
+const ENERGY_COLORS: Record<string, string> = {
+  fire: '#EE8130',
+  water: '#6390F0',
+  grass: '#7AC74C',
+  electric: '#F7D02C',
+  flying: '#A98FF3',
+  poison: '#A33EA1',
+  ground: '#E2BF65',
+  rock: '#B6A136',
+  bug: '#A6B91A',
+  ghost: '#735797',
+  steel: '#B7B7CE',
+  psychic: '#F95587',
+  ice: '#96D9D6',
+  dragon: '#6F35FC',
+  dark: '#705746',
+  fairy: '#D685AD',
+  normal: '#A8A77A',
+  fighting: '#C22E28',
+};
+
+export default async function CharactersPage() {
+  // Fetch all pokemon from database
+  const allPokemon = await prisma.pokemon.findMany({
+    orderBy: [
+      { isStarter: 'desc' },
+      { category: 'asc' },
+      { name: 'asc' },
+    ],
+  });
+
+  // Group by category
+  const categories: Record<string, Pokemon[]> = {};
+  
+  for (const pokemon of allPokemon) {
+    const cat = pokemon.category || 'Other';
+    if (!categories[cat]) {
+      categories[cat] = [];
+    }
+    categories[cat].push(pokemon);
+  }
+
+  // Sort categories - Starters first
+  const sortedCategories = Object.entries(categories).sort(([a], [b]) => {
+    if (a === 'Starter') return -1;
+    if (b === 'Starter') return 1;
+    return a.localeCompare(b);
+  });
+
+  const parseType = (types: string): string => {
+    try {
+      const parsed = JSON.parse(types);
+      return Array.isArray(parsed) ? parsed[0] : types;
+    } catch {
+      return types.split(',')[0] || 'Normal';
+    }
+  };
+
   return (
     <div className="page-wrapper">
       <div className="main-container">
@@ -104,70 +96,147 @@ export default function CharactersPage() {
           <h1 className="page-title">Characters</h1>
             
             <div className="content-section">
-              <div className="section-title">All Characters</div>
+              <div className="section-title">All Characters ({allPokemon.length})</div>
               <div className="section-content">
                 <p className="characters-intro">
                   Browse all available characters in Pokemon Arena. Click on a character to view their skills and abilities.
                 </p>
                 
-                {characterCategories.map((category) => (
-                  <div key={category.name} className="character-category-section">
-                    <h3 className="category-header">{category.name}</h3>
-                    <div className="characters-list">
-                      {category.characters.map((char) => (
-                        <Link 
-                          key={char.id} 
-                          href={`/chars/${char.id}`} 
-                          className="character-list-item"
-                        >
-                          <div className="character-avatar">
-                            <img 
-                              src={`/images/pokemon-artwork.jpg`} 
-                              alt={char.name} 
-                            />
-                          </div>
-                          <div className="character-name">{char.name}</div>
-                        </Link>
-                      ))}
+                {sortedCategories.map(([category, pokemonList]) => (
+                  <div key={category} className="character-category-section">
+                    <h3 className="category-header" style={{
+                      color: '#ffd700',
+                      borderBottom: '2px solid #ffd700',
+                      paddingBottom: '10px',
+                      marginBottom: '20px',
+                      marginTop: '30px',
+                    }}>
+                      {category === 'Starter' ? '⭐ Starters (Free)' : category} 
+                      <span style={{ color: '#888', fontSize: '0.9rem', marginLeft: '10px' }}>
+                        ({pokemonList.length})
+                      </span>
+                    </h3>
+                    <div className="characters-list" style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                      gap: '15px',
+                    }}>
+                      {pokemonList.map((pokemon) => {
+                        const primaryType = parseType(pokemon.types);
+                        const typeColor = ENERGY_COLORS[primaryType.toLowerCase()] || '#A8A77A';
+                        
+                        return (
+                          <Link 
+                            key={pokemon.id} 
+                            href={`/chars/${pokemon.name.toLowerCase()}`} 
+                            className="character-list-item"
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              padding: '15px',
+                              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+                              borderRadius: '10px',
+                              border: `2px solid ${typeColor}40`,
+                              textDecoration: 'none',
+                              transition: 'all 0.3s',
+                            }}
+                          >
+                            <div className="character-avatar" style={{
+                              width: '80px',
+                              height: '80px',
+                              borderRadius: '10px',
+                              overflow: 'hidden',
+                              marginBottom: '10px',
+                              background: `${typeColor}20`,
+                            }}>
+                              <img 
+                                src={`/images/pokemon/${pokemon.name.toLowerCase()}.png`} 
+                                alt={pokemon.name}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'contain',
+                                }}
+                              />
+                            </div>
+                            <div className="character-name" style={{
+                              color: '#fff',
+                              fontWeight: 'bold',
+                              textAlign: 'center',
+                              marginBottom: '5px',
+                            }}>
+                              {pokemon.name}
+                            </div>
+                            <div style={{
+                              fontSize: '0.8rem',
+                              color: typeColor,
+                              textTransform: 'capitalize',
+                            }}>
+                              {primaryType}
+                            </div>
+                            <div style={{
+                              fontSize: '0.75rem',
+                              color: '#888',
+                            }}>
+                              ❤️ {pokemon.health} HP
+                            </div>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Character Classes */}
+            {/* Energy Types */}
             <div className="content-section">
-              <div className="section-title">Character Classes</div>
+              <div className="section-title">Energy Types</div>
               <div className="section-content">
-                <div className="classes-grid">
-                  <div className="class-item">
-                    <div className="class-icon bloodline">B</div>
-                    <div className="class-info">
-                      <strong>Bloodline</strong>
-                      <p>Special inherited abilities</p>
+                <div className="classes-grid" style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: '15px',
+                }}>
+                  {Object.entries(ENERGY_COLORS).map(([type, color]) => (
+                    <div key={type} className="class-item" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '10px 15px',
+                      background: `${color}20`,
+                      borderRadius: '8px',
+                      border: `1px solid ${color}40`,
+                    }}>
+                      <div className="class-icon" style={{
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '50%',
+                        backgroundColor: color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        {type === 'fire' ? '🔥' : 
+                         type === 'water' ? '💧' :
+                         type === 'grass' ? '🌿' :
+                         type === 'electric' ? '⚡' :
+                         type === 'psychic' ? '🔮' :
+                         type === 'ghost' ? '👻' :
+                         type === 'dragon' ? '🐲' :
+                         type === 'dark' ? '🌑' :
+                         type === 'fairy' ? '✨' :
+                         type === 'fighting' ? '👊' :
+                         type === 'flying' ? '🪽' :
+                         type === 'ice' ? '❄️' :
+                         type === 'poison' ? '☠️' : '⭐'}
+                      </div>
+                      <div className="class-info">
+                        <strong style={{ color: color, textTransform: 'capitalize' }}>{type}</strong>
+                      </div>
                     </div>
-                  </div>
-                  <div className="class-item">
-                    <div className="class-icon ninjutsu">S</div>
-                    <div className="class-info">
-                      <strong>Special</strong>
-                      <p>Energy-based techniques</p>
-                    </div>
-                  </div>
-                  <div className="class-item">
-                    <div className="class-icon taijutsu">P</div>
-                    <div className="class-info">
-                      <strong>Physical</strong>
-                      <p>Physical combat skills</p>
-                    </div>
-                  </div>
-                  <div className="class-item">
-                    <div className="class-icon genjutsu">St</div>
-                    <div className="class-info">
-                      <strong>Status</strong>
-                      <p>Status effect techniques</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
