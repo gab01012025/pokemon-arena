@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import './naruto-arena.css';
 
 // ==================== TYPES ====================
 interface Pokemon {
@@ -10,9 +9,6 @@ interface Pokemon {
   name: string;
   hp: number;
   maxHp: number;
-  portrait: string;
-  sprite: string;
-  types: string[];
   skills: Skill[];
 }
 
@@ -20,97 +16,86 @@ interface Skill {
   id: string;
   name: string;
   desc: string;
-  power: number;
-  type: string;
+  damage: number;
+  heal: number;
+  defense: number;
+  isSelf: boolean;
+  isArea: boolean;
   cd: number;
   currentCd: number;
-  cost: Record<string, number>;
-  classes: string[];
-  target: 'enemy' | 'self';
+  cost: { tai: number; blood: number; nin: number; gen: number };
 }
 
 interface QueuedAction {
   oderId: string;
   skillId: string;
-  skillType: string;
   targetId: string;
-  targetName: string;
 }
 
-interface Popup {
-  id: string;
-  x: number;
-  y: number;
-  value: number;
-  type: 'damage' | 'heal';
-}
-
-// ==================== POKEMON DATA ====================
-const POKEDATA: Record<string, {
+// ==================== CHARACTER DATA ====================
+const CHARACTERS: Record<string, {
   name: string;
-  types: string[];
   hp: number;
   skills: Omit<Skill, 'currentCd'>[];
 }> = {
   pikachu: {
-    name: 'Pikachu', types: ['electric'], hp: 100,
+    name: 'Pikachu',
+    hp: 100,
     skills: [
-      { id: 'thunderbolt', name: 'Thunderbolt', desc: 'A strong electric blast that deals 35 damage to one enemy.', power: 35, type: 'electric', cd: 0, cost: { electric: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'quick-attack', name: 'Quick Attack', desc: 'A fast attack that deals 20 damage.', power: 20, type: 'normal', cd: 0, cost: { colorless: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
-      { id: 'thunder-wave', name: 'Thunder Wave', desc: 'Stuns one enemy for 1 turn.', power: 0, type: 'electric', cd: 2, cost: { electric: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
-      { id: 'volt-tackle', name: 'Volt Tackle', desc: 'A devastating charge that deals 50 damage.', power: 50, type: 'electric', cd: 3, cost: { electric: 2 }, classes: ['Melee', 'Instant'], target: 'enemy' }
+      { id: 'skill1', name: 'Thunderbolt', desc: 'A powerful electric attack that strikes the opponent with lightning.', damage: 35, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
+      { id: 'skill2', name: 'Quick Attack', desc: 'A fast strike that hits before the enemy can react.', damage: 20, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
+      { id: 'skill3', name: 'Thunder Wave', desc: 'Paralyzes the target, reducing their speed.', damage: 0, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
     ]
   },
   charizard: {
-    name: 'Charizard', types: ['fire'], hp: 120,
+    name: 'Charizard',
+    hp: 120,
     skills: [
-      { id: 'flamethrower', name: 'Flamethrower', desc: 'Breathes intense flames dealing 40 damage.', power: 40, type: 'fire', cd: 0, cost: { fire: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'dragon-claw', name: 'Dragon Claw', desc: 'Slashes with claws dealing 30 damage.', power: 30, type: 'normal', cd: 0, cost: { colorless: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
-      { id: 'fire-spin', name: 'Fire Spin', desc: 'Traps target in fire dealing 15 damage per turn.', power: 15, type: 'fire', cd: 3, cost: { fire: 1, colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
-      { id: 'blast-burn', name: 'Blast Burn', desc: 'The ultimate fire attack dealing 65 damage.', power: 65, type: 'fire', cd: 4, cost: { fire: 2, colorless: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' }
+      { id: 'skill1', name: 'Flamethrower', desc: 'Breathes intense flames that burn the opponent.', damage: 40, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 1, nin: 0, gen: 0 } },
+      { id: 'skill2', name: 'Dragon Claw', desc: 'Slashes the enemy with sharp claws.', damage: 30, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
+      { id: 'skill3', name: 'Fire Blast', desc: 'A devastating fire attack that hits all enemies.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: true, cd: 3, cost: { tai: 0, blood: 2, nin: 0, gen: 0 } },
     ]
   },
   blastoise: {
-    name: 'Blastoise', types: ['water'], hp: 130,
+    name: 'Blastoise',
+    hp: 130,
     skills: [
-      { id: 'hydro-pump', name: 'Hydro Pump', desc: 'Blasts water at high pressure dealing 45 damage.', power: 45, type: 'water', cd: 1, cost: { water: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'water-gun', name: 'Water Gun', desc: 'A basic water attack dealing 25 damage.', power: 25, type: 'water', cd: 0, cost: { water: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'shell-smash', name: 'Shell Smash', desc: 'Boosts attack power for 3 turns.', power: 0, type: 'normal', cd: 4, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' },
-      { id: 'protect', name: 'Protect', desc: 'Becomes invulnerable for 1 turn.', power: 0, type: 'normal', cd: 4, cost: { colorless: 1 }, classes: ['Strategic', 'Invulnerable'], target: 'self' }
+      { id: 'skill1', name: 'Hydro Pump', desc: 'Blasts the enemy with high-pressure water.', damage: 45, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 1, cost: { tai: 0, blood: 0, nin: 2, gen: 0 } },
+      { id: 'skill2', name: 'Water Gun', desc: 'A basic water attack.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
+      { id: 'skill3', name: 'Protect', desc: 'Becomes invulnerable for one turn.', damage: 0, heal: 0, defense: 100, isSelf: true, isArea: false, cd: 4, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
     ]
   },
   venusaur: {
-    name: 'Venusaur', types: ['grass'], hp: 125,
+    name: 'Venusaur',
+    hp: 125,
     skills: [
-      { id: 'solar-beam', name: 'Solar Beam', desc: 'A powerful beam dealing 55 damage.', power: 55, type: 'grass', cd: 2, cost: { grass: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'vine-whip', name: 'Vine Whip', desc: 'Strikes with vines dealing 25 damage.', power: 25, type: 'grass', cd: 0, cost: { grass: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
-      { id: 'poison-powder', name: 'Poison Powder', desc: 'Poisons target dealing 10 damage per turn.', power: 10, type: 'poison', cd: 2, cost: { colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
-      { id: 'synthesis', name: 'Synthesis', desc: 'Restores 35 HP.', power: -35, type: 'grass', cd: 3, cost: { grass: 1 }, classes: ['Strategic'], target: 'self' }
+      { id: 'skill1', name: 'Solar Beam', desc: 'Fires a powerful beam of solar energy.', damage: 55, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 2, gen: 0 } },
+      { id: 'skill2', name: 'Vine Whip', desc: 'Strikes with sharp vines.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
+      { id: 'skill3', name: 'Synthesis', desc: 'Restores HP by absorbing sunlight.', damage: 0, heal: 35, defense: 0, isSelf: true, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
     ]
   },
   gengar: {
-    name: 'Gengar', types: ['ghost'], hp: 90,
+    name: 'Gengar',
+    hp: 90,
     skills: [
-      { id: 'shadow-ball', name: 'Shadow Ball', desc: 'Hurls a shadowy blob dealing 40 damage.', power: 40, type: 'ghost', cd: 0, cost: { colorless: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
-      { id: 'hypnosis', name: 'Hypnosis', desc: 'Puts the target to sleep for 2 turns.', power: 0, type: 'psychic', cd: 3, cost: { colorless: 1 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
-      { id: 'dream-eater', name: 'Dream Eater', desc: 'Eats dreams dealing 50 damage.', power: 50, type: 'psychic', cd: 2, cost: { colorless: 2 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
-      { id: 'curse', name: 'Curse', desc: 'Curses target to lose HP each turn.', power: 0, type: 'ghost', cd: 4, cost: { colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' }
+      { id: 'skill1', name: 'Shadow Ball', desc: 'Hurls a shadowy blob at the enemy.', damage: 40, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
+      { id: 'skill2', name: 'Hypnosis', desc: 'Puts the enemy to sleep.', damage: 0, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
+      { id: 'skill3', name: 'Dream Eater', desc: 'Eats the dreams of a sleeping enemy.', damage: 50, heal: 25, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
     ]
   },
   mewtwo: {
-    name: 'Mewtwo', types: ['psychic'], hp: 110,
+    name: 'Mewtwo',
+    hp: 110,
     skills: [
-      { id: 'psychic', name: 'Psychic', desc: 'A powerful psychic attack dealing 45 damage.', power: 45, type: 'psychic', cd: 0, cost: { colorless: 2 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
-      { id: 'barrier', name: 'Barrier', desc: 'Reduces damage taken by 50% for 2 turns.', power: 0, type: 'psychic', cd: 3, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' },
-      { id: 'psystrike', name: 'Psystrike', desc: 'A devastating psychic blow dealing 55 damage.', power: 55, type: 'psychic', cd: 2, cost: { colorless: 3 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
-      { id: 'recover', name: 'Recover', desc: 'Restores 40 HP.', power: -40, type: 'normal', cd: 3, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' }
+      { id: 'skill1', name: 'Psychic', desc: 'A powerful psychic attack.', damage: 45, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
+      { id: 'skill2', name: 'Barrier', desc: 'Creates a defensive barrier.', damage: 0, heal: 0, defense: 50, isSelf: true, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
+      { id: 'skill3', name: 'Psystrike', desc: 'The ultimate psychic attack.', damage: 65, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 3 } },
     ]
   }
 };
 
-const ALL_POKEMON = Object.keys(POKEDATA);
+const ALL_CHARS = Object.keys(CHARACTERS);
 
-// ==================== HELPERS ====================
 function getPokeNum(id: string): number {
   const nums: Record<string, number> = {
     pikachu: 25, charizard: 6, blastoise: 9, venusaur: 3, gengar: 94, mewtwo: 150
@@ -118,536 +103,804 @@ function getPokeNum(id: string): number {
   return nums[id] || 25;
 }
 
-function getPortrait(id: string): string {
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokeNum(id)}.png`;
+function getCharImage(charId: string): string {
+  const num = getPokeNum(charId);
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${num}.png`;
 }
 
-function getSprite(id: string): string {
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${getPokeNum(id)}.png`;
+function getSkillImage(charId: string, skillNum: number): string {
+  const num = getPokeNum(charId);
+  if (skillNum === 1) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${num}.png`;
+  if (skillNum === 2) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${num}.png`;
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${num}.png`;
 }
 
-function getSkillIcon(type: string): string {
-  const icons: Record<string, string> = {
-    fire: '🔥', water: '💧', grass: '🌿', electric: '⚡',
-    psychic: '🔮', ghost: '👻', poison: '☠️', normal: '⭐'
-  };
-  return icons[type] || '⚔️';
-}
-
-function createPokemon(pokemonId: string, owner: string): Pokemon {
-  const data = POKEDATA[pokemonId] || POKEDATA.pikachu;
+function createChar(charId: string, owner: string): Pokemon {
+  const data = CHARACTERS[charId] || CHARACTERS.pikachu;
   return {
-    id: `${owner}-${pokemonId}-${Math.random().toString(36).slice(2, 6)}`,
+    id: `${owner}-${charId}-${Math.random().toString(36).slice(2, 6)}`,
     name: data.name,
     hp: data.hp,
     maxHp: data.hp,
-    portrait: getPortrait(pokemonId),
-    sprite: getSprite(pokemonId),
-    types: data.types,
     skills: data.skills.map(s => ({ ...s, currentCd: 0 }))
   };
 }
 
-function canAfford(cost: Record<string, number>, energy: Record<string, number>): boolean {
-  let colorlessNeeded = cost.colorless || 0;
-  for (const type of ['fire', 'water', 'grass', 'electric']) {
-    if ((cost[type] || 0) > (energy[type] || 0)) return false;
-  }
-  const extra = Object.entries(energy).reduce((sum, [type, val]) => {
-    if (type === 'colorless') return sum + val;
-    return sum + Math.max(0, val - (cost[type] || 0));
-  }, 0);
-  return extra >= colorlessNeeded;
-}
-
-// ==================== MAIN ====================
-export default function AIBattlePage() {
+// ==================== MAIN COMPONENT ====================
+export default function BattlePage() {
   return (
-    <Suspense fallback={
-      <div className="loading-overlay">
-        <div className="loading-text">Loading Battle...</div>
-        <div className="loading-spinner" />
-      </div>
-    }>
+    <Suspense fallback={<LoadingScreen />}>
       <BattleGame />
     </Suspense>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div style={{
+      width: '100%',
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#1a1a1a',
+      color: '#fff',
+      fontSize: '24px'
+    }}>
+      Loading Battle...
+    </div>
   );
 }
 
 function BattleGame() {
   const router = useRouter();
   const params = useSearchParams();
-  
   const teamParam = params.get('team');
-  const difficulty = params.get('difficulty') || 'normal';
-  
+
+  // State
   const [loading, setLoading] = useState(true);
   const [turn, setTurn] = useState(1);
-  const [timer, setTimer] = useState(100);
-  const [playerTeam, setPlayerTeam] = useState<Pokemon[]>([]);
-  const [enemyTeam, setEnemyTeam] = useState<Pokemon[]>([]);
-  const [energy, setEnergy] = useState({ fire: 1, water: 1, grass: 1, electric: 1, colorless: 2 });
-  const [selectedPoke, setSelectedPoke] = useState<Pokemon | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
-  const [targetMode, setTargetMode] = useState(false);
+  const [timer, setTimer] = useState(30);
+  const [redTeam, setRedTeam] = useState<Pokemon[]>([]);
+  const [blueTeam, setBlueTeam] = useState<Pokemon[]>([]);
+  const [chakra, setChakra] = useState({ tai: 1, blood: 1, nin: 1, gen: 1 });
+  const [selectedSkill, setSelectedSkill] = useState<{char: Pokemon, skill: Skill, charId: string} | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<{char: Pokemon, skill: Skill, charId: string} | null>(null);
   const [queue, setQueue] = useState<QueuedAction[]>([]);
-  const [popups, setPopups] = useState<Popup[]>([]);
   const [gameOver, setGameOver] = useState<'win' | 'lose' | null>(null);
-  const [centerPoke, setCenterPoke] = useState<Pokemon | null>(null);
+  const [volume, setVolume] = useState(50);
+  const [targetMode, setTargetMode] = useState(false);
 
-  // Initialize
+  const [redCharIds, setRedCharIds] = useState<string[]>([]);
+  const [blueCharIds, setBlueCharIds] = useState<string[]>([]);
+
+  // Initialize teams
   useEffect(() => {
     const team = teamParam?.split(',').slice(0, 3) || ['pikachu', 'charizard', 'blastoise'];
     while (team.length < 3) {
-      const r = ALL_POKEMON[Math.floor(Math.random() * ALL_POKEMON.length)];
+      const r = ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)];
       if (!team.includes(r)) team.push(r);
     }
     
-    const pTeam = team.map(id => createPokemon(id, 'p'));
-    setPlayerTeam(pTeam);
-    setCenterPoke(pTeam[0]);
+    setRedCharIds(team);
+    setRedTeam(team.map(id => createChar(id, 'red')));
     
-    const eTeam: string[] = [];
-    while (eTeam.length < 3) {
-      const r = ALL_POKEMON[Math.floor(Math.random() * ALL_POKEMON.length)];
-      if (!eTeam.includes(r)) eTeam.push(r);
+    const enemyIds: string[] = [];
+    while (enemyIds.length < 3) {
+      const r = ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)];
+      if (!enemyIds.includes(r)) enemyIds.push(r);
     }
-    setEnemyTeam(eTeam.map(id => createPokemon(id, 'e')));
+    setBlueCharIds(enemyIds);
+    setBlueTeam(enemyIds.map(id => createChar(id, 'blue')));
     
     setTimeout(() => setLoading(false), 500);
   }, [teamParam]);
 
-  // Timer
+  // Timer countdown
   useEffect(() => {
     if (loading || gameOver) return;
     const interval = setInterval(() => {
-      setTimer(t => {
-        if (t <= 0) return 100;
-        return t - 1;
-      });
-    }, 600);
+      setTimer(t => t > 0 ? t - 1 : 30);
+    }, 1000);
     return () => clearInterval(interval);
   }, [loading, gameOver]);
 
-  // Win/Lose check
+  // Win/lose check
   useEffect(() => {
-    if (playerTeam.length === 0 || enemyTeam.length === 0) return;
-    if (playerTeam.every(p => p.hp <= 0)) setGameOver('lose');
-    else if (enemyTeam.every(p => p.hp <= 0)) setGameOver('win');
-  }, [playerTeam, enemyTeam]);
+    if (redTeam.length === 0 || blueTeam.length === 0) return;
+    if (redTeam.every(p => p.hp <= 0)) setGameOver('lose');
+    else if (blueTeam.every(p => p.hp <= 0)) setGameOver('win');
+  }, [redTeam, blueTeam]);
 
-  const onSkillClick = useCallback((poke: Pokemon, skill: Skill) => {
-    if (skill.currentCd > 0 || poke.hp <= 0 || !canAfford(skill.cost, energy)) return;
-    
-    setSelectedPoke(poke);
-    setSelectedSkill(skill);
-    setCenterPoke(poke);
-    
-    if (skill.target === 'self') {
-      addToQueue(poke, skill, poke);
+  // Skill click handler
+  const onSkillClick = (char: Pokemon, skill: Skill, charId: string) => {
+    if (skill.currentCd > 0 || char.hp <= 0) return;
+    if (skill.cost.tai > chakra.tai || skill.cost.blood > chakra.blood || 
+        skill.cost.nin > chakra.nin || skill.cost.gen > chakra.gen) return;
+
+    setSelectedSkill({ char, skill, charId });
+    setHoveredSkill({ char, skill, charId });
+
+    if (skill.isSelf) {
+      addToQueue(char, skill, char);
     } else {
       setTargetMode(true);
     }
-  }, [energy]);
+  };
 
-  const addToQueue = useCallback((user: Pokemon, skill: Skill, target: Pokemon) => {
-    setQueue(prev => [
-      ...prev.filter(q => q.oderId !== user.id),
-      { oderId: user.id, skillId: skill.id, skillType: skill.type, targetId: target.id, targetName: target.name }
-    ]);
+  // Target click handler
+  const onTargetClick = (target: Pokemon) => {
+    if (!targetMode || !selectedSkill) return;
+    addToQueue(selectedSkill.char, selectedSkill.skill, target);
+  };
+
+  // Add action to queue
+  const addToQueue = (user: Pokemon, skill: Skill, target: Pokemon) => {
+    setChakra(prev => ({
+      tai: prev.tai - skill.cost.tai,
+      blood: prev.blood - skill.cost.blood,
+      nin: prev.nin - skill.cost.nin,
+      gen: prev.gen - skill.cost.gen,
+    }));
+
+    setQueue(prev => [...prev, {
+      oderId: user.id,
+      skillId: skill.id,
+      targetId: target.id
+    }]);
+
     setSelectedSkill(null);
-    setSelectedPoke(null);
     setTargetMode(false);
-  }, []);
+  };
 
-  const onTargetClick = useCallback((target: Pokemon) => {
-    if (!targetMode || !selectedSkill || !selectedPoke) return;
-    addToQueue(selectedPoke, selectedSkill, target);
-  }, [targetMode, selectedSkill, selectedPoke, addToQueue]);
-
-  const removeFromQueue = useCallback((oderId: string) => {
-    setQueue(prev => prev.filter(q => q.oderId !== oderId));
-  }, []);
-
-  const showPopup = useCallback((x: number, y: number, value: number, type: 'damage' | 'heal') => {
-    const id = Math.random().toString(36);
-    setPopups(prev => [...prev, { id, x, y, value, type }]);
-    setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1000);
-  }, []);
-
-  const executeTurn = useCallback(() => {
-    if (gameOver) return;
-    
+  // Pass turn / Execute actions
+  const onPassTurn = () => {
+    // Execute player actions
     queue.forEach(action => {
-      const user = playerTeam.find(p => p.id === action.oderId);
+      const user = [...redTeam, ...blueTeam].find(c => c.id === action.oderId);
       const skill = user?.skills.find(s => s.id === action.skillId);
-      if (!user || !skill || user.hp <= 0) return;
-      
-      let target = skill.target === 'self' 
-        ? user 
-        : enemyTeam.find(p => p.id === action.targetId && p.hp > 0) || enemyTeam.find(p => p.hp > 0);
-      
-      if (!target) return;
-      
-      if (skill.power > 0) {
-        const dmg = Math.floor(skill.power * (0.85 + Math.random() * 0.3));
-        setEnemyTeam(prev => prev.map(p => 
-          p.id === target!.id ? { ...p, hp: Math.max(0, p.hp - dmg) } : p
-        ));
-        showPopup(550 + Math.random() * 100, 150 + Math.random() * 80, dmg, 'damage');
-      } else if (skill.power < 0) {
-        const heal = Math.abs(skill.power);
-        setPlayerTeam(prev => prev.map(p => 
-          p.id === target!.id ? { ...p, hp: Math.min(p.maxHp, p.hp + heal) } : p
-        ));
-        showPopup(150 + Math.random() * 100, 150 + Math.random() * 80, heal, 'heal');
+      const target = [...redTeam, ...blueTeam].find(c => c.id === action.targetId);
+
+      if (user && skill && target) {
+        if (skill.damage > 0) {
+          target.hp = Math.max(0, target.hp - skill.damage);
+        }
+        if (skill.heal > 0) {
+          target.hp = Math.min(target.maxHp, target.hp + skill.heal);
+        }
+        skill.currentCd = skill.cd;
       }
-      
-      setPlayerTeam(prev => prev.map(p => 
-        p.id === user.id ? {
-          ...p,
-          skills: p.skills.map(s => s.id === skill.id ? { ...s, currentCd: s.cd } : s)
-        } : p
-      ));
-      
-      const cost = skill.cost;
-      setEnergy(prev => {
-        const next = { ...prev };
-        for (const [type, amount] of Object.entries(cost)) {
-          if (type !== 'colorless' && next[type as keyof typeof next] !== undefined) {
-            (next as any)[type] -= amount;
+    });
+
+    // AI turn
+    blueTeam.filter(e => e.hp > 0).forEach(enemy => {
+      const availableSkills = enemy.skills.filter(s => s.currentCd === 0);
+      if (availableSkills.length > 0) {
+        const skill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+        const aliveRed = redTeam.filter(r => r.hp > 0);
+        if (aliveRed.length > 0) {
+          const target = skill.isSelf ? enemy : aliveRed[Math.floor(Math.random() * aliveRed.length)];
+          if (skill.damage > 0) {
+            target.hp = Math.max(0, target.hp - skill.damage);
           }
+          if (skill.heal > 0) {
+            target.hp = Math.min(target.maxHp, target.hp + skill.heal);
+          }
+          skill.currentCd = skill.cd;
         }
-        let colorless = cost.colorless || 0;
-        for (const type of ['colorless'] as const) {
-          const used = Math.min(next[type], colorless);
-          next[type] -= used;
-          colorless -= used;
-        }
-        return next;
+      }
+    });
+
+    // Reduce cooldowns
+    [...redTeam, ...blueTeam].forEach(char => {
+      char.skills.forEach(skill => {
+        if (skill.currentCd > 0) skill.currentCd--;
       });
     });
 
-    setTimeout(() => {
-      const aiMod = difficulty === 'easy' ? 0.6 : difficulty === 'hard' ? 1.3 : 1.0;
-      
-      enemyTeam.forEach(enemy => {
-        if (enemy.hp <= 0) return;
-        const skills = enemy.skills.filter(s => s.currentCd === 0 && s.power > 0);
-        if (skills.length === 0) return;
-        
-        const skill = skills[Math.floor(Math.random() * skills.length)];
-        const targets = playerTeam.filter(p => p.hp > 0);
-        if (targets.length === 0) return;
-        
-        const target = targets[Math.floor(Math.random() * targets.length)];
-        const dmg = Math.floor(skill.power * aiMod * (0.85 + Math.random() * 0.3));
-        
-        setPlayerTeam(prev => prev.map(p => 
-          p.id === target.id ? { ...p, hp: Math.max(0, p.hp - dmg) } : p
-        ));
-        showPopup(150 + Math.random() * 100, 150 + Math.random() * 80, dmg, 'damage');
-        
-        setEnemyTeam(prev => prev.map(p => 
-          p.id === enemy.id ? {
-            ...p,
-            skills: p.skills.map(s => s.id === skill.id ? { ...s, currentCd: s.cd } : s)
-          } : p
-        ));
-      });
-      
-      setPlayerTeam(prev => prev.map(p => ({
-        ...p,
-        skills: p.skills.map(s => ({ ...s, currentCd: Math.max(0, s.currentCd - 1) }))
-      })));
-      setEnemyTeam(prev => prev.map(p => ({
-        ...p,
-        skills: p.skills.map(s => ({ ...s, currentCd: Math.max(0, s.currentCd - 1) }))
-      })));
-      
-      setEnergy(prev => ({
-        fire: Math.min(9, prev.fire + 1),
-        water: Math.min(9, prev.water + 1),
-        grass: Math.min(9, prev.grass + 1),
-        electric: Math.min(9, prev.electric + 1),
-        colorless: Math.min(9, prev.colorless + 1)
-      }));
-      
-      setQueue([]);
-      setTurn(t => t + 1);
-      setTimer(100);
-    }, 400);
-  }, [gameOver, queue, playerTeam, enemyTeam, difficulty, showPopup]);
+    // Add chakra
+    setChakra(prev => ({
+      tai: Math.min(9, prev.tai + 1),
+      blood: Math.min(9, prev.blood + 1),
+      nin: Math.min(9, prev.nin + 1),
+      gen: Math.min(9, prev.gen + 1),
+    }));
 
-  const hpClass = (hp: number, max: number) => {
-    const pct = (hp / max) * 100;
-    if (pct <= 25) return 'low';
-    if (pct <= 50) return 'medium';
-    return '';
+    setQueue([]);
+    setTurn(t => t + 1);
+    setTimer(30);
+    setRedTeam([...redTeam]);
+    setBlueTeam([...blueTeam]);
+  };
+
+  // Cancel skill selection
+  const onRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setSelectedSkill(null);
+    setTargetMode(false);
+  };
+
+  // Surrender
+  const onSurrender = () => {
+    setGameOver('lose');
   };
 
   const displaySkill = hoveredSkill || selectedSkill;
 
-  if (loading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-text">Loading Battle...</div>
-        <div className="loading-spinner" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
-  if (gameOver) {
-    return (
-      <div className="gameover-overlay">
-        <div className={`gameover-text ${gameOver}`}>
-          {gameOver === 'win' ? 'VICTORY!' : 'DEFEAT'}
-        </div>
-        <button className="gameover-btn" onClick={() => router.push('/play')}>
-          Return to Menu
-        </button>
-      </div>
-    );
-  }
+  const getHpColor = (hp: number, max: number) => {
+    const pct = hp / max;
+    if (pct > 0.5) return '#22B822';
+    if (pct > 0.25) return '#FFD700';
+    return '#CF1515';
+  };
 
   return (
-    <div className="battle-page">
-      <div className="battle-bg" />
-      
-      {/* TOP BAR */}
-      <div className="top-bar">
-        <div className="player-info">
-          <div className="player-avatar">
-            <img src="https://i.pravatar.cc/100?u=player" alt="Player" />
-          </div>
-          <div className="player-details">
-            <div className="player-name">TRAINER</div>
-            <div className="player-rank">POKEMON MASTER</div>
-          </div>
-        </div>
-        
-        <div className="top-center">
-          <div className="turn-status">
-            {queue.length > 0 ? 'PRESS WHEN READY' : 'YOUR TURN...'}
-          </div>
-          <div className="timer-bar">
-            <div className="timer-fill" style={{ width: `${timer}%` }} />
-          </div>
-          <div className="chakra-display">
-            <div className="chakra-item">
-              <div className="chakra-box fire" />
-              <span className="chakra-count">x{energy.fire}</span>
+    <div 
+      style={{
+        width: '923px',
+        height: '657px',
+        margin: '0 auto',
+        position: 'relative',
+        fontFamily: 'Verdana, sans-serif',
+        overflow: 'hidden',
+        cursor: 'default',
+      }}
+      onContextMenu={onRightClick}
+    >
+      {/* Background */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: 'url(/images/battle/background.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }} />
+
+      {/* ========== RED TEAM (LEFT SIDE) ========== */}
+      {redTeam.map((char, idx) => {
+        const charId = redCharIds[idx];
+        const topMargin = 51 + (idx * 141);
+        const isTargetable = targetMode && selectedSkill && !selectedSkill.skill.isSelf && char.hp > 0;
+
+        return (
+          <div key={char.id}>
+            {/* Scroll Background */}
+            <img
+              src="/images/battle/ScrollExtended2.png"
+              alt=""
+              style={{
+                position: 'absolute',
+                left: '28px',
+                top: `${topMargin}px`,
+                width: '348px',
+                height: '107px',
+              }}
+            />
+
+            {/* Character Portrait */}
+            <img
+              src={getCharImage(charId)}
+              alt={char.name}
+              onClick={() => isTargetable && onTargetClick(char)}
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: `${topMargin}px`,
+                width: '107px',
+                height: '107px',
+                objectFit: 'contain',
+                background: '#1a1a1a',
+                cursor: isTargetable ? 'pointer' : 'default',
+                filter: char.hp <= 0 ? 'grayscale(100%)' : 'none',
+                opacity: char.hp <= 0 ? 0.5 : 1,
+                border: isTargetable ? '3px solid #22B822' : 'none',
+                boxSizing: 'border-box',
+              }}
+            />
+
+            {/* HP Bar */}
+            <div
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: `${topMargin + 112}px`,
+                width: '107px',
+                height: '24px',
+                background: getHpColor(char.hp, char.maxHp),
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '11px',
+              }}
+            >
+              {char.hp}
             </div>
-            <div className="chakra-item">
-              <div className="chakra-box water" />
-              <span className="chakra-count">x{energy.water}</span>
-            </div>
-            <div className="chakra-item">
-              <div className="chakra-box grass" />
-              <span className="chakra-count">x{energy.grass}</span>
-            </div>
-            <div className="chakra-item">
-              <div className="chakra-box electric" />
-              <span className="chakra-count">x{energy.electric}</span>
-            </div>
-            <div className="chakra-item">
-              <div className="chakra-box colorless" />
-              <span className="chakra-count">x{energy.colorless}</span>
-            </div>
-            <button className="exchange-btn">EXCHANGE CHAKRA</button>
+
+            {/* Skills */}
+            {char.skills.map((skill, sIdx) => {
+              const skillLeft = 122 + (sIdx * 82);
+              const skillTop = topMargin + 15;
+              const isSelected = selectedSkill?.skill.id === skill.id && selectedSkill?.char.id === char.id;
+              const isInQueue = queue.some(q => q.oderId === char.id && q.skillId === skill.id);
+              const canUse = skill.currentCd === 0 && char.hp > 0 &&
+                skill.cost.tai <= chakra.tai && skill.cost.blood <= chakra.blood &&
+                skill.cost.nin <= chakra.nin && skill.cost.gen <= chakra.gen;
+
+              return (
+                <img
+                  key={skill.id}
+                  src={getSkillImage(charId, sIdx + 1)}
+                  alt={skill.name}
+                  onClick={() => canUse && onSkillClick(char, skill, charId)}
+                  onMouseEnter={() => setHoveredSkill({ char, skill, charId })}
+                  onMouseLeave={() => setHoveredSkill(null)}
+                  style={{
+                    position: 'absolute',
+                    left: `${skillLeft}px`,
+                    top: `${skillTop}px`,
+                    width: '77px',
+                    height: '77px',
+                    objectFit: 'contain',
+                    background: '#2a2a2a',
+                    border: isSelected ? '3px solid #FFD700' : isInQueue ? '3px solid #22B822' : '2px solid #555',
+                    cursor: canUse ? 'pointer' : 'not-allowed',
+                    opacity: canUse ? 1 : 0.5,
+                    boxSizing: 'border-box',
+                  }}
+                />
+              );
+            })}
+
+            {/* Cooldown overlay */}
+            {char.skills.map((skill, sIdx) => skill.currentCd > 0 && (
+              <div
+                key={`cd-${skill.id}`}
+                style={{
+                  position: 'absolute',
+                  left: `${122 + (sIdx * 82)}px`,
+                  top: `${topMargin + 15}px`,
+                  width: '77px',
+                  height: '77px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  fontSize: '28px',
+                  fontWeight: 'bold',
+                  pointerEvents: 'none',
+                }}
+              >
+                {skill.currentCd}
+              </div>
+            ))}
           </div>
-        </div>
-        
-        <div className="player-info right">
-          <div className="player-avatar">
-            <img src="https://i.pravatar.cc/100?u=ai" alt="AI" />
+        );
+      })}
+
+      {/* ========== BLUE TEAM (RIGHT SIDE) ========== */}
+      {blueTeam.map((char, idx) => {
+        const charId = blueCharIds[idx];
+        const topMargin = 51 + (idx * 141);
+        const isTargetable = targetMode && selectedSkill && !selectedSkill.skill.isSelf && char.hp > 0;
+
+        return (
+          <div key={char.id}>
+            {/* Scroll Background - mirrored */}
+            <img
+              src="/images/battle/ScrollExtended2.png"
+              alt=""
+              style={{
+                position: 'absolute',
+                right: '28px',
+                top: `${topMargin}px`,
+                width: '348px',
+                height: '107px',
+                transform: 'scaleX(-1)',
+              }}
+            />
+
+            {/* Character Portrait */}
+            <img
+              src={getCharImage(charId)}
+              alt={char.name}
+              onClick={() => isTargetable && onTargetClick(char)}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: `${topMargin}px`,
+                width: '107px',
+                height: '107px',
+                objectFit: 'contain',
+                background: '#1a1a1a',
+                cursor: isTargetable ? 'pointer' : 'default',
+                filter: char.hp <= 0 ? 'grayscale(100%)' : 'none',
+                opacity: char.hp <= 0 ? 0.5 : 1,
+                border: isTargetable ? '3px solid #22B822' : 'none',
+                boxSizing: 'border-box',
+                transform: 'scaleX(-1)',
+              }}
+            />
+
+            {/* HP Bar */}
+            <div
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: `${topMargin + 112}px`,
+                width: '107px',
+                height: '24px',
+                background: getHpColor(char.hp, char.maxHp),
+                border: '1px solid black',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '11px',
+              }}
+            >
+              {char.hp}
+            </div>
+
+            {/* Skills */}
+            {char.skills.map((skill, sIdx) => {
+              const skillRight = 122 + (sIdx * 82);
+              const skillTop = topMargin + 15;
+
+              return (
+                <img
+                  key={skill.id}
+                  src={getSkillImage(charId, sIdx + 1)}
+                  alt={skill.name}
+                  style={{
+                    position: 'absolute',
+                    right: `${skillRight}px`,
+                    top: `${skillTop}px`,
+                    width: '77px',
+                    height: '77px',
+                    objectFit: 'contain',
+                    background: '#2a2a2a',
+                    border: '2px solid #555',
+                    opacity: skill.currentCd > 0 || char.hp <= 0 ? 0.5 : 1,
+                    boxSizing: 'border-box',
+                    transform: 'scaleX(-1)',
+                  }}
+                />
+              );
+            })}
+
+            {/* Cooldown overlay */}
+            {char.skills.map((skill, sIdx) => skill.currentCd > 0 && (
+              <div
+                key={`cd-${skill.id}`}
+                style={{
+                  position: 'absolute',
+                  right: `${122 + (sIdx * 82)}px`,
+                  top: `${topMargin + 15}px`,
+                  width: '77px',
+                  height: '77px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  fontSize: '28px',
+                  fontWeight: 'bold',
+                  pointerEvents: 'none',
+                }}
+              >
+                {skill.currentCd}
+              </div>
+            ))}
           </div>
-          <div className="player-details">
-            <div className="player-name">AI TRAINER</div>
-            <div className="player-rank">{difficulty.toUpperCase()}</div>
-          </div>
+        );
+      })}
+
+      {/* ========== TOP BAR - CHAKRA & TIMER ========== */}
+      {/* Timer Progress Bar */}
+      <div style={{
+        position: 'absolute',
+        left: '410px',
+        top: '10px',
+        width: '364px',
+        height: '19px',
+        background: '#E2E1E0',
+        border: '1px solid black',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          width: `${(timer / 30) * 100}%`,
+          height: '100%',
+          background: '#CF1515',
+          transition: 'width 1s linear',
+        }} />
+      </div>
+
+      {/* Chakra Display */}
+      <div style={{ position: 'absolute', left: '410px', top: '36px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ width: '14px', height: '14px', background: '#25B825', border: '1px solid black' }} />
+        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Taijutsu</span>
+        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.tai}</span>
+
+        <div style={{ width: '14px', height: '14px', background: '#CF1515', border: '1px solid black' }} />
+        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Bloodline</span>
+        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.blood}</span>
+
+        <div style={{ width: '14px', height: '14px', background: '#345AC1', border: '1px solid black' }} />
+        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Ninjutsu</span>
+        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.nin}</span>
+
+        <div style={{ width: '14px', height: '14px', background: '#FFFFFF', border: '1px solid black' }} />
+        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Genjutsu</span>
+        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.gen}</span>
+      </div>
+
+      {/* Turn Counter */}
+      <div style={{
+        position: 'absolute',
+        right: '240px',
+        top: '4px',
+        backgroundImage: 'url(/images/battle/ScrollExtended2.png)',
+        backgroundSize: 'cover',
+        padding: '8px 16px',
+        fontWeight: 'bold',
+        fontSize: '20px',
+      }}>
+        Turn: {turn}
+      </div>
+
+      {/* Pass Turn Button */}
+      <div 
+        onClick={onPassTurn}
+        style={{
+          position: 'absolute',
+          right: '10px',
+          top: '10px',
+          width: '201px',
+          height: '37px',
+          backgroundImage: 'url(/images/battle/ScrollExtended2.png)',
+          backgroundSize: 'cover',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 'bold',
+          fontSize: '20px',
+          cursor: 'pointer',
+          transition: 'transform 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        Pass Turn
+      </div>
+
+      {/* ========== BOTTOM PANEL ========== */}
+      <img
+        src="/images/battle/ScrollExtended.png"
+        alt=""
+        style={{
+          position: 'absolute',
+          left: '259px',
+          top: '455px',
+          width: '646px',
+          height: '162px',
+        }}
+      />
+
+      <img
+        src="/images/battle/sasuke.png"
+        alt=""
+        style={{
+          position: 'absolute',
+          left: '165px',
+          top: '451px',
+          width: '171px',
+          height: '175px',
+          objectFit: 'contain',
+        }}
+      />
+
+      {/* Volume Control */}
+      <div style={{
+        position: 'absolute',
+        left: '40px',
+        top: '491px',
+        width: '150px',
+        height: '65px',
+        backgroundImage: 'url(/images/battle/ScrollMedium.png)',
+        backgroundSize: 'cover',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <span style={{ fontWeight: 'bold', fontSize: '12px' }}>Volume</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span 
+            style={{ fontSize: '20px', cursor: 'pointer', fontWeight: 'bold' }}
+            onClick={() => setVolume(v => Math.max(0, v - 10))}
+          >-</span>
+          <span style={{ fontWeight: 'bold', fontSize: '14px', width: '30px', textAlign: 'center' }}>{volume}</span>
+          <span 
+            style={{ fontSize: '20px', cursor: 'pointer', fontWeight: 'bold' }}
+            onClick={() => setVolume(v => Math.min(100, v + 10))}
+          >+</span>
         </div>
       </div>
 
-      {/* MAIN AREA */}
-      <div className="main-area">
-        {/* LEFT TEAM */}
-        <div className="team-col">
-          {playerTeam.map(poke => (
-            <div 
-              key={poke.id}
-              className={`char-row ${poke.hp <= 0 ? 'dead' : ''} ${centerPoke?.id === poke.id ? 'active' : ''}`}
-            >
-              <div className="portrait-section">
-                <div 
-                  className="portrait"
-                  onClick={() => setCenterPoke(poke)}
-                >
-                  <img src={poke.portrait} alt={poke.name} />
-                </div>
-                <div className="hp-bar-container">
-                  <div className="hp-bar">
-                    <div 
-                      className={`hp-fill ${hpClass(poke.hp, poke.maxHp)}`}
-                      style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }}
-                    />
-                    <span className="hp-text">{poke.hp}/{poke.maxHp}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="skills-container">
-                {poke.skills.map(skill => {
-                  const usable = poke.hp > 0 && skill.currentCd === 0 && canAfford(skill.cost, energy);
-                  const isQueued = queue.some(q => q.oderId === poke.id && q.skillId === skill.id);
-                  
-                  return (
-                    <div
-                      key={skill.id}
-                      className={`skill-box ${!usable ? 'disabled' : ''} ${skill.currentCd > 0 ? 'cooldown' : ''} ${isQueued ? 'queued' : ''} ${selectedSkill?.id === skill.id && selectedPoke?.id === poke.id ? 'selected' : ''}`}
-                      onClick={() => usable && onSkillClick(poke, skill)}
-                      onMouseEnter={() => setHoveredSkill(skill)}
-                      onMouseLeave={() => setHoveredSkill(null)}
-                    >
-                      <span className="skill-icon">{getSkillIcon(skill.type)}</span>
-                      {skill.currentCd > 0 && (
-                        <div className="cooldown-num">{skill.currentCd}</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* CENTER */}
-        <div className="center-col">
-          {centerPoke && (
-            <div className="center-pokemon">
-              <img src={centerPoke.sprite} alt={centerPoke.name} />
-            </div>
-          )}
-          
-          {queue.length > 0 && (
-            <div className="action-queue">
-              {queue.map(action => (
-                <div 
-                  key={action.oderId}
-                  className="queue-item"
-                  onClick={() => removeFromQueue(action.oderId)}
-                  title="Click to cancel"
-                >
-                  <span className="queue-icon">{getSkillIcon(action.skillType)}</span>
-                  <span className="queue-target">→ {action.targetName}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* RIGHT TEAM */}
-        <div className="team-col right">
-          {enemyTeam.map(poke => (
-            <div 
-              key={poke.id}
-              className={`char-row right ${poke.hp <= 0 ? 'dead' : ''}`}
-            >
-              <div className="portrait-section">
-                <div 
-                  className={`portrait ${targetMode && poke.hp > 0 ? 'targetable' : ''}`}
-                  onClick={() => targetMode && poke.hp > 0 && onTargetClick(poke)}
-                >
-                  <img src={poke.portrait} alt={poke.name} />
-                </div>
-                <div className="hp-bar-container">
-                  <div className="hp-bar">
-                    <div 
-                      className={`hp-fill ${hpClass(poke.hp, poke.maxHp)}`}
-                      style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }}
-                    />
-                    <span className="hp-text">{poke.hp}/{poke.maxHp}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="skills-container">
-                {poke.skills.map(skill => (
-                  <div key={skill.id} className="skill-box disabled">
-                    <span className="unknown-mark">?</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Surrender Button */}
+      <div 
+        onClick={onSurrender}
+        style={{
+          position: 'absolute',
+          left: '10px',
+          top: '553px',
+          width: '150px',
+          height: '65px',
+          backgroundImage: 'url(/images/battle/ScrollMedium.png)',
+          backgroundSize: 'cover',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          transition: 'transform 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        Surrender
       </div>
 
-      {/* BOTTOM BAR */}
-      <div className="bottom-bar">
-        <div className="bottom-left">
-          <button className="surrender-btn" onClick={() => router.push('/play')}>
-            Surrender
-          </button>
-          <button className="chat-btn">
-            OPEN CHAT <span className="chat-new">(NEW: 2)</span>
-          </button>
-          <div className="volume-section">
-            <span>🔊</span>
-            <input type="range" min="0" max="100" defaultValue="50" />
-          </div>
-        </div>
-        
-        <div className="skill-panel">
-          {displaySkill ? (
-            <>
-              <div className="skill-panel-title">{displaySkill.name}</div>
-              <div className="skill-panel-desc">{displaySkill.desc}</div>
-              <div className="skill-panel-footer">
-                <span className="skill-classes">CLASSES: {displaySkill.classes.join(', ')}</span>
-                <span className="skill-energy">
-                  ENERGY: 
-                  {Object.entries(displaySkill.cost).map(([type, amt]) => (
-                    <span key={type}>
-                      {Array(amt).fill(0).map((_, i) => (
-                        <span key={i} className={`chakra-box ${type}`} />
-                      ))}
-                    </span>
-                  ))}
-                </span>
-                {displaySkill.cd > 0 && (
-                  <span className="skill-cooldown">COOLDOWN: {displaySkill.cd}</span>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="no-skill-msg">
-              Here is a very nice description of the selected skill...
+      {/* Skill Panel */}
+      {displaySkill && (
+        <>
+          <img
+            src={getSkillImage(displaySkill.charId, displaySkill.char.skills.indexOf(displaySkill.skill) + 1)}
+            alt=""
+            style={{
+              position: 'absolute',
+              left: '304px',
+              top: '493px',
+              width: '77px',
+              height: '77px',
+              objectFit: 'contain',
+            }}
+          />
+
+          <div style={{ position: 'absolute', left: '388px', top: '496px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+              <div style={{ width: '14px', height: '14px', background: '#25B825', border: '1px solid black' }} />
+              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.tai}</span>
             </div>
-          )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+              <div style={{ width: '14px', height: '14px', background: '#CF1515', border: '1px solid black' }} />
+              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.blood}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+              <div style={{ width: '14px', height: '14px', background: '#345AC1', border: '1px solid black' }} />
+              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.nin}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ width: '14px', height: '14px', background: '#FFFFFF', border: '1px solid black' }} />
+              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.gen}</span>
+            </div>
+          </div>
+
+          <div style={{
+            position: 'absolute',
+            left: '441px',
+            top: '493px',
+            width: '429px',
+            height: '57px',
+            background: '#C5A8A8',
+            padding: '4px 8px',
+            fontWeight: 'bold',
+            fontSize: '12px',
+            overflow: 'hidden',
+          }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{displaySkill.skill.name}</div>
+            {displaySkill.skill.desc}
+          </div>
+
+          <div style={{
+            position: 'absolute',
+            left: '441px',
+            top: '553px',
+            display: 'flex',
+            gap: '16px',
+            fontSize: '11px',
+            fontWeight: 'bold',
+          }}>
+            <span>Damage: {displaySkill.skill.damage}</span>
+            <span>Heal: {displaySkill.skill.heal}</span>
+            <span>Defense: {displaySkill.skill.defense}</span>
+            <span>Self: {displaySkill.skill.isSelf ? 'Yes' : 'No'}</span>
+            <span>Area: {displaySkill.skill.isArea ? 'Yes' : 'No'}</span>
+          </div>
+        </>
+      )}
+
+      {!displaySkill && (
+        <div style={{
+          position: 'absolute',
+          left: '441px',
+          top: '493px',
+          width: '429px',
+          height: '57px',
+          background: '#C5A8A8',
+          padding: '4px 8px',
+          fontWeight: 'bold',
+          fontSize: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#666',
+        }}>
+          Hover over a skill to see its description...
         </div>
-        
-        <div className="ready-btn-container">
-          <button 
-            className={`ready-btn ${queue.length > 0 ? 'active' : ''}`}
-            onClick={executeTurn}
+      )}
+
+      {/* Game Over */}
+      {gameOver && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+        }}>
+          <h1 style={{
+            fontSize: '64px',
+            color: gameOver === 'win' ? '#22B822' : '#CF1515',
+            textShadow: '2px 2px 4px black',
+            marginBottom: '32px',
+          }}>
+            {gameOver === 'win' ? 'VICTORY!' : 'DEFEAT'}
+          </h1>
+          <button
+            onClick={() => router.push('/play')}
+            style={{
+              padding: '16px 48px',
+              fontSize: '20px',
+              fontWeight: 'bold',
+              background: '#345AC1',
+              color: '#fff',
+              border: '3px solid #1a3a8a',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}
           >
-            {queue.length > 0 ? 'READY' : 'PASS'}
+            Return to Menu
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Popups */}
-      {popups.map(popup => (
-        <div
-          key={popup.id}
-          className={`dmg-popup ${popup.type}`}
-          style={{ left: popup.x, top: popup.y }}
-        >
-          {popup.type === 'damage' ? '-' : '+'}{popup.value}
+      {/* Target mode indicator */}
+      {targetMode && (
+        <div style={{
+          position: 'absolute',
+          top: '240px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.8)',
+          color: '#22B822',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          fontSize: '16px',
+        }}>
+          Click on a target to attack! (Right-click to cancel)
         </div>
-      ))}
+      )}
     </div>
   );
 }
