@@ -6,7 +6,7 @@ import { getPokemonImageUrl, getTypeColor, SpriteType } from '@/lib/pokemon-imag
 
 interface PokemonSpriteProps {
   name: string;
-  pokemonId?: number;
+  pokemonId?: string | number;
   spriteType?: SpriteType;
   size?: 'small' | 'medium' | 'large' | 'xlarge';
   showType?: boolean;
