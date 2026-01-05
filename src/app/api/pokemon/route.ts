@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 4.0.0 - Always include moves for battles
+// API Version 5.0.0 - Fixed moves return with all fields
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v4.0.0 - Starting request');
+  console.log('[API Pokemon] v5.0.0 - Request with full moves');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
