@@ -99,6 +99,7 @@ export default function AIBattlePage() {
       // Preparar time do jogador
       const team: BattlePokemon[] = profile.team.pokemon.map((tp: { pokemon: Pokemon }) => ({
         ...tp.pokemon,
+        moves: tp.pokemon.moves || [], // Garantir que moves existe
         currentHp: tp.pokemon.hp,
         cooldowns: {},
       }));
@@ -124,6 +125,7 @@ export default function AIBattlePage() {
       const shuffled = [...allPokemon].sort(() => Math.random() - 0.5);
       const aiPokemon = shuffled.slice(0, 3).map((p: Pokemon) => ({
         ...p,
+        moves: p.moves || [], // Garantir que moves existe
         currentHp: p.hp,
         cooldowns: {},
       }));
@@ -756,32 +758,39 @@ export default function AIBattlePage() {
           <div className="battle-controls">
             <h4>Escolha um ataque:</h4>
             <div className="move-buttons">
-              {activePokemon?.moves.map((move) => {
-                const cooldownValue = activePokemon.cooldowns[move.id] || 0;
-                const isOnCooldown = cooldownValue > 0;
-                const typeColor = getTypeColor(move.type);
-                
-                return (
-                  <button
-                    key={move.id}
-                    className={`move-button ${move.type}`}
-                    onClick={() => executePlayerMove(move)}
-                    disabled={!isPlayerTurn || animatingAttack || isOnCooldown}
-                    style={{ 
-                      opacity: isOnCooldown ? 0.5 : 1,
-                      borderColor: typeColor.border,
-                    }}
-                  >
-                    <span className="move-name">{move.name}</span>
-                    <span className="move-info">
-                      <span className="move-power">PWR: {move.power}</span>
-                      {isOnCooldown && (
-                        <span className="move-cooldown">CD: {activePokemon.cooldowns[move.id]}</span>
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
+              {(!activePokemon?.moves || activePokemon.moves.length === 0) ? (
+                <div className="no-moves-warning">
+                  <p>⚠️ Este Pokémon não tem movimentos configurados.</p>
+                  <p>Por favor, selecione outro time.</p>
+                </div>
+              ) : (
+                activePokemon.moves.map((move) => {
+                  const cooldownValue = activePokemon.cooldowns[move.id] || 0;
+                  const isOnCooldown = cooldownValue > 0;
+                  const typeColor = getTypeColor(move.type || 'normal');
+                  
+                  return (
+                    <button
+                      key={move.id}
+                      className={`move-button ${move.type || 'normal'}`}
+                      onClick={() => executePlayerMove(move)}
+                      disabled={!isPlayerTurn || animatingAttack || isOnCooldown}
+                      style={{ 
+                        opacity: isOnCooldown ? 0.5 : 1,
+                        borderColor: typeColor.border,
+                      }}
+                    >
+                      <span className="move-name">{move.name}</span>
+                      <span className="move-info">
+                        <span className="move-power">PWR: {move.power || 0}</span>
+                        {isOnCooldown && (
+                          <span className="move-cooldown">CD: {activePokemon.cooldowns[move.id]}</span>
+                        )}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
         )}

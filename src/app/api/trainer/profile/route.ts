@@ -124,13 +124,16 @@ export async function GET() {
           attack: 80,
           defense: 70,
           speed: 60,
-          moves: up.pokemon.moves.map(m => ({
+          moves: (up.pokemon.moves || []).map(m => ({
             id: m.id,
             name: m.name,
-            description: m.description,
-            type: JSON.parse(up.pokemon.types)[0] || 'normal',
-            power: m.damage,
-            cooldown: m.cooldown,
+            description: m.description || '',
+            type: (() => {
+              try { return JSON.parse(up.pokemon.types)[0] || 'normal'; } 
+              catch { return 'normal'; }
+            })(),
+            power: m.damage || 10,
+            cooldown: m.cooldown || 0,
           })),
         },
       })),
