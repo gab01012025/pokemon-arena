@@ -1,33 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 5.0.0 - Fixed moves return with all fields
+// API Version 7.0.0 - Full moves without select restriction
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v5.0.0 - Request with full moves');
+  console.log('[API Pokemon] v7.0.0 - Full moves');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
-    const includeMoves = searchParams.get('includeMoves') === 'true' || startersOnly; // Always include moves for starters
+    const includeMoves = searchParams.get('includeMoves') === 'true' || startersOnly;
     
     const pokemon = await prisma.pokemon.findMany({
       where: startersOnly ? { isStarter: true } : undefined,
       include: {
-        moves: includeMoves ? {
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            classes: true,
-            damage: true,
-            healing: true,
-            cooldown: true,
-            duration: true,
-            effects: true,
-            target: true,
-            slot: true,
-            cost: true,
-          }
-        } : false
+        moves: includeMoves // Include all move fields
       },
       orderBy: [
         { isStarter: 'desc' },
