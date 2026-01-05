@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 9.0.0 - Explicit move field selection
+// API Version 10.0.0 - Always include moves
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v9.0.0 - Explicit move selection');
+  console.log('[API Pokemon] v10.0.0 - Always include moves');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
-    const includeMoves = searchParams.get('includeMoves') === 'true' || startersOnly;
     
     const pokemon = await prisma.pokemon.findMany({
       where: startersOnly ? { isStarter: true } : undefined,
-      include: includeMoves ? {
+      include: {
         moves: {
           select: {
             id: true,
@@ -30,7 +29,7 @@ export async function GET(request: NextRequest) {
             target: true,
           }
         }
-      } : undefined,
+      },
       orderBy: [
         { isStarter: 'desc' },
         { name: 'asc' }

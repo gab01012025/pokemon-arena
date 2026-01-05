@@ -236,7 +236,7 @@ export default function PlayPage() {
     setQueueTime(0);
   }, [socketState, wsLeaveQueue]);
 
-  // Start AI battle
+  // Start AI battle - redirect to client-side AI battle page
   const startAiBattle = useCallback(async () => {
     if (selectedTeam.length !== 3) {
       setError('Select 3 Pokémon to battle!');
@@ -245,26 +245,11 @@ export default function PlayPage() {
 
     setError(null);
     
-    try {
-      const res = await fetch('/api/battle/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teamPokemonIds: selectedTeam.map(p => p.id),
-          difficulty: 'normal'
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        router.push(`/battle/${data.battleId}`);
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to start AI battle');
-      }
-    } catch {
-      setError('Connection error - AI battle not available yet');
-    }
+    // Save selected team to localStorage for AI battle page
+    localStorage.setItem('selectedTeam', JSON.stringify(selectedTeam));
+    
+    // Redirect to client-side AI battle page
+    router.push('/battle/ai');
   }, [selectedTeam, router]);
 
   const formatTime = (seconds: number) => {

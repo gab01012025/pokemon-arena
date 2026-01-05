@@ -83,6 +83,33 @@ export default function AIBattlePage() {
   // Carregar time do jogador
   const fetchPlayerTeam = useCallback(async () => {
     try {
+      // First check localStorage for team from /play page
+      const savedTeam = localStorage.getItem('selectedTeam');
+      if (savedTeam) {
+        try {
+          const parsed = JSON.parse(savedTeam);
+          if (Array.isArray(parsed) && parsed.length === 3) {
+            const team: BattlePokemon[] = parsed.map((p: Pokemon) => ({
+              ...p,
+              hp: p.hp || 100,
+              attack: p.attack || 80,
+              defense: p.defense || 70,
+              speed: p.speed || 60,
+              moves: p.moves || [],
+              currentHp: p.hp || 100,
+              cooldowns: {},
+            }));
+            setPlayerTeam(team);
+            setGameState('ready');
+            localStorage.removeItem('selectedTeam'); // Clear after use
+            return;
+          }
+        } catch {
+          console.log('Failed to parse saved team');
+        }
+      }
+
+      // Fallback: fetch from profile API
       const res = await fetch('/api/trainer/profile');
       if (!res.ok) {
         router.push('/login');
