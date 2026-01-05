@@ -1,115 +1,139 @@
+/**
+ * Pokemon Arena Battle Page - Naruto Arena Style
+ */
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { PokemonSprite } from '@/components/PokemonSprite';
-import { getTypeColor } from '@/lib/pokemon-images';
-import { useBattleAnimations, BattleAnimationManager, TurnTransition } from '@/components/battle/BattleAnimations';
+import Image from 'next/image';
+import './battle.css';
 
-interface Pokemon {
-  id: string | number;
-  name: string;
-  type: string;
-  hp: number;
-  attack: number;
-  defense: number;
-  speed: number;
-  moves: Move[];
+// Types based on our battle engine
+interface Energy {
+  fire: number;
+  water: number;
+  grass: number;
+  electric: number;
+  random: number;
 }
 
-interface Move {
-  id: string | number;
-  name: string;
+interface Effect {
   type: string;
-  power: number;
+  value: number;
+  duration: number;
+  classes?: string[];
+}
+
+interface Skill {
+  id: string;
+  name: string;
   description: string;
+  classes: string[];
+  cost: Partial<Energy>;
   cooldown: number;
+  currentCooldown: number;
+  damage?: number;
+  effects: Effect[];
 }
 
-interface BattlePokemon extends Pokemon {
-  currentHp: number;
-  cooldowns: Record<string | number, number>;
+interface Status {
+  name: string;
+  duration: number;
+  helpful: boolean;
+  effects: Effect[];
 }
 
-interface BattleLog {
+interface BattleCharacter {
+  id: string;
+  slot: number;
+  name: string;
+  types: string[];
+  health: number;
+  maxHealth: number;
+  alive: boolean;
+  skills: Skill[];
+  statuses: Status[];
+  barrier: number;
+}
+
+interface LogEntry {
   turn: number;
-  attacker: string;
-  move: string;
-  damage: number;
   message: string;
+  type: 'skill' | 'damage' | 'heal' | 'status' | 'death' | 'system';
 }
 
 type Difficulty = 'easy' | 'normal' | 'hard';
+type GamePhase = 'loading' | 'setup' | 'battle' | 'victory' | 'defeat';
 
-export default function AIBattlePage() {
+const ENERGY_COLORS = {
+  fire: '#EE8130',
+  water: '#6390F0',
+  grass: '#7AC74C',
+  electric: '#F7D02C',
+  random: '#A8A77A',
+};
+
+const ENERGY_ICONS = {
+  fire: '🔥',
+  water: '💧',
+  grass: '🌿',
+  electric: '⚡',
+  random: '❓',
+};
+
+export default function BattlePage() {
   const router = useRouter();
-  const [gameState, setGameState] = useState<'loading' | 'ready' | 'battle' | 'finished'>('loading');
+  
+  // Game state
+  const [phase, setPhase] = useState<GamePhase>('loading');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  
-  // Random seed ref for deterministic damage calculation
-  // Initialize with a static value, will be set on mount
-  const seedRef = useRef(0);
-  const seedInitialized = useRef(false);
-  
-  // Initialize seed on mount (client-side only)
-  useEffect(() => {
-    if (!seedInitialized.current) {
-      seedRef.current = Date.now();
-      seedInitialized.current = true;
-    }
-  }, []);
+  const [turn, setTurn] = useState(1);
+  const [log, setLog] = useState<LogEntry[]>([]);
   
   // Player state
-  const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([]);
-  const [activePokemonIndex, setActivePokemonIndex] = useState(0);
+  const [playerTeam, setPlayerTeam] = useState<BattleCharacter[]>([]);
+  const [playerEnergy, setPlayerEnergy] = useState<Energy>({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+  const [selectedSkill, setSelectedSkill] = useState<{ charIndex: number; skillIndex: number } | null>(null);
+  const [queuedActions, setQueuedActions] = useState<Array<{ charIndex: number; skillIndex: number; targetIndex: number }>>([]);
   
   // AI state
-  const [aiTeam, setAiTeam] = useState<BattlePokemon[]>([]);
-  const [aiActivePokemonIndex, setAiActivePokemonIndex] = useState(0);
+  const [aiTeam, setAiTeam] = useState<BattleCharacter[]>([]);
+  const [aiEnergy, setAiEnergy] = useState<Energy>({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
   
-  // Battle state
-  const [turn, setTurn] = useState(1);
-  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
-  const [battleLog, setBattleLog] = useState<BattleLog[]>([]);
-  const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
-  const [animatingAttack, setAnimatingAttack] = useState(false);
-  const [lastDamage, setLastDamage] = useState<{ target: 'player' | 'ai'; amount: number } | null>(null);
-  const [showTurnTransition, setShowTurnTransition] = useState(false);
+  // UI state
+  const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
+  const [animating, setAnimating] = useState(false);
+  const logRef = useRef<HTMLDivElement>(null);
   
-  // Battle Animations
-  const { animations, addAnimation, removeAnimation } = useBattleAnimations();
-
-  // Carregar time do jogador
-  const fetchPlayerTeam = useCallback(async () => {
+  // Load player team
+  useEffect(() => {
+    loadPlayerTeam();
+  }, []);
+  
+  // Auto-scroll log
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [log]);
+  
+  const loadPlayerTeam = async () => {
     try {
-      // First check localStorage for team from /play page
+      // Try localStorage first (from /play page)
       const savedTeam = localStorage.getItem('selectedTeam');
       if (savedTeam) {
-        try {
-          const parsed = JSON.parse(savedTeam);
-          if (Array.isArray(parsed) && parsed.length === 3) {
-            const team: BattlePokemon[] = parsed.map((p: Pokemon) => ({
-              ...p,
-              hp: p.hp || 100,
-              attack: p.attack || 80,
-              defense: p.defense || 70,
-              speed: p.speed || 60,
-              moves: p.moves || [],
-              currentHp: p.hp || 100,
-              cooldowns: {},
-            }));
-            setPlayerTeam(team);
-            setGameState('ready');
-            localStorage.removeItem('selectedTeam'); // Clear after use
-            return;
-          }
-        } catch {
-          console.log('Failed to parse saved team');
+        const parsed = JSON.parse(savedTeam);
+        if (Array.isArray(parsed) && parsed.length === 3) {
+          const team = parsed.map((p, idx) => createBattleCharacter(p, idx));
+          setPlayerTeam(team);
+          localStorage.removeItem('selectedTeam');
+          setPhase('setup');
+          return;
         }
       }
-
-      // Fallback: fetch from profile API
+      
+      // Fallback to API
       const res = await fetch('/api/trainer/profile');
       if (!res.ok) {
         router.push('/login');
@@ -117,749 +141,669 @@ export default function AIBattlePage() {
       }
       
       const profile = await res.json();
-      
       if (!profile.team || profile.team.pokemon.length < 3) {
         router.push('/select-team');
         return;
       }
-
-      // Preparar time do jogador
-      const team: BattlePokemon[] = profile.team.pokemon.map((tp: { pokemon: Pokemon }) => ({
-        ...tp.pokemon,
-        moves: tp.pokemon.moves || [], // Garantir que moves existe
-        currentHp: tp.pokemon.hp,
-        cooldowns: {},
-      }));
       
+      const team = profile.team.pokemon.map((tp: { pokemon: Pokemon }, idx: number) => 
+        createBattleCharacter(tp.pokemon, idx)
+      );
       setPlayerTeam(team);
-      setGameState('ready');
+      setPhase('setup');
     } catch {
       router.push('/login');
     }
-  }, [router]);
-
-  useEffect(() => {
-    fetchPlayerTeam();
-  }, [fetchPlayerTeam]);
-
-  // Gerar time da AI
-  const generateAITeam = useCallback(async () => {
+  };
+  
+  interface Pokemon {
+    id: string;
+    name: string;
+    type?: string;
+    types?: string | string[];
+    health?: number;
+    hp?: number;
+    moves?: Move[];
+  }
+  
+  interface Move {
+    id: string;
+    name: string;
+    description?: string;
+    damage?: number;
+    power?: number;
+    cooldown?: number;
+    energyCost?: string;
+    effect?: string;
+    type?: string;
+  }
+  
+  const createBattleCharacter = (pokemon: Pokemon, slot: number): BattleCharacter => {
+    const health = pokemon.health || pokemon.hp || 100;
+    const types = parseTypes(pokemon.types || pokemon.type || 'Normal');
+    
+    return {
+      id: pokemon.id,
+      slot,
+      name: pokemon.name,
+      types,
+      health,
+      maxHealth: health,
+      alive: true,
+      skills: (pokemon.moves || []).slice(0, 4).map((m, idx) => createSkill(m, idx, types[0])),
+      statuses: [],
+      barrier: 0,
+    };
+  };
+  
+  const parseTypes = (types: string | string[]): string[] => {
+    if (Array.isArray(types)) return types;
+    if (typeof types === 'string') {
+      try {
+        const parsed = JSON.parse(types);
+        return Array.isArray(parsed) ? parsed : [types];
+      } catch {
+        return types.split(',').map(t => t.trim());
+      }
+    }
+    return ['Normal'];
+  };
+  
+  const createSkill = (move: Move, index: number, pokemonType: string): Skill => {
+    const damage = move.damage || move.power || 20;
+    let cost: Partial<Energy> = {};
+    
+    // Parse energy cost
+    if (move.energyCost) {
+      try {
+        cost = JSON.parse(move.energyCost);
+      } catch {
+        cost = { random: 1 };
+      }
+    } else {
+      // Default cost based on index
+      const typeKey = pokemonType.toLowerCase() as keyof Energy;
+      if (['fire', 'water', 'grass', 'electric'].includes(typeKey)) {
+        cost[typeKey] = index === 3 ? 2 : 1;
+      } else {
+        cost.random = index === 3 ? 2 : 1;
+      }
+    }
+    
+    // Parse effects
+    let effects: Effect[] = [];
+    if (move.effect) {
+      try {
+        const parsed = JSON.parse(move.effect);
+        effects = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        // Ignore
+      }
+    }
+    
+    // Add base damage effect
+    effects.unshift({
+      type: 'damage',
+      value: damage,
+      duration: 0,
+    });
+    
+    return {
+      id: move.id || `skill-${index}`,
+      name: move.name,
+      description: move.description || `Deals ${damage} damage.`,
+      classes: ['Physical'],
+      cost,
+      cooldown: move.cooldown || 0,
+      currentCooldown: 0,
+      damage,
+      effects,
+    };
+  };
+  
+  const generateAITeam = async () => {
     try {
       const res = await fetch('/api/pokemon?starters=true');
       const allPokemon = await res.json();
       
-      // Selecionar 3 Pokémon aleatórios para a AI
-      const shuffled = [...allPokemon].sort(() => Math.random() - 0.5);
-      const aiPokemon = shuffled.slice(0, 3).map((p: Pokemon) => ({
-        ...p,
-        moves: p.moves || [], // Garantir que moves existe
-        currentHp: p.hp,
-        cooldowns: {},
-      }));
+      // Select different pokemon than player
+      const playerNames = playerTeam.map(p => p.name);
+      const available = allPokemon.filter((p: Pokemon) => !playerNames.includes(p.name));
+      const shuffled = available.sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, 3);
       
-      setAiTeam(aiPokemon);
-    } catch (err) {
-      console.error('Failed to generate AI team:', err);
+      const team = selected.map((p: Pokemon, idx: number) => createBattleCharacter(p, idx + 3));
+      setAiTeam(team);
+    } catch {
+      console.error('Failed to generate AI team');
     }
-  }, []);
-
-  // Iniciar batalha
+  };
+  
   const startBattle = async () => {
     await generateAITeam();
-    setGameState('battle');
+    setPhase('battle');
     setTurn(1);
-    setIsPlayerTurn(true);
-    setBattleLog([]);
-    setWinner(null);
+    setLog([{ turn: 0, message: `Battle started! Difficulty: ${difficulty.toUpperCase()}`, type: 'system' }]);
     
-    addLog({
-      turn: 0,
-      attacker: 'Sistema',
-      move: '',
-      damage: 0,
-      message: `Batalha iniciada! Modo: ${difficulty.toUpperCase()}`,
-    });
+    // Initial energy
+    setPlayerEnergy({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+    setAiEnergy({ fire: 0, water: 0, grass: 0, electric: 0, random: 1 });
+    
+    // Generate first turn energy
+    generateEnergy();
   };
-
-  // Adicionar log
-  const addLog = (log: BattleLog) => {
-    setBattleLog(prev => [...prev, log]);
+  
+  const generateEnergy = () => {
+    const types: (keyof Energy)[] = ['fire', 'water', 'grass', 'electric'];
+    
+    // Player gets random energy
+    const pType = types[Math.floor(Math.random() * types.length)];
+    setPlayerEnergy(prev => ({ ...prev, [pType]: prev[pType] + 1 }));
+    
+    // AI gets random energy
+    const aType = types[Math.floor(Math.random() * types.length)];
+    setAiEnergy(prev => ({ ...prev, [aType]: prev[aType] + 1 }));
   };
-
-  // Vantagem de tipo simplificada
-  const getTypeAdvantage = useCallback((attackType: string, defenderType: string): number => {
-    const advantages: Record<string, string[]> = {
-      fire: ['grass', 'ice', 'bug', 'steel'],
-      water: ['fire', 'ground', 'rock'],
-      grass: ['water', 'ground', 'rock'],
-      electric: ['water', 'flying'],
-      psychic: ['fighting', 'poison'],
-      ice: ['grass', 'ground', 'flying', 'dragon'],
-      dragon: ['dragon'],
-      dark: ['psychic', 'ghost'],
-      fairy: ['fighting', 'dragon', 'dark'],
-      fighting: ['normal', 'ice', 'rock', 'dark', 'steel'],
-      poison: ['grass', 'fairy'],
-      ground: ['fire', 'electric', 'poison', 'rock', 'steel'],
-      flying: ['grass', 'fighting', 'bug'],
-      bug: ['grass', 'psychic', 'dark'],
-      rock: ['fire', 'ice', 'flying', 'bug'],
-      ghost: ['psychic', 'ghost'],
-      steel: ['ice', 'rock', 'fairy'],
-    };
-
-    if (advantages[attackType]?.includes(defenderType)) {
-      return 1.5; // Super efetivo
+  
+  const canAfford = (cost: Partial<Energy>, energy: Energy): boolean => {
+    let remaining = { ...energy };
+    
+    for (const [type, amount] of Object.entries(cost)) {
+      if (type === 'random') continue;
+      const typeKey = type as keyof Energy;
+      if ((remaining[typeKey] || 0) < (amount || 0)) {
+        return false;
+      }
+      remaining[typeKey] -= amount || 0;
     }
     
-    // Verificar se é resistido
-    const resistances: Record<string, string[]> = {
-      fire: ['fire', 'water', 'rock', 'dragon'],
-      water: ['water', 'grass', 'dragon'],
-      grass: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'],
-      electric: ['electric', 'grass', 'dragon'],
-      normal: ['rock', 'steel'],
-    };
+    const randomNeeded = cost.random || 0;
+    const randomAvailable = Object.values(remaining).reduce((a, b) => a + b, 0) - remaining.random;
     
-    if (resistances[attackType]?.includes(defenderType)) {
-      return 0.5; // Não muito efetivo
+    return randomAvailable >= randomNeeded;
+  };
+  
+  const spendEnergy = (cost: Partial<Energy>, energy: Energy): Energy => {
+    const result = { ...energy };
+    
+    for (const [type, amount] of Object.entries(cost)) {
+      if (type === 'random') continue;
+      const typeKey = type as keyof Energy;
+      result[typeKey] = Math.max(0, (result[typeKey] || 0) - (amount || 0));
     }
     
-    return 1;
-  }, []);
-
-  // Calcular dano
-  const calculateDamage = useCallback((attacker: BattlePokemon, defender: BattlePokemon, move: Move, seed: number): number => {
-    const baseDamage = move.power;
-    const attackStat = attacker.attack;
-    const defenseStat = defender.defense;
+    let randomNeeded = cost.random || 0;
+    const types: (keyof Energy)[] = ['fire', 'water', 'grass', 'electric'];
     
-    // Fórmula de dano com seed determinístico
-    const seededRandom = ((seed * 9301 + 49297) % 233280) / 233280;
-    const randomFactor = 0.85 + seededRandom * 0.15;
-    let damage = Math.floor((baseDamage * (attackStat / defenseStat)) * randomFactor);
+    for (const type of types) {
+      if (randomNeeded <= 0) break;
+      const spend = Math.min(result[type], randomNeeded);
+      result[type] -= spend;
+      randomNeeded -= spend;
+    }
     
-    // Bonus de tipo
-    const typeAdvantageValue = getTypeAdvantage(move.type, defender.type);
-    damage = Math.floor(damage * typeAdvantageValue);
+    return result;
+  };
+  
+  const selectSkill = (charIndex: number, skillIndex: number) => {
+    const char = playerTeam[charIndex];
+    if (!char.alive) return;
     
-    return Math.max(1, damage);
-  }, [getTypeAdvantage]);
-
-  // Executar movimento do jogador
-  const executePlayerMove = (move: Move) => {
-    if (!isPlayerTurn || animatingAttack || gameState !== 'battle') return;
+    const skill = char.skills[skillIndex];
+    if (!skill || skill.currentCooldown > 0) return;
+    if (!canAfford(skill.cost, playerEnergy)) return;
     
-    const attacker = playerTeam[activePokemonIndex];
-    const defender = aiTeam[aiActivePokemonIndex];
+    setSelectedSkill({ charIndex, skillIndex });
+  };
+  
+  const selectTarget = (targetIndex: number) => {
+    if (!selectedSkill) return;
     
-    // Verificar cooldown
-    if (attacker.cooldowns[move.id] && attacker.cooldowns[move.id] > 0) {
+    const { charIndex, skillIndex } = selectedSkill;
+    const char = playerTeam[charIndex];
+    const skill = char.skills[skillIndex];
+    
+    // Spend energy
+    setPlayerEnergy(prev => spendEnergy(skill.cost, prev));
+    
+    // Queue action
+    setQueuedActions(prev => [...prev, { charIndex, skillIndex, targetIndex }]);
+    
+    setSelectedSkill(null);
+  };
+  
+  const executeActions = async () => {
+    if (animating) return;
+    setAnimating(true);
+    
+    // Execute player actions
+    for (const action of queuedActions) {
+      await executePlayerAction(action);
+      await delay(500);
+    }
+    
+    // Execute AI actions
+    await executeAITurn();
+    
+    // Check victory/defeat
+    const playerAlive = playerTeam.some(c => c.alive);
+    const aiAlive = aiTeam.some(c => c.alive);
+    
+    if (!playerAlive) {
+      setPhase('defeat');
+      setAnimating(false);
       return;
     }
     
-    setAnimatingAttack(true);
+    if (!aiAlive) {
+      setPhase('victory');
+      setAnimating(false);
+      return;
+    }
     
-    // Incrementar seed e calcular dano
-    seedRef.current += 1;
-    const damage = calculateDamage(attacker, defender, move, seedRef.current);
-    
-    setTimeout(() => {
-      // Atualizar HP da AI
-      const newAiTeam = [...aiTeam];
-      newAiTeam[aiActivePokemonIndex] = {
-        ...newAiTeam[aiActivePokemonIndex],
-        currentHp: Math.max(0, newAiTeam[aiActivePokemonIndex].currentHp - damage),
-      };
-      setAiTeam(newAiTeam);
-      
-      // Disparar animação de dano
-      addAnimation({
-        type: damage > 25 ? 'critical' : 'damage',
-        targetId: 'ai-pokemon',
-        value: damage,
-        duration: 1000,
-      });
-      
-      // Atualizar cooldown
-      const newPlayerTeam = [...playerTeam];
-      newPlayerTeam[activePokemonIndex] = {
-        ...newPlayerTeam[activePokemonIndex],
-        cooldowns: {
-          ...newPlayerTeam[activePokemonIndex].cooldowns,
-          [move.id]: move.cooldown,
-        },
-      };
-      setPlayerTeam(newPlayerTeam);
-      
-      setLastDamage({ target: 'ai', amount: damage });
-      
-      addLog({
-        turn,
-        attacker: attacker.name,
-        move: move.name,
-        damage,
-        message: `${attacker.name} usou ${move.name} e causou ${damage} de dano!`,
-      });
-      
-      // Verificar se o Pokémon da AI foi derrotado
-      if (newAiTeam[aiActivePokemonIndex].currentHp <= 0) {
-        // Animação de morte
-        addAnimation({
-          type: 'death',
-          targetId: 'ai-pokemon',
-          text: newAiTeam[aiActivePokemonIndex].name,
-          duration: 1500,
-        });
-        
-        addLog({
-          turn,
-          attacker: '',
-          move: '',
-          damage: 0,
-          message: `${defender.name} foi derrotado!`,
-        });
-        
-        // Procurar próximo Pokémon vivo da AI
-        const nextAlive = newAiTeam.findIndex((p, i) => i !== aiActivePokemonIndex && p.currentHp > 0);
-        
-        if (nextAlive === -1) {
-          // Jogador venceu!
-          endBattle('player');
-        } else {
-          setAiActivePokemonIndex(nextAlive);
-          addLog({
-            turn,
-            attacker: 'AI',
-            move: '',
-            damage: 0,
-            message: `AI enviou ${newAiTeam[nextAlive].name}!`,
-          });
-        }
-      }
-      
-      setTimeout(() => {
-        setLastDamage(null);
-        setAnimatingAttack(false);
-        
-        if (winner === null) {
-          setIsPlayerTurn(false);
-          // Turno da AI
-          setTimeout(() => executeAITurn(), 1000);
-        }
-      }, 500);
-    }, 300);
+    // Next turn
+    endTurn();
+    setAnimating(false);
   };
-
-  // Turno da AI
-  const executeAITurn = () => {
-    if (gameState !== 'battle' || winner !== null) return;
+  
+  const executePlayerAction = async (action: { charIndex: number; skillIndex: number; targetIndex: number }) => {
+    const char = playerTeam[action.charIndex];
+    const skill = char.skills[action.skillIndex];
+    const target = action.targetIndex < 3 ? playerTeam[action.targetIndex] : aiTeam[action.targetIndex - 3];
     
-    const aiPokemon = aiTeam[aiActivePokemonIndex];
-    const playerPokemon = playerTeam[activePokemonIndex];
+    if (!char.alive || !target.alive) return;
     
-    if (!aiPokemon || aiPokemon.currentHp <= 0) return;
+    // Log
+    addLog(`${char.name} uses ${skill.name}!`, 'skill');
     
-    // Incrementar seed para randomização
-    seedRef.current += 1;
-    const randomSeed = seedRef.current % 100;
+    // Apply damage
+    const damage = skill.damage || skill.effects.find(e => e.type === 'damage')?.value || 0;
+    if (damage > 0) {
+      target.health = Math.max(0, target.health - damage);
+      addLog(`${target.name} takes ${damage} damage!`, 'damage');
+      
+      if (target.health <= 0) {
+        target.alive = false;
+        addLog(`${target.name} fainted!`, 'death');
+      }
+    }
     
-    // Selecionar movimento baseado na dificuldade
-    let selectedMove: Move;
+    // Set cooldown
+    skill.currentCooldown = skill.cooldown;
     
-    if (difficulty === 'easy') {
-      // Easy: movimento aleatório
-      const availableMoves = aiPokemon.moves.filter(m => 
-        !aiPokemon.cooldowns[m.id] || aiPokemon.cooldowns[m.id] <= 0
-      );
-      selectedMove = availableMoves[randomSeed % availableMoves.length] || aiPokemon.moves[0];
-    } else if (difficulty === 'hard') {
-      // Hard: melhor movimento
-      const availableMoves = aiPokemon.moves.filter(m => 
-        !aiPokemon.cooldowns[m.id] || aiPokemon.cooldowns[m.id] <= 0
-      );
-      seedRef.current += 1;
-      selectedMove = availableMoves.sort((a, b) => {
-        const damageA = calculateDamage(aiPokemon, playerPokemon, a, seedRef.current);
-        const damageB = calculateDamage(aiPokemon, playerPokemon, b, seedRef.current + 1);
-        return damageB - damageA;
-      })[0] || aiPokemon.moves[0];
+    // Update state
+    if (action.targetIndex < 3) {
+      setPlayerTeam([...playerTeam]);
     } else {
-      // Normal: 70% melhor, 30% aleatório
-      const availableMoves = aiPokemon.moves.filter(m => 
-        !aiPokemon.cooldowns[m.id] || aiPokemon.cooldowns[m.id] <= 0
+      setAiTeam([...aiTeam]);
+    }
+  };
+  
+  const executeAITurn = async () => {
+    for (const char of aiTeam) {
+      if (!char.alive) continue;
+      
+      // Find affordable skill
+      const affordableSkills = char.skills.filter(s => 
+        s.currentCooldown === 0 && canAfford(s.cost, aiEnergy)
       );
-      if (randomSeed < 70) {
-        seedRef.current += 1;
-        selectedMove = availableMoves.sort((a, b) => {
-          const damageA = calculateDamage(aiPokemon, playerPokemon, a, seedRef.current);
-          const damageB = calculateDamage(aiPokemon, playerPokemon, b, seedRef.current + 1);
-          return damageB - damageA;
-        })[0] || aiPokemon.moves[0];
-      } else {
-        selectedMove = availableMoves[randomSeed % availableMoves.length] || aiPokemon.moves[0];
-      }
-    }
-    
-    if (!selectedMove) return;
-    
-    setAnimatingAttack(true);
-    
-    seedRef.current += 1;
-    const damage = calculateDamage(aiPokemon, playerPokemon, selectedMove, seedRef.current);
-    
-    setTimeout(() => {
-      // Atualizar HP do jogador
-      const newPlayerTeam = [...playerTeam];
-      newPlayerTeam[activePokemonIndex] = {
-        ...newPlayerTeam[activePokemonIndex],
-        currentHp: Math.max(0, newPlayerTeam[activePokemonIndex].currentHp - damage),
-      };
       
-      // Disparar animação de dano no jogador
-      addAnimation({
-        type: damage > 25 ? 'critical' : 'damage',
-        targetId: 'player-pokemon',
-        value: damage,
-        duration: 1000,
-      });
+      if (affordableSkills.length === 0) continue;
       
-      // Atualizar cooldown da AI
-      const newAiTeam = [...aiTeam];
-      newAiTeam[aiActivePokemonIndex] = {
-        ...newAiTeam[aiActivePokemonIndex],
-        cooldowns: {
-          ...newAiTeam[aiActivePokemonIndex].cooldowns,
-          [selectedMove.id]: selectedMove.cooldown,
-        },
-      };
-      setAiTeam(newAiTeam);
-      setPlayerTeam(newPlayerTeam);
+      // Pick random skill (can be smarter based on difficulty)
+      const skill = affordableSkills[Math.floor(Math.random() * affordableSkills.length)];
       
-      setLastDamage({ target: 'player', amount: damage });
+      // Pick random alive target
+      const targets = playerTeam.filter(t => t.alive);
+      if (targets.length === 0) continue;
       
-      addLog({
-        turn,
-        attacker: aiPokemon.name,
-        move: selectedMove.name,
-        damage,
-        message: `${aiPokemon.name} usou ${selectedMove.name} e causou ${damage} de dano!`,
-      });
+      const target = targets[Math.floor(Math.random() * targets.length)];
       
-      // Verificar se o Pokémon do jogador foi derrotado
-      if (newPlayerTeam[activePokemonIndex].currentHp <= 0) {
-        // Animação de morte
-        addAnimation({
-          type: 'death',
-          targetId: 'player-pokemon',
-          text: playerPokemon.name,
-          duration: 1500,
-        });
+      // Spend energy
+      setAiEnergy(prev => spendEnergy(skill.cost, prev));
+      
+      // Log
+      addLog(`${char.name} uses ${skill.name}!`, 'skill');
+      
+      await delay(300);
+      
+      // Apply damage
+      const damage = skill.damage || skill.effects.find(e => e.type === 'damage')?.value || 0;
+      if (damage > 0) {
+        target.health = Math.max(0, target.health - damage);
+        addLog(`${target.name} takes ${damage} damage!`, 'damage');
         
-        addLog({
-          turn,
-          attacker: '',
-          move: '',
-          damage: 0,
-          message: `${playerPokemon.name} foi derrotado!`,
-        });
-        
-        // Procurar próximo Pokémon vivo do jogador
-        const nextAlive = newPlayerTeam.findIndex((p, i) => i !== activePokemonIndex && p.currentHp > 0);
-        
-        if (nextAlive === -1) {
-          // AI venceu!
-          endBattle('ai');
-        } else {
-          setActivePokemonIndex(nextAlive);
-          addLog({
-            turn,
-            attacker: 'Você',
-            move: '',
-            damage: 0,
-            message: `Você enviou ${newPlayerTeam[nextAlive].name}!`,
-          });
+        if (target.health <= 0) {
+          target.alive = false;
+          addLog(`${target.name} fainted!`, 'death');
         }
+        
+        setPlayerTeam([...playerTeam]);
       }
       
-      setTimeout(() => {
-        setLastDamage(null);
-        setAnimatingAttack(false);
-        
-        if (winner === null) {
-          // Reduzir cooldowns
-          reduceCooldowns();
-          setTurn(t => t + 1);
-          setIsPlayerTurn(true);
-        }
-      }, 500);
-    }, 300);
-  };
-
-  // Reduzir cooldowns
-  const reduceCooldowns = () => {
-    setPlayerTeam(team => team.map(p => ({
-      ...p,
-      cooldowns: Object.fromEntries(
-        Object.entries(p.cooldowns).map(([id, cd]) => [id, Math.max(0, (cd as number) - 1)])
-      ),
-    })));
-    
-    setAiTeam(team => team.map(p => ({
-      ...p,
-      cooldowns: Object.fromEntries(
-        Object.entries(p.cooldowns).map(([id, cd]) => [id, Math.max(0, (cd as number) - 1)])
-      ),
-    })));
-  };
-
-  // Finalizar batalha
-  const endBattle = async (result: 'player' | 'ai') => {
-    setWinner(result);
-    setGameState('finished');
-    
-    // Salvar resultado no servidor
-    try {
-      await fetch('/api/battle/ai/result', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          won: result === 'player',
-          difficulty,
-        }),
-      });
-    } catch (err) {
-      console.error('Failed to save battle result:', err);
+      // Set cooldown
+      skill.currentCooldown = skill.cooldown;
+      
+      await delay(300);
     }
   };
-
-  // Trocar Pokémon
-  const switchPokemon = (index: number) => {
-    if (!isPlayerTurn || animatingAttack || gameState !== 'battle') return;
-    if (playerTeam[index].currentHp <= 0) return;
-    if (index === activePokemonIndex) return;
-    
-    setActivePokemonIndex(index);
-    addLog({
-      turn,
-      attacker: 'Você',
-      move: '',
-      damage: 0,
-      message: `Você trocou para ${playerTeam[index].name}!`,
+  
+  const endTurn = () => {
+    // Decrement cooldowns
+    playerTeam.forEach(char => {
+      char.skills.forEach(skill => {
+        if (skill.currentCooldown > 0) skill.currentCooldown--;
+      });
     });
     
-    setIsPlayerTurn(false);
-    setTimeout(() => executeAITurn(), 1000);
+    aiTeam.forEach(char => {
+      char.skills.forEach(skill => {
+        if (skill.currentCooldown > 0) skill.currentCooldown--;
+      });
+    });
+    
+    setPlayerTeam([...playerTeam]);
+    setAiTeam([...aiTeam]);
+    setQueuedActions([]);
+    setTurn(prev => prev + 1);
+    
+    // Generate new energy
+    generateEnergy();
   };
-
-  // Render loading
-  if (gameState === 'loading') {
-    return (
-      <div className="ai-battle-page">
-        <div className="loading-container">
-          <div className="pokeball-loader large" />
-          <p>Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Render seleção de dificuldade
-  if (gameState === 'ready') {
-    return (
-      <div className="ai-battle-page">
-        <div className="difficulty-select">
-          <h1>🎮 Batalha contra AI</h1>
-          
-          <div className="team-preview">
-            <h3>Seu Time</h3>
-            <div className="team-pokemon-list">
-              {playerTeam.map((pokemon) => (
-                <div key={pokemon.id} className="preview-pokemon">
-                  <PokemonSprite
-                    name={pokemon.name}
-                    pokemonId={pokemon.id}
-                    size="medium"
-                    spriteType="artwork"
-                  />
-                  <span>{pokemon.name}</span>
-                </div>
-              ))}
+  
+  const addLog = (message: string, type: LogEntry['type']) => {
+    setLog(prev => [...prev, { turn, message, type }]);
+  };
+  
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  
+  const getAIName = () => {
+    switch (difficulty) {
+      case 'easy': return 'Youngster Joey';
+      case 'normal': return 'Trainer Red';
+      case 'hard': return 'Champion Blue';
+    }
+  };
+  
+  // Render functions
+  const renderEnergyPool = (energy: Energy, isPlayer: boolean) => (
+    <div className={`energy-pool ${isPlayer ? 'player' : 'enemy'}`}>
+      {Object.entries(energy).map(([type, count]) => (
+        <div key={type} className="energy-row">
+          {Array.from({ length: count }).map((_, i) => (
+            <div 
+              key={i} 
+              className="energy-orb"
+              style={{ backgroundColor: ENERGY_COLORS[type as keyof typeof ENERGY_COLORS] }}
+              title={type}
+            >
+              {ENERGY_ICONS[type as keyof typeof ENERGY_ICONS]}
             </div>
-          </div>
-          
-          <div className="difficulty-options">
-            <h3>Selecione a Dificuldade</h3>
-            <div className="difficulty-buttons">
-              <button 
-                className={`difficulty-btn easy ${difficulty === 'easy' ? 'active' : ''}`}
-                onClick={() => setDifficulty('easy')}
-              >
-                <span className="diff-icon">😊</span>
-                <span className="diff-name">Fácil</span>
-                <span className="diff-desc">AI faz escolhas aleatórias</span>
-              </button>
-              <button 
-                className={`difficulty-btn normal ${difficulty === 'normal' ? 'active' : ''}`}
-                onClick={() => setDifficulty('normal')}
-              >
-                <span className="diff-icon">🤔</span>
-                <span className="diff-name">Normal</span>
-                <span className="diff-desc">AI joga de forma equilibrada</span>
-              </button>
-              <button 
-                className={`difficulty-btn hard ${difficulty === 'hard' ? 'active' : ''}`}
-                onClick={() => setDifficulty('hard')}
-              >
-                <span className="diff-icon">😈</span>
-                <span className="diff-name">Difícil</span>
-                <span className="diff-desc">AI joga otimizando cada turno</span>
-              </button>
-            </div>
-          </div>
-          
-          <div className="start-actions">
-            <button className="btn btn-primary btn-large" onClick={startBattle}>
-              ⚔️ Iniciar Batalha
-            </button>
-            <Link href="/play" className="btn btn-secondary">
-              Voltar
-            </Link>
-          </div>
+          ))}
         </div>
+      ))}
+    </div>
+  );
+  
+  const renderCharacter = (char: BattleCharacter, isPlayer: boolean) => (
+    <div 
+      key={char.id}
+      className={`battle-character ${!char.alive ? 'dead' : ''} ${isPlayer ? 'player' : 'enemy'}`}
+      onClick={() => selectedSkill && !isPlayer && char.alive && selectTarget(char.slot)}
+    >
+      <div className="char-portrait">
+        <Image
+          src={`/images/pokemon/${char.name.toLowerCase()}.png`}
+          alt={char.name}
+          width={80}
+          height={80}
+          className="char-image"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
+          }}
+        />
+        {!char.alive && <div className="death-overlay">✕</div>}
       </div>
-    );
-  }
-
-  // Render batalha ou resultado
-  const activePokemon = playerTeam[activePokemonIndex];
-  const aiActivePokemon = aiTeam[aiActivePokemonIndex];
-
-  return (
-    <div className="ai-battle-page">
-      <div className="battle-container">
-        {/* Header da batalha */}
-        <div className="battle-header">
-          <span className="turn-indicator">Turno {turn}</span>
-          <span className={`turn-status ${isPlayerTurn ? 'your-turn' : 'enemy-turn'}`}>
-            {isPlayerTurn ? '🎯 Seu turno!' : '⏳ Turno do oponente...'}
-          </span>
-          <span className="difficulty-badge">{difficulty.toUpperCase()}</span>
-        </div>
-
-        {/* Arena de batalha */}
-        <div className="battle-arena">
-          {/* Overlay de Animações */}
-          <BattleAnimationManager 
-            animations={animations} 
-            onAnimationComplete={removeAnimation}
+      
+      <div className="char-info">
+        <div className="char-name">{char.name}</div>
+        <div className="health-bar-container">
+          <div 
+            className="health-bar"
+            style={{ 
+              width: `${(char.health / char.maxHealth) * 100}%`,
+              backgroundColor: char.health > char.maxHealth * 0.5 ? '#4CAF50' : 
+                               char.health > char.maxHealth * 0.25 ? '#FFC107' : '#F44336'
+            }}
           />
-          
-          {/* Transição de Turno */}
-          {showTurnTransition && (
-            <TurnTransition 
-              turn={turn} 
-              onComplete={() => setShowTurnTransition(false)}
-            />
-          )}
-          
-          {/* Lado do Jogador */}
-          <div id="player-pokemon" className={`battle-side player ${lastDamage?.target === 'player' ? 'pokemon-damaged' : ''}`}>
-            <div className="pokemon-display">
-              <PokemonSprite
-                name={activePokemon?.name || ''}
-                pokemonId={activePokemon?.id}
-                size="xlarge"
-                spriteType="artwork"
-                className={animatingAttack && isPlayerTurn ? 'pokemon-attacking' : ''}
-              />
-              {lastDamage?.target === 'player' && (
-                <div className="damage-number">-{lastDamage.amount}</div>
-              )}
-            </div>
-            
-            <div className="pokemon-info">
-              <h3>{activePokemon?.name}</h3>
-              <div className="hp-bar-container">
-                <div className="hp-bar">
-                  <div 
-                    className="hp-fill"
-                    style={{ 
-                      width: `${(activePokemon?.currentHp / activePokemon?.hp) * 100}%`,
-                      backgroundColor: (activePokemon?.currentHp / activePokemon?.hp) > 0.5 
-                        ? '#4CAF50' 
-                        : (activePokemon?.currentHp / activePokemon?.hp) > 0.25 
-                          ? '#FFC107' 
-                          : '#F44336'
-                    }}
-                  />
-                </div>
-                <span className="hp-text">
-                  {activePokemon?.currentHp} / {activePokemon?.hp}
-                </span>
-              </div>
-            </div>
-
-            {/* Mini team display */}
-            <div className="mini-team">
-              {playerTeam.map((p, i) => (
-                <div 
-                  key={p.id}
-                  className={`mini-pokemon ${i === activePokemonIndex ? 'active' : ''} ${p.currentHp <= 0 ? 'fainted' : ''}`}
-                  onClick={() => switchPokemon(i)}
-                >
-                  <PokemonSprite
-                    name={p.name}
-                    pokemonId={p.id}
-                    size="small"
-                    className={p.currentHp <= 0 ? 'grayscale' : ''}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* VS */}
-          <div className="vs-divider">
-            <span>VS</span>
-          </div>
-
-          {/* Lado da AI */}
-          <div id="ai-pokemon" className={`battle-side ai ${lastDamage?.target === 'ai' ? 'pokemon-damaged' : ''}`}>
-            <div className="pokemon-display">
-              <PokemonSprite
-                name={aiActivePokemon?.name || ''}
-                pokemonId={aiActivePokemon?.id}
-                size="xlarge"
-                spriteType="artwork"
-                className={animatingAttack && !isPlayerTurn ? 'pokemon-attacking' : ''}
-              />
-              {lastDamage?.target === 'ai' && (
-                <div className="damage-number">-{lastDamage.amount}</div>
-              )}
-            </div>
-            
-            <div className="pokemon-info">
-              <h3>{aiActivePokemon?.name} <span className="ai-tag">AI</span></h3>
-              <div className="hp-bar-container">
-                <div className="hp-bar">
-                  <div 
-                    className="hp-fill"
-                    style={{ 
-                      width: `${(aiActivePokemon?.currentHp / aiActivePokemon?.hp) * 100}%`,
-                      backgroundColor: (aiActivePokemon?.currentHp / aiActivePokemon?.hp) > 0.5 
-                        ? '#4CAF50' 
-                        : (aiActivePokemon?.currentHp / aiActivePokemon?.hp) > 0.25 
-                          ? '#FFC107' 
-                          : '#F44336'
-                    }}
-                  />
-                </div>
-                <span className="hp-text">
-                  {aiActivePokemon?.currentHp} / {aiActivePokemon?.hp}
-                </span>
-              </div>
-            </div>
-
-            {/* Mini AI team display */}
-            <div className="mini-team">
-              {aiTeam.map((p, i) => (
-                <div 
-                  key={p.id}
-                  className={`mini-pokemon ${i === aiActivePokemonIndex ? 'active' : ''} ${p.currentHp <= 0 ? 'fainted' : ''}`}
-                >
-                  <PokemonSprite
-                    name={p.name}
-                    pokemonId={p.id}
-                    size="small"
-                    className={p.currentHp <= 0 ? 'grayscale' : ''}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
-
-        {/* Controles de batalha */}
-        {gameState === 'battle' && !winner && (
-          <div className="battle-controls">
-            <h4>Escolha um ataque:</h4>
-            <div className="move-buttons">
-              {(!activePokemon?.moves || activePokemon.moves.length === 0) ? (
-                <div className="no-moves-warning">
-                  <p>⚠️ Este Pokémon não tem movimentos configurados.</p>
-                  <p>Por favor, selecione outro time.</p>
-                </div>
-              ) : (
-                activePokemon.moves.map((move) => {
-                  const cooldownValue = activePokemon.cooldowns[move.id] || 0;
-                  const isOnCooldown = cooldownValue > 0;
-                  const typeColor = getTypeColor(move.type || 'normal');
-                  
-                  return (
-                    <button
-                      key={move.id}
-                      className={`move-button ${move.type || 'normal'}`}
-                      onClick={() => executePlayerMove(move)}
-                      disabled={!isPlayerTurn || animatingAttack || isOnCooldown}
-                      style={{ 
-                        opacity: isOnCooldown ? 0.5 : 1,
-                        borderColor: typeColor.border,
-                      }}
-                    >
-                      <span className="move-name">{move.name}</span>
-                      <span className="move-info">
-                        <span className="move-power">PWR: {move.power || 0}</span>
-                        {isOnCooldown && (
-                          <span className="move-cooldown">CD: {activePokemon.cooldowns[move.id]}</span>
-                        )}
-                      </span>
-                    </button>
-                  );
-                })
-              )}
+        <div className="health-text">{char.health} / {char.maxHealth}</div>
+      </div>
+      
+      {/* Status effects */}
+      <div className="status-icons">
+        {char.statuses.map((status, i) => (
+          <div 
+            key={i}
+            className={`status-icon ${status.helpful ? 'buff' : 'debuff'}`}
+            title={`${status.name} (${status.duration} turns)`}
+          >
+            {status.helpful ? '↑' : '↓'}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  
+  const renderSkills = (char: BattleCharacter, charIndex: number) => (
+    <div className="skills-row">
+      {char.skills.map((skill, skillIndex) => {
+        const affordable = canAfford(skill.cost, playerEnergy);
+        const onCooldown = skill.currentCooldown > 0;
+        const isSelected = selectedSkill?.charIndex === charIndex && selectedSkill?.skillIndex === skillIndex;
+        const isQueued = queuedActions.some(a => a.charIndex === charIndex && a.skillIndex === skillIndex);
+        
+        return (
+          <div
+            key={skill.id}
+            className={`skill-button ${!affordable ? 'unaffordable' : ''} ${onCooldown ? 'cooldown' : ''} ${isSelected ? 'selected' : ''} ${isQueued ? 'queued' : ''} ${!char.alive ? 'disabled' : ''}`}
+            onClick={() => char.alive && !onCooldown && affordable && !isQueued && selectSkill(charIndex, skillIndex)}
+            onMouseEnter={() => setHoveredSkill(skill)}
+            onMouseLeave={() => setHoveredSkill(null)}
+          >
+            <div className="skill-name">{skill.name}</div>
+            {onCooldown && <div className="cooldown-overlay">{skill.currentCooldown}</div>}
+            <div className="skill-cost">
+              {Object.entries(skill.cost).map(([type, count]) => (
+                count ? (
+                  <span key={type} className="cost-item" style={{ color: ENERGY_COLORS[type as keyof typeof ENERGY_COLORS] }}>
+                    {ENERGY_ICONS[type as keyof typeof ENERGY_ICONS]}{count}
+                  </span>
+                ) : null
+              ))}
             </div>
           </div>
-        )}
-
-        {/* Resultado da batalha */}
-        {gameState === 'finished' && winner && (
-          <div className="battle-result">
-            <div className={`result-card ${winner === 'player' ? 'victory' : 'defeat'}`}>
-              <h2>{winner === 'player' ? '🏆 Vitória!' : '💔 Derrota'}</h2>
-              <p>
-                {winner === 'player' 
-                  ? 'Parabéns! Você derrotou a AI!' 
-                  : 'Não desista! Tente novamente!'}
-              </p>
-              <div className="result-actions">
-                <button className="btn btn-primary" onClick={() => {
-                  setGameState('ready');
-                  setPlayerTeam(team => team.map(p => ({ ...p, currentHp: p.hp, cooldowns: {} })));
-                  setBattleLog([]);
-                  setWinner(null);
-                  setTurn(1);
-                }}>
-                  Jogar Novamente
-                </button>
-                <Link href="/play" className="btn btn-secondary">
-                  Voltar ao Menu
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Log de batalha */}
-        <div className="battle-log">
-          <h4>📜 Log da Batalha</h4>
-          <div className="log-entries">
-            {battleLog.slice(-5).map((log, i) => (
-              <div key={i} className="log-entry">
-                {log.message}
+        );
+      })}
+    </div>
+  );
+  
+  // Setup phase
+  if (phase === 'setup') {
+    return (
+      <div className="battle-container setup">
+        <h1>⚔️ Battle vs AI</h1>
+        
+        <div className="team-preview">
+          <h2>Your Team</h2>
+          <div className="team-row">
+            {playerTeam.map(char => (
+              <div key={char.id} className="preview-char">
+                <Image
+                  src={`/images/pokemon/${char.name.toLowerCase()}.png`}
+                  alt={char.name}
+                  width={100}
+                  height={100}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/pokemon/pikachu.png';
+                  }}
+                />
+                <div className="preview-name">{char.name}</div>
               </div>
             ))}
           </div>
+        </div>
+        
+        <div className="difficulty-select">
+          <h2>Select Difficulty</h2>
+          <div className="difficulty-options">
+            {(['easy', 'normal', 'hard'] as Difficulty[]).map(d => (
+              <button
+                key={d}
+                className={`difficulty-btn ${difficulty === d ? 'selected' : ''}`}
+                onClick={() => setDifficulty(d)}
+              >
+                <div className="diff-icon">
+                  {d === 'easy' ? '😊' : d === 'normal' ? '😐' : '😈'}
+                </div>
+                <div className="diff-name">{d.charAt(0).toUpperCase() + d.slice(1)}</div>
+                <div className="diff-desc">
+                  {d === 'easy' ? 'AI makes random choices' : 
+                   d === 'normal' ? 'AI plays balanced' : 
+                   'AI plays optimally'}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <button className="start-battle-btn" onClick={startBattle}>
+          ⚔️ Start Battle
+        </button>
+        
+        <button className="back-btn" onClick={() => router.push('/play')}>
+          ← Back
+        </button>
+      </div>
+    );
+  }
+  
+  // Victory/Defeat
+  if (phase === 'victory' || phase === 'defeat') {
+    return (
+      <div className={`battle-container result ${phase}`}>
+        <div className="result-modal">
+          <h1>{phase === 'victory' ? '🏆 Victory!' : '💔 Defeat'}</h1>
+          <p>{phase === 'victory' ? 'Congratulations! You won the battle!' : "Don't give up! Try again!"}</p>
+          
+          <div className="result-buttons">
+            <button onClick={() => {
+              setPhase('setup');
+              setPlayerTeam(playerTeam.map(c => ({ ...c, health: c.maxHealth, alive: true, skills: c.skills.map(s => ({ ...s, currentCooldown: 0 })) })));
+            }}>
+              Play Again
+            </button>
+            <button onClick={() => router.push('/play')}>
+              Back to Menu
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Loading
+  if (phase === 'loading') {
+    return (
+      <div className="battle-container loading">
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
+  
+  // Battle phase
+  return (
+    <div className="battle-container">
+      {/* Header */}
+      <div className="battle-header">
+        <div className="turn-info">Turn {turn}</div>
+        <div className="vs-badge">VS</div>
+        <div className="opponent-name">{getAIName()}</div>
+      </div>
+      
+      {/* Main battle area */}
+      <div className="battle-arena">
+        {/* Player side */}
+        <div className="team-side player-side">
+          <div className="team-label">Your Team</div>
+          {renderEnergyPool(playerEnergy, true)}
+          <div className="characters-column">
+            {playerTeam.map(char => renderCharacter(char, true))}
+          </div>
+        </div>
+        
+        {/* Enemy side */}
+        <div className="team-side enemy-side">
+          <div className="team-label">{getAIName()}</div>
+          {renderEnergyPool(aiEnergy, false)}
+          <div className="characters-column">
+            {aiTeam.map(char => renderCharacter(char, false))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Skills panel */}
+      <div className="skills-panel">
+        <div className="skills-header">
+          {selectedSkill ? 'Select Target' : 'Select a Skill'}
+        </div>
+        {playerTeam.map((char, idx) => (
+          <div key={char.id} className="char-skills">
+            <div className="char-skills-label">{char.name}</div>
+            {renderSkills(char, idx)}
+          </div>
+        ))}
+        
+        <div className="action-buttons">
+          <button 
+            className="execute-btn"
+            onClick={executeActions}
+            disabled={animating || queuedActions.length === 0}
+          >
+            {animating ? 'Executing...' : `Execute Turn (${queuedActions.length} actions)`}
+          </button>
+          
+          <button 
+            className="skip-btn"
+            onClick={endTurn}
+            disabled={animating}
+          >
+            Skip Turn
+          </button>
+        </div>
+      </div>
+      
+      {/* Skill tooltip */}
+      {hoveredSkill && (
+        <div className="skill-tooltip">
+          <div className="tooltip-name">{hoveredSkill.name}</div>
+          <div className="tooltip-desc">{hoveredSkill.description}</div>
+          {hoveredSkill.cooldown > 0 && (
+            <div className="tooltip-cd">Cooldown: {hoveredSkill.cooldown} turns</div>
+          )}
+        </div>
+      )}
+      
+      {/* Battle log */}
+      <div className="battle-log" ref={logRef}>
+        <div className="log-header">📜 Battle Log</div>
+        <div className="log-entries">
+          {log.map((entry, i) => (
+            <div key={i} className={`log-entry ${entry.type}`}>
+              <span className="log-turn">[T{entry.turn}]</span>
+              <span className="log-message">{entry.message}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
