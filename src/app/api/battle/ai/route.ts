@@ -20,6 +20,52 @@ const AI_NAMES = {
   hard: 'Champion Blue',
 };
 
+// GET - Check if user has an active AI battle
+export async function GET() {
+  try {
+    const session = await getSession();
+    
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Check for active AI battles
+    const activeBattle = await prisma.battle.findFirst({
+      where: {
+        player1Id: session.user.id,
+        battleType: 'ai',
+        status: 'active',
+      },
+      orderBy: {
+        startedAt: 'desc',
+      },
+    });
+
+    if (activeBattle) {
+      return NextResponse.json({
+        success: true,
+        hasBattle: true,
+        battleId: activeBattle.id,
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      hasBattle: false,
+    });
+
+  } catch (error) {
+    console.error('AI Battle GET error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSession();

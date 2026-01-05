@@ -235,6 +235,7 @@ export const typeColors: Record<string, { bg: string; text: string; border: stri
 /**
  * Retorna as cores de um tipo de Pokémon
  */
-export function getTypeColor(type: string): { bg: string; text: string; border: string } {
+export function getTypeColor(type: string | null | undefined): { bg: string; text: string; border: string } {
+  if (!type) return typeColors.normal;
   return typeColors[type.toLowerCase()] || typeColors.normal;
 }
