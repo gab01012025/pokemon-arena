@@ -64,26 +64,29 @@ export async function GET(request: NextRequest) {
         moves: [],  // Default empty array
       };
       
-      if (includeMoves && 'moves' in p) {
-        base.moves = (p.moves as Array<{
-          id: string;
-          name: string;
-          description: string;
-          damage: number;
-          cooldown: number;
-          classes: string;
-          effects: string;
-          target: string;
-          cost: string;
-        }>).map(m => ({
+      // Always process moves if they exist (starters should always have moves)
+      const pokemonMoves = (p as { moves?: Array<{
+        id: string;
+        name: string;
+        description: string;
+        damage: number;
+        cooldown: number;
+        classes: string;
+        effects: string;
+        target: string;
+        cost: string;
+      }> }).moves;
+      
+      if (pokemonMoves && Array.isArray(pokemonMoves) && pokemonMoves.length > 0) {
+        base.moves = pokemonMoves.map(m => ({
           id: m.id,
           name: m.name,
-          description: m.description,
-          damage: m.damage,
-          power: m.damage, // Alias for battle page
-          cooldown: m.cooldown,
-          energyCost: m.cost,
-          effect: m.effects,
+          description: m.description || '',
+          damage: m.damage || 10,
+          power: m.damage || 10, // Alias for battle page
+          cooldown: m.cooldown || 0,
+          energyCost: m.cost || '{}',
+          effect: m.effects || '[]',
           type: firstType?.toLowerCase() || 'normal',
         }));
       }
