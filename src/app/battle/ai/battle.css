@@ -2,10 +2,21 @@
 
 .battle-arena {
   min-height: 100vh;
-  background: url('/images/battle-bg.jpg') center center / cover no-repeat;
+  background: url('/images/pokemon-battle.webp') center center / cover no-repeat;
   background-color: #2d5a27;
   position: relative;
   overflow: hidden;
+}
+
+.battle-arena::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
 }
 
 /* ============ TOP BAR - Header with players ============ */
@@ -215,10 +226,10 @@
 }
 
 .skill-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #1a1a1a 100%);
-  border: 2px solid #555;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+  border: 2px solid #666;
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -232,22 +243,29 @@
 .skill-icon:hover:not(.disabled):not(.cooldown) {
   border-color: #ffd700;
   transform: scale(1.1);
+  z-index: 10;
 }
 
 .skill-icon.selected {
   border-color: #00ff00;
-  box-shadow: 0 0 5px #00ff00;
+  box-shadow: 0 0 8px #00ff00;
 }
 
 .skill-icon.queued {
-  border-color: #ffaa00;
-  background: linear-gradient(180deg, #553300 0%, #331100 100%);
+  border-color: #ff8800;
+  box-shadow: 0 0 8px #ff8800;
+  background: linear-gradient(180deg, #664400 0%, #442200 100%);
 }
 
-.skill-icon.disabled,
-.skill-icon.cooldown {
-  opacity: 0.5;
+.skill-icon.disabled {
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+.skill-icon.cooldown {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: linear-gradient(180deg, #333 0%, #111 100%);
 }
 
 .skill-icon img {

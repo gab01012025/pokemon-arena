@@ -458,11 +458,24 @@ export default function BattlePage() {
                 }}
                 onMouseEnter={() => setHoveredSkill({ char, skill })}
                 onMouseLeave={() => setHoveredSkill(null)}
+                title={skill.name}
               >
                 {onCooldown ? (
                   <span className="cooldown-number">{skill.currentCooldown}</span>
                 ) : (
-                  <span className="question-mark">?</span>
+                  <img 
+                    src={`/images/pokemon/${char.name.toLowerCase()}.png`}
+                    alt={skill.name}
+                    style={{ 
+                      width: '36px', 
+                      height: '36px', 
+                      objectFit: 'contain',
+                      filter: queued ? 'brightness(1.2)' : 'none',
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                 )}
               </div>
             );
