@@ -49,6 +49,18 @@ export async function GET() {
                 name: true,
                 types: true,
                 health: true,
+                moves: {
+                  select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    damage: true,
+                    cooldown: true,
+                    cost: true,
+                    effects: true,
+                    target: true,
+                  },
+                },
               },
             },
           },
@@ -112,6 +124,14 @@ export async function GET() {
           attack: 80,
           defense: 70,
           speed: 60,
+          moves: up.pokemon.moves.map(m => ({
+            id: m.id,
+            name: m.name,
+            description: m.description,
+            type: JSON.parse(up.pokemon.types)[0] || 'normal',
+            power: m.damage,
+            cooldown: m.cooldown,
+          })),
         },
       })),
     } : null;

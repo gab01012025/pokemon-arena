@@ -8,7 +8,7 @@ import { getTypeColor } from '@/lib/pokemon-images';
 import { useBattleAnimations, BattleAnimationManager, TurnTransition } from '@/components/battle/BattleAnimations';
 
 interface Pokemon {
-  id: number;
+  id: string | number;
   name: string;
   type: string;
   hp: number;
@@ -19,7 +19,7 @@ interface Pokemon {
 }
 
 interface Move {
-  id: number;
+  id: string | number;
   name: string;
   type: string;
   power: number;
@@ -29,7 +29,7 @@ interface Move {
 
 interface BattlePokemon extends Pokemon {
   currentHp: number;
-  cooldowns: Record<number, number>;
+  cooldowns: Record<string | number, number>;
 }
 
 interface BattleLog {

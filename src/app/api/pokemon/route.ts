@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 3.0.0 - Force redeploy with data transformation
+// API Version 4.0.0 - Always include moves for battles
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v3.0.0 - Starting request');
+  console.log('[API Pokemon] v4.0.0 - Starting request');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
-    const includeMoves = searchParams.get('includeMoves') === 'true';
+    const includeMoves = searchParams.get('includeMoves') === 'true' || startersOnly; // Always include moves for starters
     
     const pokemon = await prisma.pokemon.findMany({
       where: startersOnly ? { isStarter: true } : undefined,
@@ -80,12 +80,19 @@ export async function GET(request: NextRequest) {
           name: m.name,
           description: m.description,
           damage: m.damage,
+          power: m.damage, // Alias for battle page
           cooldown: m.cooldown,
           energyCost: m.cost,
           effect: m.effects,
-          type: firstType || 'normal',
+          type: firstType?.toLowerCase() || 'normal',
         }));
       }
+      
+      // Also add stats for AI battles
+      base.hp = p.health;
+      base.attack = 80 + Math.floor((p.health - 100) / 2); // Scale with health
+      base.defense = 70 + Math.floor((p.health - 100) / 3);
+      base.speed = 60 + Math.floor((p.health - 100) / 4);
       
       return base;
     });

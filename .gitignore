@@ -45,3 +45,4 @@ next-env.d.ts
 # Database
 *.db
 prisma/dev.db
+.env*.local
