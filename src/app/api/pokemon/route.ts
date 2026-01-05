@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 7.0.0 - Full moves without select restriction
+// API Version 8.0.0 - With cache headers and version field
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v7.0.0 - Full moves');
+  console.log('[API Pokemon] v8.0.0 - Full moves, no cache');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
@@ -85,7 +88,10 @@ export async function GET(request: NextRequest) {
       return base;
     });
 
-    return NextResponse.json(transformedPokemon);
+    const response = NextResponse.json(transformedPokemon);
+    response.headers.set('X-API-Version', '8.0.0');
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (error) {
     console.error('Failed to fetch Pokemon:', error);
     return NextResponse.json(
