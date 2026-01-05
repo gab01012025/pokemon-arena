@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// API Version 8.0.0 - With cache headers and version field
+// API Version 9.0.0 - Explicit move field selection
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  console.log('[API Pokemon] v8.0.0 - Full moves, no cache');
+  console.log('[API Pokemon] v9.0.0 - Explicit move selection');
   try {
     const { searchParams } = new URL(request.url);
     const startersOnly = searchParams.get('starters') === 'true';
@@ -14,9 +14,23 @@ export async function GET(request: NextRequest) {
     
     const pokemon = await prisma.pokemon.findMany({
       where: startersOnly ? { isStarter: true } : undefined,
-      include: {
-        moves: includeMoves // Include all move fields
-      },
+      include: includeMoves ? {
+        moves: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            classes: true,
+            cost: true,
+            cooldown: true,
+            duration: true,
+            damage: true,
+            healing: true,
+            effects: true,
+            target: true,
+          }
+        }
+      } : undefined,
       orderBy: [
         { isStarter: 'desc' },
         { name: 'asc' }
