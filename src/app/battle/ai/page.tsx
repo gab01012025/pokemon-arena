@@ -336,7 +336,7 @@ function BattleGame() {
 
   const displaySkill = hoveredSkill || selectedSkill;
 
-  if (loading) return <div className="na-loading">Loading Battle...</div>;
+  if (loading) return <div className="na-loading">⚔️ Loading Battle... ⚔️</div>;
 
   // Calculate total chakra cost for display
   const getTotalCost = (skill: Skill) => {
