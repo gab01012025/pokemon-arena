@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import './battle.css';
 
 // ==================== TYPES ====================
 interface Pokemon {
@@ -18,12 +19,10 @@ interface Skill {
   desc: string;
   damage: number;
   heal: number;
-  defense: number;
-  isSelf: boolean;
-  isArea: boolean;
+  classes: string[];
   cd: number;
   currentCd: number;
-  cost: { tai: number; blood: number; nin: number; gen: number };
+  cost: { tai: number; blood: number; nin: number; gen: number; rand: number };
 }
 
 interface QueuedAction {
@@ -42,54 +41,60 @@ const CHARACTERS: Record<string, {
     name: 'Pikachu',
     hp: 100,
     skills: [
-      { id: 'skill1', name: 'Thunderbolt', desc: 'A powerful electric attack that strikes the opponent with lightning.', damage: 35, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
-      { id: 'skill2', name: 'Quick Attack', desc: 'A fast strike that hits before the enemy can react.', damage: 20, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
-      { id: 'skill3', name: 'Thunder Wave', desc: 'Paralyzes the target, reducing their speed.', damage: 0, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
+      { id: 'skill1', name: 'Thunderbolt', desc: 'Pikachu releases a powerful electric shock that deals 35 DAMAGE to one enemy.', damage: 35, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0, rand: 0 } },
+      { id: 'skill2', name: 'Quick Attack', desc: 'Pikachu strikes with incredible speed, dealing 20 DAMAGE. This skill is ALWAYS FIRST.', damage: 20, heal: 0, classes: ['Physical', 'Melee', 'Instant'], cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0, rand: 0 } },
+      { id: 'skill3', name: 'Thunder Wave', desc: 'Pikachu paralyzes the target for 1 turn, STUNNING them.', damage: 0, heal: 0, classes: ['Chakra', 'Ranged', 'Affliction'], cd: 2, cost: { tai: 0, blood: 0, nin: 1, gen: 0, rand: 0 } },
+      { id: 'skill4', name: 'Volt Tackle', desc: 'Pikachu charges with electricity dealing 50 DAMAGE but takes 15 recoil damage.', damage: 50, heal: 0, classes: ['Physical', 'Melee', 'Instant'], cd: 3, cost: { tai: 0, blood: 0, nin: 2, gen: 0, rand: 0 } },
     ]
   },
   charizard: {
     name: 'Charizard',
-    hp: 120,
+    hp: 100,
     skills: [
-      { id: 'skill1', name: 'Flamethrower', desc: 'Breathes intense flames that burn the opponent.', damage: 40, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 1, nin: 0, gen: 0 } },
-      { id: 'skill2', name: 'Dragon Claw', desc: 'Slashes the enemy with sharp claws.', damage: 30, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
-      { id: 'skill3', name: 'Fire Blast', desc: 'A devastating fire attack that hits all enemies.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: true, cd: 3, cost: { tai: 0, blood: 2, nin: 0, gen: 0 } },
+      { id: 'skill1', name: 'Flamethrower', desc: 'Charizard breathes intense flames dealing 40 DAMAGE to one enemy.', damage: 40, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 0, cost: { tai: 0, blood: 1, nin: 0, gen: 0, rand: 0 } },
+      { id: 'skill2', name: 'Dragon Claw', desc: 'Charizard slashes with sharp claws dealing 30 DAMAGE.', damage: 30, heal: 0, classes: ['Physical', 'Melee', 'Instant'], cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0, rand: 0 } },
+      { id: 'skill3', name: 'Fire Spin', desc: 'Charizard traps the enemy in fire, dealing 15 DAMAGE for 3 turns.', damage: 15, heal: 0, classes: ['Chakra', 'Ranged', 'Affliction'], cd: 3, cost: { tai: 0, blood: 1, nin: 0, gen: 0, rand: 1 } },
+      { id: 'skill4', name: 'Blast Burn', desc: 'Charizard unleashes ultimate flames dealing 65 DAMAGE to all enemies.', damage: 65, heal: 0, classes: ['Chakra', 'Ranged', 'Instant', 'AOE'], cd: 4, cost: { tai: 0, blood: 2, nin: 0, gen: 0, rand: 0 } },
     ]
   },
   blastoise: {
     name: 'Blastoise',
-    hp: 130,
+    hp: 100,
     skills: [
-      { id: 'skill1', name: 'Hydro Pump', desc: 'Blasts the enemy with high-pressure water.', damage: 45, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 1, cost: { tai: 0, blood: 0, nin: 2, gen: 0 } },
-      { id: 'skill2', name: 'Water Gun', desc: 'A basic water attack.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
-      { id: 'skill3', name: 'Protect', desc: 'Becomes invulnerable for one turn.', damage: 0, heal: 0, defense: 100, isSelf: true, isArea: false, cd: 4, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
+      { id: 'skill1', name: 'Hydro Pump', desc: 'Blastoise blasts high-pressure water dealing 45 DAMAGE.', damage: 45, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 1, cost: { tai: 0, blood: 0, nin: 2, gen: 0, rand: 0 } },
+      { id: 'skill2', name: 'Water Gun', desc: 'A basic water attack dealing 25 DAMAGE.', damage: 25, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 0, cost: { tai: 0, blood: 0, nin: 1, gen: 0, rand: 0 } },
+      { id: 'skill3', name: 'Withdraw', desc: 'Blastoise retreats into shell, gaining 25 DESTRUCTIBLE DEFENSE for 2 turns.', damage: 0, heal: 0, classes: ['Chakra', 'Instant', 'Defense'], cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1, rand: 0 } },
+      { id: 'skill4', name: 'Hydro Cannon', desc: 'Ultimate water blast dealing 60 DAMAGE. Blastoise cannot act next turn.', damage: 60, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 4, cost: { tai: 0, blood: 0, nin: 2, gen: 0, rand: 1 } },
     ]
   },
   venusaur: {
     name: 'Venusaur',
-    hp: 125,
+    hp: 100,
     skills: [
-      { id: 'skill1', name: 'Solar Beam', desc: 'Fires a powerful beam of solar energy.', damage: 55, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 2, gen: 0 } },
-      { id: 'skill2', name: 'Vine Whip', desc: 'Strikes with sharp vines.', damage: 25, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0 } },
-      { id: 'skill3', name: 'Synthesis', desc: 'Restores HP by absorbing sunlight.', damage: 0, heal: 35, defense: 0, isSelf: true, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 1, gen: 0 } },
+      { id: 'skill1', name: 'Solar Beam', desc: 'Venusaur fires a powerful beam dealing 55 DAMAGE.', damage: 55, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 2, cost: { tai: 0, blood: 0, nin: 2, gen: 0, rand: 0 } },
+      { id: 'skill2', name: 'Vine Whip', desc: 'Strikes with vines dealing 25 DAMAGE.', damage: 25, heal: 0, classes: ['Physical', 'Melee', 'Instant'], cd: 0, cost: { tai: 1, blood: 0, nin: 0, gen: 0, rand: 0 } },
+      { id: 'skill3', name: 'Leech Seed', desc: 'Plants a seed that DRAINS 10 HP per turn for 3 turns.', damage: 10, heal: 10, classes: ['Chakra', 'Ranged', 'Affliction'], cd: 3, cost: { tai: 0, blood: 0, nin: 1, gen: 0, rand: 0 } },
+      { id: 'skill4', name: 'Synthesis', desc: 'Venusaur heals 35 HP by absorbing sunlight.', damage: 0, heal: 35, classes: ['Chakra', 'Instant'], cd: 3, cost: { tai: 0, blood: 0, nin: 1, gen: 0, rand: 0 } },
     ]
   },
   gengar: {
     name: 'Gengar',
-    hp: 90,
+    hp: 100,
     skills: [
-      { id: 'skill1', name: 'Shadow Ball', desc: 'Hurls a shadowy blob at the enemy.', damage: 40, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
-      { id: 'skill2', name: 'Hypnosis', desc: 'Puts the enemy to sleep.', damage: 0, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
-      { id: 'skill3', name: 'Dream Eater', desc: 'Eats the dreams of a sleeping enemy.', damage: 50, heal: 25, defense: 0, isSelf: false, isArea: false, cd: 2, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
+      { id: 'skill1', name: 'Shadow Ball', desc: 'Gengar hurls a shadowy blob dealing 40 DAMAGE.', damage: 40, heal: 0, classes: ['Chakra', 'Ranged', 'Instant'], cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2, rand: 0 } },
+      { id: 'skill2', name: 'Hypnosis', desc: 'Gengar puts the enemy to SLEEP for 2 turns.', damage: 0, heal: 0, classes: ['Mental', 'Ranged', 'Affliction'], cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1, rand: 0 } },
+      { id: 'skill3', name: 'Dream Eater', desc: 'Eats the dreams of a sleeping enemy, dealing 50 DAMAGE and healing 25 HP.', damage: 50, heal: 25, classes: ['Mental', 'Ranged', 'Instant'], cd: 2, cost: { tai: 0, blood: 0, nin: 0, gen: 2, rand: 0 } },
+      { id: 'skill4', name: 'Curse', desc: 'Gengar curses the target, both lose 25% HP per turn for 4 turns.', damage: 0, heal: 0, classes: ['Affliction', 'Unique'], cd: 4, cost: { tai: 0, blood: 1, nin: 0, gen: 0, rand: 0 } },
     ]
   },
   mewtwo: {
     name: 'Mewtwo',
-    hp: 110,
+    hp: 100,
     skills: [
-      { id: 'skill1', name: 'Psychic', desc: 'A powerful psychic attack.', damage: 45, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2 } },
-      { id: 'skill2', name: 'Barrier', desc: 'Creates a defensive barrier.', damage: 0, heal: 0, defense: 50, isSelf: true, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1 } },
-      { id: 'skill3', name: 'Psystrike', desc: 'The ultimate psychic attack.', damage: 65, heal: 0, defense: 0, isSelf: false, isArea: false, cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 3 } },
+      { id: 'skill1', name: 'Psychic', desc: 'Mewtwo attacks with psychic power dealing 45 DAMAGE.', damage: 45, heal: 0, classes: ['Mental', 'Ranged', 'Instant'], cd: 0, cost: { tai: 0, blood: 0, nin: 0, gen: 2, rand: 0 } },
+      { id: 'skill2', name: 'Barrier', desc: 'Mewtwo creates a barrier, becoming INVULNERABLE for 1 turn.', damage: 0, heal: 0, classes: ['Mental', 'Instant', 'Invulnerable'], cd: 4, cost: { tai: 0, blood: 0, nin: 0, gen: 1, rand: 0 } },
+      { id: 'skill3', name: 'Psystrike', desc: 'A devastating psychic blow dealing 55 DAMAGE that ignores defense.', damage: 55, heal: 0, classes: ['Mental', 'Ranged', 'Instant', 'Piercing'], cd: 2, cost: { tai: 0, blood: 0, nin: 0, gen: 2, rand: 1 } },
+      { id: 'skill4', name: 'Recover', desc: 'Mewtwo restores 40 HP.', damage: 0, heal: 40, classes: ['Mental', 'Instant'], cd: 3, cost: { tai: 0, blood: 0, nin: 0, gen: 1, rand: 0 } },
     ]
   }
 };
@@ -112,7 +117,8 @@ function getSkillImage(charId: string, skillNum: number): string {
   const num = getPokeNum(charId);
   if (skillNum === 1) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${num}.png`;
   if (skillNum === 2) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${num}.png`;
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${num}.png`;
+  if (skillNum === 3) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${num}.png`;
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/shiny/${num}.png`;
 }
 
 function createChar(charId: string, owner: string): Pokemon {
@@ -129,26 +135,9 @@ function createChar(charId: string, owner: string): Pokemon {
 // ==================== MAIN COMPONENT ====================
 export default function BattlePage() {
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <Suspense fallback={<div className="na-loading">Loading Battle...</div>}>
       <BattleGame />
     </Suspense>
-  );
-}
-
-function LoadingScreen() {
-  return (
-    <div style={{
-      width: '100%',
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#1a1a1a',
-      color: '#fff',
-      fontSize: '24px'
-    }}>
-      Loading Battle...
-    </div>
   );
 }
 
@@ -157,19 +146,20 @@ function BattleGame() {
   const params = useSearchParams();
   const teamParam = params.get('team');
 
-  // State
   const [loading, setLoading] = useState(true);
   const [turn, setTurn] = useState(1);
   const [timer, setTimer] = useState(30);
+  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [redTeam, setRedTeam] = useState<Pokemon[]>([]);
   const [blueTeam, setBlueTeam] = useState<Pokemon[]>([]);
-  const [chakra, setChakra] = useState({ tai: 1, blood: 1, nin: 1, gen: 1 });
-  const [selectedSkill, setSelectedSkill] = useState<{char: Pokemon, skill: Skill, charId: string} | null>(null);
+  const [chakra, setChakra] = useState({ tai: 0, blood: 1, nin: 0, gen: 0, rand: 1 });
+  const [selectedSkill, setSelectedSkill] = useState<{char: Pokemon, skill: Skill, charId: string, charIdx: number} | null>(null);
   const [hoveredSkill, setHoveredSkill] = useState<{char: Pokemon, skill: Skill, charId: string} | null>(null);
   const [queue, setQueue] = useState<QueuedAction[]>([]);
   const [gameOver, setGameOver] = useState<'win' | 'lose' | null>(null);
-  const [volume, setVolume] = useState(50);
   const [targetMode, setTargetMode] = useState(false);
+  const [centerChar, setCenterChar] = useState<{charId: string, team: 'red' | 'blue'} | null>(null);
+  const [hoveredChar, setHoveredChar] = useState<{name: string, rank: string, clan: string, level: number, ladderRank: number, ratio: string} | null>(null);
 
   const [redCharIds, setRedCharIds] = useState<string[]>([]);
   const [blueCharIds, setBlueCharIds] = useState<string[]>([]);
@@ -200,10 +190,16 @@ function BattleGame() {
   useEffect(() => {
     if (loading || gameOver) return;
     const interval = setInterval(() => {
-      setTimer(t => t > 0 ? t - 1 : 30);
+      setTimer(t => {
+        if (t <= 0) {
+          onPassTurn();
+          return 30;
+        }
+        return t - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [loading, gameOver]);
+  }, [loading, gameOver, isPlayerTurn]);
 
   // Win/lose check
   useEffect(() => {
@@ -212,36 +208,53 @@ function BattleGame() {
     else if (blueTeam.every(p => p.hp <= 0)) setGameOver('win');
   }, [redTeam, blueTeam]);
 
-  // Skill click handler
-  const onSkillClick = (char: Pokemon, skill: Skill, charId: string) => {
-    if (skill.currentCd > 0 || char.hp <= 0) return;
-    if (skill.cost.tai > chakra.tai || skill.cost.blood > chakra.blood || 
-        skill.cost.nin > chakra.nin || skill.cost.gen > chakra.gen) return;
-
-    setSelectedSkill({ char, skill, charId });
-    setHoveredSkill({ char, skill, charId });
-
-    if (skill.isSelf) {
-      addToQueue(char, skill, char);
-    } else {
-      setTargetMode(true);
-    }
+  const canAfford = (skill: Skill) => {
+    const totalChakra = chakra.tai + chakra.blood + chakra.nin + chakra.gen + chakra.rand;
+    const needed = skill.cost.tai + skill.cost.blood + skill.cost.nin + skill.cost.gen + skill.cost.rand;
+    
+    if (skill.cost.tai > chakra.tai + chakra.rand) return false;
+    if (skill.cost.blood > chakra.blood + chakra.rand) return false;
+    if (skill.cost.nin > chakra.nin + chakra.rand) return false;
+    if (skill.cost.gen > chakra.gen + chakra.rand) return false;
+    
+    return totalChakra >= needed;
   };
 
-  // Target click handler
-  const onTargetClick = (target: Pokemon) => {
+  const onSkillClick = (char: Pokemon, skill: Skill, charId: string, charIdx: number) => {
+    if (skill.currentCd > 0 || char.hp <= 0 || !canAfford(skill)) return;
+
+    setSelectedSkill({ char, skill, charId, charIdx });
+    setHoveredSkill({ char, skill, charId });
+    setCenterChar({ charId, team: 'red' });
+    setTargetMode(true);
+  };
+
+  const onTargetClick = (target: Pokemon, targetCharId: string, team: 'red' | 'blue') => {
     if (!targetMode || !selectedSkill) return;
+    
+    // Show center character when clicking
+    setCenterChar({ charId: targetCharId, team });
+    
+    // Add to queue
     addToQueue(selectedSkill.char, selectedSkill.skill, target);
   };
 
-  // Add action to queue
   const addToQueue = (user: Pokemon, skill: Skill, target: Pokemon) => {
-    setChakra(prev => ({
-      tai: prev.tai - skill.cost.tai,
-      blood: prev.blood - skill.cost.blood,
-      nin: prev.nin - skill.cost.nin,
-      gen: prev.gen - skill.cost.gen,
-    }));
+    // Deduct chakra
+    let newChakra = { ...chakra };
+    newChakra.tai -= skill.cost.tai;
+    newChakra.blood -= skill.cost.blood;
+    newChakra.nin -= skill.cost.nin;
+    newChakra.gen -= skill.cost.gen;
+    // Use rand chakra for any deficit
+    const deficit = -Math.min(0, newChakra.tai) - Math.min(0, newChakra.blood) - Math.min(0, newChakra.nin) - Math.min(0, newChakra.gen);
+    newChakra.rand -= skill.cost.rand + deficit;
+    newChakra.tai = Math.max(0, newChakra.tai);
+    newChakra.blood = Math.max(0, newChakra.blood);
+    newChakra.nin = Math.max(0, newChakra.nin);
+    newChakra.gen = Math.max(0, newChakra.gen);
+    
+    setChakra(newChakra);
 
     setQueue(prev => [...prev, {
       oderId: user.id,
@@ -253,7 +266,6 @@ function BattleGame() {
     setTargetMode(false);
   };
 
-  // Pass turn / Execute actions
   const onPassTurn = () => {
     // Execute player actions
     queue.forEach(action => {
@@ -266,7 +278,8 @@ function BattleGame() {
           target.hp = Math.max(0, target.hp - skill.damage);
         }
         if (skill.heal > 0) {
-          target.hp = Math.min(target.maxHp, target.hp + skill.heal);
+          const healTarget = skill.classes.includes('Affliction') ? user : target;
+          healTarget.hp = Math.min(healTarget.maxHp, healTarget.hp + skill.heal);
         }
         skill.currentCd = skill.cd;
       }
@@ -279,12 +292,9 @@ function BattleGame() {
         const skill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
         const aliveRed = redTeam.filter(r => r.hp > 0);
         if (aliveRed.length > 0) {
-          const target = skill.isSelf ? enemy : aliveRed[Math.floor(Math.random() * aliveRed.length)];
+          const target = aliveRed[Math.floor(Math.random() * aliveRed.length)];
           if (skill.damage > 0) {
             target.hp = Math.max(0, target.hp - skill.damage);
-          }
-          if (skill.heal > 0) {
-            target.hp = Math.min(target.maxHp, target.hp + skill.heal);
           }
           skill.currentCd = skill.cd;
         }
@@ -298,12 +308,12 @@ function BattleGame() {
       });
     });
 
-    // Add chakra
+    // Add random chakra
+    const types = ['tai', 'blood', 'nin', 'gen'] as const;
+    const newType = types[Math.floor(Math.random() * types.length)];
     setChakra(prev => ({
-      tai: Math.min(9, prev.tai + 1),
-      blood: Math.min(9, prev.blood + 1),
-      nin: Math.min(9, prev.nin + 1),
-      gen: Math.min(9, prev.gen + 1),
+      ...prev,
+      [newType]: Math.min(9, prev[newType] + 1)
     }));
 
     setQueue([]);
@@ -311,594 +321,292 @@ function BattleGame() {
     setTimer(30);
     setRedTeam([...redTeam]);
     setBlueTeam([...blueTeam]);
+    setIsPlayerTurn(true);
   };
 
-  // Cancel skill selection
   const onRightClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setSelectedSkill(null);
     setTargetMode(false);
   };
 
-  // Surrender
   const onSurrender = () => {
     setGameOver('lose');
   };
 
   const displaySkill = hoveredSkill || selectedSkill;
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <div className="na-loading">Loading Battle...</div>;
 
-  const getHpColor = (hp: number, max: number) => {
-    const pct = hp / max;
-    if (pct > 0.5) return '#22B822';
-    if (pct > 0.25) return '#FFD700';
-    return '#CF1515';
+  // Calculate total chakra cost for display
+  const getTotalCost = (skill: Skill) => {
+    return skill.cost.tai + skill.cost.blood + skill.cost.nin + skill.cost.gen + skill.cost.rand;
   };
 
   return (
-    <div 
-      style={{
-        width: '923px',
-        height: '657px',
-        margin: '0 auto',
-        position: 'relative',
-        fontFamily: 'Verdana, sans-serif',
-        overflow: 'hidden',
-        cursor: 'default',
-      }}
-      onContextMenu={onRightClick}
-    >
-      {/* Background */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundImage: 'url(/images/battle/background.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }} />
+    <div className="na-battle" onContextMenu={onRightClick}>
+      {/* Background - forest */}
+      <div className="na-bg" />
 
-      {/* ========== RED TEAM (LEFT SIDE) ========== */}
-      {redTeam.map((char, idx) => {
-        const charId = redCharIds[idx];
-        const topMargin = 51 + (idx * 141);
-        const isTargetable = targetMode && selectedSkill && !selectedSkill.skill.isSelf && char.hp > 0;
-
-        return (
-          <div key={char.id}>
-            {/* Scroll Background */}
-            <img
-              src="/images/battle/ScrollExtended2.png"
-              alt=""
-              style={{
-                position: 'absolute',
-                left: '28px',
-                top: `${topMargin}px`,
-                width: '348px',
-                height: '107px',
-              }}
-            />
-
-            {/* Character Portrait */}
-            <img
-              src={getCharImage(charId)}
-              alt={char.name}
-              onClick={() => isTargetable && onTargetClick(char)}
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: `${topMargin}px`,
-                width: '107px',
-                height: '107px',
-                objectFit: 'contain',
-                background: '#1a1a1a',
-                cursor: isTargetable ? 'pointer' : 'default',
-                filter: char.hp <= 0 ? 'grayscale(100%)' : 'none',
-                opacity: char.hp <= 0 ? 0.5 : 1,
-                border: isTargetable ? '3px solid #22B822' : 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-
-            {/* HP Bar */}
-            <div
-              style={{
-                position: 'absolute',
-                left: '10px',
-                top: `${topMargin + 112}px`,
-                width: '107px',
-                height: '24px',
-                background: getHpColor(char.hp, char.maxHp),
-                border: '1px solid black',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '11px',
-              }}
-            >
-              {char.hp}
-            </div>
-
-            {/* Skills */}
-            {char.skills.map((skill, sIdx) => {
-              const skillLeft = 122 + (sIdx * 82);
-              const skillTop = topMargin + 15;
-              const isSelected = selectedSkill?.skill.id === skill.id && selectedSkill?.char.id === char.id;
-              const isInQueue = queue.some(q => q.oderId === char.id && q.skillId === skill.id);
-              const canUse = skill.currentCd === 0 && char.hp > 0 &&
-                skill.cost.tai <= chakra.tai && skill.cost.blood <= chakra.blood &&
-                skill.cost.nin <= chakra.nin && skill.cost.gen <= chakra.gen;
-
-              return (
-                <img
-                  key={skill.id}
-                  src={getSkillImage(charId, sIdx + 1)}
-                  alt={skill.name}
-                  onClick={() => canUse && onSkillClick(char, skill, charId)}
-                  onMouseEnter={() => setHoveredSkill({ char, skill, charId })}
-                  onMouseLeave={() => setHoveredSkill(null)}
-                  style={{
-                    position: 'absolute',
-                    left: `${skillLeft}px`,
-                    top: `${skillTop}px`,
-                    width: '77px',
-                    height: '77px',
-                    objectFit: 'contain',
-                    background: '#2a2a2a',
-                    border: isSelected ? '3px solid #FFD700' : isInQueue ? '3px solid #22B822' : '2px solid #555',
-                    cursor: canUse ? 'pointer' : 'not-allowed',
-                    opacity: canUse ? 1 : 0.5,
-                    boxSizing: 'border-box',
-                  }}
-                />
-              );
-            })}
-
-            {/* Cooldown overlay */}
-            {char.skills.map((skill, sIdx) => skill.currentCd > 0 && (
-              <div
-                key={`cd-${skill.id}`}
-                style={{
-                  position: 'absolute',
-                  left: `${122 + (sIdx * 82)}px`,
-                  top: `${topMargin + 15}px`,
-                  width: '77px',
-                  height: '77px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(0,0,0,0.7)',
-                  color: '#fff',
-                  fontSize: '28px',
-                  fontWeight: 'bold',
-                  pointerEvents: 'none',
-                }}
-              >
-                {skill.currentCd}
-              </div>
-            ))}
+      {/* Top bar */}
+      <div className="na-topbar">
+        {/* Player info left */}
+        <div className="na-player-info left">
+          <img src="/images/ui/avatar-default.png" alt="" className="na-avatar" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/50'; }} />
+          <div className="na-player-details">
+            <div className="na-player-name">TRAINER</div>
+            <div className="na-player-rank">POKEMON MASTER</div>
           </div>
-        );
-      })}
+        </div>
 
-      {/* ========== BLUE TEAM (RIGHT SIDE) ========== */}
-      {blueTeam.map((char, idx) => {
-        const charId = blueCharIds[idx];
-        const topMargin = 51 + (idx * 141);
-        const isTargetable = targetMode && selectedSkill && !selectedSkill.skill.isSelf && char.hp > 0;
-
-        return (
-          <div key={char.id}>
-            {/* Scroll Background - mirrored */}
-            <img
-              src="/images/battle/ScrollExtended2.png"
-              alt=""
-              style={{
-                position: 'absolute',
-                right: '28px',
-                top: `${topMargin}px`,
-                width: '348px',
-                height: '107px',
-                transform: 'scaleX(-1)',
-              }}
-            />
-
-            {/* Character Portrait */}
-            <img
-              src={getCharImage(charId)}
-              alt={char.name}
-              onClick={() => isTargetable && onTargetClick(char)}
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: `${topMargin}px`,
-                width: '107px',
-                height: '107px',
-                objectFit: 'contain',
-                background: '#1a1a1a',
-                cursor: isTargetable ? 'pointer' : 'default',
-                filter: char.hp <= 0 ? 'grayscale(100%)' : 'none',
-                opacity: char.hp <= 0 ? 0.5 : 1,
-                border: isTargetable ? '3px solid #22B822' : 'none',
-                boxSizing: 'border-box',
-                transform: 'scaleX(-1)',
-              }}
-            />
-
-            {/* HP Bar */}
-            <div
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: `${topMargin + 112}px`,
-                width: '107px',
-                height: '24px',
-                background: getHpColor(char.hp, char.maxHp),
-                border: '1px solid black',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                fontSize: '11px',
-              }}
-            >
-              {char.hp}
-            </div>
-
-            {/* Skills */}
-            {char.skills.map((skill, sIdx) => {
-              const skillRight = 122 + (sIdx * 82);
-              const skillTop = topMargin + 15;
-
-              return (
-                <img
-                  key={skill.id}
-                  src={getSkillImage(charId, sIdx + 1)}
-                  alt={skill.name}
-                  style={{
-                    position: 'absolute',
-                    right: `${skillRight}px`,
-                    top: `${skillTop}px`,
-                    width: '77px',
-                    height: '77px',
-                    objectFit: 'contain',
-                    background: '#2a2a2a',
-                    border: '2px solid #555',
-                    opacity: skill.currentCd > 0 || char.hp <= 0 ? 0.5 : 1,
-                    boxSizing: 'border-box',
-                    transform: 'scaleX(-1)',
-                  }}
-                />
-              );
-            })}
-
-            {/* Cooldown overlay */}
-            {char.skills.map((skill, sIdx) => skill.currentCd > 0 && (
-              <div
-                key={`cd-${skill.id}`}
-                style={{
-                  position: 'absolute',
-                  right: `${122 + (sIdx * 82)}px`,
-                  top: `${topMargin + 15}px`,
-                  width: '77px',
-                  height: '77px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(0,0,0,0.7)',
-                  color: '#fff',
-                  fontSize: '28px',
-                  fontWeight: 'bold',
-                  pointerEvents: 'none',
-                }}
-              >
-                {skill.currentCd}
-              </div>
-            ))}
+        {/* Center - turn info */}
+        <div className="na-turn-info">
+          <div className="na-turn-text">{isPlayerTurn ? 'PRESS WHEN READY' : 'OPPONENT TURN...'}</div>
+          <div className="na-timer-bar">
+            <div className="na-timer-fill" style={{ width: `${(timer / 30) * 100}%` }} />
           </div>
-        );
-      })}
+          {/* Chakra display */}
+          <div className="na-chakra-display">
+            <div className="na-chakra-item">
+              <span className="na-chakra-box tai" />
+              <span className="na-chakra-count">x{chakra.tai}</span>
+            </div>
+            <div className="na-chakra-item">
+              <span className="na-chakra-box blood" />
+              <span className="na-chakra-count">x{chakra.blood}</span>
+            </div>
+            <div className="na-chakra-item">
+              <span className="na-chakra-box nin" />
+              <span className="na-chakra-count">x{chakra.nin}</span>
+            </div>
+            <div className="na-chakra-item">
+              <span className="na-chakra-box gen" />
+              <span className="na-chakra-count">x{chakra.gen}</span>
+            </div>
+            <div className="na-chakra-item">
+              <span className="na-chakra-box rand" />
+              <span className="na-chakra-count">x{chakra.rand}</span>
+            </div>
+            <button className="na-exchange-btn">EXCHANGE CHAKRA</button>
+          </div>
+        </div>
 
-      {/* ========== TOP BAR - CHAKRA & TIMER ========== */}
-      {/* Timer Progress Bar */}
-      <div style={{
-        position: 'absolute',
-        left: '410px',
-        top: '10px',
-        width: '364px',
-        height: '19px',
-        background: '#E2E1E0',
-        border: '1px solid black',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          width: `${(timer / 30) * 100}%`,
-          height: '100%',
-          background: '#CF1515',
-          transition: 'width 1s linear',
-        }} />
-      </div>
-
-      {/* Chakra Display */}
-      <div style={{ position: 'absolute', left: '410px', top: '36px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <div style={{ width: '14px', height: '14px', background: '#25B825', border: '1px solid black' }} />
-        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Taijutsu</span>
-        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.tai}</span>
-
-        <div style={{ width: '14px', height: '14px', background: '#CF1515', border: '1px solid black' }} />
-        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Bloodline</span>
-        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.blood}</span>
-
-        <div style={{ width: '14px', height: '14px', background: '#345AC1', border: '1px solid black' }} />
-        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Ninjutsu</span>
-        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.nin}</span>
-
-        <div style={{ width: '14px', height: '14px', background: '#FFFFFF', border: '1px solid black' }} />
-        <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Genjutsu</span>
-        <span style={{ fontWeight: 'bold', width: '20px' }}>{chakra.gen}</span>
-      </div>
-
-      {/* Turn Counter */}
-      <div style={{
-        position: 'absolute',
-        right: '240px',
-        top: '4px',
-        backgroundImage: 'url(/images/battle/ScrollExtended2.png)',
-        backgroundSize: 'cover',
-        padding: '8px 16px',
-        fontWeight: 'bold',
-        fontSize: '20px',
-      }}>
-        Turn: {turn}
-      </div>
-
-      {/* Pass Turn Button */}
-      <div 
-        onClick={onPassTurn}
-        style={{
-          position: 'absolute',
-          right: '10px',
-          top: '10px',
-          width: '201px',
-          height: '37px',
-          backgroundImage: 'url(/images/battle/ScrollExtended2.png)',
-          backgroundSize: 'cover',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          fontSize: '20px',
-          cursor: 'pointer',
-          transition: 'transform 0.2s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        Pass Turn
-      </div>
-
-      {/* ========== BOTTOM PANEL ========== */}
-      <img
-        src="/images/battle/ScrollExtended.png"
-        alt=""
-        style={{
-          position: 'absolute',
-          left: '259px',
-          top: '455px',
-          width: '646px',
-          height: '162px',
-        }}
-      />
-
-      <img
-        src="/images/battle/sasuke.png"
-        alt=""
-        style={{
-          position: 'absolute',
-          left: '165px',
-          top: '451px',
-          width: '171px',
-          height: '175px',
-          objectFit: 'contain',
-        }}
-      />
-
-      {/* Volume Control */}
-      <div style={{
-        position: 'absolute',
-        left: '40px',
-        top: '491px',
-        width: '150px',
-        height: '65px',
-        backgroundImage: 'url(/images/battle/ScrollMedium.png)',
-        backgroundSize: 'cover',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ fontWeight: 'bold', fontSize: '12px' }}>Volume</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span 
-            style={{ fontSize: '20px', cursor: 'pointer', fontWeight: 'bold' }}
-            onClick={() => setVolume(v => Math.max(0, v - 10))}
-          >-</span>
-          <span style={{ fontWeight: 'bold', fontSize: '14px', width: '30px', textAlign: 'center' }}>{volume}</span>
-          <span 
-            style={{ fontSize: '20px', cursor: 'pointer', fontWeight: 'bold' }}
-            onClick={() => setVolume(v => Math.min(100, v + 10))}
-          >+</span>
+        {/* Enemy info right */}
+        <div className="na-player-info right">
+          <div className="na-player-details">
+            <div className="na-player-name">AI TRAINER</div>
+            <div className="na-player-rank">NORMAL</div>
+          </div>
+          <img src="/images/ui/avatar-default.png" alt="" className="na-avatar" onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/50'; }} />
         </div>
       </div>
 
-      {/* Surrender Button */}
-      <div 
-        onClick={onSurrender}
-        style={{
-          position: 'absolute',
-          left: '10px',
-          top: '553px',
-          width: '150px',
-          height: '65px',
-          backgroundImage: 'url(/images/battle/ScrollMedium.png)',
-          backgroundSize: 'cover',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '20px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          transition: 'transform 0.2s',
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        Surrender
+      {/* Main battle area */}
+      <div className="na-main">
+        {/* Left team (Player - Red) */}
+        <div className="na-team left">
+          {redTeam.map((char, idx) => {
+            const charId = redCharIds[idx];
+            const isTargetable = targetMode && selectedSkill?.skill.heal && selectedSkill.skill.heal > 0 && char.hp > 0;
+            const isDead = char.hp <= 0;
+
+            return (
+              <div 
+                key={char.id} 
+                className={`na-char-row ${isDead ? 'dead' : ''} ${isTargetable ? 'targetable' : ''}`}
+                onClick={() => isTargetable && onTargetClick(char, charId, 'red')}
+              >
+                {/* Portrait */}
+                <div className="na-portrait-wrap">
+                  <img 
+                    src={getCharImage(charId)} 
+                    alt={char.name}
+                    className="na-portrait"
+                    onMouseEnter={() => setCenterChar({ charId, team: 'red' })}
+                  />
+                  <div className="na-hp-bar">
+                    <div 
+                      className="na-hp-fill" 
+                      style={{ width: `${(char.hp / char.maxHp) * 100}%` }}
+                    />
+                    <span className="na-hp-text">{char.hp}/{char.maxHp}</span>
+                  </div>
+                </div>
+
+                {/* Skills */}
+                <div className="na-skills">
+                  {char.skills.map((skill, sIdx) => {
+                    const isSelected = selectedSkill?.skill.id === skill.id && selectedSkill?.char.id === char.id;
+                    const isQueued = queue.some(q => q.oderId === char.id && q.skillId === skill.id);
+                    const canUse = skill.currentCd === 0 && char.hp > 0 && canAfford(skill);
+                    const onCooldown = skill.currentCd > 0;
+
+                    return (
+                      <div 
+                        key={skill.id}
+                        className={`na-skill ${isSelected ? 'selected' : ''} ${isQueued ? 'queued' : ''} ${!canUse ? 'disabled' : ''} ${onCooldown ? 'cooldown' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); canUse && onSkillClick(char, skill, charId, idx); }}
+                        onMouseEnter={() => setHoveredSkill({ char, skill, charId })}
+                        onMouseLeave={() => !selectedSkill && setHoveredSkill(null)}
+                      >
+                        <img src={getSkillImage(charId, sIdx + 1)} alt={skill.name} />
+                        {onCooldown && <div className="na-cd-overlay">{skill.currentCd}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Center character display */}
+        <div className="na-center">
+          {centerChar && (
+            <img 
+              src={getCharImage(centerChar.charId)} 
+              alt=""
+              className="na-center-char"
+            />
+          )}
+        </div>
+
+        {/* Right team (Enemy - Blue) */}
+        <div className="na-team right">
+          {blueTeam.map((char, idx) => {
+            const charId = blueCharIds[idx];
+            const isTargetable = targetMode && selectedSkill && (!selectedSkill.skill.heal || selectedSkill.skill.damage > 0) && char.hp > 0;
+            const isDead = char.hp <= 0;
+
+            return (
+              <div 
+                key={char.id} 
+                className={`na-char-row right ${isDead ? 'dead' : ''} ${isTargetable ? 'targetable' : ''}`}
+                onClick={() => isTargetable && onTargetClick(char, charId, 'blue')}
+                onMouseEnter={() => setHoveredChar({
+                  name: 'AI TRAINER',
+                  rank: 'CHUUNIN',
+                  clan: 'CLANLESS',
+                  level: 11,
+                  ladderRank: 12049,
+                  ratio: '13 - 27 (-1)'
+                })}
+                onMouseLeave={() => setHoveredChar(null)}
+              >
+                {/* Skills */}
+                <div className="na-skills right">
+                  {char.skills.map((skill, sIdx) => {
+                    const onCooldown = skill.currentCd > 0;
+                    return (
+                      <div 
+                        key={skill.id}
+                        className={`na-skill enemy ${onCooldown ? 'cooldown' : ''}`}
+                      >
+                        <img src={getSkillImage(charId, sIdx + 1)} alt={skill.name} />
+                        {onCooldown && <div className="na-cd-overlay">{skill.currentCd}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Portrait */}
+                <div className="na-portrait-wrap">
+                  <img 
+                    src={getCharImage(charId)} 
+                    alt={char.name}
+                    className="na-portrait right"
+                    onMouseEnter={() => setCenterChar({ charId, team: 'blue' })}
+                  />
+                  <div className="na-hp-bar">
+                    <div 
+                      className="na-hp-fill" 
+                      style={{ width: `${(char.hp / char.maxHp) * 100}%` }}
+                    />
+                    <span className="na-hp-text">{char.hp}/{char.maxHp}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Skill Panel */}
-      {displaySkill && (
-        <>
-          <img
-            src={getSkillImage(displaySkill.charId, displaySkill.char.skills.indexOf(displaySkill.skill) + 1)}
-            alt=""
-            style={{
-              position: 'absolute',
-              left: '304px',
-              top: '493px',
-              width: '77px',
-              height: '77px',
-              objectFit: 'contain',
-            }}
-          />
-
-          <div style={{ position: 'absolute', left: '388px', top: '496px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-              <div style={{ width: '14px', height: '14px', background: '#25B825', border: '1px solid black' }} />
-              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.tai}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-              <div style={{ width: '14px', height: '14px', background: '#CF1515', border: '1px solid black' }} />
-              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.blood}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-              <div style={{ width: '14px', height: '14px', background: '#345AC1', border: '1px solid black' }} />
-              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.nin}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '14px', height: '14px', background: '#FFFFFF', border: '1px solid black' }} />
-              <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{displaySkill.skill.cost.gen}</span>
-            </div>
+      {/* Bottom panel */}
+      <div className="na-bottom">
+        {/* Left side - surrender & chat */}
+        <div className="na-bottom-left">
+          <button className="na-surrender-btn" onClick={onSurrender}>SURRENDER</button>
+          <button className="na-chat-btn">OPEN CHAT <span className="na-new">(NEW: 2)</span></button>
+          <div className="na-volume">
+            <span>🔊</span>
+            <input type="range" min="0" max="100" defaultValue="50" />
           </div>
+        </div>
 
-          <div style={{
-            position: 'absolute',
-            left: '441px',
-            top: '493px',
-            width: '429px',
-            height: '57px',
-            background: '#C5A8A8',
-            padding: '4px 8px',
-            fontWeight: 'bold',
-            fontSize: '12px',
-            overflow: 'hidden',
-          }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{displaySkill.skill.name}</div>
-            {displaySkill.skill.desc}
-          </div>
+        {/* Naruto decoration */}
+        <div className="na-naruto-deco">
+          <img src="/images/battle/sasuke.png" alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+        </div>
 
-          <div style={{
-            position: 'absolute',
-            left: '441px',
-            top: '553px',
-            display: 'flex',
-            gap: '16px',
-            fontSize: '11px',
-            fontWeight: 'bold',
-          }}>
-            <span>Damage: {displaySkill.skill.damage}</span>
-            <span>Heal: {displaySkill.skill.heal}</span>
-            <span>Defense: {displaySkill.skill.defense}</span>
-            <span>Self: {displaySkill.skill.isSelf ? 'Yes' : 'No'}</span>
-            <span>Area: {displaySkill.skill.isArea ? 'Yes' : 'No'}</span>
-          </div>
-        </>
-      )}
+        {/* Skill panel */}
+        <div className="na-skill-panel">
+          {displaySkill ? (
+            <>
+              <div className="na-skill-header">
+                <span className="na-skill-name">{displaySkill.skill.name.toUpperCase()}</span>
+                <div className="na-skill-energy">
+                  <span>ENERGY:</span>
+                  {displaySkill.skill.cost.tai > 0 && <span className="na-chakra-box tai" />}
+                  {displaySkill.skill.cost.blood > 0 && <span className="na-chakra-box blood" />}
+                  {displaySkill.skill.cost.nin > 0 && <span className="na-chakra-box nin" />}
+                  {displaySkill.skill.cost.gen > 0 && <span className="na-chakra-box gen" />}
+                  {displaySkill.skill.cost.rand > 0 && <span className="na-chakra-box rand" />}
+                  {getTotalCost(displaySkill.skill) === 0 && <span>NONE</span>}
+                </div>
+              </div>
+              <div className="na-skill-desc">
+                {displaySkill.skill.desc}
+              </div>
+              <div className="na-skill-footer">
+                <span className="na-skill-classes">CLASSES: {displaySkill.skill.classes.join(', ').toUpperCase()}</span>
+                <span className="na-skill-cd">COOLDOWN: {displaySkill.skill.cd}</span>
+              </div>
+            </>
+          ) : (
+            <div className="na-skill-empty">Here is a very nice description of the selected skill...</div>
+          )}
+        </div>
 
-      {!displaySkill && (
-        <div style={{
-          position: 'absolute',
-          left: '441px',
-          top: '493px',
-          width: '429px',
-          height: '57px',
-          background: '#C5A8A8',
-          padding: '4px 8px',
-          fontWeight: 'bold',
-          fontSize: '14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#666',
-        }}>
-          Hover over a skill to see its description...
+        {/* Pass button */}
+        <button className="na-pass-btn" onClick={onPassTurn}>PASS</button>
+      </div>
+
+      {/* Hovered enemy info popup */}
+      {hoveredChar && (
+        <div className="na-char-popup">
+          <div className="na-popup-name">{hoveredChar.name}</div>
+          <div className="na-popup-rank">{hoveredChar.rank}</div>
+          <div className="na-popup-info">CLAN: {hoveredChar.clan}</div>
+          <div className="na-popup-info">LEVEL: {hoveredChar.level}</div>
+          <div className="na-popup-info">LADDERRANK: {hoveredChar.ladderRank}</div>
+          <div className="na-popup-info">RATIO: {hoveredChar.ratio}</div>
         </div>
       )}
 
-      {/* Game Over */}
+      {/* Game Over overlay */}
       {gameOver && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(0,0,0,0.8)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-        }}>
-          <h1 style={{
-            fontSize: '64px',
-            color: gameOver === 'win' ? '#22B822' : '#CF1515',
-            textShadow: '2px 2px 4px black',
-            marginBottom: '32px',
-          }}>
+        <div className="na-gameover">
+          <h1 className={gameOver === 'win' ? 'win' : 'lose'}>
             {gameOver === 'win' ? 'VICTORY!' : 'DEFEAT'}
           </h1>
-          <button
-            onClick={() => router.push('/play')}
-            style={{
-              padding: '16px 48px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              background: '#345AC1',
-              color: '#fff',
-              border: '3px solid #1a3a8a',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Return to Menu
-          </button>
+          <button onClick={() => router.push('/play')}>Return to Menu</button>
         </div>
       )}
 
       {/* Target mode indicator */}
       {targetMode && (
-        <div style={{
-          position: 'absolute',
-          top: '240px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.8)',
-          color: '#22B822',
-          padding: '12px 24px',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          fontSize: '16px',
-        }}>
-          Click on a target to attack! (Right-click to cancel)
+        <div className="na-target-hint">
+          Click on an enemy to attack! (Right-click to cancel)
         </div>
       )}
     </div>

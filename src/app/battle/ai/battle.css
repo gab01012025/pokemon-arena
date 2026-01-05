@@ -1,0 +1,689 @@
+/**
+ * Naruto Arena Classic - Battle CSS
+ * Pixel-perfect recreation of naruto-arena.site
+ */
+
+/* ==================== BASE ==================== */
+.na-battle {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+.na-loading {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 24px;
+}
+
+/* ==================== BACKGROUND ==================== */
+.na-bg {
+  position: absolute;
+  inset: 0;
+  /* Forest green gradient with trees */
+  background: 
+    linear-gradient(180deg, 
+      #87CEEB 0%, 
+      #87CEEB 30%, 
+      #228B22 30%, 
+      #228B22 100%
+    );
+  z-index: 0;
+}
+
+.na-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: 
+    /* Trees pattern */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 60px,
+      rgba(0,80,0,0.4) 60px,
+      rgba(0,80,0,0.4) 65px
+    ),
+    /* Grass gradient */
+    linear-gradient(180deg, 
+      #2d5a27 0%, 
+      #1a4a15 50%,
+      #1a3a12 100%
+    );
+}
+
+/* ==================== TOP BAR ==================== */
+.na-topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, #8B0000 0%, #5a0000 100%);
+  border-bottom: 4px solid #4a0000;
+  min-height: 80px;
+}
+
+.na-player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.na-player-info.right {
+  flex-direction: row-reverse;
+}
+
+.na-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 3px solid #FFD700;
+  background: #333;
+}
+
+.na-player-details {
+  text-align: left;
+}
+
+.na-player-info.right .na-player-details {
+  text-align: right;
+}
+
+.na-player-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.na-player-rank {
+  font-size: 11px;
+  color: #ccc;
+  text-transform: uppercase;
+}
+
+/* Turn info center */
+.na-turn-info {
+  flex: 1;
+  max-width: 400px;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.na-turn-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 6px;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.na-timer-bar {
+  height: 20px;
+  background: #333;
+  border: 2px solid #000;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.na-timer-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #ff4444 0%, #cc0000 100%);
+  transition: width 1s linear;
+}
+
+/* Chakra display */
+.na-chakra-display {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.na-chakra-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.na-chakra-box {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000;
+  display: inline-block;
+}
+
+.na-chakra-box.tai { background: #22B822; }
+.na-chakra-box.blood { background: #CC0000; }
+.na-chakra-box.nin { background: #2266CC; }
+.na-chakra-box.gen { background: #FFFFFF; }
+.na-chakra-box.rand { background: linear-gradient(135deg, #22B822 25%, #CC0000 25%, #CC0000 50%, #2266CC 50%, #2266CC 75%, #FFFFFF 75%); }
+
+.na-chakra-count {
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+}
+
+.na-exchange-btn {
+  padding: 3px 8px;
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.na-exchange-btn:hover {
+  background: linear-gradient(180deg, #777 0%, #555 100%);
+}
+
+/* ==================== MAIN BATTLE AREA ==================== */
+.na-main {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  min-height: 400px;
+}
+
+/* Team columns */
+.na-team {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 400px;
+}
+
+.na-team.right {
+  align-items: flex-end;
+}
+
+/* Character row */
+.na-char-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 6px;
+  background: linear-gradient(180deg, #8B0000 0%, #6a0000 50%, #4a0000 100%);
+  border: 3px solid #4a0000;
+  border-radius: 4px;
+  position: relative;
+}
+
+.na-char-row.right {
+  flex-direction: row-reverse;
+}
+
+.na-char-row.dead {
+  filter: grayscale(80%);
+  opacity: 0.6;
+}
+
+.na-char-row.targetable {
+  cursor: pointer;
+  box-shadow: 0 0 10px 3px rgba(0, 255, 0, 0.5);
+}
+
+.na-char-row.targetable:hover {
+  box-shadow: 0 0 15px 5px rgba(0, 255, 0, 0.7);
+}
+
+/* Portrait */
+.na-portrait-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.na-portrait {
+  width: 80px;
+  height: 80px;
+  border: 3px solid #FFD700;
+  background: #1a1a1a;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.na-portrait.right {
+  transform: scaleX(-1);
+}
+
+.na-portrait:hover {
+  border-color: #fff;
+}
+
+/* HP Bar */
+.na-hp-bar {
+  width: 80px;
+  height: 20px;
+  background: #333;
+  border: 2px solid #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.na-hp-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #22CC22 0%, #118811 100%);
+  transition: width 0.3s ease;
+}
+
+.na-hp-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+}
+
+/* Skills */
+.na-skills {
+  display: flex;
+  gap: 4px;
+}
+
+.na-skills.right {
+  flex-direction: row-reverse;
+}
+
+.na-skill {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #666;
+  background: #222;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+
+.na-skill img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.na-skill:hover:not(.disabled):not(.cooldown) {
+  border-color: #FFD700;
+  transform: scale(1.05);
+}
+
+.na-skill.selected {
+  border-color: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.na-skill.queued {
+  border-color: #22CC22;
+  box-shadow: 0 0 8px rgba(34, 204, 34, 0.6);
+}
+
+.na-skill.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.na-skill.enemy {
+  cursor: default;
+}
+
+.na-skill.cooldown {
+  opacity: 0.6;
+}
+
+.na-cd-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px #000;
+}
+
+/* Center character display */
+.na-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.na-center-char {
+  max-width: 280px;
+  max-height: 280px;
+  object-fit: contain;
+  filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.5));
+  animation: centerFloat 3s ease-in-out infinite;
+}
+
+@keyframes centerFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ==================== BOTTOM PANEL ==================== */
+.na-bottom {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: stretch;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #8B0000 0%, #5a0000 100%);
+  border-top: 4px solid #4a0000;
+  min-height: 120px;
+  gap: 16px;
+}
+
+.na-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.na-surrender-btn {
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border: 2px solid #333;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.na-surrender-btn:hover {
+  background: linear-gradient(180deg, #777 0%, #555 100%);
+}
+
+.na-chat-btn {
+  padding: 6px 12px;
+  background: linear-gradient(180deg, #444 0%, #333 100%);
+  border: 1px solid #222;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.na-new {
+  color: #FFD700;
+}
+
+.na-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+
+.na-volume input[type="range"] {
+  width: 80px;
+}
+
+/* Naruto decoration */
+.na-naruto-deco {
+  width: 120px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.na-naruto-deco img {
+  max-width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  margin-bottom: -12px;
+}
+
+/* Skill panel */
+.na-skill-panel {
+  flex: 1;
+  background: #F5E6D3;
+  border: 3px solid #8B4513;
+  border-radius: 4px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 90px;
+}
+
+.na-skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.na-skill-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #8B0000;
+}
+
+.na-skill-energy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #333;
+}
+
+.na-skill-energy .na-chakra-box {
+  width: 14px;
+  height: 14px;
+}
+
+.na-skill-desc {
+  font-size: 12px;
+  color: #333;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.na-skill-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.na-skill-classes {
+  font-style: italic;
+}
+
+.na-skill-empty {
+  color: #888;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Pass button */
+.na-pass-btn {
+  padding: 20px 40px;
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border: 3px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  align-self: center;
+}
+
+.na-pass-btn:hover {
+  background: linear-gradient(180deg, #22CC22 0%, #118811 100%);
+  border-color: #0a6a0a;
+  transform: scale(1.05);
+}
+
+/* ==================== POPUPS ==================== */
+.na-char-popup {
+  position: fixed;
+  bottom: 160px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #FFD700;
+  border-radius: 6px;
+  padding: 12px 20px;
+  color: #fff;
+  z-index: 100;
+  min-width: 200px;
+}
+
+.na-popup-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #FFD700;
+}
+
+.na-popup-rank {
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.na-popup-info {
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* Target hint */
+.na-target-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #22CC22;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 50;
+  border: 2px solid #22CC22;
+}
+
+/* ==================== GAME OVER ==================== */
+.na-gameover {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.na-gameover h1 {
+  font-size: 72px;
+  text-shadow: 4px 4px 8px #000;
+  margin-bottom: 40px;
+}
+
+.na-gameover h1.win {
+  color: #22CC22;
+}
+
+.na-gameover h1.lose {
+  color: #CC0000;
+}
+
+.na-gameover button {
+  padding: 20px 50px;
+  font-size: 20px;
+  font-weight: bold;
+  background: linear-gradient(180deg, #2266CC 0%, #1144AA 100%);
+  color: #fff;
+  border: 3px solid #0033AA;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.na-gameover button:hover {
+  background: linear-gradient(180deg, #3377DD 0%, #2255BB 100%);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1200px) {
+  .na-team {
+    width: 320px;
+  }
+  
+  .na-skill {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .na-portrait {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .na-hp-bar {
+    width: 70px;
+  }
+}
+
+@media (max-width: 900px) {
+  .na-main {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .na-team {
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  .na-center {
+    order: -1;
+    min-height: 150px;
+  }
+  
+  .na-center-char {
+    max-width: 150px;
+    max-height: 150px;
+  }
+}
