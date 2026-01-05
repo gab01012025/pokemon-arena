@@ -1,65 +1,95 @@
-/* ========================================
-   POKEMON ARENA - NARUTO ARENA EXACT CLONE
-   ======================================== */
+/* ================================================
+   POKEMON ARENA - NARUTO ARENA CLASSIC EXACT CLONE
+   Based on: naruto-arena.site/ingame
+   ================================================ */
 
-/* Full page container */
-.battle-container {
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.battle-page {
   width: 100vw;
   height: 100vh;
-  background: url('/images/battle-bg.jpg') center center / cover no-repeat;
-  background-color: #2d5a27;
   display: flex;
   flex-direction: column;
+  font-family: Arial, Helvetica, sans-serif;
   overflow: hidden;
-  font-family: 'Arial', sans-serif;
   position: relative;
 }
 
-/* Forest background fallback */
-.battle-container::before {
-  content: '';
+/* ============ BACKGROUND ============ */
+.battle-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, 
-    #4a7c3f 0%, 
-    #3d6b33 30%, 
-    #2d5a27 60%,
-    #1f4a1c 100%
-  );
   z-index: 0;
+  background: linear-gradient(to bottom, 
+    #87CEEB 0%, 
+    #87CEEB 30%,
+    #228B22 30%,
+    #228B22 100%
+  );
 }
 
-/* ========== TOP BAR ========== */
+.battle-bg::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: 
+    radial-gradient(ellipse at 50% 100%, #2d5a2d 0%, transparent 50%),
+    linear-gradient(to bottom, #3a7a3a 0%, #2d5a2d 50%, #1e4a1e 100%);
+}
+
+/* Trees silhouette */
+.battle-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50'%3E%3Cpath fill='%23194d19' d='M0 50 L10 20 L20 50 L30 15 L40 50 L50 10 L60 50 L70 18 L80 50 L90 12 L100 50 Z'/%3E%3C/svg%3E") 
+    repeat-x bottom;
+  opacity: 0.6;
+}
+
+/* ============ TOP BAR ============ */
 .top-bar {
   position: relative;
-  z-index: 10;
-  height: 70px;
-  background: linear-gradient(180deg, #8B0000 0%, #5c0000 100%);
-  border-bottom: 3px solid #3a0000;
+  z-index: 100;
+  height: 80px;
+  background: linear-gradient(180deg, #8B0000 0%, #660000 50%, #4a0000 100%);
+  border-bottom: 3px solid #2a0000;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
+/* Player Info Box */
 .player-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 180px;
 }
 
 .player-info.right {
   flex-direction: row-reverse;
+  text-align: right;
 }
 
 .player-avatar {
   width: 50px;
   height: 50px;
+  border: 2px solid #ffd700;
   border-radius: 50%;
-  border: 3px solid #ffd700;
-  background: #333;
   overflow: hidden;
+  background: #333;
 }
 
 .player-avatar img {
@@ -72,175 +102,165 @@
   color: #fff;
 }
 
-.player-details.right {
-  text-align: right;
-}
-
 .player-name {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
-  text-shadow: 1px 1px 2px #000;
   color: #ffd700;
+  text-shadow: 1px 1px 2px #000;
 }
 
-.player-title {
-  font-size: 12px;
+.player-rank {
+  font-size: 11px;
   color: #ccc;
   text-transform: uppercase;
 }
 
-/* Center section - Timer and Turn */
-.center-info {
-  text-align: center;
+/* Center Section */
+.top-center {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
-.turn-text {
-  color: #fff;
-  font-size: 14px;
+.turn-status {
+  font-size: 13px;
   font-weight: bold;
+  color: #fff;
   text-transform: uppercase;
-  margin-bottom: 5px;
+  text-shadow: 1px 1px 2px #000;
 }
 
 .timer-bar {
-  width: 300px;
+  width: 280px;
   height: 20px;
   background: #333;
   border: 2px solid #555;
-  border-radius: 10px;
-  margin: 0 auto;
   overflow: hidden;
 }
 
 .timer-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ff4444, #ff8800);
-  transition: width 1s linear;
+  background: linear-gradient(90deg, #cc0000, #ff3333);
+  transition: width 0.5s linear;
 }
 
-/* Energy Display */
-.energy-display {
+/* Chakra Display */
+.chakra-display {
   display: flex;
+  align-items: center;
   gap: 8px;
-  align-items: center;
-  margin-top: 5px;
-  justify-content: center;
+  margin-top: 3px;
 }
 
-.energy-item {
+.chakra-item {
   display: flex;
   align-items: center;
-  gap: 3px;
-  font-size: 12px;
+  gap: 2px;
+}
+
+.chakra-box {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #333;
+}
+
+.chakra-box.fire { background: #ff0000; }
+.chakra-box.water { background: #0066ff; }
+.chakra-box.grass { background: #00cc00; }
+.chakra-box.electric { background: #ffcc00; }
+.chakra-box.colorless { background: #ffffff; }
+
+.chakra-count {
+  font-size: 11px;
   color: #fff;
   font-weight: bold;
 }
 
-.energy-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-}
-
-.energy-icon.fire { background: #ff6b35; }
-.energy-icon.water { background: #4fc3f7; }
-.energy-icon.grass { background: #66bb6a; }
-.energy-icon.electric { background: #ffeb3b; color: #333; }
-.energy-icon.colorless { background: #9e9e9e; }
-
 .exchange-btn {
-  background: transparent;
-  border: 1px solid #888;
-  color: #ccc;
-  font-size: 10px;
+  font-size: 9px;
   padding: 2px 8px;
+  background: #555;
+  border: 1px solid #777;
+  color: #fff;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 5px;
 }
 
-.exchange-btn:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-/* ========== MAIN BATTLE AREA ========== */
-.battle-area {
+/* ============ MAIN AREA ============ */
+.main-area {
   position: relative;
-  z-index: 5;
+  z-index: 10;
   flex: 1;
   display: flex;
-  justify-content: space-between;
-  padding: 20px 30px;
+  padding: 15px;
 }
 
-/* Team columns */
-.team-column {
+/* ============ TEAM COLUMN ============ */
+.team-col {
+  width: 340px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  width: 280px;
+  gap: 8px;
 }
 
-.team-column.right {
+.team-col.right {
   align-items: flex-end;
 }
 
-/* Character row - Portrait + Skills */
+/* ============ CHARACTER ROW ============ */
 .char-row {
   display: flex;
-  gap: 8px;
   align-items: flex-start;
+  background: linear-gradient(180deg, rgba(139,0,0,0.9) 0%, rgba(100,0,0,0.9) 100%);
+  border: 3px solid #8B0000;
+  padding: 8px;
+  gap: 8px;
 }
 
 .char-row.right {
   flex-direction: row-reverse;
 }
 
-/* Portrait box */
-.portrait-box {
-  position: relative;
-  width: 80px;
-  flex-shrink: 0;
+.char-row.dead {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+
+.char-row.active {
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.5);
+}
+
+/* Portrait Section */
+.portrait-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .portrait {
-  width: 80px;
-  height: 80px;
-  border: 3px solid #8B0000;
-  border-radius: 5px;
+  width: 75px;
+  height: 75px;
+  border: 3px solid #ffd700;
+  background: #111;
   overflow: hidden;
-  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .portrait:hover {
-  border-color: #ff4444;
-  transform: scale(1.05);
-}
-
-.portrait.selected {
-  border-color: #ffd700;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-}
-
-.portrait.dead {
-  filter: grayscale(100%);
-  opacity: 0.5;
+  border-color: #fff;
 }
 
 .portrait.targetable {
-  border-color: #00ff00;
-  animation: pulse-target 1s infinite;
+  border-color: #ff0000;
+  animation: target-glow 0.5s infinite alternate;
 }
 
-@keyframes pulse-target {
-  0%, 100% { box-shadow: 0 0 5px #00ff00; }
-  50% { box-shadow: 0 0 20px #00ff00; }
+@keyframes target-glow {
+  from { box-shadow: 0 0 5px #f00; }
+  to { box-shadow: 0 0 20px #f00; }
 }
 
 .portrait img {
@@ -249,34 +269,33 @@
   object-fit: cover;
 }
 
-/* HP Bar under portrait */
+/* HP Bar */
 .hp-bar-container {
-  width: 100%;
+  width: 75px;
   margin-top: 3px;
 }
 
 .hp-bar {
   width: 100%;
-  height: 14px;
-  background: #333;
+  height: 16px;
+  background: linear-gradient(180deg, #333 0%, #111 100%);
   border: 1px solid #555;
-  border-radius: 2px;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
 
 .hp-fill {
   height: 100%;
-  background: linear-gradient(180deg, #4caf50, #2e7d32);
-  transition: width 0.5s ease;
+  background: linear-gradient(180deg, #00cc00 0%, #009900 50%, #006600 100%);
+  transition: width 0.3s;
 }
 
 .hp-fill.medium {
-  background: linear-gradient(180deg, #ffeb3b, #f57c00);
+  background: linear-gradient(180deg, #ffcc00 0%, #cc9900 50%, #996600 100%);
 }
 
 .hp-fill.low {
-  background: linear-gradient(180deg, #f44336, #b71c1c);
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #990000 100%);
 }
 
 .hp-text {
@@ -291,40 +310,42 @@
   text-shadow: 1px 1px 1px #000;
 }
 
-/* Skills grid 2x2 */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 55px);
-  grid-template-rows: repeat(2, 55px);
-  gap: 4px;
+/* Skills */
+.skills-container {
+  display: flex;
+  gap: 5px;
 }
 
 .skill-box {
-  width: 55px;
-  height: 55px;
+  width: 65px;
+  height: 65px;
   border: 2px solid #555;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+  background: linear-gradient(135deg, #444 0%, #222 100%);
   cursor: pointer;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  transition: all 0.2s;
 }
 
-.skill-box:hover:not(.disabled):not(.on-cooldown) {
+.skill-box:hover:not(.disabled):not(.cooldown) {
   border-color: #ffd700;
-  transform: scale(1.1);
+  transform: scale(1.05);
   z-index: 10;
 }
 
 .skill-box.selected {
   border-color: #00ff00;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  box-shadow: 0 0 10px #0f0;
 }
 
-.skill-box.queued {
-  border-color: #ff9800;
-  background: rgba(255, 152, 0, 0.3);
+.skill-box.queued::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 200, 0, 0.3);
+  z-index: 1;
 }
 
 .skill-box.disabled {
@@ -332,8 +353,7 @@
   cursor: not-allowed;
 }
 
-.skill-box.on-cooldown {
-  opacity: 0.6;
+.skill-box.cooldown {
   cursor: not-allowed;
 }
 
@@ -343,30 +363,31 @@
   object-fit: cover;
 }
 
-.skill-cooldown {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: bold;
-  color: #ff4444;
+.skill-icon {
+  font-size: 32px;
 }
 
-.skill-question {
+.cooldown-num {
   position: absolute;
   inset: 0;
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  color: #666;
+  font-weight: bold;
+  color: #ff3333;
+  text-shadow: 2px 2px 2px #000;
 }
 
-/* Center Pokemon Display */
-.center-display {
+.unknown-mark {
+  font-size: 36px;
+  color: #666;
+  font-weight: bold;
+}
+
+/* ============ CENTER ============ */
+.center-col {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -376,8 +397,8 @@
 }
 
 .center-pokemon {
-  max-width: 350px;
-  max-height: 350px;
+  max-width: 300px;
+  max-height: 300px;
 }
 
 .center-pokemon img {
@@ -387,291 +408,271 @@
   filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
 }
 
-/* Ready Button */
-.ready-btn {
-  margin-top: 20px;
-  padding: 15px 60px;
-  font-size: 20px;
-  font-weight: bold;
-  text-transform: uppercase;
-  background: linear-gradient(180deg, #4a4a4a, #333);
-  border: 3px solid #666;
-  color: #fff;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: all 0.2s;
-}
-
-.ready-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #5a5a5a, #444);
-  border-color: #888;
-}
-
-.ready-btn.active {
-  background: linear-gradient(180deg, #4caf50, #2e7d32);
-  border-color: #1b5e20;
-}
-
-.ready-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.turn-indicator {
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #ffd700;
-  text-transform: uppercase;
-}
-
-/* ========== BOTTOM BAR - SKILL INFO ========== */
-.bottom-bar {
-  position: relative;
-  z-index: 10;
-  min-height: 100px;
-  background: linear-gradient(180deg, #8B0000 0%, #5c0000 100%);
-  border-top: 3px solid #3a0000;
+.action-queue {
+  position: absolute;
+  bottom: 30px;
   display: flex;
-  padding: 10px 20px;
-  gap: 20px;
+  gap: 10px;
 }
 
-.surrender-section {
+.queue-item {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  background: rgba(0,0,0,0.9);
+  border: 2px solid #ff9800;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.queue-item:hover {
+  border-color: #f44336;
+  background: #500;
+}
+
+.queue-icon {
+  font-size: 20px;
+}
+
+.queue-target {
+  font-size: 9px;
+  color: #fff;
+  margin-top: 2px;
+}
+
+/* ============ BOTTOM BAR ============ */
+.bottom-bar {
+  position: relative;
+  z-index: 100;
+  min-height: 100px;
+  background: linear-gradient(180deg, #8B0000 0%, #660000 50%, #4a0000 100%);
+  border-top: 3px solid #2a0000;
+  display: flex;
+  padding: 10px 20px;
+  gap: 15px;
+}
+
+/* Left Controls */
+.bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 130px;
 }
 
 .surrender-btn {
-  background: linear-gradient(180deg, #666, #444);
-  border: 2px solid #888;
+  background: linear-gradient(180deg, #444 0%, #222 100%);
+  border: 2px solid #666;
   color: #fff;
-  padding: 8px 15px;
-  font-size: 12px;
   font-weight: bold;
+  font-size: 12px;
+  padding: 8px;
   cursor: pointer;
   text-transform: uppercase;
 }
 
 .surrender-btn:hover {
-  background: linear-gradient(180deg, #777, #555);
+  background: linear-gradient(180deg, #555 0%, #333 100%);
 }
 
 .chat-btn {
-  background: linear-gradient(180deg, #1976d2, #0d47a1);
+  background: linear-gradient(180deg, #1976d2 0%, #0d47a1 100%);
   border: 2px solid #1565c0;
   color: #fff;
-  padding: 8px 15px;
-  font-size: 12px;
   font-weight: bold;
+  font-size: 11px;
+  padding: 6px;
   cursor: pointer;
 }
 
-/* Skill Description */
-.skill-info-panel {
+.chat-new {
+  color: #ff0;
+  font-size: 10px;
+}
+
+.volume-section {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #222;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+.volume-section span {
+  font-size: 10px;
+  color: #aaa;
+}
+
+.volume-section input {
+  width: 60px;
+}
+
+/* Skill Panel */
+.skill-panel {
   flex: 1;
+  background: linear-gradient(180deg, #f5f0e6 0%, #e8e0d0 100%);
+  border: 2px solid #8B4513;
+  padding: 10px 15px;
   display: flex;
   flex-direction: column;
-  color: #fff;
-  padding: 5px 15px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
 }
 
-.skill-info-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.skill-name {
-  font-size: 18px;
+.skill-panel-title {
+  font-size: 16px;
   font-weight: bold;
-  color: #ffd700;
+  color: #333;
   text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
-.skill-energy-cost {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.skill-energy-cost .label {
+.skill-panel-desc {
   font-size: 12px;
-  color: #aaa;
-  margin-right: 5px;
-}
-
-.skill-description {
-  font-size: 14px;
+  color: #444;
   line-height: 1.4;
-  color: #ddd;
-  margin-bottom: 8px;
+  flex: 1;
 }
 
-.skill-description .highlight {
-  color: #4fc3f7;
+.skill-panel-desc .highlight {
+  color: #0066cc;
   font-weight: bold;
+  text-decoration: underline;
 }
 
-.skill-meta {
+.skill-panel-footer {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #aaa;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #555;
 }
 
 .skill-classes {
-  display: flex;
-  gap: 10px;
-}
-
-.skill-class {
   text-transform: uppercase;
 }
 
-.skill-cooldown-text {
-  color: #ff9800;
+.skill-energy {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.no-skill-selected {
+.skill-energy .chakra-box {
+  width: 14px;
+  height: 14px;
+}
+
+.skill-cooldown {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+.no-skill-msg {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 1;
   color: #888;
-  font-size: 14px;
+  font-style: italic;
 }
 
-/* ========== DAMAGE POPUPS ========== */
-.damage-popup {
+/* Ready Button */
+.ready-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+}
+
+.ready-btn {
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border: 3px solid #888;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 15px 25px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.ready-btn:hover {
+  background: linear-gradient(180deg, #777 0%, #555 100%);
+}
+
+.ready-btn.active {
+  background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+  border-color: #2E7D32;
+}
+
+/* ============ POPUPS ============ */
+.dmg-popup {
   position: fixed;
   font-size: 28px;
   font-weight: bold;
-  color: #ff4444;
-  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
   pointer-events: none;
-  z-index: 100;
-  animation: damage-float 1.2s ease-out forwards;
+  z-index: 1000;
+  animation: popup-anim 1s ease-out forwards;
 }
 
-.damage-popup.heal {
-  color: #4caf50;
+.dmg-popup.damage {
+  color: #ff0000;
+  text-shadow: 2px 2px 0 #000;
 }
 
-@keyframes damage-float {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-30px) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-60px) scale(0.8);
-  }
+.dmg-popup.heal {
+  color: #00ff00;
+  text-shadow: 2px 2px 0 #000;
 }
 
-/* ========== ACTION QUEUE ========== */
-.action-queue {
-  position: absolute;
-  bottom: 120px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  z-index: 20;
+@keyframes popup-anim {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-40px) scale(1.3); }
+  100% { transform: translateY(-80px) scale(0.8); opacity: 0; }
 }
 
-.queued-action {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.8);
-  border: 2px solid #ff9800;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.queued-action:hover {
-  background: rgba(255, 0, 0, 0.3);
-  border-color: #f44336;
-}
-
-.queued-action img {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-}
-
-.queued-action .arrow {
-  color: #ffd700;
-  font-size: 16px;
-  margin: 3px 0;
-}
-
-.queued-action .target-name {
-  font-size: 10px;
-  color: #fff;
-  max-width: 60px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* ========== VICTORY/DEFEAT OVERLAY ========== */
-.game-over-overlay {
+/* ============ GAME OVER ============ */
+.gameover-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0,0,0,0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
-.game-over-text {
-  font-size: 72px;
+.gameover-text {
+  font-size: 60px;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 30px;
 }
 
-.game-over-text.victory {
+.gameover-text.win {
   color: #ffd700;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  text-shadow: 0 0 30px #ffd700;
 }
 
-.game-over-text.defeat {
-  color: #f44336;
-  text-shadow: 0 0 30px rgba(244, 67, 54, 0.5);
+.gameover-text.lose {
+  color: #ff3333;
+  text-shadow: 0 0 30px #ff0000;
 }
 
-.game-over-btn {
+.gameover-btn {
   padding: 15px 50px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
-  background: linear-gradient(180deg, #4caf50, #2e7d32);
+  background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
   border: none;
   color: #fff;
   cursor: pointer;
-  border-radius: 10px;
-  margin-top: 20px;
+  border-radius: 5px;
 }
 
-.game-over-btn:hover {
-  background: linear-gradient(180deg, #66bb6a, #43a047);
-}
-
-/* ========== LOADING SCREEN ========== */
-.loading-screen {
+/* ============ LOADING ============ */
+.loading-overlay {
   position: fixed;
   inset: 0;
   background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -679,22 +680,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .loading-text {
-  font-size: 32px;
+  font-size: 24px;
   color: #ffd700;
   margin-bottom: 20px;
 }
 
 .loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid #333;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #333;
   border-top-color: #ffd700;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {

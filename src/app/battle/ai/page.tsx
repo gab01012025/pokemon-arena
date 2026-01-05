@@ -1,688 +1,518 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import './battle.css';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import './naruto-arena.css';
 
-// ============ TYPES ============
-type EnergyType = 'fire' | 'water' | 'grass' | 'electric' | 'colorless';
-
-interface Energy {
-  fire: number;
-  water: number;
-  grass: number;
-  electric: number;
-  colorless: number;
+// ==================== TYPES ====================
+interface Pokemon {
+  id: string;
+  name: string;
+  hp: number;
+  maxHp: number;
+  portrait: string;
+  sprite: string;
+  types: string[];
+  skills: Skill[];
 }
 
 interface Skill {
   id: string;
   name: string;
-  description: string;
-  type: EnergyType;
-  cost: Partial<Energy>;
-  cooldown: number;
-  currentCooldown: number;
-  damage: number;
-  healing?: number;
-  effects?: string[];
+  desc: string;
+  power: number;
+  type: string;
+  cd: number;
+  currentCd: number;
+  cost: Record<string, number>;
   classes: string[];
-  image: string;
-}
-
-interface Pokemon {
-  id: string;
-  slot: number;
-  name: string;
-  type: EnergyType;
-  health: number;
-  maxHealth: number;
-  alive: boolean;
-  skills: Skill[];
-  portrait: string;
-  sprite: string;
+  target: 'enemy' | 'self';
 }
 
 interface QueuedAction {
-  userSlot: number;
-  skillIdx: number;
-  targetSlot: number;
-  targetTeam: 'player' | 'ai';
-  skill: Skill;
+  oderId: string;
+  skillId: string;
+  skillType: string;
+  targetId: string;
+  targetName: string;
 }
 
-type Phase = 'loading' | 'player-turn' | 'executing' | 'ai-turn' | 'victory' | 'defeat';
+interface Popup {
+  id: string;
+  x: number;
+  y: number;
+  value: number;
+  type: 'damage' | 'heal';
+}
 
-// ============ SKILL IMAGES ============
-const getSkillImage = (type: EnergyType, idx: number): string => {
-  const images: Record<EnergyType, string[]> = {
-    electric: [
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/thunder-stone.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/magnet.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/light-ball.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/zap-plate.png',
-    ],
-    fire: [
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/fire-stone.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charcoal.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/flame-orb.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/flame-plate.png',
-    ],
-    water: [
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/water-stone.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mystic-water.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/splash-plate.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/wave-incense.png',
-    ],
-    grass: [
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leaf-stone.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/miracle-seed.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/meadow-plate.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rose-incense.png',
-    ],
-    colorless: [
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/normal-gem.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/silk-scarf.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/eviolite.png',
-      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leftovers.png',
-    ],
-  };
-  return images[type][idx % 4];
-};
-
-// ============ CREATE SKILL HELPER ============
-const createSkill = (
-  id: string,
-  name: string,
-  description: string,
-  type: EnergyType,
-  cost: Partial<Energy>,
-  damage: number,
-  cooldown: number,
-  classes: string[],
-  idx: number,
-  effects?: string[],
-  healing?: number
-): Skill => ({
-  id,
-  name,
-  description,
-  type,
-  cost,
-  damage,
-  healing,
-  cooldown,
-  currentCooldown: 0,
-  classes,
-  effects,
-  image: getSkillImage(type, idx),
-});
-
-// ============ POKEMON DATA ============
-const createPlayerTeam = (): Pokemon[] => [
-  {
-    id: 'pikachu',
-    slot: 0,
-    name: 'Pikachu',
-    type: 'electric',
-    health: 100,
-    maxHealth: 100,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+// ==================== POKEMON DATA ====================
+const POKEDATA: Record<string, {
+  name: string;
+  types: string[];
+  hp: number;
+  skills: Omit<Skill, 'currentCd'>[];
+}> = {
+  pikachu: {
+    name: 'Pikachu', types: ['electric'], hp: 100,
     skills: [
-      createSkill('thunder-shock', 'Thunder Shock', 'Zaps the target with electricity dealing 20 damage.', 'electric', { electric: 1 }, 20, 0, ['Ranged', 'Instant'], 0),
-      createSkill('thunderbolt', 'Thunderbolt', 'A powerful electric attack dealing 45 damage.', 'electric', { electric: 2 }, 45, 1, ['Ranged', 'Instant'], 1),
-      createSkill('agility', 'Agility', 'Pikachu becomes INVULNERABLE for 1 turn.', 'colorless', { colorless: 1 }, 0, 3, ['Mental', 'Buff', 'Instant'], 2, ['invulnerable']),
-      createSkill('volt-tackle', 'Volt Tackle', 'Charges with electricity for 60 damage. Recoil: 15 to self.', 'electric', { electric: 2, colorless: 1 }, 60, 2, ['Physical', 'Melee'], 3),
-    ],
+      { id: 'thunderbolt', name: 'Thunderbolt', desc: 'A strong electric blast that deals 35 damage to one enemy.', power: 35, type: 'electric', cd: 0, cost: { electric: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'quick-attack', name: 'Quick Attack', desc: 'A fast attack that deals 20 damage.', power: 20, type: 'normal', cd: 0, cost: { colorless: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
+      { id: 'thunder-wave', name: 'Thunder Wave', desc: 'Stuns one enemy for 1 turn.', power: 0, type: 'electric', cd: 2, cost: { electric: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
+      { id: 'volt-tackle', name: 'Volt Tackle', desc: 'A devastating charge that deals 50 damage.', power: 50, type: 'electric', cd: 3, cost: { electric: 2 }, classes: ['Melee', 'Instant'], target: 'enemy' }
+    ]
   },
-  {
-    id: 'charizard',
-    slot: 1,
-    name: 'Charizard',
-    type: 'fire',
-    health: 120,
-    maxHealth: 120,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
+  charizard: {
+    name: 'Charizard', types: ['fire'], hp: 120,
     skills: [
-      createSkill('ember', 'Ember', 'A small flame attack dealing 15 damage.', 'fire', { fire: 1 }, 15, 0, ['Ranged', 'Instant'], 0),
-      createSkill('flamethrower', 'Flamethrower', 'Breathes intense flames dealing 50 damage.', 'fire', { fire: 2 }, 50, 1, ['Ranged', 'Instant'], 1),
-      createSkill('dragon-rage', 'Dragon Rage', 'Unleashes draconic fury for 40 fixed damage. PIERCING.', 'fire', { fire: 1, colorless: 1 }, 40, 2, ['Ranged', 'Piercing'], 2),
-      createSkill('fire-blast', 'Fire Blast', 'Massive fire attack dealing 65 damage to ONE enemy.', 'fire', { fire: 3 }, 65, 3, ['Ranged', 'Ultimate'], 3),
-    ],
+      { id: 'flamethrower', name: 'Flamethrower', desc: 'Breathes intense flames dealing 40 damage.', power: 40, type: 'fire', cd: 0, cost: { fire: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'dragon-claw', name: 'Dragon Claw', desc: 'Slashes with claws dealing 30 damage.', power: 30, type: 'normal', cd: 0, cost: { colorless: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
+      { id: 'fire-spin', name: 'Fire Spin', desc: 'Traps target in fire dealing 15 damage per turn.', power: 15, type: 'fire', cd: 3, cost: { fire: 1, colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
+      { id: 'blast-burn', name: 'Blast Burn', desc: 'The ultimate fire attack dealing 65 damage.', power: 65, type: 'fire', cd: 4, cost: { fire: 2, colorless: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' }
+    ]
   },
-  {
-    id: 'blastoise',
-    slot: 2,
-    name: 'Blastoise',
-    type: 'water',
-    health: 130,
-    maxHealth: 130,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png',
+  blastoise: {
+    name: 'Blastoise', types: ['water'], hp: 130,
     skills: [
-      createSkill('water-gun', 'Water Gun', 'Shoots water at the target for 20 damage.', 'water', { water: 1 }, 20, 0, ['Ranged', 'Instant'], 0),
-      createSkill('hydro-pump', 'Hydro Pump', 'Blasts with extreme pressure for 55 damage.', 'water', { water: 2, colorless: 1 }, 55, 2, ['Ranged', 'Instant'], 1),
-      createSkill('withdraw', 'Withdraw', 'Gains 25 DESTRUCTIBLE DEFENSE for 2 turns.', 'colorless', { colorless: 1 }, 0, 3, ['Defense', 'Buff', 'Instant'], 2, ['defense']),
-      createSkill('skull-bash', 'Skull Bash', 'Powerful headbutt dealing 50 damage.', 'water', { water: 1, colorless: 1 }, 50, 2, ['Physical', 'Melee'], 3),
-    ],
+      { id: 'hydro-pump', name: 'Hydro Pump', desc: 'Blasts water at high pressure dealing 45 damage.', power: 45, type: 'water', cd: 1, cost: { water: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'water-gun', name: 'Water Gun', desc: 'A basic water attack dealing 25 damage.', power: 25, type: 'water', cd: 0, cost: { water: 1 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'shell-smash', name: 'Shell Smash', desc: 'Boosts attack power for 3 turns.', power: 0, type: 'normal', cd: 4, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' },
+      { id: 'protect', name: 'Protect', desc: 'Becomes invulnerable for 1 turn.', power: 0, type: 'normal', cd: 4, cost: { colorless: 1 }, classes: ['Strategic', 'Invulnerable'], target: 'self' }
+    ]
   },
-];
-
-const createAITeam = (): Pokemon[] => [
-  {
-    id: 'mewtwo',
-    slot: 0,
-    name: 'Mewtwo',
-    type: 'colorless',
-    health: 150,
-    maxHealth: 150,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png',
+  venusaur: {
+    name: 'Venusaur', types: ['grass'], hp: 125,
     skills: [
-      createSkill('confusion', 'Confusion', 'Psychic attack dealing 25 damage.', 'colorless', { colorless: 1 }, 25, 0, ['Ranged', 'Mental'], 0),
-      createSkill('psychic', 'Psychic', 'Powerful psychic blast for 60 damage.', 'colorless', { colorless: 2 }, 60, 2, ['Ranged', 'Mental'], 1),
-      createSkill('barrier', 'Barrier', 'Creates a barrier, INVULNERABLE for 1 turn.', 'colorless', { colorless: 1 }, 0, 4, ['Defense', 'Invulnerable'], 2, ['invulnerable']),
-      createSkill('recover', 'Recover', 'Restores 50 HP to self.', 'colorless', { colorless: 2 }, 0, 4, ['Healing'], 3, [], 50),
-    ],
+      { id: 'solar-beam', name: 'Solar Beam', desc: 'A powerful beam dealing 55 damage.', power: 55, type: 'grass', cd: 2, cost: { grass: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'vine-whip', name: 'Vine Whip', desc: 'Strikes with vines dealing 25 damage.', power: 25, type: 'grass', cd: 0, cost: { grass: 1 }, classes: ['Melee', 'Instant'], target: 'enemy' },
+      { id: 'poison-powder', name: 'Poison Powder', desc: 'Poisons target dealing 10 damage per turn.', power: 10, type: 'poison', cd: 2, cost: { colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' },
+      { id: 'synthesis', name: 'Synthesis', desc: 'Restores 35 HP.', power: -35, type: 'grass', cd: 3, cost: { grass: 1 }, classes: ['Strategic'], target: 'self' }
+    ]
   },
-  {
-    id: 'gengar',
-    slot: 1,
-    name: 'Gengar',
-    type: 'colorless',
-    health: 100,
-    maxHealth: 100,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png',
+  gengar: {
+    name: 'Gengar', types: ['ghost'], hp: 90,
     skills: [
-      createSkill('shadow-ball', 'Shadow Ball', 'Hurls a shadowy blob for 30 damage.', 'colorless', { colorless: 1 }, 30, 0, ['Ranged', 'Affliction'], 0),
-      createSkill('dream-eater', 'Dream Eater', 'Deals 45 damage and heals Gengar 20 HP.', 'colorless', { colorless: 2 }, 45, 2, ['Ranged', 'Drain'], 1, [], 20),
-      createSkill('hypnosis', 'Hypnosis', 'STUNS target for 1 turn.', 'colorless', { colorless: 1 }, 0, 3, ['Mental', 'Control'], 2, ['stun']),
-      createSkill('destiny-bond', 'Destiny Bond', 'If Gengar is KOd this turn, attacker also faints.', 'colorless', { colorless: 2 }, 0, 4, ['Unique'], 3),
-    ],
+      { id: 'shadow-ball', name: 'Shadow Ball', desc: 'Hurls a shadowy blob dealing 40 damage.', power: 40, type: 'ghost', cd: 0, cost: { colorless: 2 }, classes: ['Ranged', 'Instant'], target: 'enemy' },
+      { id: 'hypnosis', name: 'Hypnosis', desc: 'Puts the target to sleep for 2 turns.', power: 0, type: 'psychic', cd: 3, cost: { colorless: 1 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
+      { id: 'dream-eater', name: 'Dream Eater', desc: 'Eats dreams dealing 50 damage.', power: 50, type: 'psychic', cd: 2, cost: { colorless: 2 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
+      { id: 'curse', name: 'Curse', desc: 'Curses target to lose HP each turn.', power: 0, type: 'ghost', cd: 4, cost: { colorless: 1 }, classes: ['Ranged', 'Affliction'], target: 'enemy' }
+    ]
   },
-  {
-    id: 'dragonite',
-    slot: 2,
-    name: 'Dragonite',
-    type: 'fire',
-    health: 140,
-    maxHealth: 140,
-    alive: true,
-    portrait: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png',
-    sprite: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png',
+  mewtwo: {
+    name: 'Mewtwo', types: ['psychic'], hp: 110,
     skills: [
-      createSkill('dragon-breath', 'Dragon Breath', 'Exhales destructive breath for 25 damage.', 'fire', { fire: 1 }, 25, 0, ['Ranged', 'Instant'], 0),
-      createSkill('outrage', 'Outrage', 'Rampages dealing 65 damage.', 'fire', { fire: 2, colorless: 1 }, 65, 2, ['Physical', 'Melee'], 1),
-      createSkill('dragon-dance', 'Dragon Dance', 'Boosts damage by 15 for 3 turns.', 'colorless', { colorless: 1 }, 0, 3, ['Mental', 'Buff'], 2),
-      createSkill('hyper-beam', 'Hyper Beam', 'Devastating beam for 80 damage. Stuns self next turn.', 'colorless', { colorless: 3 }, 80, 4, ['Ranged', 'Ultimate'], 3),
-    ],
-  },
-];
-
-// ============ HELPER FUNCTIONS ============
-const getHpClass = (hp: number, max: number): string => {
-  const pct = (hp / max) * 100;
-  if (pct <= 25) return 'low';
-  if (pct <= 50) return 'medium';
-  return '';
-};
-
-const canAfford = (cost: Partial<Energy>, energy: Energy): boolean => {
-  if ((cost.fire || 0) > energy.fire) return false;
-  if ((cost.water || 0) > energy.water) return false;
-  if ((cost.grass || 0) > energy.grass) return false;
-  if ((cost.electric || 0) > energy.electric) return false;
-  
-  const specificCost = (cost.fire || 0) + (cost.water || 0) + (cost.grass || 0) + (cost.electric || 0);
-  const colorlessNeeded = cost.colorless || 0;
-  const totalAvailable = energy.fire + energy.water + energy.grass + energy.electric + energy.colorless - specificCost;
-  
-  return totalAvailable >= colorlessNeeded;
-};
-
-const spendEnergy = (cost: Partial<Energy>, energy: Energy): Energy => {
-  const newEnergy = { ...energy };
-  newEnergy.fire -= cost.fire || 0;
-  newEnergy.water -= cost.water || 0;
-  newEnergy.grass -= cost.grass || 0;
-  newEnergy.electric -= cost.electric || 0;
-  
-  let colorlessNeeded = cost.colorless || 0;
-  const types: EnergyType[] = ['colorless', 'fire', 'water', 'grass', 'electric'];
-  for (const type of types) {
-    while (colorlessNeeded > 0 && newEnergy[type] > 0) {
-      newEnergy[type]--;
-      colorlessNeeded--;
-    }
+      { id: 'psychic', name: 'Psychic', desc: 'A powerful psychic attack dealing 45 damage.', power: 45, type: 'psychic', cd: 0, cost: { colorless: 2 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
+      { id: 'barrier', name: 'Barrier', desc: 'Reduces damage taken by 50% for 2 turns.', power: 0, type: 'psychic', cd: 3, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' },
+      { id: 'psystrike', name: 'Psystrike', desc: 'A devastating psychic blow dealing 55 damage.', power: 55, type: 'psychic', cd: 2, cost: { colorless: 3 }, classes: ['Ranged', 'Mental'], target: 'enemy' },
+      { id: 'recover', name: 'Recover', desc: 'Restores 40 HP.', power: -40, type: 'normal', cd: 3, cost: { colorless: 1 }, classes: ['Strategic'], target: 'self' }
+    ]
   }
-  
-  return newEnergy;
 };
 
-const getTotalEnergyCost = (cost: Partial<Energy>): number => {
-  return (cost.fire || 0) + (cost.water || 0) + (cost.grass || 0) + (cost.electric || 0) + (cost.colorless || 0);
-};
+const ALL_POKEMON = Object.keys(POKEDATA);
 
-// ============ MAIN COMPONENT ============
+// ==================== HELPERS ====================
+function getPokeNum(id: string): number {
+  const nums: Record<string, number> = {
+    pikachu: 25, charizard: 6, blastoise: 9, venusaur: 3, gengar: 94, mewtwo: 150
+  };
+  return nums[id] || 25;
+}
+
+function getPortrait(id: string): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokeNum(id)}.png`;
+}
+
+function getSprite(id: string): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${getPokeNum(id)}.png`;
+}
+
+function getSkillIcon(type: string): string {
+  const icons: Record<string, string> = {
+    fire: '🔥', water: '💧', grass: '🌿', electric: '⚡',
+    psychic: '🔮', ghost: '👻', poison: '☠️', normal: '⭐'
+  };
+  return icons[type] || '⚔️';
+}
+
+function createPokemon(pokemonId: string, owner: string): Pokemon {
+  const data = POKEDATA[pokemonId] || POKEDATA.pikachu;
+  return {
+    id: `${owner}-${pokemonId}-${Math.random().toString(36).slice(2, 6)}`,
+    name: data.name,
+    hp: data.hp,
+    maxHp: data.hp,
+    portrait: getPortrait(pokemonId),
+    sprite: getSprite(pokemonId),
+    types: data.types,
+    skills: data.skills.map(s => ({ ...s, currentCd: 0 }))
+  };
+}
+
+function canAfford(cost: Record<string, number>, energy: Record<string, number>): boolean {
+  let colorlessNeeded = cost.colorless || 0;
+  for (const type of ['fire', 'water', 'grass', 'electric']) {
+    if ((cost[type] || 0) > (energy[type] || 0)) return false;
+  }
+  const extra = Object.entries(energy).reduce((sum, [type, val]) => {
+    if (type === 'colorless') return sum + val;
+    return sum + Math.max(0, val - (cost[type] || 0));
+  }, 0);
+  return extra >= colorlessNeeded;
+}
+
+// ==================== MAIN ====================
 export default function AIBattlePage() {
+  return (
+    <Suspense fallback={
+      <div className="loading-overlay">
+        <div className="loading-text">Loading Battle...</div>
+        <div className="loading-spinner" />
+      </div>
+    }>
+      <BattleGame />
+    </Suspense>
+  );
+}
+
+function BattleGame() {
   const router = useRouter();
+  const params = useSearchParams();
   
-  // Game state
-  const [phase, setPhase] = useState<Phase>('loading');
+  const teamParam = params.get('team');
+  const difficulty = params.get('difficulty') || 'normal';
+  
+  const [loading, setLoading] = useState(true);
   const [turn, setTurn] = useState(1);
-  const [timer, setTimer] = useState(90);
-  
-  // Teams
+  const [timer, setTimer] = useState(100);
   const [playerTeam, setPlayerTeam] = useState<Pokemon[]>([]);
-  const [aiTeam, setAiTeam] = useState<Pokemon[]>([]);
-  
-  // Energy
-  const [playerEnergy, setPlayerEnergy] = useState<Energy>({ fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 });
-  
-  // Actions
-  const [selectedSkill, setSelectedSkill] = useState<{ slot: number; skillIdx: number } | null>(null);
-  const [queuedActions, setQueuedActions] = useState<QueuedAction[]>([]);
-  
-  // UI state
-  const [hoveredSkill, setHoveredSkill] = useState<{ skill: Skill; pokemon: Pokemon } | null>(null);
-  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-  const [damagePopups, setDamagePopups] = useState<{ id: number; x: number; y: number; value: number; isHeal: boolean }[]>([]);
-  
-  // Remaining energy after queued actions
-  const remainingEnergy = useMemo((): Energy => {
-    let energy = { ...playerEnergy };
-    queuedActions.forEach(action => {
-      energy = spendEnergy(action.skill.cost, energy);
-    });
-    return energy;
-  }, [playerEnergy, queuedActions]);
-  
-  // Generate random energy
-  const generateTurnEnergy = useCallback((): Energy => {
-    const types: EnergyType[] = ['fire', 'water', 'grass', 'electric', 'colorless'];
-    const newEnergy: Energy = { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 };
-    for (let i = 0; i < 4; i++) {
-      const type = types[Math.floor(Math.random() * types.length)];
-      newEnergy[type]++;
+  const [enemyTeam, setEnemyTeam] = useState<Pokemon[]>([]);
+  const [energy, setEnergy] = useState({ fire: 1, water: 1, grass: 1, electric: 1, colorless: 2 });
+  const [selectedPoke, setSelectedPoke] = useState<Pokemon | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<Skill | null>(null);
+  const [targetMode, setTargetMode] = useState(false);
+  const [queue, setQueue] = useState<QueuedAction[]>([]);
+  const [popups, setPopups] = useState<Popup[]>([]);
+  const [gameOver, setGameOver] = useState<'win' | 'lose' | null>(null);
+  const [centerPoke, setCenterPoke] = useState<Pokemon | null>(null);
+
+  // Initialize
+  useEffect(() => {
+    const team = teamParam?.split(',').slice(0, 3) || ['pikachu', 'charizard', 'blastoise'];
+    while (team.length < 3) {
+      const r = ALL_POKEMON[Math.floor(Math.random() * ALL_POKEMON.length)];
+      if (!team.includes(r)) team.push(r);
     }
-    return newEnergy;
-  }, []);
-  
-  // Initialize game
+    
+    const pTeam = team.map(id => createPokemon(id, 'p'));
+    setPlayerTeam(pTeam);
+    setCenterPoke(pTeam[0]);
+    
+    const eTeam: string[] = [];
+    while (eTeam.length < 3) {
+      const r = ALL_POKEMON[Math.floor(Math.random() * ALL_POKEMON.length)];
+      if (!eTeam.includes(r)) eTeam.push(r);
+    }
+    setEnemyTeam(eTeam.map(id => createPokemon(id, 'e')));
+    
+    setTimeout(() => setLoading(false), 500);
+  }, [teamParam]);
+
+  // Timer
   useEffect(() => {
-    const initTimer = setTimeout(() => {
-      const pTeam = createPlayerTeam();
-      const aTeam = createAITeam();
-      setPlayerTeam(pTeam);
-      setAiTeam(aTeam);
-      setSelectedPokemon(pTeam[0]);
-      setPlayerEnergy(generateTurnEnergy());
-      setPhase('player-turn');
-    }, 1500);
-    return () => clearTimeout(initTimer);
-  }, [generateTurnEnergy]);
-  
-  // Timer countdown
-  useEffect(() => {
-    if (phase !== 'player-turn') return;
+    if (loading || gameOver) return;
     const interval = setInterval(() => {
-      setTimer(prev => {
-        if (prev <= 1) {
-          // Auto-execute turn when timer runs out
-          executeTurn();
-          return 90;
-        }
-        return prev - 1;
+      setTimer(t => {
+        if (t <= 0) return 100;
+        return t - 1;
       });
-    }, 1000);
+    }, 600);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-  
-  // Show damage popup
-  const showDamagePopup = useCallback((slot: number, team: 'player' | 'ai', value: number, isHeal: boolean) => {
-    const id = Date.now() + Math.random();
-    const baseX = team === 'player' ? 180 : window.innerWidth - 180;
-    const y = 180 + slot * 120;
+  }, [loading, gameOver]);
+
+  // Win/Lose check
+  useEffect(() => {
+    if (playerTeam.length === 0 || enemyTeam.length === 0) return;
+    if (playerTeam.every(p => p.hp <= 0)) setGameOver('lose');
+    else if (enemyTeam.every(p => p.hp <= 0)) setGameOver('win');
+  }, [playerTeam, enemyTeam]);
+
+  const onSkillClick = useCallback((poke: Pokemon, skill: Skill) => {
+    if (skill.currentCd > 0 || poke.hp <= 0 || !canAfford(skill.cost, energy)) return;
     
-    setDamagePopups(prev => [...prev, { id, x: baseX, y, value, isHeal }]);
-    setTimeout(() => {
-      setDamagePopups(prev => prev.filter(p => p.id !== id));
-    }, 1200);
-  }, []);
-  
-  // Handle skill click
-  const handleSkillClick = useCallback((pokemon: Pokemon, skillIdx: number) => {
-    if (phase !== 'player-turn') return;
-    if (!pokemon.alive) return;
+    setSelectedPoke(poke);
+    setSelectedSkill(skill);
+    setCenterPoke(poke);
     
-    const skill = pokemon.skills[skillIdx];
-    if (skill.currentCooldown > 0) return;
-    if (!canAfford(skill.cost, remainingEnergy)) return;
-    
-    // Toggle off if already selected
-    if (selectedSkill?.slot === pokemon.slot && selectedSkill?.skillIdx === skillIdx) {
-      setSelectedSkill(null);
-      return;
+    if (skill.target === 'self') {
+      addToQueue(poke, skill, poke);
+    } else {
+      setTargetMode(true);
     }
-    
-    // If already queued, remove it
-    const existingIdx = queuedActions.findIndex(a => a.userSlot === pokemon.slot && a.skillIdx === skillIdx);
-    if (existingIdx >= 0) {
-      setQueuedActions(prev => prev.filter((_, i) => i !== existingIdx));
-      return;
-    }
-    
-    setSelectedSkill({ slot: pokemon.slot, skillIdx });
-    setSelectedPokemon(pokemon);
-    setHoveredSkill({ skill, pokemon });
-  }, [phase, remainingEnergy, selectedSkill, queuedActions]);
-  
-  // Handle target selection
-  const handleTargetClick = useCallback((targetSlot: number, targetTeam: 'player' | 'ai') => {
-    if (!selectedSkill) return;
-    
-    const user = playerTeam.find(p => p.slot === selectedSkill.slot);
-    if (!user) return;
-    
-    const skill = user.skills[selectedSkill.skillIdx];
-    
-    setQueuedActions(prev => [...prev, {
-      userSlot: selectedSkill.slot,
-      skillIdx: selectedSkill.skillIdx,
-      targetSlot,
-      targetTeam,
-      skill,
-    }]);
-    
+  }, [energy]);
+
+  const addToQueue = useCallback((user: Pokemon, skill: Skill, target: Pokemon) => {
+    setQueue(prev => [
+      ...prev.filter(q => q.oderId !== user.id),
+      { oderId: user.id, skillId: skill.id, skillType: skill.type, targetId: target.id, targetName: target.name }
+    ]);
     setSelectedSkill(null);
-  }, [selectedSkill, playerTeam]);
-  
-  // Remove action from queue
-  const removeFromQueue = useCallback((idx: number) => {
-    setQueuedActions(prev => prev.filter((_, i) => i !== idx));
+    setSelectedPoke(null);
+    setTargetMode(false);
   }, []);
-  
-  // Execute player turn
-  const executeTurn = useCallback(async () => {
-    if (phase !== 'player-turn') return;
-    setPhase('executing');
+
+  const onTargetClick = useCallback((target: Pokemon) => {
+    if (!targetMode || !selectedSkill || !selectedPoke) return;
+    addToQueue(selectedPoke, selectedSkill, target);
+  }, [targetMode, selectedSkill, selectedPoke, addToQueue]);
+
+  const removeFromQueue = useCallback((oderId: string) => {
+    setQueue(prev => prev.filter(q => q.oderId !== oderId));
+  }, []);
+
+  const showPopup = useCallback((x: number, y: number, value: number, type: 'damage' | 'heal') => {
+    const id = Math.random().toString(36);
+    setPopups(prev => [...prev, { id, x, y, value, type }]);
+    setTimeout(() => setPopups(prev => prev.filter(p => p.id !== id)), 1000);
+  }, []);
+
+  const executeTurn = useCallback(() => {
+    if (gameOver) return;
     
-    // Execute player actions
-    for (const action of queuedActions) {
-      await new Promise(r => setTimeout(r, 600));
+    queue.forEach(action => {
+      const user = playerTeam.find(p => p.id === action.oderId);
+      const skill = user?.skills.find(s => s.id === action.skillId);
+      if (!user || !skill || user.hp <= 0) return;
       
-      const user = playerTeam.find(p => p.slot === action.userSlot);
-      if (!user || !user.alive) continue;
+      let target = skill.target === 'self' 
+        ? user 
+        : enemyTeam.find(p => p.id === action.targetId && p.hp > 0) || enemyTeam.find(p => p.hp > 0);
       
-      // Apply damage
-      if (action.skill.damage > 0 && action.targetTeam === 'ai') {
-        const targetIdx = aiTeam.findIndex(p => p.slot === action.targetSlot);
-        if (targetIdx >= 0 && aiTeam[targetIdx].alive) {
-          const damage = action.skill.damage;
-          showDamagePopup(action.targetSlot, 'ai', damage, false);
-          
-          setAiTeam(prev => prev.map(p => {
-            if (p.slot === action.targetSlot) {
-              const newHp = Math.max(0, p.health - damage);
-              return { ...p, health: newHp, alive: newHp > 0 };
-            }
-            return p;
-          }));
-        }
+      if (!target) return;
+      
+      if (skill.power > 0) {
+        const dmg = Math.floor(skill.power * (0.85 + Math.random() * 0.3));
+        setEnemyTeam(prev => prev.map(p => 
+          p.id === target!.id ? { ...p, hp: Math.max(0, p.hp - dmg) } : p
+        ));
+        showPopup(550 + Math.random() * 100, 150 + Math.random() * 80, dmg, 'damage');
+      } else if (skill.power < 0) {
+        const heal = Math.abs(skill.power);
+        setPlayerTeam(prev => prev.map(p => 
+          p.id === target!.id ? { ...p, hp: Math.min(p.maxHp, p.hp + heal) } : p
+        ));
+        showPopup(150 + Math.random() * 100, 150 + Math.random() * 80, heal, 'heal');
       }
       
-      // Apply healing
-      if (action.skill.healing && action.skill.healing > 0) {
-        showDamagePopup(action.userSlot, 'player', action.skill.healing, true);
-        setPlayerTeam(prev => prev.map(p => {
-          if (p.slot === action.userSlot) {
-            const newHp = Math.min(p.maxHealth, p.health + (action.skill.healing || 0));
-            return { ...p, health: newHp };
+      setPlayerTeam(prev => prev.map(p => 
+        p.id === user.id ? {
+          ...p,
+          skills: p.skills.map(s => s.id === skill.id ? { ...s, currentCd: s.cd } : s)
+        } : p
+      ));
+      
+      const cost = skill.cost;
+      setEnergy(prev => {
+        const next = { ...prev };
+        for (const [type, amount] of Object.entries(cost)) {
+          if (type !== 'colorless' && next[type as keyof typeof next] !== undefined) {
+            (next as any)[type] -= amount;
           }
-          return p;
-        }));
-      }
-      
-      // Set cooldown
-      setPlayerTeam(prev => prev.map(p => {
-        if (p.slot === action.userSlot) {
-          const skills = [...p.skills];
-          skills[action.skillIdx] = { 
-            ...skills[action.skillIdx], 
-            currentCooldown: action.skill.cooldown + 1
-          };
-          return { ...p, skills };
         }
-        return p;
-      }));
-    }
-    
-    // Check win condition
-    await new Promise(r => setTimeout(r, 400));
-    const aiAlive = aiTeam.some(p => p.health > 0);
-    if (!aiAlive) {
-      setPhase('victory');
-      return;
-    }
-    
-    // AI Turn
-    setPhase('ai-turn');
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // Simple AI: Each alive AI Pokemon uses a random available skill on random player
-    const aiActions: { user: Pokemon; skill: Skill; targetSlot: number }[] = [];
-    const aiEnergy = generateTurnEnergy();
-    let availableEnergy = { ...aiEnergy };
-    
-    for (const aiPoke of aiTeam) {
-      if (!aiPoke.alive || aiPoke.health <= 0) continue;
-      
-      const availableSkills = aiPoke.skills.filter(s => 
-        s.currentCooldown === 0 && canAfford(s.cost, availableEnergy)
-      );
-      
-      if (availableSkills.length > 0) {
-        const skill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
-        const alivePlayerTargets = playerTeam.filter(p => p.alive && p.health > 0);
-        if (alivePlayerTargets.length > 0) {
-          const target = alivePlayerTargets[Math.floor(Math.random() * alivePlayerTargets.length)];
-          aiActions.push({ user: aiPoke, skill, targetSlot: target.slot });
-          availableEnergy = spendEnergy(skill.cost, availableEnergy);
+        let colorless = cost.colorless || 0;
+        for (const type of ['colorless'] as const) {
+          const used = Math.min(next[type], colorless);
+          next[type] -= used;
+          colorless -= used;
         }
-      }
-    }
-    
-    // Execute AI actions
-    for (const action of aiActions) {
-      await new Promise(r => setTimeout(r, 600));
+        return next;
+      });
+    });
+
+    setTimeout(() => {
+      const aiMod = difficulty === 'easy' ? 0.6 : difficulty === 'hard' ? 1.3 : 1.0;
       
-      if (action.skill.damage > 0) {
-        showDamagePopup(action.targetSlot, 'player', action.skill.damage, false);
+      enemyTeam.forEach(enemy => {
+        if (enemy.hp <= 0) return;
+        const skills = enemy.skills.filter(s => s.currentCd === 0 && s.power > 0);
+        if (skills.length === 0) return;
         
-        setPlayerTeam(prev => prev.map(p => {
-          if (p.slot === action.targetSlot) {
-            const newHp = Math.max(0, p.health - action.skill.damage);
-            return { ...p, health: newHp, alive: newHp > 0 };
-          }
-          return p;
-        }));
-      }
+        const skill = skills[Math.floor(Math.random() * skills.length)];
+        const targets = playerTeam.filter(p => p.hp > 0);
+        if (targets.length === 0) return;
+        
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        const dmg = Math.floor(skill.power * aiMod * (0.85 + Math.random() * 0.3));
+        
+        setPlayerTeam(prev => prev.map(p => 
+          p.id === target.id ? { ...p, hp: Math.max(0, p.hp - dmg) } : p
+        ));
+        showPopup(150 + Math.random() * 100, 150 + Math.random() * 80, dmg, 'damage');
+        
+        setEnemyTeam(prev => prev.map(p => 
+          p.id === enemy.id ? {
+            ...p,
+            skills: p.skills.map(s => s.id === skill.id ? { ...s, currentCd: s.cd } : s)
+          } : p
+        ));
+      });
       
-      // Set AI cooldowns
-      setAiTeam(prev => prev.map(p => {
-        if (p.slot === action.user.slot) {
-          const skills = p.skills.map(s => 
-            s.id === action.skill.id ? { ...s, currentCooldown: action.skill.cooldown + 1 } : s
-          );
-          return { ...p, skills };
-        }
-        return p;
+      setPlayerTeam(prev => prev.map(p => ({
+        ...p,
+        skills: p.skills.map(s => ({ ...s, currentCd: Math.max(0, s.currentCd - 1) }))
+      })));
+      setEnemyTeam(prev => prev.map(p => ({
+        ...p,
+        skills: p.skills.map(s => ({ ...s, currentCd: Math.max(0, s.currentCd - 1) }))
+      })));
+      
+      setEnergy(prev => ({
+        fire: Math.min(9, prev.fire + 1),
+        water: Math.min(9, prev.water + 1),
+        grass: Math.min(9, prev.grass + 1),
+        electric: Math.min(9, prev.electric + 1),
+        colorless: Math.min(9, prev.colorless + 1)
       }));
-    }
-    
-    // Check lose condition
-    await new Promise(r => setTimeout(r, 400));
-    const playerAlive = playerTeam.some(p => p.health > 0);
-    if (!playerAlive) {
-      setPhase('defeat');
-      return;
-    }
-    
-    // Reduce all cooldowns
-    setPlayerTeam(prev => prev.map(p => ({
-      ...p,
-      skills: p.skills.map(s => ({ ...s, currentCooldown: Math.max(0, s.currentCooldown - 1) }))
-    })));
-    setAiTeam(prev => prev.map(p => ({
-      ...p,
-      skills: p.skills.map(s => ({ ...s, currentCooldown: Math.max(0, s.currentCooldown - 1) }))
-    })));
-    
-    // New turn
-    setQueuedActions([]);
-    setTurn(prev => prev + 1);
-    setPlayerEnergy(generateTurnEnergy());
-    setTimer(90);
-    setPhase('player-turn');
-    
-  }, [phase, queuedActions, playerTeam, aiTeam, generateTurnEnergy, showDamagePopup]);
-  
-  // Render loading screen
-  if (phase === 'loading') {
+      
+      setQueue([]);
+      setTurn(t => t + 1);
+      setTimer(100);
+    }, 400);
+  }, [gameOver, queue, playerTeam, enemyTeam, difficulty, showPopup]);
+
+  const hpClass = (hp: number, max: number) => {
+    const pct = (hp / max) * 100;
+    if (pct <= 25) return 'low';
+    if (pct <= 50) return 'medium';
+    return '';
+  };
+
+  const displaySkill = hoveredSkill || selectedSkill;
+
+  if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="loading-text">Preparando Batalha...</div>
-        <div className="loading-spinner"></div>
+      <div className="loading-overlay">
+        <div className="loading-text">Loading Battle...</div>
+        <div className="loading-spinner" />
       </div>
     );
   }
-  
-  // Render game over
-  if (phase === 'victory' || phase === 'defeat') {
+
+  if (gameOver) {
     return (
-      <div className="game-over-overlay">
-        <div className={`game-over-text ${phase}`}>
-          {phase === 'victory' ? '🏆 VITÓRIA!' : '💀 DERROTA'}
+      <div className="gameover-overlay">
+        <div className={`gameover-text ${gameOver}`}>
+          {gameOver === 'win' ? 'VICTORY!' : 'DEFEAT'}
         </div>
-        <button className="game-over-btn" onClick={() => router.push('/play')}>
-          Voltar ao Menu
+        <button className="gameover-btn" onClick={() => router.push('/play')}>
+          Return to Menu
         </button>
       </div>
     );
   }
-  
-  const isSelectingTarget = selectedSkill !== null;
-  
+
   return (
-    <div className="battle-container">
+    <div className="battle-page">
+      <div className="battle-bg" />
+      
       {/* TOP BAR */}
       <div className="top-bar">
         <div className="player-info">
           <div className="player-avatar">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" alt="Player" />
+            <img src="https://i.pravatar.cc/100?u=player" alt="Player" />
           </div>
           <div className="player-details">
-            <div className="player-name">TREINADOR</div>
-            <div className="player-title">Mestre Pokémon</div>
+            <div className="player-name">TRAINER</div>
+            <div className="player-rank">POKEMON MASTER</div>
           </div>
         </div>
         
-        <div className="center-info">
-          <div className="turn-text">
-            {phase === 'player-turn' ? 'SELECIONE SEUS MOVIMENTOS' : 
-             phase === 'executing' ? 'EXECUTANDO...' : 
-             phase === 'ai-turn' ? 'TURNO DO OPONENTE...' : ''}
+        <div className="top-center">
+          <div className="turn-status">
+            {queue.length > 0 ? 'PRESS WHEN READY' : 'YOUR TURN...'}
           </div>
           <div className="timer-bar">
-            <div className="timer-fill" style={{ width: `${(timer / 90) * 100}%` }}></div>
+            <div className="timer-fill" style={{ width: `${timer}%` }} />
           </div>
-          <div className="energy-display">
-            <div className="energy-item">
-              <div className="energy-icon fire">🔥</div>
-              <span>x{remainingEnergy.fire}</span>
+          <div className="chakra-display">
+            <div className="chakra-item">
+              <div className="chakra-box fire" />
+              <span className="chakra-count">x{energy.fire}</span>
             </div>
-            <div className="energy-item">
-              <div className="energy-icon water">💧</div>
-              <span>x{remainingEnergy.water}</span>
+            <div className="chakra-item">
+              <div className="chakra-box water" />
+              <span className="chakra-count">x{energy.water}</span>
             </div>
-            <div className="energy-item">
-              <div className="energy-icon grass">🌿</div>
-              <span>x{remainingEnergy.grass}</span>
+            <div className="chakra-item">
+              <div className="chakra-box grass" />
+              <span className="chakra-count">x{energy.grass}</span>
             </div>
-            <div className="energy-item">
-              <div className="energy-icon electric">⚡</div>
-              <span>x{remainingEnergy.electric}</span>
+            <div className="chakra-item">
+              <div className="chakra-box electric" />
+              <span className="chakra-count">x{energy.electric}</span>
             </div>
-            <div className="energy-item">
-              <div className="energy-icon colorless">⭐</div>
-              <span>x{remainingEnergy.colorless}</span>
+            <div className="chakra-item">
+              <div className="chakra-box colorless" />
+              <span className="chakra-count">x{energy.colorless}</span>
             </div>
-            <button className="exchange-btn">TROCAR ENERGIA</button>
+            <button className="exchange-btn">EXCHANGE CHAKRA</button>
           </div>
         </div>
         
         <div className="player-info right">
           <div className="player-avatar">
-            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" alt="Rival" />
+            <img src="https://i.pravatar.cc/100?u=ai" alt="AI" />
           </div>
-          <div className="player-details right">
-            <div className="player-name">RIVAL</div>
-            <div className="player-title">Treinador Elite</div>
+          <div className="player-details">
+            <div className="player-name">AI TRAINER</div>
+            <div className="player-rank">{difficulty.toUpperCase()}</div>
           </div>
         </div>
       </div>
-      
-      {/* BATTLE AREA */}
-      <div className="battle-area">
-        {/* Player Team - Left */}
-        <div className="team-column">
-          {playerTeam.map(pokemon => (
-            <div key={pokemon.id} className="char-row">
-              <div className="portrait-box">
+
+      {/* MAIN AREA */}
+      <div className="main-area">
+        {/* LEFT TEAM */}
+        <div className="team-col">
+          {playerTeam.map(poke => (
+            <div 
+              key={poke.id}
+              className={`char-row ${poke.hp <= 0 ? 'dead' : ''} ${centerPoke?.id === poke.id ? 'active' : ''}`}
+            >
+              <div className="portrait-section">
                 <div 
-                  className={`portrait ${!pokemon.alive ? 'dead' : ''} ${selectedPokemon?.id === pokemon.id ? 'selected' : ''}`}
-                  onClick={() => pokemon.alive && setSelectedPokemon(pokemon)}
+                  className="portrait"
+                  onClick={() => setCenterPoke(poke)}
                 >
-                  <img src={pokemon.portrait} alt={pokemon.name} />
+                  <img src={poke.portrait} alt={poke.name} />
                 </div>
                 <div className="hp-bar-container">
                   <div className="hp-bar">
                     <div 
-                      className={`hp-fill ${getHpClass(pokemon.health, pokemon.maxHealth)}`}
-                      style={{ width: `${(pokemon.health / pokemon.maxHealth) * 100}%` }}
-                    ></div>
-                    <div className="hp-text">{pokemon.health}/{pokemon.maxHealth}</div>
+                      className={`hp-fill ${hpClass(poke.hp, poke.maxHp)}`}
+                      style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }}
+                    />
+                    <span className="hp-text">{poke.hp}/{poke.maxHp}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="skills-grid">
-                {pokemon.skills.map((skill, idx) => {
-                  const isQueued = queuedActions.some(a => a.userSlot === pokemon.slot && a.skillIdx === idx);
-                  const isSelected = selectedSkill?.slot === pokemon.slot && selectedSkill?.skillIdx === idx;
-                  const canUse = pokemon.alive && skill.currentCooldown === 0 && canAfford(skill.cost, remainingEnergy);
+              <div className="skills-container">
+                {poke.skills.map(skill => {
+                  const usable = poke.hp > 0 && skill.currentCd === 0 && canAfford(skill.cost, energy);
+                  const isQueued = queue.some(q => q.oderId === poke.id && q.skillId === skill.id);
                   
                   return (
                     <div
                       key={skill.id}
-                      className={`skill-box ${isQueued ? 'queued' : ''} ${isSelected ? 'selected' : ''} ${!canUse ? 'disabled' : ''} ${skill.currentCooldown > 0 ? 'on-cooldown' : ''}`}
-                      onClick={() => handleSkillClick(pokemon, idx)}
-                      onMouseEnter={() => setHoveredSkill({ skill, pokemon })}
-                      onMouseLeave={() => !selectedSkill && setHoveredSkill(null)}
+                      className={`skill-box ${!usable ? 'disabled' : ''} ${skill.currentCd > 0 ? 'cooldown' : ''} ${isQueued ? 'queued' : ''} ${selectedSkill?.id === skill.id && selectedPoke?.id === poke.id ? 'selected' : ''}`}
+                      onClick={() => usable && onSkillClick(poke, skill)}
+                      onMouseEnter={() => setHoveredSkill(skill)}
+                      onMouseLeave={() => setHoveredSkill(null)}
                     >
-                      <img src={skill.image} alt={skill.name} />
-                      {skill.currentCooldown > 0 && (
-                        <div className="skill-cooldown">{skill.currentCooldown}</div>
+                      <span className="skill-icon">{getSkillIcon(skill.type)}</span>
+                      {skill.currentCd > 0 && (
+                        <div className="cooldown-num">{skill.currentCd}</div>
                       )}
                     </div>
                   );
@@ -691,51 +521,61 @@ export default function AIBattlePage() {
             </div>
           ))}
         </div>
-        
-        {/* Center - Selected Pokemon */}
-        <div className="center-display">
-          {selectedPokemon && (
+
+        {/* CENTER */}
+        <div className="center-col">
+          {centerPoke && (
             <div className="center-pokemon">
-              <img src={selectedPokemon.sprite} alt={selectedPokemon.name} />
+              <img src={centerPoke.sprite} alt={centerPoke.name} />
             </div>
           )}
           
-          <button 
-            className={`ready-btn ${queuedActions.length > 0 ? 'active' : ''}`}
-            onClick={executeTurn}
-            disabled={phase !== 'player-turn'}
-          >
-            PRONTO
-          </button>
-          <div className="turn-indicator">TURNO {turn}</div>
-        </div>
-        
-        {/* AI Team - Right */}
-        <div className="team-column right">
-          {aiTeam.map(pokemon => (
-            <div key={pokemon.id} className="char-row right">
-              <div className="portrait-box">
+          {queue.length > 0 && (
+            <div className="action-queue">
+              {queue.map(action => (
                 <div 
-                  className={`portrait ${!pokemon.alive ? 'dead' : ''} ${isSelectingTarget && pokemon.alive ? 'targetable' : ''}`}
-                  onClick={() => isSelectingTarget && pokemon.alive && handleTargetClick(pokemon.slot, 'ai')}
+                  key={action.oderId}
+                  className="queue-item"
+                  onClick={() => removeFromQueue(action.oderId)}
+                  title="Click to cancel"
                 >
-                  <img src={pokemon.portrait} alt={pokemon.name} />
+                  <span className="queue-icon">{getSkillIcon(action.skillType)}</span>
+                  <span className="queue-target">→ {action.targetName}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT TEAM */}
+        <div className="team-col right">
+          {enemyTeam.map(poke => (
+            <div 
+              key={poke.id}
+              className={`char-row right ${poke.hp <= 0 ? 'dead' : ''}`}
+            >
+              <div className="portrait-section">
+                <div 
+                  className={`portrait ${targetMode && poke.hp > 0 ? 'targetable' : ''}`}
+                  onClick={() => targetMode && poke.hp > 0 && onTargetClick(poke)}
+                >
+                  <img src={poke.portrait} alt={poke.name} />
                 </div>
                 <div className="hp-bar-container">
                   <div className="hp-bar">
                     <div 
-                      className={`hp-fill ${getHpClass(pokemon.health, pokemon.maxHealth)}`}
-                      style={{ width: `${(pokemon.health / pokemon.maxHealth) * 100}%` }}
-                    ></div>
-                    <div className="hp-text">{pokemon.health}/{pokemon.maxHealth}</div>
+                      className={`hp-fill ${hpClass(poke.hp, poke.maxHp)}`}
+                      style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }}
+                    />
+                    <span className="hp-text">{poke.hp}/{poke.maxHp}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="skills-grid">
-                {pokemon.skills.map((skill) => (
+              <div className="skills-container">
+                {poke.skills.map(skill => (
                   <div key={skill.id} className="skill-box disabled">
-                    <span className="skill-question">?</span>
+                    <span className="unknown-mark">?</span>
                   </div>
                 ))}
               </div>
@@ -743,78 +583,69 @@ export default function AIBattlePage() {
           ))}
         </div>
       </div>
-      
-      {/* Action Queue */}
-      {queuedActions.length > 0 && (
-        <div className="action-queue">
-          {queuedActions.map((action, idx) => {
-            const user = playerTeam.find(p => p.slot === action.userSlot);
-            const target = action.targetTeam === 'ai' 
-              ? aiTeam.find(p => p.slot === action.targetSlot)
-              : playerTeam.find(p => p.slot === action.targetSlot);
-            
-            return (
-              <div key={idx} className="queued-action" onClick={() => removeFromQueue(idx)}>
-                <img src={action.skill.image} alt={action.skill.name} />
-                <span className="arrow">→</span>
-                <span className="target-name">{target?.name}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      
-      {/* BOTTOM BAR - Skill Info */}
+
+      {/* BOTTOM BAR */}
       <div className="bottom-bar">
-        <div className="surrender-section">
-          <button className="surrender-btn" onClick={() => router.push('/play')}>RENDER-SE</button>
-          <button className="chat-btn">CHAT (0)</button>
+        <div className="bottom-left">
+          <button className="surrender-btn" onClick={() => router.push('/play')}>
+            Surrender
+          </button>
+          <button className="chat-btn">
+            OPEN CHAT <span className="chat-new">(NEW: 2)</span>
+          </button>
+          <div className="volume-section">
+            <span>🔊</span>
+            <input type="range" min="0" max="100" defaultValue="50" />
+          </div>
         </div>
         
-        {hoveredSkill ? (
-          <div className="skill-info-panel">
-            <div className="skill-info-header">
-              <span className="skill-name">{hoveredSkill.skill.name}</span>
-              <div className="skill-energy-cost">
-                <span className="label">ENERGY:</span>
-                {Object.entries(hoveredSkill.skill.cost).map(([type, amount]) => (
-                  amount > 0 && (
-                    <div key={type} className={`energy-icon ${type}`}>
-                      {type === 'fire' ? '🔥' : type === 'water' ? '💧' : type === 'grass' ? '🌿' : type === 'electric' ? '⚡' : '⭐'}
-                    </div>
-                  )
-                )).filter(Boolean)}
-                {getTotalEnergyCost(hoveredSkill.skill.cost) === 0 && <span>NONE</span>}
+        <div className="skill-panel">
+          {displaySkill ? (
+            <>
+              <div className="skill-panel-title">{displaySkill.name}</div>
+              <div className="skill-panel-desc">{displaySkill.desc}</div>
+              <div className="skill-panel-footer">
+                <span className="skill-classes">CLASSES: {displaySkill.classes.join(', ')}</span>
+                <span className="skill-energy">
+                  ENERGY: 
+                  {Object.entries(displaySkill.cost).map(([type, amt]) => (
+                    <span key={type}>
+                      {Array(amt).fill(0).map((_, i) => (
+                        <span key={i} className={`chakra-box ${type}`} />
+                      ))}
+                    </span>
+                  ))}
+                </span>
+                {displaySkill.cd > 0 && (
+                  <span className="skill-cooldown">COOLDOWN: {displaySkill.cd}</span>
+                )}
               </div>
+            </>
+          ) : (
+            <div className="no-skill-msg">
+              Here is a very nice description of the selected skill...
             </div>
-            <div className="skill-description">
-              {hoveredSkill.skill.description}
-            </div>
-            <div className="skill-meta">
-              <div className="skill-classes">
-                <span>CLASSES: </span>
-                {hoveredSkill.skill.classes.map((c, i) => (
-                  <span key={i} className="skill-class">{c}{i < hoveredSkill.skill.classes.length - 1 ? ', ' : ''}</span>
-                ))}
-              </div>
-              <span className="skill-cooldown-text">COOLDOWN: {hoveredSkill.skill.cooldown}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="no-skill-selected">
-            Passe o mouse sobre uma skill para ver os detalhes
-          </div>
-        )}
+          )}
+        </div>
+        
+        <div className="ready-btn-container">
+          <button 
+            className={`ready-btn ${queue.length > 0 ? 'active' : ''}`}
+            onClick={executeTurn}
+          >
+            {queue.length > 0 ? 'READY' : 'PASS'}
+          </button>
+        </div>
       </div>
-      
-      {/* Damage Popups */}
-      {damagePopups.map(popup => (
+
+      {/* Popups */}
+      {popups.map(popup => (
         <div
           key={popup.id}
-          className={`damage-popup ${popup.isHeal ? 'heal' : ''}`}
+          className={`dmg-popup ${popup.type}`}
           style={{ left: popup.x, top: popup.y }}
         >
-          {popup.isHeal ? '+' : '-'}{popup.value}
+          {popup.type === 'damage' ? '-' : '+'}{popup.value}
         </div>
       ))}
     </div>
