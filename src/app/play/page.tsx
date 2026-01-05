@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
-import { useGameSocket } from '@/hooks/useGameSocket';
 
 interface Pokemon {
   id: string;
@@ -19,98 +18,19 @@ interface Pokemon {
   moves?: { id: string; name: string }[];
 }
 
-interface UserData {
-  id: string;
-  username: string;
-}
-
-type GameMode = 'selection' | 'queue' | 'battle';
-
 export default function PlayPage() {
   const router = useRouter();
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Pokemon[]>([]);
-  const [gameMode, setGameMode] = useState<GameMode>('selection');
-  const [queueTime, setQueueTime] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
-
-  // Get user data for WebSocket
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (res.ok) {
-          const data = await res.json();
-          setUserData({ id: data.user.id, username: data.user.username });
-        }
-      } catch {
-        console.error('Failed to fetch user');
-      }
-    }
-    fetchUser();
-  }, []);
-
-  // WebSocket connection
-  const {
-    state: socketState,
-    battleId,
-    queuePosition,
-    onlineCount,
-    error: socketError,
-    connect,
-    disconnect,
-    joinQueue: wsJoinQueue,
-    leaveQueue: wsLeaveQueue,
-  } = useGameSocket(userData?.id || null, userData?.username || null);
-
-  // Connect to socket when user is loaded
-  useEffect(() => {
-    if (userData && socketState === 'disconnected') {
-      connect();
-    }
-  }, [userData, socketState, connect]);
-
-  // Handle battle found
-  useEffect(() => {
-    if (battleId && socketState === 'inBattle') {
-      setGameMode('battle');
-      // Redirect to battle page
-      router.push(`/battle/${battleId}`);
-    }
-  }, [battleId, socketState, router]);
-
-  // Handle queue state
-  useEffect(() => {
-    if (socketState === 'inQueue') {
-      setGameMode('queue');
-    }
-  }, [socketState]);
-
-  // Handle socket errors
-  useEffect(() => {
-    if (socketError) {
-      setError(socketError);
-    }
-  }, [socketError]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (gameMode === 'queue') {
-        wsLeaveQueue();
-      }
-    };
-  }, [gameMode, wsLeaveQueue]);
+  const [difficulty, setDifficulty] = useState<'easy' | 'normal' | 'hard'>('normal');
 
   // Helper function to extract type from various formats
   const extractType = (pokemon: Record<string, unknown>): string => {
-    // If type is already a string, use it
     if (typeof pokemon.type === 'string' && pokemon.type) {
       return pokemon.type;
     }
-    // If types is a JSON string like "[\"Water\"]"
     if (typeof pokemon.types === 'string') {
       try {
         const parsed = JSON.parse(pokemon.types);
@@ -119,12 +39,10 @@ export default function PlayPage() {
         }
         return pokemon.types;
       } catch {
-        // types might be "Water,Fire" format
         const first = pokemon.types.split(',')[0];
         return first || 'Normal';
       }
     }
-    // If types is an array
     if (Array.isArray(pokemon.types) && pokemon.types.length > 0) {
       return pokemon.types[0];
     }
@@ -138,7 +56,6 @@ export default function PlayPage() {
         const res = await fetch('/api/pokemon');
         if (res.ok) {
           const data = await res.json();
-          // Transform data to ensure type field exists
           const transformed = data.map((p: Record<string, unknown>) => ({
             ...p,
             type: extractType(p),
@@ -146,26 +63,36 @@ export default function PlayPage() {
             moves: p.moves || [],
           }));
           setPokemon(transformed);
+        } else {
+          // Use default Pokemon if API fails
+          setPokemon([
+            { id: '1', name: 'Pikachu', type: 'Electric', health: 100, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png', moves: [] },
+            { id: '2', name: 'Charizard', type: 'Fire', health: 120, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png', moves: [] },
+            { id: '3', name: 'Blastoise', type: 'Water', health: 130, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png', moves: [] },
+            { id: '4', name: 'Venusaur', type: 'Grass', health: 125, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png', moves: [] },
+            { id: '5', name: 'Gengar', type: 'Ghost', health: 100, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png', moves: [] },
+            { id: '6', name: 'Alakazam', type: 'Psychic', health: 90, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png', moves: [] },
+            { id: '7', name: 'Machamp', type: 'Fighting', health: 130, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/68.png', moves: [] },
+            { id: '8', name: 'Dragonite', type: 'Dragon', health: 140, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png', moves: [] },
+            { id: '9', name: 'Mewtwo', type: 'Psychic', health: 150, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png', moves: [] },
+          ]);
         }
       } catch {
-        console.error('Failed to fetch Pokemon');
+        // Use default Pokemon on error
+        setPokemon([
+          { id: '1', name: 'Pikachu', type: 'Electric', health: 100, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png', moves: [] },
+          { id: '2', name: 'Charizard', type: 'Fire', health: 120, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png', moves: [] },
+          { id: '3', name: 'Blastoise', type: 'Water', health: 130, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png', moves: [] },
+          { id: '4', name: 'Venusaur', type: 'Grass', health: 125, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png', moves: [] },
+          { id: '5', name: 'Gengar', type: 'Ghost', health: 100, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png', moves: [] },
+          { id: '6', name: 'Alakazam', type: 'Psychic', health: 90, imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png', moves: [] },
+        ]);
       } finally {
         setLoading(false);
       }
     }
     fetchPokemon();
   }, []);
-
-  // Queue timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (gameMode === 'queue') {
-      interval = setInterval(() => {
-        setQueueTime(prev => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [gameMode]);
 
   const selectPokemon = (poke: Pokemon) => {
     if (selectedTeam.find(p => p.id === poke.id)) {
@@ -175,88 +102,17 @@ export default function PlayPage() {
     }
   };
 
-  // Join queue with WebSocket
-  const joinQueue = useCallback(async () => {
+  // Start AI battle
+  const startAiBattle = useCallback(() => {
     if (selectedTeam.length !== 3) {
-      setError('Select 3 Pokémon to battle!');
+      setError('Selecione 3 Pokémon para batalhar!');
       return;
     }
-
     setError(null);
-    setQueueTime(0);
-
-    // Use WebSocket if connected
-    if (socketState === 'authenticated') {
-      wsJoinQueue({
-        slot1: selectedTeam[0],
-        slot2: selectedTeam[1],
-        slot3: selectedTeam[2],
-      }, 'quick');
-      setGameMode('queue');
-    } else {
-      // Fallback to REST API
-      try {
-        const res = await fetch('/api/battle/queue', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            teamPokemonIds: selectedTeam.map(p => p.id)
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.battleId) {
-            router.push(`/battle/${data.battleId}`);
-          } else {
-            setGameMode('queue');
-          }
-        } else {
-          const data = await res.json();
-          setError(data.error || 'Failed to join queue');
-        }
-      } catch {
-        setError('Connection error');
-      }
-    }
-  }, [selectedTeam, socketState, wsJoinQueue, router]);
-
-  // Leave queue
-  const leaveQueue = useCallback(async () => {
-    if (socketState === 'inQueue') {
-      wsLeaveQueue();
-    } else {
-      try {
-        await fetch('/api/battle/queue', { method: 'DELETE' });
-      } catch {
-        // Ignore
-      }
-    }
-    setGameMode('selection');
-    setQueueTime(0);
-  }, [socketState, wsLeaveQueue]);
-
-  // Start AI battle - redirect to client-side AI battle page
-  const startAiBattle = useCallback(async () => {
-    if (selectedTeam.length !== 3) {
-      setError('Select 3 Pokémon to battle!');
-      return;
-    }
-
-    setError(null);
-    
-    // Save selected team to localStorage for AI battle page
     localStorage.setItem('selectedTeam', JSON.stringify(selectedTeam));
-    
-    // Redirect to client-side AI battle page
+    localStorage.setItem('difficulty', difficulty);
     router.push('/battle/ai');
-  }, [selectedTeam, router]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, [selectedTeam, difficulty, router]);
 
   const getTypeColor = (type: string | undefined | null) => {
     const colors: Record<string, string> = {
@@ -312,174 +168,188 @@ export default function PlayPage() {
             <div className="error-banner">{error}</div>
           )}
 
-          {/* Queue Mode */}
-          {gameMode === 'queue' && (
-            <div className="content-section queue-section">
-              <div className="section-title">🔍 Searching for Opponent...</div>
-              <div className="section-content">
-                <div className="queue-display">
-                  <div className="queue-spinner"></div>
-                  <div className="queue-time">Time in queue: {formatTime(queueTime)}</div>
-                  {queuePosition && (
-                    <div className="queue-position">Queue position: #{queuePosition}</div>
-                  )}
-                  <div className="queue-team">
-                    <span>Your Team:</span>
-                    <div className="queue-team-icons">
-                      {selectedTeam.map(p => (
-                        <div key={p.id} className="queue-team-pokemon" style={{ borderColor: getTypeColor(p.type) }}>
-                          <img 
-                            src={p.imageUrl || '/images/pokemon/default.png'} 
-                            alt={p.name}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <button className="btn-cancel-queue" onClick={leaveQueue}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Battle Mode - Redirecting */}
-          {gameMode === 'battle' && battleId && (
-            <div className="content-section battle-section">
-              <div className="section-title">⚔️ Battle Found!</div>
-              <div className="section-content">
-                <div className="battle-found">
-                  <p>Battle ID: {battleId}</p>
-                  <p>Redirecting to battle...</p>
-                  <Link href={`/battle/${battleId}`} className="btn-enter-battle">
-                    ENTER BATTLE
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Selection Mode */}
-          {gameMode === 'selection' && (
-            <>
-              {/* Selected Team */}
-              <div className="content-section team-section">
-                <div className="section-title">Your Team ({selectedTeam.length}/3)</div>
-                <div className="section-content">
-                  <div className="selected-team">
-                    {[0, 1, 2].map(index => (
-                      <div 
-                        key={index} 
-                        className={`team-slot-new ${selectedTeam[index] ? 'filled' : 'empty'}`}
-                        style={selectedTeam[index] ? { borderColor: getTypeColor(selectedTeam[index].type) } : {}}
-                        onClick={() => selectedTeam[index] && selectPokemon(selectedTeam[index])}
-                      >
-                        {selectedTeam[index] ? (
-                          <>
-                            <img 
-                              src={selectedTeam[index].imageUrl || '/images/pokemon/default.png'} 
-                              alt={selectedTeam[index].name}
-                            />
-                            <span className="slot-name">{selectedTeam[index].name}</span>
-                            <span className="slot-remove">✕</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="slot-number">{index + 1}</div>
-                            <span className="slot-label">Select Pokémon</span>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="battle-buttons">
-                    <button 
-                      className={`btn-queue ${selectedTeam.length === 3 ? 'ready' : 'disabled'}`}
-                      onClick={joinQueue}
-                      disabled={selectedTeam.length !== 3}
-                    >
-                      🎮 FIND MATCH
-                    </button>
-                    <button 
-                      className={`btn-queue-ai ${selectedTeam.length === 3 ? 'ready' : 'disabled'}`}
-                      onClick={startAiBattle}
-                      disabled={selectedTeam.length !== 3}
-                    >
-                      🤖 BATTLE AI
-                    </button>
-                  </div>
-                  
-                  {/* Connection Status */}
-                  <div className="connection-status">
-                    <span className={`status-indicator ${socketState === 'authenticated' ? 'online' : socketState === 'connecting' ? 'connecting' : 'offline'}`}></span>
-                    <span className="status-text">
-                      {socketState === 'authenticated' ? 'Online' : socketState === 'connecting' ? 'Connecting...' : 'Offline'}
-                    </span>
-                    {onlineCount > 0 && (
-                      <span className="online-count">({onlineCount} players online)</span>
+          {/* Selected Team */}
+          <div className="content-section team-section">
+            <div className="section-title">Seu Time ({selectedTeam.length}/3)</div>
+            <div className="section-content">
+              <div className="selected-team">
+                {[0, 1, 2].map(index => (
+                  <div 
+                    key={index} 
+                    className={`team-slot-new ${selectedTeam[index] ? 'filled' : 'empty'}`}
+                    style={selectedTeam[index] ? { borderColor: getTypeColor(selectedTeam[index].type) } : {}}
+                    onClick={() => selectedTeam[index] && selectPokemon(selectedTeam[index])}
+                  >
+                    {selectedTeam[index] ? (
+                      <>
+                        <img 
+                          src={selectedTeam[index].imageUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'} 
+                          alt={selectedTeam[index].name}
+                        />
+                        <span className="slot-name">{selectedTeam[index].name}</span>
+                        <span className="slot-remove">✕</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="slot-number">{index + 1}</div>
+                        <span className="slot-label">Selecione um Pokémon</span>
+                      </>
                     )}
                   </div>
-                </div>
+                ))}
+              </div>
+              
+              {/* Difficulty Selection */}
+              <div className="difficulty-selection" style={{ margin: '20px 0', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                <button 
+                  className={`difficulty-btn ${difficulty === 'easy' ? 'active' : ''}`}
+                  onClick={() => setDifficulty('easy')}
+                  style={{
+                    padding: '10px 25px',
+                    border: '2px solid',
+                    borderColor: difficulty === 'easy' ? '#4CAF50' : '#555',
+                    background: difficulty === 'easy' ? 'linear-gradient(135deg, #4CAF50, #45a049)' : '#333',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                  }}
+                >
+                  🌱 Fácil
+                </button>
+                <button 
+                  className={`difficulty-btn ${difficulty === 'normal' ? 'active' : ''}`}
+                  onClick={() => setDifficulty('normal')}
+                  style={{
+                    padding: '10px 25px',
+                    border: '2px solid',
+                    borderColor: difficulty === 'normal' ? '#FF9800' : '#555',
+                    background: difficulty === 'normal' ? 'linear-gradient(135deg, #FF9800, #F57C00)' : '#333',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                  }}
+                >
+                  ⚔️ Normal
+                </button>
+                <button 
+                  className={`difficulty-btn ${difficulty === 'hard' ? 'active' : ''}`}
+                  onClick={() => setDifficulty('hard')}
+                  style={{
+                    padding: '10px 25px',
+                    border: '2px solid',
+                    borderColor: difficulty === 'hard' ? '#f44336' : '#555',
+                    background: difficulty === 'hard' ? 'linear-gradient(135deg, #f44336, #d32f2f)' : '#333',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                  }}
+                >
+                  💀 Difícil
+                </button>
               </div>
 
-              {/* Available Pokemon */}
-              <div className="content-section pokemon-selection-section">
-                <div className="section-title">Select Your Pokémon</div>
-                <div className="section-content">
-                  {loading ? (
-                    <div className="loading-pokemon">Loading Pokémon...</div>
-                  ) : (
-                    <div className="pokemon-selection-grid">
-                      {pokemon.map(poke => (
-                        <div 
-                          key={poke.id}
-                          className={`pokemon-select-card ${selectedTeam.find(p => p.id === poke.id) ? 'selected' : ''}`}
-                          style={{ borderColor: getTypeColor(poke.type) }}
-                          onClick={() => selectPokemon(poke)}
-                        >
-                          <div className="pokemon-select-image" style={{ backgroundColor: `${getTypeColor(poke.type)}22` }}>
-                            <img 
-                              src={poke.imageUrl || '/images/pokemon/default.png'} 
-                              alt={poke.name}
-                            />
-                            {selectedTeam.find(p => p.id === poke.id) && (
-                              <div className="selected-overlay">✓</div>
-                            )}
-                          </div>
-                          <div className="pokemon-select-info">
-                            <span className="pokemon-select-name">{poke.name}</span>
-                            <span className="pokemon-select-type" style={{ backgroundColor: getTypeColor(poke.type) }}>
-                              {poke.type || 'Normal'}
-                            </span>
-                          </div>
-                          <div className="pokemon-select-stats">
-                            <span>❤️ {poke.health || 100} HP</span>
-                            <span>⚔️ {poke.moves?.length || 0} Moves</span>
-                          </div>
-                        </div>
-                      ))}
+              <div className="battle-buttons">
+                <button 
+                  className={`btn-queue-ai ${selectedTeam.length === 3 ? 'ready' : 'disabled'}`}
+                  onClick={startAiBattle}
+                  disabled={selectedTeam.length !== 3}
+                  style={{
+                    padding: '15px 40px',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    border: 'none',
+                    borderRadius: '10px',
+                    cursor: selectedTeam.length === 3 ? 'pointer' : 'not-allowed',
+                    background: selectedTeam.length === 3 
+                      ? 'linear-gradient(135deg, #e91e63, #c2185b)' 
+                      : '#555',
+                    color: '#fff',
+                    boxShadow: selectedTeam.length === 3 
+                      ? '0 4px 15px rgba(233, 30, 99, 0.4)' 
+                      : 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  🤖 BATALHAR CONTRA IA
+                </button>
+              </div>
+              
+              {/* PvP Coming Soon */}
+              <div style={{ 
+                marginTop: '20px', 
+                padding: '15px', 
+                background: 'rgba(255, 255, 255, 0.05)', 
+                borderRadius: '10px',
+                textAlign: 'center',
+                border: '1px dashed #555'
+              }}>
+                <p style={{ color: '#888', margin: 0 }}>
+                  🎮 <strong>Multiplayer PvP</strong> em breve!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Available Pokemon */}
+          <div className="content-section pokemon-selection-section">
+            <div className="section-title">Selecione Seus Pokémon</div>
+            <div className="section-content">
+              {loading ? (
+                <div className="loading-pokemon">Carregando Pokémon...</div>
+              ) : (
+                <div className="pokemon-selection-grid">
+                  {pokemon.map(poke => (
+                    <div 
+                      key={poke.id}
+                      className={`pokemon-select-card ${selectedTeam.find(p => p.id === poke.id) ? 'selected' : ''}`}
+                      style={{ borderColor: getTypeColor(poke.type) }}
+                      onClick={() => selectPokemon(poke)}
+                    >
+                      <div className="pokemon-select-image" style={{ backgroundColor: `${getTypeColor(poke.type)}22` }}>
+                        <img 
+                          src={poke.imageUrl || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'} 
+                          alt={poke.name}
+                        />
+                        {selectedTeam.find(p => p.id === poke.id) && (
+                          <div className="selected-overlay">✓</div>
+                        )}
+                      </div>
+                      <div className="pokemon-select-info">
+                        <span className="pokemon-select-name">{poke.name}</span>
+                        <span className="pokemon-select-type" style={{ backgroundColor: getTypeColor(poke.type) }}>
+                          {poke.type || 'Normal'}
+                        </span>
+                      </div>
+                      <div className="pokemon-select-stats">
+                        <span>❤️ {poke.health || 100} HP</span>
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
 
-              {/* Instructions */}
-              <div className="content-section">
-                <div className="section-title">How to Play</div>
-                <div className="section-content">
-                  <ol className="play-instructions">
-                    <li>Select 3 Pokémon to form your battle team</li>
-                    <li>Click &quot;Find Match&quot; to search for an opponent</li>
-                    <li>Use your Pokémon&apos;s moves strategically each turn</li>
-                    <li>Manage your energy pool to use powerful attacks</li>
-                    <li>Defeat all enemy Pokémon to win!</li>
-                  </ol>
-                </div>
-              </div>
-            </>
-          )}
+          {/* Instructions */}
+          <div className="content-section">
+            <div className="section-title">Como Jogar</div>
+            <div className="section-content">
+              <ol className="play-instructions">
+                <li>Selecione 3 Pokémon para formar seu time de batalha</li>
+                <li>Escolha a dificuldade da IA (Fácil, Normal ou Difícil)</li>
+                <li>Clique em &quot;Batalhar contra IA&quot; para começar</li>
+                <li>Use as habilidades dos seus Pokémon estrategicamente</li>
+                <li>Gerencie sua energia para usar ataques poderosos</li>
+                <li>Derrote todos os Pokémon inimigos para vencer!</li>
+              </ol>
+            </div>
+          </div>
         </main>
 
         <RightSidebar />
