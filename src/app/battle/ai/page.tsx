@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import './battle.css';
+import './mobile.css';
 import { getRankByLevel, RankInfo } from '@/lib/ranks';
 import { calculateArenaDamage } from '@/lib/damage-calculator';
 import { getTypeEffectiveness, STAB_MULTIPLIER } from '@/lib/type-effectiveness';
@@ -1347,7 +1348,7 @@ export default function AIBattlePage() {
                 ...p,
                 statusEffects: [...p.statusEffects, { type: move.statusEffect!.type, duration, source: atk.name }],
               } : p));
-              const statusText = {
+              const statusText: Record<StatusType, string> = {
                 'burn': 'burned', 'poison': 'poisoned', 'paralyze': 'paralyzed',
                 'freeze': 'frozen', 'sleep': 'put to sleep', 'confuse': 'confused',
                 'stun': 'stunned', 'silence': 'silenced', 'weaken': 'weakened',
@@ -1355,8 +1356,10 @@ export default function AIBattlePage() {
                 'reflect': 'reflecting', 'counter': 'countering', 'reduce-damage': 'shielded',
                 'increase-damage': 'empowered', 'drain-hp': 'draining', 'heal-over-time': 'regenerating',
                 'cannot-be-healed': 'cursed', 'cooldown-increase': 'slowed', 'cooldown-reduce': 'hastened',
-              }[move.statusEffect.type] || 'affected';
-              addLog(`${def.name} was ${statusText}!`, 'status');
+                'remove-energy': 'energy drained', 'steal-energy': 'energy stolen',
+              };
+              const statusMsg = statusText[move.statusEffect.type] || 'affected';
+              addLog(`${def.name} was ${statusMsg}!`, 'status');
             }
           }
         }
@@ -1373,9 +1376,10 @@ export default function AIBattlePage() {
       // Status-only moves (no damage)
       if (move.statusEffect) {
         const tIdx = action.targetIndex;
+        const targetType = move.targetType as 'enemy' | 'all-enemies' | 'self';
         
         // Check if targeting self or enemy
-        if (move.targetType === 'self') {
+        if (targetType === 'self') {
           // Apply to self
           let chance = move.statusEffect.chance;
           if (Math.random() * 100 < chance) {
