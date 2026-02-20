@@ -3,17 +3,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
 :root {
+  /* Official Pokemon TCG Pocket Energy Colors */
   --color-grass: #78C850;
   --color-fire: #F08030;
   --color-water: #6890F0;
-  --color-electric: #F8D030;
+  --color-lightning: #F8D030;
   --color-psychic: #F85888;
   --color-fighting: #C03028;
   --color-darkness: #705848;
   --color-metal: #B8B8D0;
   --color-colorless: #A8A878;
-  --color-dragon: #7038F8;
-  --color-random: #FFD700;
   
   --glass-bg: rgba(10, 10, 30, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -392,17 +391,45 @@
   transition: transform 0.2s;
 }
 .energy-orb:hover { transform: scale(1.15); }
-.energy-orb.grass { background: var(--color-grass); }
-.energy-orb.fire { background: var(--color-fire); }
-.energy-orb.water { background: var(--color-water); }
-.energy-orb.electric { background: var(--color-electric); color: #333; }
-.energy-orb.psychic { background: var(--color-psychic); }
-.energy-orb.fighting { background: var(--color-fighting); }
-.energy-orb.darkness { background: var(--color-darkness); }
-.energy-orb.metal { background: var(--color-metal); color: #333; }
-.energy-orb.colorless { background: var(--color-colorless); }
-.energy-orb.dragon { background: var(--color-dragon); }
-.energy-orb.random { background: var(--color-random); color: #333; }
+.energy-orb.grass { 
+  background: var(--color-grass); 
+  box-shadow: 0 0 10px rgba(120, 200, 80, 0.5);
+}
+.energy-orb.fire { 
+  background: var(--color-fire); 
+  box-shadow: 0 0 10px rgba(240, 128, 48, 0.5);
+}
+.energy-orb.water { 
+  background: var(--color-water); 
+  box-shadow: 0 0 10px rgba(104, 144, 240, 0.5);
+}
+.energy-orb.lightning { 
+  background: var(--color-lightning); 
+  color: #333; 
+  box-shadow: 0 0 10px rgba(248, 208, 48, 0.5);
+}
+.energy-orb.psychic { 
+  background: var(--color-psychic); 
+  box-shadow: 0 0 10px rgba(248, 88, 136, 0.5);
+}
+.energy-orb.fighting { 
+  background: var(--color-fighting); 
+  box-shadow: 0 0 10px rgba(192, 48, 40, 0.5);
+}
+.energy-orb.darkness { 
+  background: var(--color-darkness); 
+  box-shadow: 0 0 10px rgba(112, 88, 72, 0.5);
+}
+.energy-orb.metal { 
+  background: var(--color-metal); 
+  color: #333; 
+  box-shadow: 0 0 10px rgba(184, 184, 208, 0.5);
+}
+.energy-orb.colorless { 
+  background: var(--color-colorless); 
+  color: #333; 
+  box-shadow: 0 0 10px rgba(168, 168, 120, 0.5);
+}
 .energy-count {
   font-family: var(--font-pixel);
   font-size: 8px;
@@ -1135,8 +1162,8 @@
 .energy-select-card.fire::before { background: var(--color-fire); }
 .energy-select-card.water { background: rgba(104, 144, 240, 0.2); }
 .energy-select-card.water::before { background: var(--color-water); }
-.energy-select-card.electric { background: rgba(248, 208, 48, 0.2); }
-.energy-select-card.electric::before { background: var(--color-electric); }
+.energy-select-card.lightning { background: rgba(248, 208, 48, 0.2); }
+.energy-select-card.lightning::before { background: var(--color-lightning); }
 .energy-select-card.psychic { background: rgba(248, 88, 136, 0.2); }
 .energy-select-card.psychic::before { background: var(--color-psychic); }
 .energy-select-card.fighting { background: rgba(192, 48, 40, 0.2); }
@@ -1147,17 +1174,15 @@
 .energy-select-card.metal::before { background: var(--color-metal); }
 .energy-select-card.colorless { background: rgba(168, 168, 120, 0.2); }
 .energy-select-card.colorless::before { background: var(--color-colorless); }
-.energy-select-card.dragon { background: rgba(112, 56, 248, 0.2); }
-.energy-select-card.dragon::before { background: var(--color-dragon); }
 
 /* Energy icon backgrounds */
 .energy-icon-big.grass { background: var(--color-grass); }
 .energy-icon-big.fire { background: var(--color-fire); }
 .energy-icon-big.water { background: var(--color-water); }
-.energy-icon-big.electric { background: var(--color-electric); }
+.energy-icon-big.lightning { background: var(--color-lightning); }
 .energy-icon-big.psychic { background: var(--color-psychic); }
 .energy-icon-big.fighting { background: var(--color-fighting); }
 .energy-icon-big.darkness { background: var(--color-darkness); }
 .energy-icon-big.metal { background: var(--color-metal); }
 .energy-icon-big.colorless { background: var(--color-colorless); }
-.energy-icon-big.dragon { background: var(--color-dragon); }
+.energy-icon-big.colorless { background: var(--color-colorless); }

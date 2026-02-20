@@ -21,32 +21,65 @@ const toGlobalType = (t: PokemonType): GlobalType =>
   (t.charAt(0).toUpperCase() + t.slice(1)) as GlobalType;
 const toGlobalTypes = (ts: PokemonType[]): GlobalType[] => ts.map(toGlobalType);
 
-// ==================== TCG POCKET ENERGY TYPES ====================
-// 4 main energies + random (random)
-type EnergyType = 'grass' | 'fire' | 'water' | 'electric' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'dragon' | 'random';
+// ==================== TCG POCKET ENERGY TYPES (OFFICIAL) ====================
+// Pokemon TCG Pocket has 8 official energy types + Colorless
+// Source: https://www.pokemon.com/us/strategy/learn-how-to-build-a-deck-in-pokemon-tcg-pocket
+type EnergyType = 'grass' | 'fire' | 'water' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'colorless';
 
-const ALL_SELECTABLE_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'electric', 'psychic', 'fighting', 'darkness', 'metal', 'dragon'];
-const ALL_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'electric', 'psychic', 'fighting', 'darkness', 'metal', 'dragon', 'random'];
+const ALL_SELECTABLE_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal'];
+const ALL_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'colorless'];
 
+// Official TCG Pocket energy icons (using emojis as placeholders)
 const ENERGY_ICONS: Record<EnergyType, string> = {
-  grass: '🌿', fire: '🔥', water: '💧', electric: '⚡',
-  psychic: '🔮', fighting: '👊', darkness: '🌑', metal: '⚙️', dragon: '🐲', random: '⭐',
+  grass: '🌿',
+  fire: '🔥',
+  water: '💧',
+  lightning: '⚡',
+  psychic: '🔮',
+  fighting: '👊',
+  darkness: '🌑',
+  metal: '⚙️',
+  colorless: '⭐',
 };
 
+// Official TCG Pocket energy names
 const ENERGY_NAMES: Record<EnergyType, string> = {
-  grass: 'Grass', fire: 'Fire', water: 'Water', electric: 'Lightning',
-  psychic: 'Psychic', fighting: 'Fighting', darkness: 'Darkness', metal: 'Metal', dragon: 'Dragon', random: 'Random',
+  grass: 'Grass',
+  fire: 'Fire',
+  water: 'Water',
+  lightning: 'Lightning',
+  psychic: 'Psychic',
+  fighting: 'Fighting',
+  darkness: 'Darkness',
+  metal: 'Metal',
+  colorless: 'Colorless',
 };
 
-// Map Pokemon types to TCG energy types
+// Map Pokemon types to TCG Pocket energy types (OFFICIAL)
 const TYPE_TO_ENERGY: Record<PokemonType, EnergyType> = {
-  fire: 'fire', water: 'water', grass: 'grass', electric: 'electric',
-  psychic: 'psychic', ghost: 'psychic',
-  fighting: 'fighting', rock: 'fighting', ground: 'fighting',
-  dark: 'darkness', poison: 'darkness',
+  // Direct mappings (8 main types)
+  fire: 'fire',
+  water: 'water',
+  grass: 'grass',
+  electric: 'lightning',
+  psychic: 'psychic',
+  fighting: 'fighting',
+  dark: 'darkness',
   steel: 'metal',
-  normal: 'random', flying: 'random', dragon: 'random',
-  fairy: 'random', bug: 'grass', ice: 'water',
+  
+  // Types that use existing energies
+  ghost: 'psychic',      // Ghost uses Psychic energy
+  rock: 'fighting',      // Rock uses Fighting energy
+  ground: 'fighting',    // Ground uses Fighting energy
+  poison: 'darkness',    // Poison uses Darkness energy
+  bug: 'grass',          // Bug uses Grass energy
+  ice: 'water',          // Ice uses Water energy
+  
+  // Colorless types (can use any energy)
+  normal: 'colorless',
+  flying: 'colorless',
+  dragon: 'colorless',
+  fairy: 'colorless',
 };
 
 // ==================== STATUS EFFECTS ====================
@@ -82,11 +115,28 @@ type GamePhase = 'loading' | 'energy-select' | 'player1-turn' | 'player2-turn' |
   'item-target' | 'victory' | 'defeat';
 
 interface EnergyState {
-  grass: number; fire: number; water: number; electric: number;
-  psychic: number; fighting: number; darkness: number; metal: number; dragon: number; random: number;
+  grass: number;
+  fire: number;
+  water: number;
+  lightning: number;
+  psychic: number;
+  fighting: number;
+  darkness: number;
+  metal: number;
+  colorless: number;
 }
 
-const EMPTY_ENERGY: EnergyState = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+const EMPTY_ENERGY: EnergyState = {
+  grass: 0,
+  fire: 0,
+  water: 0,
+  lightning: 0,
+  psychic: 0,
+  fighting: 0,
+  darkness: 0,
+  metal: 0,
+  colorless: 0,
+};
 
 interface EnergyCost { type: EnergyType; amount: number; }
 
@@ -181,7 +231,7 @@ const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> 
   fire: { bg: 'linear-gradient(135deg, #F08030 0%, #dd6610 100%)', border: '#c44d00', text: '#fff' },
   water: { bg: 'linear-gradient(135deg, #6890F0 0%, #4a6fd0 100%)', border: '#3a5eb5', text: '#fff' },
   grass: { bg: 'linear-gradient(135deg, #78C850 0%, #5aa830 100%)', border: '#4a8828', text: '#fff' },
-  electric: { bg: 'linear-gradient(135deg, #F8D030 0%, #e0b020 100%)', border: '#c09810', text: '#333' },
+  electric: { bg: 'linear-gradient(135deg, #F8D030 0%, #e0b020 100%)', border: '#c09810', text: '#333' }, // Maps to Lightning energy
   ice: { bg: 'linear-gradient(135deg, #98D8D8 0%, #78b8b8 100%)', border: '#58a0a0', text: '#333' },
   fighting: { bg: 'linear-gradient(135deg, #C03028 0%, #a01810 100%)', border: '#800800', text: '#fff' },
   poison: { bg: 'linear-gradient(135deg, #A040A0 0%, #802080 100%)', border: '#601060', text: '#fff' },
@@ -260,14 +310,14 @@ const getDefaultMoves = (type: PokemonType): Move[] => {
     fire: [
       { id: 'f1', name: 'Flamethrower', type: 'fire', power: 45, accuracy: 100, cost: [{ type: 'fire', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful stream of fire dealing 45 damage.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 30, duration: 3 } },
       { id: 'f2', name: 'Ember', type: 'fire', power: 25, accuracy: 100, cost: [{ type: 'fire', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A small flame dealing 25 damage. May burn.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 20, duration: 2 } },
-      { id: 'f3', name: 'Fire Fang', type: 'fire', power: 35, accuracy: 95, cost: [{ type: 'fire', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Bites with fire fangs for 35 damage.', targetType: 'enemy' },
-      { id: 'f4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'f3', name: 'Fire Fang', type: 'fire', power: 35, accuracy: 95, cost: [{ type: 'fire', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Bites with fire fangs for 35 damage.', targetType: 'enemy' },
+      { id: 'f4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     water: [
       { id: 'w1', name: 'Hydro Pump', type: 'water', power: 55, accuracy: 85, cost: [{ type: 'water', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A high-pressure blast of water dealing 55 damage.', targetType: 'enemy' },
       { id: 'w2', name: 'Water Gun', type: 'water', power: 25, accuracy: 100, cost: [{ type: 'water', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Squirts water dealing 25 damage.', targetType: 'enemy' },
       { id: 'w3', name: 'Aqua Tail', type: 'water', power: 40, accuracy: 95, cost: [{ type: 'water', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Swings a watery tail for 40 damage.', targetType: 'enemy' },
-      { id: 'w4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'w4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     grass: [
       { id: 'g1', name: 'Solar Beam', type: 'grass', power: 55, accuracy: 90, cost: [{ type: 'grass', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Absorbs light then blasts for 55 damage.', targetType: 'enemy' },
@@ -276,10 +326,10 @@ const getDefaultMoves = (type: PokemonType): Move[] => {
       { id: 'g4', name: 'Synthesis', type: 'grass', power: 0, accuracy: 100, cost: [{ type: 'grass', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Absorbs sunlight to heal 60 HP.', targetType: 'self' },
     ],
     electric: [
-      { id: 'e1', name: 'Thunderbolt', type: 'electric', power: 45, accuracy: 100, cost: [{ type: 'electric', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A strong jolt of electricity for 45 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 30, duration: 2 } },
-      { id: 'e2', name: 'Thunder Shock', type: 'electric', power: 20, accuracy: 100, cost: [{ type: 'electric', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A shock of electricity for 20 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 20, duration: 1 } },
-      { id: 'e3', name: 'Thunder', type: 'electric', power: 60, accuracy: 70, cost: [{ type: 'electric', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive lightning strike for 60 damage. Low accuracy.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 50, duration: 2 } },
-      { id: 'e4', name: 'Charge', type: 'electric', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Charges power. Heals 30 HP.', targetType: 'self' },
+      { id: 'e1', name: 'Thunderbolt', type: 'electric', power: 45, accuracy: 100, cost: [{ type: 'lightning', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A strong jolt of electricity for 45 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 30, duration: 2 } },
+      { id: 'e2', name: 'Thunder Shock', type: 'electric', power: 20, accuracy: 100, cost: [{ type: 'lightning', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A shock of electricity for 20 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 20, duration: 1 } },
+      { id: 'e3', name: 'Thunder', type: 'electric', power: 60, accuracy: 70, cost: [{ type: 'lightning', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive lightning strike for 60 damage. Low accuracy.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 50, duration: 2 } },
+      { id: 'e4', name: 'Charge', type: 'electric', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Charges power. Heals 30 HP.', targetType: 'self' },
     ],
     psychic: [
       { id: 'ps1', name: 'Psychic', type: 'psychic', power: 45, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A telekinetic blast for 45 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 20, duration: 2 } },
@@ -288,82 +338,82 @@ const getDefaultMoves = (type: PokemonType): Move[] => {
       { id: 'ps4', name: 'Barrier', type: 'psychic', power: 0, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Creates a barrier. Reduces damage by 25 for 2 turns.', targetType: 'self', statusEffect: { type: 'reduce-damage', chance: 100, duration: 2, value: 25 } },
     ],
     fighting: [
-      { id: 'fg1', name: 'Close Combat', type: 'fighting', power: 55, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'An all-out attack for 55 damage.', targetType: 'enemy' },
+      { id: 'fg1', name: 'Close Combat', type: 'fighting', power: 55, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'An all-out attack for 55 damage.', targetType: 'enemy' },
       { id: 'fg2', name: 'Karate Chop', type: 'fighting', power: 30, accuracy: 100, cost: [{ type: 'fighting', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A sharp chop for 30 damage.', targetType: 'enemy' },
       { id: 'fg3', name: 'Brick Break', type: 'fighting', power: 40, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful punch for 40 damage.', targetType: 'enemy' },
-      { id: 'fg4', name: 'Bulk Up', type: 'fighting', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Tenses muscles. Heals 40 HP.', targetType: 'self' },
+      { id: 'fg4', name: 'Bulk Up', type: 'fighting', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Tenses muscles. Heals 40 HP.', targetType: 'self' },
     ],
     ghost: [
       { id: 'gh1', name: 'Shadow Ball', type: 'ghost', power: 45, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Hurls a shadowy blob for 45 damage.', targetType: 'enemy' },
       { id: 'gh2', name: 'Shadow Claw', type: 'ghost', power: 35, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slashes with shadow for 35 damage.', targetType: 'enemy' },
-      { id: 'gh3', name: 'Hex', type: 'ghost', power: 35, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Attacks with a curse for 35 damage. Double if target has status.', targetType: 'enemy' },
+      { id: 'gh3', name: 'Hex', type: 'ghost', power: 35, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Attacks with a curse for 35 damage. Double if target has status.', targetType: 'enemy' },
       { id: 'gh4', name: 'Curse', type: 'ghost', power: 0, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Curses the target. Poisons for 3 turns.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 100, duration: 3 } },
     ],
     dark: [
       { id: 'dk1', name: 'Dark Pulse', type: 'dark', power: 45, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A wave of dark thoughts for 45 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 20, duration: 1 } },
       { id: 'dk2', name: 'Bite', type: 'dark', power: 30, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Bites the target for 30 damage.', targetType: 'enemy' },
-      { id: 'dk3', name: 'Crunch', type: 'dark', power: 40, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Crunches hard for 40 damage.', targetType: 'enemy' },
+      { id: 'dk3', name: 'Crunch', type: 'dark', power: 40, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Crunches hard for 40 damage.', targetType: 'enemy' },
       { id: 'dk4', name: 'Nasty Plot', type: 'dark', power: 0, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Schemes. Boosts attack by 40% for 3 turns.', targetType: 'self', statusEffect: { type: 'strengthen', chance: 100, duration: 3, value: 40 } },
     ],
     poison: [
       { id: 'po1', name: 'Sludge Bomb', type: 'poison', power: 45, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Hurls sludge for 45 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 40, duration: 3 } },
       { id: 'po2', name: 'Poison Jab', type: 'poison', power: 35, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Jabs with poison for 35 damage.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 2 } },
       { id: 'po3', name: 'Toxic', type: 'poison', power: 0, accuracy: 90, cost: [{ type: 'darkness', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Badly poisons the target for 4 turns.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 100, duration: 4 } },
-      { id: 'po4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'po4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     ground: [
-      { id: 'gd1', name: 'Earthquake', type: 'ground', power: 50, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Shakes the ground for 50 damage to all enemies.', targetType: 'all-enemies' },
+      { id: 'gd1', name: 'Earthquake', type: 'ground', power: 50, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Shakes the ground for 50 damage to all enemies.', targetType: 'all-enemies' },
       { id: 'gd2', name: 'Dig', type: 'ground', power: 40, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Digs underground then strikes for 40 damage.', targetType: 'enemy' },
       { id: 'gd3', name: 'Rock Slide', type: 'rock', power: 35, accuracy: 90, cost: [{ type: 'fighting', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Drops rocks for 35 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 30, duration: 1 } },
-      { id: 'gd4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'gd4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     flying: [
-      { id: 'fl1', name: 'Brave Bird', type: 'flying', power: 55, accuracy: 100, cost: [{ type: 'random', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A reckless dive for 55 damage.', targetType: 'enemy' },
-      { id: 'fl2', name: 'Air Slash', type: 'flying', power: 35, accuracy: 95, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slashes with air for 35 damage.', targetType: 'enemy' },
-      { id: 'fl3', name: 'Aerial Ace', type: 'flying', power: 30, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift strike for 30 damage. Never misses.', targetType: 'enemy' },
-      { id: 'fl4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Lands and rests. Heals 50 HP.', targetType: 'self' },
+      { id: 'fl1', name: 'Brave Bird', type: 'flying', power: 55, accuracy: 100, cost: [{ type: 'colorless', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A reckless dive for 55 damage.', targetType: 'enemy' },
+      { id: 'fl2', name: 'Air Slash', type: 'flying', power: 35, accuracy: 95, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slashes with air for 35 damage.', targetType: 'enemy' },
+      { id: 'fl3', name: 'Aerial Ace', type: 'flying', power: 30, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift strike for 30 damage. Never misses.', targetType: 'enemy' },
+      { id: 'fl4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Lands and rests. Heals 50 HP.', targetType: 'self' },
     ],
     rock: [
       { id: 'rk1', name: 'Rock Slide', type: 'rock', power: 40, accuracy: 90, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Drops rocks for 40 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 30, duration: 1 } },
       { id: 'rk2', name: 'Rock Throw', type: 'rock', power: 25, accuracy: 100, cost: [{ type: 'fighting', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Throws a rock for 25 damage.', targetType: 'enemy' },
-      { id: 'rk3', name: 'Ancient Power', type: 'rock', power: 30, accuracy: 100, cost: [{ type: 'fighting', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Attacks with ancient power for 30 damage.', targetType: 'enemy' },
-      { id: 'rk4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'rk3', name: 'Ancient Power', type: 'rock', power: 30, accuracy: 100, cost: [{ type: 'fighting', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Attacks with ancient power for 30 damage.', targetType: 'enemy' },
+      { id: 'rk4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     bug: [
       { id: 'bg1', name: 'Bug Buzz', type: 'bug', power: 45, accuracy: 100, cost: [{ type: 'grass', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A vibrating buzz for 45 damage.', targetType: 'enemy' },
       { id: 'bg2', name: 'X-Scissor', type: 'bug', power: 35, accuracy: 100, cost: [{ type: 'grass', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slashes in an X for 35 damage.', targetType: 'enemy' },
-      { id: 'bg3', name: 'Signal Beam', type: 'bug', power: 30, accuracy: 100, cost: [{ type: 'grass', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A peculiar beam for 30 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 20, duration: 2 } },
-      { id: 'bg4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'bg3', name: 'Signal Beam', type: 'bug', power: 30, accuracy: 100, cost: [{ type: 'grass', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A peculiar beam for 30 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 20, duration: 2 } },
+      { id: 'bg4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     ice: [
       { id: 'ic1', name: 'Ice Beam', type: 'ice', power: 45, accuracy: 100, cost: [{ type: 'water', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A freezing beam for 45 damage. May freeze.', targetType: 'enemy', statusEffect: { type: 'freeze', chance: 20, duration: 2 } },
       { id: 'ic2', name: 'Aurora Beam', type: 'ice', power: 30, accuracy: 100, cost: [{ type: 'water', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A rainbow beam for 30 damage.', targetType: 'enemy' },
       { id: 'ic3', name: 'Blizzard', type: 'ice', power: 55, accuracy: 70, cost: [{ type: 'water', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A howling blizzard for 55 damage. May freeze.', targetType: 'all-enemies', statusEffect: { type: 'freeze', chance: 30, duration: 2 } },
-      { id: 'ic4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'ic4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     steel: [
       { id: 'st1', name: 'Flash Cannon', type: 'steel', power: 45, accuracy: 100, cost: [{ type: 'metal', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A focused light cannon for 45 damage.', targetType: 'enemy' },
       { id: 'st2', name: 'Metal Claw', type: 'steel', power: 30, accuracy: 95, cost: [{ type: 'metal', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Rakes with metal claws for 30 damage.', targetType: 'enemy' },
-      { id: 'st3', name: 'Iron Tail', type: 'steel', power: 40, accuracy: 85, cost: [{ type: 'metal', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slams with a hard tail for 40 damage.', targetType: 'enemy' },
+      { id: 'st3', name: 'Iron Tail', type: 'steel', power: 40, accuracy: 85, cost: [{ type: 'metal', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slams with a hard tail for 40 damage.', targetType: 'enemy' },
       { id: 'st4', name: 'Iron Defense', type: 'steel', power: 0, accuracy: 100, cost: [{ type: 'metal', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Hardens body. Heals 50 HP.', targetType: 'self' },
     ],
     dragon: [
-      { id: 'dr1', name: 'Dragon Pulse', type: 'dragon', power: 45, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shockwave from the mouth for 45 damage.', targetType: 'enemy' },
-      { id: 'dr2', name: 'Dragon Claw', type: 'dragon', power: 35, accuracy: 100, cost: [{ type: 'random', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slashes with claws for 35 damage.', targetType: 'enemy' },
-      { id: 'dr3', name: 'Outrage', type: 'dragon', power: 60, accuracy: 100, cost: [{ type: 'random', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'A rampage for 60 damage. Confuses self.', targetType: 'enemy' },
-      { id: 'dr4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'dr1', name: 'Dragon Pulse', type: 'dragon', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shockwave from the mouth for 45 damage.', targetType: 'enemy' },
+      { id: 'dr2', name: 'Dragon Claw', type: 'dragon', power: 35, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Slashes with claws for 35 damage.', targetType: 'enemy' },
+      { id: 'dr3', name: 'Outrage', type: 'dragon', power: 60, accuracy: 100, cost: [{ type: 'colorless', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'A rampage for 60 damage. Confuses self.', targetType: 'enemy' },
+      { id: 'dr4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
     fairy: [
-      { id: 'fa1', name: 'Moonblast', type: 'fairy', power: 45, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A moonlight blast for 45 damage.', targetType: 'enemy' },
-      { id: 'fa2', name: 'Dazzling Gleam', type: 'fairy', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Dazzles all enemies for 40 damage.', targetType: 'all-enemies' },
-      { id: 'fa3', name: 'Draining Kiss', type: 'fairy', power: 25, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Drains HP for 25 damage. Heals user 15 HP.', targetType: 'enemy' },
-      { id: 'fa4', name: 'Charm', type: 'fairy', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Charms the target. Heals 40 HP.', targetType: 'self' },
+      { id: 'fa1', name: 'Moonblast', type: 'fairy', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A moonlight blast for 45 damage.', targetType: 'enemy' },
+      { id: 'fa2', name: 'Dazzling Gleam', type: 'fairy', power: 40, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Dazzles all enemies for 40 damage.', targetType: 'all-enemies' },
+      { id: 'fa3', name: 'Draining Kiss', type: 'fairy', power: 25, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Drains HP for 25 damage. Heals user 15 HP.', targetType: 'enemy' },
+      { id: 'fa4', name: 'Charm', type: 'fairy', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Charms the target. Heals 40 HP.', targetType: 'self' },
     ],
     normal: [
-      { id: 'n1', name: 'Body Slam', type: 'normal', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A full-body slam for 40 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 30, duration: 2 } },
-      { id: 'n2', name: 'Tackle', type: 'normal', power: 20, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Tackles the target for 20 damage.', targetType: 'enemy' },
-      { id: 'n3', name: 'Quick Attack', type: 'normal', power: 25, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift attack for 25 damage. High priority.', targetType: 'enemy' },
-      { id: 'n4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
+      { id: 'n1', name: 'Body Slam', type: 'normal', power: 40, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A full-body slam for 40 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 30, duration: 2 } },
+      { id: 'n2', name: 'Tackle', type: 'normal', power: 20, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Tackles the target for 20 damage.', targetType: 'enemy' },
+      { id: 'n3', name: 'Quick Attack', type: 'normal', power: 25, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift attack for 25 damage. High priority.', targetType: 'enemy' },
+      { id: 'n4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self' },
     ],
   };
   return moveSets[type] || moveSets.normal;
@@ -376,40 +426,32 @@ interface KantoPokemonData {
   evolutionEnergyCost?: EnergyCost[];
 }
 
+// KANTO STARTER POKEMON ONLY (Client requested: only starters, no evolutions in selection)
+// Evolution system still works during battle, but initial selection is starters only
 const KANTO_POKEMON: KantoPokemonData[] = [
+  // Classic Kanto Starters (can evolve during battle)
   { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 195, canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 35, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 230, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
-  { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 270, canEvolve: false },
   { id: 4, name: 'Charmander', types: ['fire'], hp: 190, canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 38, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 5, name: 'Charmeleon', types: ['fire'], hp: 228, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 38, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
-  { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 266, canEvolve: false },
   { id: 7, name: 'Squirtle', types: ['water'], hp: 198, canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 31, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
-  { id: 8, name: 'Wartortle', types: ['water'], hp: 229, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 39, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
-  { id: 9, name: 'Blastoise', types: ['water'], hp: 268, canEvolve: false },
-  { id: 25, name: 'Pikachu', types: ['electric'], hp: 165, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 65, statBonus: 15 }, evolutionEnergyCost: [{ type: 'electric', amount: 2 }] },
-  { id: 26, name: 'Raichu', types: ['electric'], hp: 230, canEvolve: false },
-  { id: 63, name: 'Abra', types: ['psychic'], hp: 145, canEvolve: true, evolvesTo: { id: 64, name: 'Kadabra', hpBonus: 55, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 64, name: 'Kadabra', types: ['psychic'], hp: 200, canEvolve: true, evolvesTo: { id: 65, name: 'Alakazam', hpBonus: 50, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  { id: 65, name: 'Alakazam', types: ['psychic'], hp: 250, canEvolve: false },
-  { id: 66, name: 'Machop', types: ['fighting'], hp: 180, canEvolve: true, evolvesTo: { id: 67, name: 'Machoke', hpBonus: 50, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
-  { id: 67, name: 'Machoke', types: ['fighting'], hp: 230, canEvolve: true, evolvesTo: { id: 68, name: 'Machamp', hpBonus: 40, statBonus: 18 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
-  { id: 68, name: 'Machamp', types: ['fighting'], hp: 270, canEvolve: false },
-  { id: 92, name: 'Gastly', types: ['ghost', 'poison'], hp: 160, canEvolve: true, evolvesTo: { id: 93, name: 'Haunter', hpBonus: 45, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 93, name: 'Haunter', types: ['ghost', 'poison'], hp: 205, canEvolve: true, evolvesTo: { id: 94, name: 'Gengar', hpBonus: 55, statBonus: 18 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 260, canEvolve: false },
-  { id: 95, name: 'Onix', types: ['rock', 'ground'], hp: 165, canEvolve: false },
-  { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 285, canEvolve: false },
-  { id: 131, name: 'Lapras', types: ['water', 'ice'], hp: 300, canEvolve: false },
-  { id: 143, name: 'Snorlax', types: ['normal'], hp: 320, canEvolve: false },
-  { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 281, canEvolve: false },
-  { id: 59, name: 'Arcanine', types: ['fire'], hp: 270, canEvolve: false },
-  { id: 134, name: 'Vaporeon', types: ['water'], hp: 300, canEvolve: false },
-  { id: 135, name: 'Jolteon', types: ['electric'], hp: 245, canEvolve: false },
-  { id: 136, name: 'Flareon', types: ['fire'], hp: 245, canEvolve: false },
-  { id: 121, name: 'Starmie', types: ['water', 'psychic'], hp: 230, canEvolve: false },
-  { id: 123, name: 'Scyther', types: ['bug', 'flying'], hp: 250, canEvolve: false },
-  { id: 142, name: 'Aerodactyl', types: ['rock', 'flying'], hp: 260, canEvolve: false },
+  
+  // Pikachu (Mascot/Special starter - can evolve)
+  { id: 25, name: 'Pikachu', types: ['electric'], hp: 165, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 65, statBonus: 15 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  
+  // Additional starter options
+  { id: 133, name: 'Eevee', types: ['normal'], hp: 180, canEvolve: false },
+  { id: 52, name: 'Meowth', types: ['normal'], hp: 175, canEvolve: false },
 ];
+
+// Evolution data (for when Pokemon evolve during battle)
+const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
+  2: { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 230, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  3: { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 270, canEvolve: false },
+  5: { id: 5, name: 'Charmeleon', types: ['fire'], hp: 228, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 38, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
+  6: { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 266, canEvolve: false },
+  8: { id: 8, name: 'Wartortle', types: ['water'], hp: 229, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 39, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  9: { id: 9, name: 'Blastoise', types: ['water'], hp: 268, canEvolve: false },
+  26: { id: 26, name: 'Raichu', types: ['electric'], hp: 230, canEvolve: false },
+};
 
 // ==================== TRAINERS WITH PASSIVES ====================
 const TRAINERS: Trainer[] = [
@@ -439,8 +481,8 @@ const TRAINERS: Trainer[] = [
     passiveDesc: '+1 Electric energy every 2 turns',
     applyPassive: ({ energy, setEnergy, turn, addLog }) => {
       if (turn > 1 && turn % 2 === 0) {
-        setEnergy({ ...energy, electric: energy.electric + 1 });
-        addLog('Lt. Surge\'s Lightning Rod: +1 Electric energy!', 'effect');
+        setEnergy({ ...energy, lightning: energy.lightning + 1 });
+        addLog('Lt. Surge\'s Lightning Rod: +1 Lightning energy!', 'effect');
       }
     },
   },
@@ -558,29 +600,29 @@ const addEnergy = (current: EnergyState, toAdd: EnergyState): EnergyState => {
 const spendEnergyForMove = (currentEnergy: EnergyState, move: Move): EnergyState => {
   const e = { ...currentEnergy };
   for (const cost of move.cost) {
-    if (cost.type === 'random') {
-      // Colorless: use any energy type, prefer dedicated random first
+    if (cost.type === 'colorless') {
+      // Colorless: use any energy type, prefer dedicated colorless first
       let remaining = cost.amount;
-      if (e.random >= remaining) {
-        e.random -= remaining;
+      if (e.colorless >= remaining) {
+        e.colorless -= remaining;
         continue;
       }
-      remaining -= e.random;
-      e.random = 0;
+      remaining -= e.colorless;
+      e.colorless = 0;
       for (const t of ALL_ENERGY_TYPES) {
-        if (t === 'random') continue;
+        if (t === 'colorless') continue;
         const spend = Math.min(e[t], remaining);
         e[t] -= spend;
         remaining -= spend;
         if (remaining <= 0) break;
       }
     } else {
-      // Specific type: use that type first, then random
+      // Specific type: use that type first, then colorless
       const spend = Math.min(e[cost.type], cost.amount);
       e[cost.type] -= spend;
       const stillNeeded = cost.amount - spend;
       if (stillNeeded > 0) {
-        e.random = Math.max(0, e.random - stillNeeded);
+        e.colorless = Math.max(0, e.colorless - stillNeeded);
       }
     }
   }
@@ -596,7 +638,7 @@ const canAffordMove = (energy: EnergyState, alreadySpent: SelectedAction[], move
   }
   // Check if remaining energy can cover this move
   for (const cost of move.cost) {
-    if (cost.type === 'random') {
+    if (cost.type === 'colorless') {
       if (getTotalEnergy(temp) < cost.amount) return false;
       // Deduct for next check
       let remaining = cost.amount;
@@ -607,12 +649,12 @@ const canAffordMove = (energy: EnergyState, alreadySpent: SelectedAction[], move
         if (remaining <= 0) break;
       }
     } else {
-      const available = temp[cost.type] + temp.random;
+      const available = temp[cost.type] + temp.colorless;
       if (available < cost.amount) return false;
       const spend = Math.min(temp[cost.type], cost.amount);
       temp[cost.type] -= spend;
       const stillNeeded = cost.amount - spend;
-      if (stillNeeded > 0) temp.random -= stillNeeded;
+      if (stillNeeded > 0) temp.colorless -= stillNeeded;
     }
   }
   return true;
@@ -929,7 +971,8 @@ export default function AIBattlePage() {
   };
 
   const confirmEnergySelection = () => {
-    if (selectedEnergyTypes.length !== 4) return; // MUST select exactly 4
+    // TCG Pocket: Must select 1-3 energy types (recommended: 1 for consistency)
+    if (selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 3) return;
     // Generate initial energy (turn 1 = 1 energy only)
     const initialEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, 1);
     setEnergy(initialEnergy);
@@ -988,9 +1031,9 @@ export default function AIBattlePage() {
     
     // Instant effects (no target needed)
     if (item.id === 'energy-boost') {
-      setEnergy(prev => ({ ...prev, random: prev.random + 1 }));
+      setEnergy(prev => ({ ...prev, colorless: prev.colorless + 1 }));
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, uses: i.uses - 1 } : i));
-      addLog(`Used ${item.name}! +1 Random energy!`, 'heal');
+      addLog(`Used ${item.name}! +1 Colorless energy!`, 'heal');
       setShowItems(false);
       return;
     }
@@ -1095,10 +1138,10 @@ export default function AIBattlePage() {
       temp = spendEnergyForMove(temp, a.move);
     }
     for (const cost of poke.evolutionEnergyCost) {
-      if (cost.type === 'random') {
+      if (cost.type === 'colorless') {
         if (getTotalEnergy(temp) < cost.amount) return false;
       } else {
-        if (temp[cost.type] + temp.random < cost.amount) return false;
+        if (temp[cost.type] + temp.colorless < cost.amount) return false;
       }
     }
     return true;
@@ -1111,7 +1154,7 @@ export default function AIBattlePage() {
     // Spend energy
     let newEnergy = { ...energy };
     for (const cost of poke.evolutionEnergyCost) {
-      if (cost.type === 'random') {
+      if (cost.type === 'colorless') {
         let remaining = cost.amount;
         for (const t of ALL_ENERGY_TYPES) {
           const spend = Math.min(newEnergy[t], remaining);
@@ -1123,7 +1166,7 @@ export default function AIBattlePage() {
         const spend = Math.min(newEnergy[cost.type], cost.amount);
         newEnergy[cost.type] -= spend;
         const stillNeeded = cost.amount - spend;
-        if (stillNeeded > 0) newEnergy.random = Math.max(0, newEnergy.random - stillNeeded);
+        if (stillNeeded > 0) newEnergy.colorless = Math.max(0, newEnergy.colorless - stillNeeded);
       }
     }
     setEnergy(newEnergy);
@@ -1141,7 +1184,7 @@ export default function AIBattlePage() {
 
     // Apply evolution
     const evo = poke.evolvesTo;
-    const kantoData = KANTO_POKEMON.find(k => k.id === evo.id);
+    const kantoData = EVOLUTION_DATA[evo.id] || KANTO_POKEMON.find(k => k.id === evo.id);
     setPlayerTeam(prev => prev.map((p, i) => {
       if (i !== pIdx) return p;
       return {
@@ -1589,7 +1632,7 @@ export default function AIBattlePage() {
       <div className="energy-select-screen">
         <div>
           <div className="energy-select-title">SELECT YOUR ENERGY TYPES</div>
-          <div className="energy-select-subtitle">Choose EXACTLY 4 energy types for your battle deck (+ Random)</div>
+          <div className="energy-select-subtitle">Choose 1-3 energy types for your deck (Tip: Use 1 type for consistency)</div>
         </div>
 
         <div className="energy-select-team">
@@ -1619,10 +1662,12 @@ export default function AIBattlePage() {
         <button
           className="energy-confirm-btn"
           onClick={confirmEnergySelection}
-          disabled={selectedEnergyTypes.length !== 4}
+          disabled={selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 3}
         >
-          {selectedEnergyTypes.length < 4
-            ? `SELECT ${4 - selectedEnergyTypes.length} MORE (Must be 4)`
+          {selectedEnergyTypes.length === 0
+            ? 'SELECT 1-3 ENERGY TYPES'
+            : selectedEnergyTypes.length > 3
+            ? 'TOO MANY! (Max 3)'
             : 'START BATTLE'}
         </button>
       </div>
