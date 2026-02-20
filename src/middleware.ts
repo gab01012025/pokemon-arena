@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
+// Force JWT_SECRET in production
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production');
+}
+
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'pokemon-arena-super-secret-key-change-in-production-2026'
+  process.env.JWT_SECRET || 'pokemon-arena-dev-secret-only-for-local-development'
 );
 
 const COOKIE_NAME = 'pokemon-arena-session';

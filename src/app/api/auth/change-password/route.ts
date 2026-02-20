@@ -23,9 +23,16 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (newPassword.length < 6) {
+    // Validate new password strength
+    const { validatePassword } = await import('@/lib/password-validator');
+    const validation = validatePassword(newPassword);
+    
+    if (!validation.isValid) {
       return NextResponse.json(
-        { error: 'New password must be at least 6 characters' },
+        { 
+          error: 'Password does not meet security requirements',
+          details: validation.errors 
+        },
         { status: 400 }
       );
     }

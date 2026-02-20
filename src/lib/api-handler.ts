@@ -146,6 +146,16 @@ export function validateRequest<T>(schema: z.ZodSchema<T>) {
 // Rate limiting (simple in-memory implementation)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
+// Clean up old entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (now > value.resetAt) {
+      rateLimitMap.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
 export function rateLimit(
   identifier: string,
   maxRequests: number = 10,
@@ -163,12 +173,23 @@ export function rateLimit(
   }
 
   if (record.count >= maxRequests) {
+    logger.warn('Rate limit exceeded', {
+      metadata: { identifier, count: record.count, maxRequests }
+    });
     return false;
   }
 
   record.count++;
   return true;
 }
+
+// Stricter rate limits for sensitive endpoints
+export const rateLimits = {
+  auth: { maxRequests: 5, windowMs: 15 * 60 * 1000 }, // 5 per 15 min
+  api: { maxRequests: 100, windowMs: 60 * 1000 }, // 100 per minute
+  battle: { maxRequests: 30, windowMs: 60 * 1000 }, // 30 per minute
+  admin: { maxRequests: 20, windowMs: 60 * 1000 }, // 20 per minute
+};
 
 // Get client IP
 export function getClientIP(req: NextRequest): string {
@@ -180,28 +201,60 @@ export function getClientIP(req: NextRequest): string {
 }
 
 // Require authentication
-export async function requireAuth(req: NextRequest): Promise<{ userId: string; username: string }> {
-  // TODO: Implement proper auth check
-  const authHeader = req.headers.get('authorization');
+export async function requireAuth(req: NextRequest): Promise<{ userId: string; username: string; email: string }> {
+  const { cookies } = req;
+  const token = cookies.get('pokemon-arena-session')?.value;
   
-  if (!authHeader) {
+  if (!token) {
     throw APIErrors.unauthorized('Authentication required');
   }
 
-  // Verify token and return user info
-  // This is a placeholder - implement actual auth logic
-  return {
-    userId: 'user-id',
-    username: 'username',
-  };
+  try {
+    const JWT_SECRET = new TextEncoder().encode(
+      process.env.JWT_SECRET
+    );
+
+    if (!process.env.JWT_SECRET) {
+      logger.fatal('JWT_SECRET not configured', new Error('Missing JWT_SECRET'));
+      throw APIErrors.internal('Server configuration error');
+    }
+
+    const { jwtVerify } = await import('jose');
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+
+    if (!payload.userId || !payload.username) {
+      throw APIErrors.unauthorized('Invalid token payload');
+    }
+
+    return {
+      userId: payload.userId as string,
+      username: payload.username as string,
+      email: payload.email as string,
+    };
+  } catch (error) {
+    logger.warn('Auth token verification failed', { metadata: { error } });
+    throw APIErrors.unauthorized('Invalid or expired token');
+  }
 }
 
 // CORS headers
 export function corsHeaders() {
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  // Em desenvolvimento, permite localhost
+  if (isDevelopment) {
+    allowedOrigins.push('http://localhost:3000', 'http://localhost:3001');
+  }
+  
+  // Se não houver origens configuradas em produção, bloqueia tudo
+  const origin = allowedOrigins.length > 0 ? allowedOrigins[0] : 'null';
+  
   return {
-    'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGIN || '*',
+    'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400',
   };
 }
