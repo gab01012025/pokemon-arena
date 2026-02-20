@@ -56,11 +56,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add Pokemon to trainer's unlocked collection
+    // Add Pokemon to trainer's unlocked collection with battle team settings
     await prisma.trainerPokemon.createMany({
-      data: pokemonIds.map((pokemonId: string) => ({
+      data: pokemonIds.map((pokemonId: string, index: number) => ({
         trainerId: session.user.id,
         pokemonId: pokemonId,
+        isActive: true,    // All initially selected Pokemon are active in battle team
+        position: index,   // Position 0, 1, 2 based on selection order
       })),
     });
 
@@ -96,11 +98,17 @@ export async function GET() {
       include: {
         pokemon: {
           include: {
-            moves: true,
+            moves: {
+              orderBy: { slot: 'asc' },
+            },
           },
         },
       },
-      orderBy: { unlockedAt: 'asc' },
+      orderBy: [
+        { isActive: 'desc' },  // Active Pokemon first
+        { position: 'asc' },    // Then by position
+        { unlockedAt: 'asc' },  // Then by unlock date
+      ],
     });
 
     if (trainerPokemon.length === 0) {
@@ -119,6 +127,8 @@ export async function GET() {
         health: tp.pokemon.health,
         moves: tp.pokemon.moves,
         unlockedAt: tp.unlockedAt,
+        isActive: tp.isActive,
+        position: tp.position,
       })),
     });
 

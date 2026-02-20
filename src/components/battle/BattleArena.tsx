@@ -151,7 +151,7 @@ export function BattleArena({
           Turn {battleState.turn}
         </span>
         <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>
-          {isMyTurn ? '⚔️ YOUR TURN' : '⏳ OPPONENT\'S TURN'}
+          {isMyTurn ? 'YOUR TURN' : 'OPPONENT\'S TURN'}
         </span>
         <span style={{ color: 'white', fontSize: '12px' }}>
           Actions: {myActions.length}/3
@@ -171,7 +171,7 @@ export function BattleArena({
           fontSize: '14px',
           textTransform: 'uppercase',
         }}>
-          ⚔️ Opponent&apos;s Team
+          Opponent&apos;s Team
         </h3>
         <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
           {enemyTeam.map((pokemon, index) => (
@@ -201,7 +201,7 @@ export function BattleArena({
             marginRight: '15px',
             fontWeight: 'bold',
           }}>
-            ⚡ Your Energy:
+            Your Energy:
           </span>
           <EnergyDisplay energy={myEnergy} size="md" />
         </div>
@@ -220,7 +220,7 @@ export function BattleArena({
           fontSize: '14px',
           textTransform: 'uppercase',
         }}>
-          🎮 Your Team
+          Your Team
         </h3>
         <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
           {myTeam.map((pokemon, index) => (
@@ -265,7 +265,7 @@ export function BattleArena({
             margin: '0 0 10px 0',
             fontSize: '14px',
           }}>
-            📋 {selectedPokemon.name}&apos;s Moves
+            {selectedPokemon.name}&apos;s Moves
           </h3>
           <div style={{
             display: 'grid',
@@ -297,7 +297,7 @@ export function BattleArena({
           textAlign: 'center',
         }}>
           <p style={{ color: '#FFCB05', margin: '0 0 10px 0', fontWeight: 'bold' }}>
-            🎯 Select a target for {selectedMove.name}
+            Select a target for {selectedMove.name}
           </p>
           <button
             onClick={cancelTargeting}
@@ -311,7 +311,7 @@ export function BattleArena({
               fontWeight: 'bold',
             }}
           >
-            ✖ Cancel
+            Cancel
           </button>
         </div>
       )}
@@ -333,7 +333,7 @@ export function BattleArena({
             alignSelf: 'center',
           }}
         >
-          ⚡ END TURN ({myActions.length} actions)
+          END TURN ({myActions.length} actions)
         </button>
       )}
 
@@ -345,7 +345,7 @@ export function BattleArena({
           borderRadius: '8px',
         }}>
           <h4 style={{ color: '#888', margin: '0 0 8px 0', fontSize: '12px' }}>
-            📝 Queued Actions:
+            Queued Actions:
           </h4>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {myActions.map((action, index) => {

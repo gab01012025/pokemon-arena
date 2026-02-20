@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic rendering (no prerender at build time)
+export const dynamic = 'force-dynamic';
+
 interface Pokemon {
   id: string;
   name: string;
@@ -82,11 +85,11 @@ export default async function CharactersPage() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
-              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 

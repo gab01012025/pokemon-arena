@@ -13,20 +13,20 @@ export default function Home() {
             <div className="nav-buttons-top">
               <Link href="/" className="nav-btn-top">Startpage</Link>
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
-              <Link href="/tutorial" className="nav-btn-top">📚 Tutorial</Link>
+              <Link href="/tutorial" className="nav-btn-top">Tutorial</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/missions" className="nav-btn-top">📋 Missões</Link>
-              <Link href="/unlock-pokemon" className="nav-btn-top">🔓 Desbloquear</Link>
-              <Link href="/my-clan" className="nav-btn-top">🏰 Meu Clã</Link>
+              <Link href="/missions" className="nav-btn-top">Missões</Link>
+              <Link href="/unlock-pokemon" className="nav-btn-top">Desbloquear</Link>
+              <Link href="/my-clan" className="nav-btn-top">Meu Clã</Link>
               <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">
-                🎮 DISCORD
+                DISCORD
               </a>
             </div>
           </div>
           
           {/* Banner */}
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 
@@ -54,23 +54,15 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Pokemon-Boards */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Pokemon-Boards</div>
+          {/* Pokédex */}
+          <div className="sidebar-box pokedex-box">
+            <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, #E3350D, #FFCB05)' }}>Pokédex</div>
             <div className="sidebar-box-content">
-              <p>Visit the</p>
-              <p><Link href="#">Pokemon-Boards.site</Link></p>
-              <p>The official Pokemon Arena Forums.</p>
-            </div>
-          </div>
-
-          {/* Pokemon Helper */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Pokemon Helper</div>
-            <div className="sidebar-box-content">
-              <p>Visit the</p>
-              <p><Link href="#">Pokemon Helper Site</Link></p>
-              <p>The official Pokemon Arena Helper.</p>
+              <p>Explore todos os Pokémon!</p>
+              <Link href="/pokedex" className="pokedex-button">
+                Abrir Pokédex
+              </Link>
+              <p style={{ fontSize: '0.8rem', marginTop: '8px', color: '#888' }}>Dados da PokeAPI</p>
             </div>
           </div>
 
@@ -276,11 +268,11 @@ export default function Home() {
               </div>
             </div>
             <div className="news-reactions">
-              <span className="reaction"><span className="reaction-emoji">🔥</span> 12</span>
-              <span className="reaction"><span className="reaction-emoji">😡</span> 14</span>
-              <span className="reaction"><span className="reaction-emoji">😮</span> 4</span>
-              <span className="reaction"><span className="reaction-emoji">🙄</span> 5</span>
-              <span className="reaction"><span className="reaction-emoji">❤️</span> 3</span>
+              <span className="reaction"><span className="reaction-emoji">Hot</span> 12</span>
+              <span className="reaction"><span className="reaction-emoji">Angry</span> 14</span>
+              <span className="reaction"><span className="reaction-emoji">Wow</span> 4</span>
+              <span className="reaction"><span className="reaction-emoji">Meh</span> 5</span>
+              <span className="reaction"><span className="reaction-emoji">Love</span> 3</span>
               <span className="reaction"><span className="reaction-emoji">+</span></span>
             </div>
           </article>

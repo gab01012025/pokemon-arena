@@ -98,7 +98,7 @@ export default async function CharsPage() {
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 
@@ -110,7 +110,7 @@ export default async function CharsPage() {
           {/* Starter Pokemon */}
           <section className="chars-section">
             <h2 className="section-header">
-              <span>⭐ Starter Pokemon</span>
+              <span>Starter Pokemon</span>
               <span className="section-count">{starters.length} available</span>
             </h2>
             <div className="chars-grid">

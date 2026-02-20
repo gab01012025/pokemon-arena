@@ -441,6 +441,71 @@ a:hover {
   line-height: 1.3;
 }
 
+/* ===== DISCORD BUTTON ===== */
+.discord-box .sidebar-box-header {
+  background: #5865F2 !important;
+}
+
+.discord-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
+  color: white;
+  padding: 12px 20px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  text-decoration: none;
+  margin: 10px 0;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.discord-button:hover {
+  background: linear-gradient(135deg, #4752C4 0%, #5865F2 100%);
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+}
+
+/* ===== POKEDEX BUTTON ===== */
+.pokedex-box .sidebar-box-header {
+  background: linear-gradient(135deg, #E3350D, #FFCB05) !important;
+}
+
+.pokedex-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #E3350D 0%, #FFCB05 100%);
+  color: white;
+  padding: 12px 20px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  text-decoration: none;
+  margin: 10px 0;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.pokedex-button:hover {
+  background: linear-gradient(135deg, #FFCB05 0%, #E3350D 100%);
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(227, 53, 13, 0.4);
+}
+
 /* ===== LOGIN FORM ===== */
 .login-form input[type="text"],
 .login-form input[type="password"] {
@@ -1541,9 +1606,39 @@ a:hover {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
   transition: border-color 0.2s;
   background: #fff;
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
+  opacity: 1;
+}
+
+.auth-form input::placeholder {
+  color: #888 !important;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+.auth-form input::-webkit-input-placeholder {
+  color: #888 !important;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+.auth-form input::-moz-placeholder {
+  color: #888 !important;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover,
+.auth-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #333 !important;
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  font-weight: 500;
 }
 
 .auth-form input:focus {

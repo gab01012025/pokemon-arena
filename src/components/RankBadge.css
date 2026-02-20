@@ -1,0 +1,138 @@
+/* ==========================================
+   RANK BADGE COMPONENT STYLES
+   ========================================== */
+
+.rank-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rank-badge-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-badge-icon img {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Sizes */
+.rank-badge-sm .rank-badge-icon img {
+  width: 32px;
+  height: 32px;
+}
+
+.rank-badge-md .rank-badge-icon img {
+  width: 48px;
+  height: 48px;
+}
+
+.rank-badge-lg .rank-badge-icon img {
+  width: 64px;
+  height: 64px;
+}
+
+.rank-badge-xl .rank-badge-icon img {
+  width: 96px;
+  height: 96px;
+}
+
+/* Animated glow effect */
+.rank-badge-animated .rank-badge-icon {
+  animation: rank-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rank-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px var(--rank-glow));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px var(--rank-glow)) drop-shadow(0 0 25px var(--rank-glow));
+  }
+}
+
+/* Rank name */
+.rank-badge-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+  letter-spacing: 1px;
+}
+
+.rank-badge-lg .rank-badge-name {
+  font-size: 10px;
+}
+
+.rank-badge-xl .rank-badge-name {
+  font-size: 12px;
+}
+
+/* Level display */
+.rank-badge-level {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #fff;
+  background: rgba(0,0,0,0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* ==========================================
+   RANK CROWN STYLES (for above characters)
+   ========================================== */
+
+.rank-crown {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.rank-crown img {
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+}
+
+.rank-crown-sm img {
+  width: 24px;
+  height: 24px;
+}
+
+.rank-crown-md img {
+  width: 32px;
+  height: 32px;
+}
+
+.rank-crown-lg img {
+  width: 48px;
+  height: 48px;
+}
+
+/* ==========================================
+   RANK COLORS (for borders, backgrounds)
+   ========================================== */
+
+.rank-bronze { --rank-color: #CD7F32; }
+.rank-prata { --rank-color: #C0C0C0; }
+.rank-ouro { --rank-color: #FFD700; }
+.rank-platina { --rank-color: #E5E4E2; }
+.rank-esmeralda { --rank-color: #50C878; }
+.rank-rubi { --rank-color: #E0115F; }
+.rank-safira { --rank-color: #0F52BA; }
+.rank-diamante { --rank-color: #B9F2FF; }
+.rank-mestre { --rank-color: #9B30FF; }
+.rank-grao-mestre { --rank-color: #DC143C; }
+.rank-lendario { --rank-color: #FFD700; }
+
+/* Border style for ranked elements */
+.rank-border {
+  border: 3px solid var(--rank-color);
+  box-shadow: 0 0 10px var(--rank-glow, rgba(0,0,0,0.3));
+}

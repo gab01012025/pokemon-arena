@@ -71,7 +71,7 @@ export function ClansClient({ initialClans }: ClansClientProps) {
   return (
     <div className="clans-page">
       <div className="clans-header">
-        <h1>🏰 Ranking de Clãs</h1>
+        <h1>Ranking de Clãs</h1>
         <p>Encontre um clã para se juntar ou crie o seu próprio!</p>
       </div>
 
@@ -82,17 +82,17 @@ export function ClansClient({ initialClans }: ClansClientProps) {
         <div className="search-box">
           <input
             type="text"
-            placeholder="🔍 Buscar clã por nome ou tag..."
+            placeholder="Buscar clã por nome ou tag..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="action-buttons">
           <Link href="/create-clan" className="btn-create-clan">
-            ➕ Criar Clã
+            Criar Clã
           </Link>
           <Link href="/my-clan" className="btn-my-clan">
-            🏠 Meu Clã
+            Meu Clã
           </Link>
         </div>
       </div>
@@ -152,14 +152,14 @@ export function ClansClient({ initialClans }: ClansClientProps) {
       {showJoinModal && selectedClan && (
         <div className="modal-overlay" onClick={() => setShowJoinModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>🏰 Entrar no Clã?</h2>
+            <h2>Entrar no Clã?</h2>
             <div className="clan-preview">
               <h3>[{selectedClan.tag}] {selectedClan.name}</h3>
               <p>{selectedClan.description || 'Sem descrição'}</p>
               <div className="preview-stats">
-                <span>⭐ {selectedClan.experience.toLocaleString()} XP</span>
-                <span>🏆 {selectedClan.wins} Vitórias</span>
-                <span>👥 {selectedClan.members} Membros</span>
+                <span>{selectedClan.experience.toLocaleString()} XP</span>
+                <span>{selectedClan.wins} Vitórias</span>
+                <span>{selectedClan.members} Membros</span>
               </div>
             </div>
             <p className="confirm-text">

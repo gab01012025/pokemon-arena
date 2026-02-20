@@ -119,6 +119,23 @@ function getLevelTitle(level: number) {
   return 'Rookie';
 }
 
+function getAvatarUrl(avatar: string): string {
+  if (!avatar || avatar === 'default') {
+    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'; // Pikachu default
+  }
+  // Pokemon sprite avatar
+  if (avatar.startsWith('pokemon-')) {
+    const pokemonId = avatar.replace('pokemon-', '');
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
+  }
+  // External URL (imgur, etc)
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar;
+  }
+  // Fallback to Pikachu
+  return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+}
+
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
   const profile = await getProfile(decodeURIComponent(username));
@@ -159,7 +176,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="profile-header">
               <div className="profile-avatar">
                 <img 
-                  src={profile.avatar === 'default' ? '/images/ash-ketchum.webp' : `/images/avatars/${profile.avatar}.png`} 
+                  src={getAvatarUrl(profile.avatar)} 
                   alt={profile.username} 
                 />
                 <span className={`level-badge level-${levelTitle?.toLowerCase() || 'newbie'}`}>
@@ -185,7 +202,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
               <div className="profile-actions">
                 <button className="btn-primary">Challenge</button>
-                <button className="btn-secondary">Add Friend</button>
+                <Link href="/change-avatar" className="btn-secondary">Change Avatar</Link>
               </div>
             </div>
           </div>

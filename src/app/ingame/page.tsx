@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { allPokemon } from '@/data/pokemon';
 import { Pokemon, Move } from '@/types/game';
 import { calculateDamage, TYPE_ICONS, TYPE_COLORS } from '@/lib/type-effectiveness';
+import { getRankByLevel } from '@/lib/ranks';
 import { 
   bypassesCounter, 
   bypassesReflect, 
@@ -236,12 +237,12 @@ export default function InGamePage() {
         {/* Player Info Panel */}
         <div className="player-panel">
           <div className="player-info">
-            <p className="player-name">{user?.username?.toUpperCase() || 'GAB123'}</p>
-            <p className="player-rank">POKEMON TRAINER</p>
+            <p className="player-name">{user?.username?.toUpperCase() || 'TRAINER'}</p>
+            <p className="player-rank">{getRankByLevel(user?.level || 1).name.toUpperCase()}</p>
             <p>CLAN: CLANLESS</p>
-            <p>LEVEL: {user?.level || 1} (0 XP)</p>
-            <p>LADDERRANK: 26573</p>
-            <p>RATIO: {user?.wins || 0} - {user?.losses || 0} (+ 0)</p>
+            <p>LEVEL: {user?.level || 1} ({user?.ladderPoints || 0} LP)</p>
+            <p>STREAK: {user?.streak || 0}</p>
+            <p>RATIO: {user?.wins || 0} - {user?.losses || 0}</p>
           </div>
           
           {/* Selected Team */}
@@ -412,8 +413,8 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
   void _playerTeam; // Suppress unused warning
   void _enemyTeam; // Suppress unused warning
   
-  const enemyName = "TRAINER RED";
-  const enemyRank = "POKEMON MASTER";
+  const enemyName = "GYM LEADER";
+  const enemyRank = "PLATINA";
 
   // State for auto-ready trigger
   const [autoReady, setAutoReady] = useState(false);
@@ -970,7 +971,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       <div className="battle-wrapper">
         <div className={`game-over-screen ${playerWon ? 'victory' : 'defeat'}`}>
           <div className="game-over-header">
-            <h1>{playerWon ? '🏆 VICTORY!' : '💀 DEFEAT'}</h1>
+            <h1>{playerWon ? 'VICTORY!' : 'DEFEAT'}</h1>
             <p className="game-over-subtitle">{playerWon ? 'You defeated your opponent!' : 'Your team was defeated...'}</p>
           </div>
           
@@ -987,7 +988,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
 
           {/* EXP and Rewards Section */}
           <div className="rewards-section">
-            <h3>📊 REWARDS</h3>
+            <h3>REWARDS</h3>
             
             {battleRewards ? (
               <>
@@ -998,7 +999,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 
                 {battleRewards.streakBonus > 0 && (
                   <div className="reward-item streak">
-                    <span className="reward-label">🔥 Streak Bonus</span>
+                    <span className="reward-label">Streak Bonus</span>
                     <span className="reward-value">+{battleRewards.streakBonus} XP</span>
                   </div>
                 )}
@@ -1010,7 +1011,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 
                 {battleRewards.leveledUp && (
                   <div className="level-up-notification">
-                    <span className="level-up-icon">⬆️</span>
+                    <span className="level-up-icon">UP</span>
                     <span className="level-up-text">LEVEL UP!</span>
                     <span className="new-level">Level {battleRewards.newLevel}</span>
                   </div>
@@ -1030,7 +1031,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                     </div>
                     <div className="stats-summary">
                       <span>Record: {battleRewards.stats.wins}W / {battleRewards.stats.losses}L</span>
-                      {battleRewards.stats.streak > 0 && <span>🔥 {battleRewards.stats.streak} Win Streak</span>}
+                      {battleRewards.stats.streak > 0 && <span>{battleRewards.stats.streak} Win Streak</span>}
                     </div>
                   </div>
                 )}
@@ -1115,8 +1116,8 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       {/* Battle Header */}
       <div className="battle-header">
         <div className="player-header">
-          <span className="player-battle-name">{user?.username?.toUpperCase() || 'GAB123'}</span>
-          <span className="player-battle-rank">POKEMON TRAINER</span>
+          <span className="player-battle-name">{user?.username?.toUpperCase() || 'TRAINER'}</span>
+          <span className="player-battle-rank">{getRankByLevel(user?.level || 1).name.toUpperCase()}</span>
         </div>
         
         <div className="turn-indicator">
@@ -1134,7 +1135,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 title="Fire - Click to exchange"
                 onClick={() => showEnergyExchange && handleEnergyExchange('fire')}
               >
-                🔥 x{energy.fire}
+                Fire x{energy.fire}
               </span>
             )}
             {energy.water > 0 && (
@@ -1143,7 +1144,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 title="Water - Click to exchange"
                 onClick={() => showEnergyExchange && handleEnergyExchange('water')}
               >
-                💧 x{energy.water}
+                Water x{energy.water}
               </span>
             )}
             {energy.grass > 0 && (
@@ -1152,7 +1153,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 title="Grass - Click to exchange"
                 onClick={() => showEnergyExchange && handleEnergyExchange('grass')}
               >
-                🌿 x{energy.grass}
+                Grass x{energy.grass}
               </span>
             )}
             {energy.electric > 0 && (
@@ -1161,12 +1162,12 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 title="Electric - Click to exchange"
                 onClick={() => showEnergyExchange && handleEnergyExchange('electric')}
               >
-                ⚡ x{energy.electric}
+                Elec x{energy.electric}
               </span>
             )}
             {energy.colorless > 0 && (
               <span className="energy-icon colorless" title="Colorless">
-                ⬜ x{energy.colorless}
+                Any x{energy.colorless}
               </span>
             )}
             <button 
@@ -1174,7 +1175,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
               onClick={() => setShowEnergyExchange(!showEnergyExchange)}
               title="Exchange colored energy for colorless"
             >
-              {showEnergyExchange ? '✓ SELECT' : '⇄ EXCHANGE'}
+              {showEnergyExchange ? 'SELECT' : 'EXCHANGE'}
             </button>
           </div>
         </div>

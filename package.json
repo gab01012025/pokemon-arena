@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "prisma": {
-    "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-main.ts"
   },
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,7 @@
     "test:run": "vitest run",
     "server": "npx ts-node --esm src/server/game-server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "db:seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "db:seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-main.ts",
     "db:push": "prisma db push",
     "db:reset": "npx prisma db push --force-reset --accept-data-loss && npm run db:seed",
     "vercel-build": "prisma generate && prisma db push && next build"

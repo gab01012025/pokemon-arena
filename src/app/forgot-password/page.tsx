@@ -15,11 +15,11 @@ export default function ForgotPasswordPage() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
-              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 

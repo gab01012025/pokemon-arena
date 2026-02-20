@@ -13,14 +13,14 @@ interface MoveButtonProps {
 }
 
 const classIcons: Record<string, string> = {
-  'Physical': '⚔️',
-  'Special': '✨',
-  'Status': '🔄',
-  'Affliction': '💀',
-  'Mental': '🧠',
-  'Ranged': '🎯',
-  'Instant': '⚡',
-  'Unique': '💎',
+  'Physical': 'PHY',
+  'Special': 'SPC',
+  'Status': 'STS',
+  'Affliction': 'AFF',
+  'Mental': 'MNT',
+  'Ranged': 'RNG',
+  'Instant': 'INS',
+  'Unique': 'UNQ',
 };
 
 const targetLabels: Record<TargetType, string> = {
@@ -127,7 +127,7 @@ export function MoveButton({
           borderRadius: '4px',
           color: isSelected ? '#444' : '#888',
         }}>
-          🎯 {targetLabels[move.target]}
+          Target: {targetLabels[move.target]}
         </span>
 
         {/* Damage */}
@@ -138,7 +138,7 @@ export function MoveButton({
             borderRadius: '4px',
             color: '#F44336',
           }}>
-            ⚔️ {move.damage} DMG
+            {move.damage} DMG
           </span>
         )}
 
@@ -162,7 +162,7 @@ export function MoveButton({
             borderRadius: '4px',
             color: '#9C27B0',
           }}>
-            🕐 CD: {move.cooldown}
+            CD: {move.cooldown}
           </span>
         )}
 
@@ -201,7 +201,7 @@ export function MoveButton({
             fontWeight: 'bold',
             fontSize: '16px',
           }}>
-            🕐 {cooldownRemaining} turns
+            {cooldownRemaining} turns
           </span>
         </div>
       )}

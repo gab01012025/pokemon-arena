@@ -39,7 +39,7 @@ export default function BattlePage() {
           marginBottom: '20px',
           textShadow: '0 0 10px rgba(233, 30, 99, 0.5)',
         }}>
-          🎮 Batalha Multiplayer
+          Batalha Multiplayer
         </h1>
         
         <div style={{ 
@@ -50,7 +50,7 @@ export default function BattlePage() {
           marginBottom: '30px',
         }}>
           <p style={{ color: '#FFC107', fontSize: '1.1rem', margin: 0 }}>
-            ⚠️ O modo Multiplayer PvP está em desenvolvimento!
+            O modo Multiplayer PvP está em desenvolvimento!
           </p>
         </div>
 

@@ -1,0 +1,1465 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
+import './battle.css';
+import { getRankByLevel, RankInfo } from '@/lib/ranks';
+import { calculateArenaDamage } from '@/lib/damage-calculator';
+import { getTypeEffectiveness as getGlobalTypeEff, STAB_MULTIPLIER } from '@/lib/type-effectiveness';
+import { PokemonType as GlobalPokemonType } from '@/types/game';
+
+// ==================== TYPES ====================
+type PokemonType = 'fire' | 'water' | 'grass' | 'electric' | 'psychic' | 'ghost' | 'dragon' | 'ice' | 'fighting' | 'poison' | 'ground' | 'flying' | 'normal' | 'bug' | 'rock' | 'steel' | 'dark' | 'fairy';
+
+// Helper to convert local lowercase types to global capitalized types
+const toGlobalType = (type: PokemonType): GlobalPokemonType => {
+  return (type.charAt(0).toUpperCase() + type.slice(1)) as GlobalPokemonType;
+};
+
+const toGlobalTypes = (types: PokemonType[]): GlobalPokemonType[] => {
+  return types.map(toGlobalType);
+};
+
+// Wrapper for getTypeEffectiveness that accepts local types
+const getTypeEff = (attackType: PokemonType, defenderTypes: PokemonType[]): number => {
+  return getGlobalTypeEff(toGlobalType(attackType), toGlobalTypes(defenderTypes));
+};
+type EnergyType = 'fire' | 'water' | 'grass' | 'electric' | 'random';
+
+interface Move {
+  id: string;
+  name: string;
+  type: PokemonType;
+  power: number;
+  accuracy: number;
+  cost: { type: EnergyType; amount: number }[];
+  cooldown: number;
+  currentCooldown: number;
+  description: string;
+  targetType: 'enemy' | 'ally' | 'self' | 'all-enemies';
+}
+
+interface BattlePokemon {
+  id: number;
+  name: string;
+  types: PokemonType[];
+  hp: number;
+  maxHp: number;
+  attack: number;
+  defense: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
+  sprite: string;
+  moves: Move[];
+}
+
+interface EnergyState {
+  fire: number;
+  water: number;
+  grass: number;
+  electric: number;
+  random: number;
+}
+
+interface SelectedAction {
+  pokemonIndex: number;
+  move: Move;
+  targetIndex: number;
+}
+
+interface LogEntry {
+  id: number;
+  text: string;
+  type: 'damage' | 'heal' | 'effect' | 'info';
+}
+
+type GamePhase = 'loading' | 'selecting' | 'targeting' | 'executing' | 'opponent-turn' | 'victory' | 'defeat';
+
+// Interface matching the API response from /api/trainer/profile
+interface UnlockedPokemonData {
+  id: string;
+  pokemon: {
+    id: number;
+    name: string;
+    types: string; // JSON string like '["fire", "flying"]'
+    health: number;
+    moves: {
+      id: string;
+      name: string;
+      description: string;
+      damage: number;
+      cooldown: number;
+      cost: string; // JSON string
+      effects?: string | null;
+      target: string;
+    }[];
+  };
+}
+
+interface PlayerProfile {
+  username: string;
+  level: number;
+  unlockedPokemon: UnlockedPokemonData[];
+}
+
+// ==================== CENARIOS ====================
+const BATTLE_BACKGROUNDS = [
+  '/images/cenarios/or_as_battle_background_1b_by_phoenixoflight92_d874gjl-414w-2x.jpg',
+  '/images/cenarios/or_as_battle_background_6__evening__by_phoenixoflight92_d88ajms-414w-2x.jpg',
+  '/images/cenarios/or_as_vs_elite_four_sydney_battle_background_by_phoenixoflight92_d891h6b-414w-2x.jpg',
+  '/images/cenarios/or_as_vs_flannery_battle_background_by_phoenixoflight92_d88efs2-414w-2x.jpg',
+  '/images/cenarios/pokemon_x_and_y_battle_background_10_by_phoenixoflight92_d843fov-414w-2x.jpg',
+  '/images/cenarios/pokemon_x_and_y_battle_background_4_by_phoenixoflight92_d83ohf3-414w-2x.jpg',
+  '/images/cenarios/pokemon_x_and_y_battle_background_5_by_phoenixoflight92_d83pwna-414w-2x.jpg',
+  '/images/cenarios/pokemon_x_and_y_forest_battle_background_by_phoenixoflight92_d85ijvr-414w-2x.jpg',
+];
+
+// Type colors for TM-style skill slots (no external images needed)
+const TYPE_COLORS: Record<PokemonType, { bg: string; border: string; text: string }> = {
+  fire: { bg: 'linear-gradient(135deg, #FF9C54 0%, #F08030 50%, #C4501A 100%)', border: '#A33000', text: '#FFF' },
+  water: { bg: 'linear-gradient(135deg, #76BDFE 0%, #6890F0 50%, #4A6FC4 100%)', border: '#2A4FA0', text: '#FFF' },
+  grass: { bg: 'linear-gradient(135deg, #8ED752 0%, #78C850 50%, #5A9830 100%)', border: '#3C6820', text: '#FFF' },
+  electric: { bg: 'linear-gradient(135deg, #FBE273 0%, #F8D030 50%, #C9A500 100%)', border: '#8B7500', text: '#333' },
+  psychic: { bg: 'linear-gradient(135deg, #FF73A8 0%, #F85888 50%, #C43868 100%)', border: '#8B1848', text: '#FFF' },
+  ghost: { bg: 'linear-gradient(135deg, #8B78C8 0%, #705898 50%, #503878 100%)', border: '#302858', text: '#FFF' },
+  dragon: { bg: 'linear-gradient(135deg, #8B78F0 0%, #7038F8 50%, #5018C8 100%)', border: '#300898', text: '#FFF' },
+  ice: { bg: 'linear-gradient(135deg, #BCE4E4 0%, #98D8D8 50%, #68B8B8 100%)', border: '#489090', text: '#333' },
+  fighting: { bg: 'linear-gradient(135deg, #D67048 0%, #C03028 50%, #901818 100%)', border: '#600808', text: '#FFF' },
+  poison: { bg: 'linear-gradient(135deg, #C068C0 0%, #A040A0 50%, #702070 100%)', border: '#401040', text: '#FFF' },
+  ground: { bg: 'linear-gradient(135deg, #EBC878 0%, #E0C068 50%, #B89838 100%)', border: '#886818', text: '#333' },
+  flying: { bg: 'linear-gradient(135deg, #C8B8F8 0%, #A890F0 50%, #8868D0 100%)', border: '#5848A0', text: '#FFF' },
+  normal: { bg: 'linear-gradient(135deg, #D8D8C0 0%, #A8A878 50%, #787858 100%)', border: '#505038', text: '#333' },
+  bug: { bg: 'linear-gradient(135deg, #C8D820 0%, #A8B820 50%, #889810 100%)', border: '#586800', text: '#333' },
+  rock: { bg: 'linear-gradient(135deg, #D8C070 0%, #B8A038 50%, #988020 100%)', border: '#685010', text: '#FFF' },
+  steel: { bg: 'linear-gradient(135deg, #D8D8E0 0%, #B8B8D0 50%, #9898B8 100%)', border: '#686888', text: '#333' },
+  dark: { bg: 'linear-gradient(135deg, #907860 0%, #705848 50%, #503828 100%)', border: '#302018', text: '#FFF' },
+  fairy: { bg: 'linear-gradient(135deg, #F0B0C0 0%, #EE99AC 50%, #DD7898 100%)', border: '#B05878', text: '#333' },
+};
+
+// ==================== TYPE EFFECTIVENESS SYSTEM ====================
+// Classic Pokemon type chart for strategic gameplay
+const TYPE_EFFECTIVENESS: Record<PokemonType, { superEffective: PokemonType[]; notVeryEffective: PokemonType[]; immune: PokemonType[] }> = {
+  fire: { superEffective: ['grass', 'ice', 'bug', 'steel'], notVeryEffective: ['fire', 'water', 'rock', 'dragon'], immune: [] },
+  water: { superEffective: ['fire', 'ground', 'rock'], notVeryEffective: ['water', 'grass', 'dragon'], immune: [] },
+  grass: { superEffective: ['water', 'ground', 'rock'], notVeryEffective: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'], immune: [] },
+  electric: { superEffective: ['water', 'flying'], notVeryEffective: ['grass', 'electric', 'dragon'], immune: ['ground'] },
+  psychic: { superEffective: ['fighting', 'poison'], notVeryEffective: ['psychic', 'steel'], immune: ['dark'] },
+  ghost: { superEffective: ['psychic', 'ghost'], notVeryEffective: ['dark'], immune: ['normal'] },
+  dragon: { superEffective: ['dragon'], notVeryEffective: ['steel'], immune: ['fairy'] },
+  ice: { superEffective: ['grass', 'ground', 'flying', 'dragon'], notVeryEffective: ['fire', 'water', 'ice', 'steel'], immune: [] },
+  fighting: { superEffective: ['normal', 'ice', 'rock', 'dark', 'steel'], notVeryEffective: ['poison', 'flying', 'psychic', 'bug', 'fairy'], immune: ['ghost'] },
+  poison: { superEffective: ['grass', 'fairy'], notVeryEffective: ['poison', 'ground', 'rock', 'ghost'], immune: ['steel'] },
+  ground: { superEffective: ['fire', 'electric', 'poison', 'rock', 'steel'], notVeryEffective: ['grass', 'bug'], immune: ['flying'] },
+  flying: { superEffective: ['grass', 'fighting', 'bug'], notVeryEffective: ['electric', 'rock', 'steel'], immune: [] },
+  normal: { superEffective: [], notVeryEffective: ['rock', 'steel'], immune: ['ghost'] },
+  bug: { superEffective: ['grass', 'psychic', 'dark'], notVeryEffective: ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'], immune: [] },
+  rock: { superEffective: ['fire', 'ice', 'flying', 'bug'], notVeryEffective: ['fighting', 'ground', 'steel'], immune: [] },
+  steel: { superEffective: ['ice', 'rock', 'fairy'], notVeryEffective: ['fire', 'water', 'electric', 'steel'], immune: [] },
+  dark: { superEffective: ['psychic', 'ghost'], notVeryEffective: ['fighting', 'dark', 'fairy'], immune: [] },
+  fairy: { superEffective: ['fighting', 'dragon', 'dark'], notVeryEffective: ['fire', 'poison', 'steel'], immune: [] },
+};
+
+// Calculate type effectiveness multiplier
+function getTypeEffectiveness(moveType: PokemonType, defenderTypes: PokemonType[]): { multiplier: number; message: string } {
+  let multiplier = 1;
+  const effectiveness = TYPE_EFFECTIVENESS[moveType];
+  
+  for (const defType of defenderTypes) {
+    if (effectiveness.immune.includes(defType)) {
+      return { multiplier: 0, message: "It doesn't affect" };
+    }
+    if (effectiveness.superEffective.includes(defType)) {
+      multiplier *= 2;
+    }
+    if (effectiveness.notVeryEffective.includes(defType)) {
+      multiplier *= 0.5;
+    }
+  }
+  
+  if (multiplier >= 2) return { multiplier, message: "It's super effective!" };
+  if (multiplier > 0 && multiplier < 1) return { multiplier, message: "It's not very effective..." };
+  if (multiplier === 0) return { multiplier: 0, message: "It doesn't affect" };
+  return { multiplier, message: '' };
+}
+
+// Move abbreviations (like TM style)
+const MOVE_ABBREV: Record<string, string> = {
+  'Flamethrower': 'FLM',
+  'Blast Burn': 'BBN',
+  'Dragon Claw': 'DCL',
+  'Air Slash': 'ASL',
+  'Hydro Pump': 'HYP',
+  'Ice Beam': 'ICB',
+  'Withdraw': 'WDR',
+  'Hydro Cannon': 'HCN',
+  'Solar Beam': 'SLB',
+  'Sludge Bomb': 'SDB',
+  'Leech Seed': 'LCS',
+  'Frenzy Plant': 'FRP',
+  'Psychic': 'PSY',
+  'Shadow Ball': 'SHB',
+  'Recover': 'RCV',
+  'Psystrike': 'PST',
+  'Dream Eater': 'DRE',
+  'Hypnosis': 'HYP',
+  'Destiny Bond': 'DSB',
+  'Dragon Rush': 'DRU',
+  'Hurricane': 'HUR',
+  'Roost': 'RST',
+  'Draco Meteor': 'DCM',
+  'Thunderbolt': 'TBT',
+  'Thunder': 'THN',
+  'Volt Tackle': 'VTK',
+  'Quick Attack': 'QAK',
+  'Iron Tail': 'ITL',
+  'Electro Ball': 'EBL',
+  'Leaf Storm': 'LSM',
+  'Razor Leaf': 'RZL',
+  'Vine Whip': 'VNW',
+  'Sleep Powder': 'SLP',
+  'Poison Powder': 'PSP',
+  'Surf': 'SRF',
+  'Water Gun': 'WGN',
+  'Aqua Tail': 'AQT',
+  'Rain Dance': 'RND',
+  'Skull Bash': 'SKB',
+  'Fire Blast': 'FBL',
+  'Fire Spin': 'FSP',
+  'Scratch': 'SCR',
+  'Slash': 'SLS',
+  'Mega Punch': 'MGP',
+  'Mega Kick': 'MGK',
+};
+
+// ==================== POKEMON NAME TO POKEDEX NUMBER MAPPING ====================
+const POKEMON_POKEDEX: Record<string, number> = {
+  'Bulbasaur': 1, 'Ivysaur': 2, 'Venusaur': 3,
+  'Charmander': 4, 'Charmeleon': 5, 'Charizard': 6,
+  'Squirtle': 7, 'Wartortle': 8, 'Blastoise': 9,
+  'Caterpie': 10, 'Metapod': 11, 'Butterfree': 12,
+  'Weedle': 13, 'Kakuna': 14, 'Beedrill': 15,
+  'Pidgey': 16, 'Pidgeotto': 17, 'Pidgeot': 18,
+  'Rattata': 19, 'Raticate': 20,
+  'Spearow': 21, 'Fearow': 22,
+  'Ekans': 23, 'Arbok': 24,
+  'Pikachu': 25, 'Raichu': 26,
+  'Sandshrew': 27, 'Sandslash': 28,
+};
+
+// ==================== HELPER: Get sprite URL ====================
+const getSprite = (pokemonNameOrId: string | number) => {
+  // First try to get by name
+  if (typeof pokemonNameOrId === 'string') {
+    const pokedexNum = POKEMON_POKEDEX[pokemonNameOrId];
+    if (pokedexNum) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokedexNum}.gif`;
+    }
+    // Try to parse as number
+    const parsed = parseInt(pokemonNameOrId, 10);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 28) {
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${parsed}.gif`;
+    }
+  } else if (typeof pokemonNameOrId === 'number' && pokemonNameOrId > 0 && pokemonNameOrId <= 28) {
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokemonNameOrId}.gif`;
+  }
+  // Default fallback
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/1.gif`;
+};
+
+// ==================== HELPER: Convert DB Move to Battle Move ====================
+const convertDBMoveToBattleMove = (dbMove: { id: string; name: string; description?: string; type?: string; damage?: number; power?: number; cooldown?: number; cost?: string; target?: string; effects?: string | null }, pokemonType: PokemonType): Move => {
+  // Parse cost
+  let cost: { type: EnergyType; amount: number }[] = [];
+  if (dbMove.cost) {
+    try {
+      const costObj = JSON.parse(dbMove.cost);
+      for (const [type, amount] of Object.entries(costObj)) {
+        const energyType = ['fire', 'water', 'grass', 'electric'].includes(type) ? type as EnergyType : 'random';
+        cost.push({ type: energyType, amount: amount as number });
+      }
+    } catch {
+      cost = [{ type: 'random', amount: 1 }];
+    }
+  } else {
+    cost = [{ type: 'random', amount: 1 }];
+  }
+
+  // Determine target type
+  let targetType: 'enemy' | 'ally' | 'self' | 'all-enemies' = 'enemy';
+  if (dbMove.target) {
+    if (dbMove.target === 'self') targetType = 'self';
+    else if (dbMove.target === 'ally') targetType = 'ally';
+    else if (dbMove.target === 'all-enemies' || dbMove.target === 'all') targetType = 'all-enemies';
+  }
+  // Also check name for common self-target moves
+  if (['Recover', 'Roost', 'Withdraw', 'Rest', 'Synthesis', 'Moonlight', 'Morning Sun'].includes(dbMove.name)) {
+    targetType = 'self';
+  }
+
+  const moveType = dbMove.type as PokemonType || pokemonType;
+
+  return {
+    id: dbMove.id,
+    name: dbMove.name,
+    type: moveType,
+    power: dbMove.power || dbMove.damage || 0,
+    accuracy: 100,
+    cost,
+    cooldown: dbMove.cooldown || 0,
+    currentCooldown: 0,
+    description: dbMove.description || dbMove.name,
+    targetType,
+  };
+};
+
+// ==================== HELPER: Convert Profile Pokemon to Battle Pokemon ====================
+const convertProfileToBattlePokemon = (unlockedPokemon: UnlockedPokemonData[]): BattlePokemon[] => {
+  if (!unlockedPokemon || unlockedPokemon.length === 0) {
+    return [];
+  }
+
+  return unlockedPokemon.slice(0, 3).map(slot => {
+    const p = slot.pokemon;
+    const pokemonId = p.id;
+    
+    // Parse types from JSON string
+    let types: PokemonType[] = ['normal'];
+    try {
+      const parsedTypes = JSON.parse(p.types || '["normal"]');
+      types = parsedTypes as PokemonType[];
+    } catch {
+      types = ['normal'];
+    }
+    const primaryType = types[0] || 'normal';
+    
+    // Calculate HP from base stat
+    const baseHp = p.health || 100;
+    const calculatedHp = Math.floor(baseHp * 2.5) + 60;
+
+    // Convert moves, ensure at least 4 moves
+    let moves = (p.moves || []).slice(0, 4).map(m => convertDBMoveToBattleMove(m, primaryType));
+    
+    // If less than 4 moves, add default moves based on type
+    while (moves.length < 4) {
+      const defaultMoves = getDefaultMoves(primaryType);
+      const missingMove = defaultMoves[moves.length];
+      if (missingMove) {
+        moves.push(missingMove);
+      } else {
+        break;
+      }
+    }
+
+    // Get Pokedex number from name for sprite and BattlePokemon id
+    const pokedexNumber = POKEMON_POKEDEX[p.name] || 1;
+
+    return {
+      id: pokedexNumber,
+      name: p.name,
+      types,
+      hp: calculatedHp,
+      maxHp: calculatedHp,
+      attack: 80,
+      defense: 70,
+      spAtk: 85,
+      spDef: 75,
+      speed: 60,
+      sprite: getSprite(p.name),
+      moves,
+    };
+  });
+};
+
+// ==================== HELPER: Get Default Moves for Type ====================
+const getDefaultMoves = (type: PokemonType): Move[] => {
+  const defaultMovesByType: Record<PokemonType, Move[]> = {
+    fire: [
+      { id: 'def1', name: 'Flamethrower', type: 'fire', power: 90, accuracy: 100, cost: [{ type: 'fire', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A powerful fire attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Fire Blast', type: 'fire', power: 110, accuracy: 85, cost: [{ type: 'fire', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'An intense fire attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Scratch', type: 'normal', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A basic attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Blast Burn', type: 'fire', power: 150, accuracy: 90, cost: [{ type: 'fire', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate fire attack.', targetType: 'enemy' },
+    ],
+    water: [
+      { id: 'def1', name: 'Surf', type: 'water', power: 90, accuracy: 100, cost: [{ type: 'water', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A powerful water attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Hydro Pump', type: 'water', power: 110, accuracy: 80, cost: [{ type: 'water', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'An intense water attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Ice Beam', type: 'ice', power: 90, accuracy: 100, cost: [{ type: 'water', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A freezing attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Hydro Cannon', type: 'water', power: 150, accuracy: 90, cost: [{ type: 'water', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate water attack.', targetType: 'enemy' },
+    ],
+    grass: [
+      { id: 'def1', name: 'Razor Leaf', type: 'grass', power: 55, accuracy: 95, cost: [{ type: 'grass', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Sharp leaves attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Solar Beam', type: 'grass', power: 120, accuracy: 100, cost: [{ type: 'grass', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A powerful solar attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Sludge Bomb', type: 'poison', power: 90, accuracy: 100, cost: [{ type: 'grass', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A poison attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Frenzy Plant', type: 'grass', power: 150, accuracy: 90, cost: [{ type: 'grass', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate grass attack.', targetType: 'all-enemies' },
+    ],
+    electric: [
+      { id: 'def1', name: 'Thunderbolt', type: 'electric', power: 90, accuracy: 100, cost: [{ type: 'electric', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A powerful electric attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Thunder', type: 'electric', power: 110, accuracy: 70, cost: [{ type: 'electric', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A devastating thunder.', targetType: 'enemy' },
+      { id: 'def3', name: 'Quick Attack', type: 'normal', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A fast attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Volt Tackle', type: 'electric', power: 120, accuracy: 100, cost: [{ type: 'electric', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate electric attack.', targetType: 'enemy' },
+    ],
+    psychic: [
+      { id: 'def1', name: 'Psychic', type: 'psychic', power: 90, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful psychic attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Psystrike', type: 'psychic', power: 100, accuracy: 100, cost: [{ type: 'random', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A devastating psychic wave.', targetType: 'enemy' },
+      { id: 'def3', name: 'Shadow Ball', type: 'ghost', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shadowy attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Recover', type: 'psychic', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recover HP.', targetType: 'self' },
+    ],
+    ghost: [
+      { id: 'def1', name: 'Shadow Ball', type: 'ghost', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shadowy attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Dream Eater', type: 'psychic', power: 100, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Eat dreams to heal.', targetType: 'enemy' },
+      { id: 'def3', name: 'Hypnosis', type: 'psychic', power: 0, accuracy: 60, cost: [{ type: 'random', amount: 1 }], cooldown: 3, currentCooldown: 0, description: 'Put target to sleep.', targetType: 'enemy' },
+      { id: 'def4', name: 'Destiny Bond', type: 'ghost', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 4, currentCooldown: 0, description: 'If you faint, foe faints too.', targetType: 'self' },
+    ],
+    dragon: [
+      { id: 'def1', name: 'Dragon Claw', type: 'dragon', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Sharp claws attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Dragon Rush', type: 'dragon', power: 100, accuracy: 75, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A fierce dragon charge.', targetType: 'enemy' },
+      { id: 'def3', name: 'Hurricane', type: 'flying', power: 110, accuracy: 70, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A devastating wind.', targetType: 'enemy' },
+      { id: 'def4', name: 'Draco Meteor', type: 'dragon', power: 130, accuracy: 90, cost: [{ type: 'random', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate dragon attack.', targetType: 'all-enemies' },
+    ],
+    normal: [
+      { id: 'def1', name: 'Scratch', type: 'normal', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A basic attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Slash', type: 'normal', power: 70, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A sharp attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Mega Punch', type: 'normal', power: 80, accuracy: 85, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A powerful punch.', targetType: 'enemy' },
+      { id: 'def4', name: 'Mega Kick', type: 'normal', power: 120, accuracy: 75, cost: [{ type: 'random', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'A devastating kick.', targetType: 'enemy' },
+    ],
+    ice: [
+      { id: 'def1', name: 'Ice Beam', type: 'ice', power: 90, accuracy: 100, cost: [{ type: 'water', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A freezing beam.', targetType: 'enemy' },
+      { id: 'def2', name: 'Blizzard', type: 'ice', power: 110, accuracy: 70, cost: [{ type: 'water', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A devastating snowstorm.', targetType: 'all-enemies' },
+      { id: 'def3', name: 'Aurora Beam', type: 'ice', power: 65, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A rainbow beam.', targetType: 'enemy' },
+      { id: 'def4', name: 'Sheer Cold', type: 'ice', power: 150, accuracy: 30, cost: [{ type: 'water', amount: 2 }, { type: 'random', amount: 1 }], cooldown: 3, currentCooldown: 0, description: 'OHKO if it hits.', targetType: 'enemy' },
+    ],
+    fighting: [
+      { id: 'def1', name: 'Mega Punch', type: 'fighting', power: 80, accuracy: 85, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful punch.', targetType: 'enemy' },
+      { id: 'def2', name: 'Close Combat', type: 'fighting', power: 120, accuracy: 100, cost: [{ type: 'random', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Fight at close range.', targetType: 'enemy' },
+      { id: 'def3', name: 'Karate Chop', type: 'fighting', power: 50, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A sharp chop.', targetType: 'enemy' },
+      { id: 'def4', name: 'Focus Blast', type: 'fighting', power: 120, accuracy: 70, cost: [{ type: 'random', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate fighting attack.', targetType: 'enemy' },
+    ],
+    poison: [
+      { id: 'def1', name: 'Sludge Bomb', type: 'poison', power: 90, accuracy: 100, cost: [{ type: 'grass', amount: 1 }, { type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A poisonous sludge.', targetType: 'enemy' },
+      { id: 'def2', name: 'Poison Jab', type: 'poison', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A poisonous stab.', targetType: 'enemy' },
+      { id: 'def3', name: 'Toxic', type: 'poison', power: 0, accuracy: 90, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Badly poison the target.', targetType: 'enemy' },
+      { id: 'def4', name: 'Gunk Shot', type: 'poison', power: 120, accuracy: 80, cost: [{ type: 'random', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'Ultimate poison attack.', targetType: 'enemy' },
+    ],
+    ground: [
+      { id: 'def1', name: 'Earthquake', type: 'ground', power: 100, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A devastating quake.', targetType: 'all-enemies' },
+      { id: 'def2', name: 'Dig', type: 'ground', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Dig underground then attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Mud Shot', type: 'ground', power: 55, accuracy: 95, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A mud attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Fissure', type: 'ground', power: 150, accuracy: 30, cost: [{ type: 'random', amount: 3 }], cooldown: 3, currentCooldown: 0, description: 'OHKO if it hits.', targetType: 'enemy' },
+    ],
+    flying: [
+      { id: 'def1', name: 'Air Slash', type: 'flying', power: 75, accuracy: 95, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A blade of air.', targetType: 'enemy' },
+      { id: 'def2', name: 'Hurricane', type: 'flying', power: 110, accuracy: 70, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'A devastating wind.', targetType: 'enemy' },
+      { id: 'def3', name: 'Aerial Ace', type: 'flying', power: 60, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift aerial attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Rest to recover HP.', targetType: 'self' },
+    ],
+    bug: [
+      { id: 'def1', name: 'Bug Buzz', type: 'bug', power: 90, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A loud bug noise.', targetType: 'enemy' },
+      { id: 'def2', name: 'X-Scissor', type: 'bug', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slash in an X pattern.', targetType: 'enemy' },
+      { id: 'def3', name: 'String Shot', type: 'bug', power: 0, accuracy: 95, cost: [{ type: 'random', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Slow the enemy.', targetType: 'enemy' },
+      { id: 'def4', name: 'Pin Missile', type: 'bug', power: 75, accuracy: 95, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Multiple needle strikes.', targetType: 'enemy' },
+    ],
+    rock: [
+      { id: 'def1', name: 'Rock Slide', type: 'rock', power: 75, accuracy: 90, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Large rocks slide down.', targetType: 'enemy' },
+      { id: 'def2', name: 'Stone Edge', type: 'rock', power: 100, accuracy: 80, cost: [{ type: 'random', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Sharp stones attack.', targetType: 'enemy' },
+      { id: 'def3', name: 'Rock Throw', type: 'rock', power: 50, accuracy: 90, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Throw a rock.', targetType: 'enemy' },
+      { id: 'def4', name: 'Stealth Rock', type: 'rock', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Set damaging rocks.', targetType: 'enemy' },
+    ],
+    steel: [
+      { id: 'def1', name: 'Iron Head', type: 'steel', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A steel headbutt.', targetType: 'enemy' },
+      { id: 'def2', name: 'Flash Cannon', type: 'steel', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A steel beam.', targetType: 'enemy' },
+      { id: 'def3', name: 'Metal Claw', type: 'steel', power: 50, accuracy: 95, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Steel claw attack.', targetType: 'enemy' },
+      { id: 'def4', name: 'Iron Defense', type: 'steel', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Boost defense.', targetType: 'self' },
+    ],
+    dark: [
+      { id: 'def1', name: 'Dark Pulse', type: 'dark', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A dark energy wave.', targetType: 'enemy' },
+      { id: 'def2', name: 'Crunch', type: 'dark', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A crushing bite.', targetType: 'enemy' },
+      { id: 'def3', name: 'Pursuit', type: 'dark', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Chase the target.', targetType: 'enemy' },
+      { id: 'def4', name: 'Nasty Plot', type: 'dark', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Boost special attack.', targetType: 'self' },
+    ],
+    fairy: [
+      { id: 'def1', name: 'Moonblast', type: 'fairy', power: 95, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Moon power attack.', targetType: 'enemy' },
+      { id: 'def2', name: 'Dazzling Gleam', type: 'fairy', power: 80, accuracy: 100, cost: [{ type: 'random', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A blinding light.', targetType: 'enemy' },
+      { id: 'def3', name: 'Fairy Wind', type: 'fairy', power: 40, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A gentle breeze.', targetType: 'enemy' },
+      { id: 'def4', name: 'Moonlight', type: 'fairy', power: 0, accuracy: 100, cost: [{ type: 'random', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Heal under moonlight.', targetType: 'self' },
+    ],
+  };
+
+  return defaultMovesByType[type] || defaultMovesByType.normal;
+};
+
+// ==================== ALL 28 KANTO POKEMON FOR AI OPPONENT ====================
+interface KantoPokemonData {
+  id: number;
+  name: string;
+  types: PokemonType[];
+  hp: number;
+}
+
+const KANTO_POKEMON: KantoPokemonData[] = [
+  { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 200 },
+  { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 230 },
+  { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 270 },
+  { id: 4, name: 'Charmander', types: ['fire'], hp: 190 },
+  { id: 5, name: 'Charmeleon', types: ['fire'], hp: 228 },
+  { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 266 },
+  { id: 7, name: 'Squirtle', types: ['water'], hp: 198 },
+  { id: 8, name: 'Wartortle', types: ['water'], hp: 229 },
+  { id: 9, name: 'Blastoise', types: ['water'], hp: 268 },
+  { id: 10, name: 'Caterpie', types: ['bug'], hp: 175 },
+  { id: 11, name: 'Metapod', types: ['bug'], hp: 180 },
+  { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 230 },
+  { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 170 },
+  { id: 14, name: 'Kakuna', types: ['bug', 'poison'], hp: 175 },
+  { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 245 },
+  { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 170 },
+  { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 233 },
+  { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 273 },
+  { id: 19, name: 'Rattata', types: ['normal'], hp: 160 },
+  { id: 20, name: 'Raticate', types: ['normal'], hp: 215 },
+  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 170 },
+  { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 245 },
+  { id: 23, name: 'Ekans', types: ['poison'], hp: 165 },
+  { id: 24, name: 'Arbok', types: ['poison'], hp: 230 },
+  { id: 25, name: 'Pikachu', types: ['electric'], hp: 165 },
+  { id: 26, name: 'Raichu', types: ['electric'], hp: 230 },
+  { id: 27, name: 'Sandshrew', types: ['ground'], hp: 190 },
+  { id: 28, name: 'Sandslash', types: ['ground'], hp: 255 },
+];
+
+// ==================== AI TRAINER NAMES (Realistic) ====================
+const AI_TRAINER_NAMES = [
+  'Youngster Joey', 'Bug Catcher Wade', 'Lass Dana', 'Hiker Clark',
+  'Picnicker Carol', 'Camper Liam', 'Fisherman Ralph', 'Swimmer Maria',
+  'Ace Trainer Kate', 'Cooltrainer Gaven', 'Psychic Tyron', 'Blackbelt Kiyo',
+  'Bird Keeper Abe', 'Ranger Beth', 'Veteran Lucas', 'Champion Cynthia',
+  'Elite Four Bruno', 'Gym Leader Brock', 'Gym Leader Misty', 'Trainer Ethan',
+  'Trainer Lyra', 'Trainer Dawn', 'Trainer Barry', 'Trainer Silver',
+];
+
+const getRandomTrainerName = () => AI_TRAINER_NAMES[Math.floor(Math.random() * AI_TRAINER_NAMES.length)];
+
+// ==================== OPPONENT DATA (Random from Kanto 28) ====================
+const createOpponentTeam = (): BattlePokemon[] => {
+  // Shuffle and pick 3 random Pokemon (prefer evolved forms for difficulty)
+  const evolved = KANTO_POKEMON.filter(p => [3, 6, 9, 12, 15, 18, 20, 22, 24, 26, 28].includes(p.id));
+  const shuffled = [...evolved].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 3);
+
+  return selected.map((p, idx) => {
+    const primaryType = p.types[0];
+    return {
+      id: p.id,
+      name: p.name,
+      types: p.types,
+      hp: p.hp,
+      maxHp: p.hp,
+      attack: 80 + Math.floor(Math.random() * 20),
+      defense: 70 + Math.floor(Math.random() * 20),
+      spAtk: 85 + Math.floor(Math.random() * 20),
+      spDef: 75 + Math.floor(Math.random() * 20),
+      speed: 60 + Math.floor(Math.random() * 30),
+      sprite: getSprite(p.name),
+      moves: getDefaultMoves(primaryType),
+    };
+  });
+};
+
+// ==================== HELPERS ====================
+// Generate energy based on alive Pokemon types (not random!)
+const rollEnergyByTypes = (team: BattlePokemon[]): EnergyState => {
+  const newEnergy: EnergyState = { fire: 0, water: 0, grass: 0, electric: 0, random: 0 };
+  const alivePokemons = team.filter(p => p.hp > 0);
+  
+  console.log('rollEnergyByTypes called with team:', team.map(p => ({ name: p.name, types: p.types, hp: p.hp })));
+  
+  for (const pokemon of alivePokemons) {
+    // Each alive Pokemon generates 1 energy of its primary type
+    const primaryType = pokemon.types[0];
+    console.log(`Pokemon ${pokemon.name} has primary type: ${primaryType}`);
+    
+    // Map Pokemon type to energy type (only fire, water, grass, electric have direct energy)
+    if (['fire', 'water', 'grass', 'electric'].includes(primaryType)) {
+      newEnergy[primaryType as keyof EnergyState]++;
+      console.log(`Added 1 ${primaryType} energy`);
+    } else {
+      // Other types generate random energy
+      newEnergy.random++;
+      console.log(`Added 1 random energy (type was ${primaryType})`);
+    }
+  }
+  
+  console.log('Final energy generated:', newEnergy);
+  return newEnergy;
+};
+
+// Legacy function kept for compatibility
+const rollEnergy = (aliveCount: number): EnergyState => {
+  const types: EnergyType[] = ['fire', 'water', 'grass', 'electric', 'random'];
+  const energy: EnergyState = { fire: 0, water: 0, grass: 0, electric: 0, random: 0 };
+  for (let i = 0; i < aliveCount; i++) {
+    energy[types[Math.floor(Math.random() * types.length)]]++;
+  }
+  return energy;
+};
+
+const getTotalEnergy = (e: EnergyState) => e.fire + e.water + e.grass + e.electric + e.random;
+
+// Spend energy for a move - returns new energy state
+const spendEnergyForMove = (currentEnergy: EnergyState, move: Move): EnergyState => {
+  const newEnergy = { ...currentEnergy };
+  
+  for (const cost of move.cost) {
+    if (cost.type === 'random') {
+      // Random can use any type of energy
+      let remaining = cost.amount;
+      for (const type of ['fire', 'water', 'grass', 'electric', 'random'] as EnergyType[]) {
+        const spend = Math.min(newEnergy[type], remaining);
+        newEnergy[type] -= spend;
+        remaining -= spend;
+        if (remaining <= 0) break;
+      }
+    } else {
+      // Specific type - use that type first, then random
+      const spend = Math.min(newEnergy[cost.type], cost.amount);
+      newEnergy[cost.type] -= spend;
+      const stillNeeded = cost.amount - spend;
+      if (stillNeeded > 0) {
+        newEnergy.random -= stillNeeded;
+      }
+    }
+  }
+  
+  return newEnergy;
+};
+
+// Add energy (accumulate)
+const addEnergy = (current: EnergyState, toAdd: EnergyState): EnergyState => {
+  return {
+    fire: current.fire + toAdd.fire,
+    water: current.water + toAdd.water,
+    grass: current.grass + toAdd.grass,
+    electric: current.electric + toAdd.electric,
+    random: current.random + toAdd.random,
+  };
+};
+
+const getHpClass = (current: number, max: number) => {
+  const pct = (current / max) * 100;
+  return pct > 50 ? 'high' : pct > 25 ? 'medium' : 'low';
+};
+
+// ==================== FALLBACK TEAM (for unauthenticated users) ====================
+const createFallbackPlayerTeam = (): BattlePokemon[] => {
+  const getSprite = (id: number) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+
+  return [
+    {
+      id: 6, name: 'Charizard', types: ['fire', 'flying'],
+      hp: 266, maxHp: 266, attack: 84, defense: 78, spAtk: 109, spDef: 85, speed: 100,
+      sprite: getSprite(6),
+      moves: getDefaultMoves('fire'),
+    },
+    {
+      id: 9, name: 'Blastoise', types: ['water'],
+      hp: 268, maxHp: 268, attack: 83, defense: 100, spAtk: 85, spDef: 105, speed: 78,
+      sprite: getSprite(9),
+      moves: getDefaultMoves('water'),
+    },
+    {
+      id: 3, name: 'Venusaur', types: ['grass', 'poison'],
+      hp: 270, maxHp: 270, attack: 82, defense: 83, spAtk: 100, spDef: 100, speed: 80,
+      sprite: getSprite(3),
+      moves: getDefaultMoves('grass'),
+    }
+  ];
+};
+
+// ==================== MAIN COMPONENT ====================
+export default function AIBattlePage() {
+  const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([]);
+  const [opponentTeam, setOpponentTeam] = useState<BattlePokemon[]>([]);
+  const [energy, setEnergy] = useState<EnergyState>({ fire: 0, water: 0, grass: 0, electric: 0, random: 0 });
+  const [turn, setTurn] = useState(1);
+  const [phase, setPhase] = useState<GamePhase>('loading');
+  const [selectedActions, setSelectedActions] = useState<SelectedAction[]>([]);
+  const [selectingPokemon, setSelectingPokemon] = useState<number | null>(null);
+  const [selectingMove, setSelectingMove] = useState<Move | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string } | null>(null);
+  const [battleLog, setBattleLog] = useState<LogEntry[]>([]);
+  const [logId, setLogId] = useState(0);
+  const [timer, setTimer] = useState(100);
+  const [battleBackground, setBattleBackground] = useState('');
+  
+  // Player info from API or localStorage
+  const [playerName, setPlayerName] = useState('Trainer');
+  const [playerLevel, setPlayerLevel] = useState(1);
+  const [playerXP, setPlayerXP] = useState(0);
+  const [playerRank, setPlayerRank] = useState<RankInfo>(getRankByLevel(1));
+  const [battleStats, setBattleStats] = useState({ wins: 0, losses: 0, totalXP: 0 });
+  
+  // Opponent info (AI) - Fixed in state to prevent re-renders
+  const [opponentName] = useState(() => getRandomTrainerName());
+  const [opponentLevel] = useState(() => Math.floor(Math.random() * 30) + 15);
+  // Derive rank from level (not state, just computed)
+  const opponentRank = getRankByLevel(opponentLevel);
+
+  // Fetch player profile and team
+  useEffect(() => {
+    const fetchPlayerData = async () => {
+      let teamLoaded = false;
+      
+      // Load player stats from localStorage first (for persistence)
+      try {
+        const savedPlayerData = localStorage.getItem('playerData');
+        if (savedPlayerData) {
+          const data = JSON.parse(savedPlayerData);
+          setPlayerName(data.username || 'Trainer');
+          setPlayerLevel(data.level || 1);
+          setPlayerXP(data.xp || 0);
+          setPlayerRank(getRankByLevel(data.level || 1));
+          console.log('Player data loaded from localStorage:', data);
+        }
+        
+        const savedStats = localStorage.getItem('battleStats');
+        if (savedStats) {
+          setBattleStats(JSON.parse(savedStats));
+        }
+      } catch (e) {
+        console.log('Could not load player data from localStorage');
+      }
+      
+      // First, try to load team from localStorage (set by /play page)
+      try {
+        const savedTeam = localStorage.getItem('battleTeam');
+        if (savedTeam) {
+          const parsedTeam = JSON.parse(savedTeam);
+          if (Array.isArray(parsedTeam) && parsedTeam.length === 3) {
+            // Convert localStorage team to battle format
+            const battleTeam = parsedTeam.map((p: { id: number; name: string; type: string; skills: { name: string; description: string }[] }) => {
+              const pokedexNum = p.id;
+              const primaryType = (p.type || 'normal') as PokemonType;
+              
+              // Create moves from skills
+              const moves: Move[] = (p.skills || []).slice(0, 4).map((skill: { name: string; description: string }, idx: number) => {
+                // Parse damage from description
+                const damageMatch = skill.description.match(/(\d+)/);
+                const damage = damageMatch ? parseInt(damageMatch[1]) : 20;
+                
+                return {
+                  id: `move-${idx}`,
+                  name: skill.name,
+                  type: primaryType,
+                  power: damage,
+                  accuracy: 100,
+                  cost: [{ type: ['fire', 'water', 'grass', 'electric'].includes(primaryType) ? primaryType as EnergyType : 'random', amount: 1 }],
+                  cooldown: idx >= 3 ? 1 : 0,
+                  currentCooldown: 0,
+                  description: skill.description,
+                  targetType: 'enemy' as const,
+                };
+              });
+              
+              // Add default moves if needed
+              while (moves.length < 4) {
+                const defaultMoves = getDefaultMoves(primaryType);
+                if (defaultMoves[moves.length]) {
+                  moves.push(defaultMoves[moves.length]);
+                } else break;
+              }
+              
+              return {
+                id: pokedexNum,
+                name: p.name,
+                types: [primaryType] as PokemonType[],
+                hp: Math.floor(100 * 2.5) + 60,
+                maxHp: Math.floor(100 * 2.5) + 60,
+                attack: 80,
+                defense: 70,
+                spAtk: 85,
+                spDef: 75,
+                speed: 60,
+                sprite: getSprite(p.name),
+                moves,
+              };
+            });
+            
+            setPlayerTeam(battleTeam);
+            teamLoaded = true;
+            console.log('Team loaded from localStorage:', battleTeam.map(p => p.name));
+          }
+        }
+      } catch (e) {
+        console.log('Could not load team from localStorage');
+      }
+      
+      // Try to get player info from API
+      try {
+        const response = await fetch('/api/trainer/profile');
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Set player info and save to localStorage for offline access
+          const username = data.username || 'Trainer';
+          const level = data.level || 1;
+          const xp = data.xp || 0;
+          
+          setPlayerName(username);
+          setPlayerLevel(level);
+          setPlayerXP(xp);
+          setPlayerRank(getRankByLevel(level));
+          
+          // Save to localStorage for persistence
+          localStorage.setItem('playerData', JSON.stringify({
+            username,
+            level,
+            xp,
+            lastUpdated: Date.now()
+          }));
+          
+          // If team not loaded from localStorage, try API
+          if (!teamLoaded && data.unlockedPokemon && data.unlockedPokemon.length >= 3) {
+            const battleTeam = convertProfileToBattlePokemon(data.unlockedPokemon);
+            if (battleTeam.length >= 3) {
+              setPlayerTeam(battleTeam);
+              teamLoaded = true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch player data:', error);
+      }
+      
+      // If still no team, use fallback
+      if (!teamLoaded) {
+        console.log('Using fallback team');
+        setPlayerTeam(createFallbackPlayerTeam());
+      }
+      
+      // Set opponent team
+      setOpponentTeam(createOpponentTeam());
+      
+      // Initial energy will be set after team is confirmed in useEffect
+      // Starting with empty energy - first turn will add based on Pokemon types
+      setEnergy({ fire: 0, water: 0, grass: 0, electric: 0, random: 0 });
+      
+      // Set random background
+      const randomBg = BATTLE_BACKGROUNDS[Math.floor(Math.random() * BATTLE_BACKGROUNDS.length)];
+      setBattleBackground(randomBg);
+      
+      // Change phase to selecting
+      setPhase('selecting');
+    };
+
+    fetchPlayerData();
+  }, []);
+
+  // Add initial log and energy after team is loaded
+  useEffect(() => {
+    if (playerTeam.length > 0 && phase === 'selecting' && battleLog.length === 0) {
+      // Give initial energy based on Pokemon types
+      const initialEnergy = rollEnergyByTypes(playerTeam);
+      console.log('Setting initial energy based on team types:', initialEnergy);
+      console.log('Team types:', playerTeam.map(p => ({ name: p.name, types: p.types })));
+      setEnergy(initialEnergy);
+      addLog('Battle Start! Choose your moves!', 'info');
+    }
+  }, [playerTeam, phase, battleLog.length]);
+
+  useEffect(() => {
+    if (phase !== 'selecting') return;
+    const int = setInterval(() => setTimer(t => t <= 0 ? (handleEndTurn(), 100) : t - 1), 600);
+    return () => clearInterval(int);
+  }, [phase]);
+
+  const addLog = useCallback((text: string, type: LogEntry['type']) => {
+    setLogId(id => id + 1);
+    setBattleLog(prev => [{ id: logId + 1, text, type }, ...prev].slice(0, 25));
+  }, [logId]);
+
+  const canUseMove = (move: Move, pIdx: number): boolean => {
+    if (move.currentCooldown > 0) return false;
+    if (playerTeam[pIdx]?.hp <= 0) return false;
+    if (selectedActions.some(a => a.pokemonIndex === pIdx)) return false;
+    
+    let temp = { ...energy };
+    for (const a of selectedActions) {
+      for (const c of a.move.cost) {
+        if (c.type === 'random') {
+          let need = c.amount;
+          for (const t of ['fire', 'water', 'grass', 'electric', 'random'] as EnergyType[]) {
+            const spend = Math.min(temp[t], need);
+            temp[t] -= spend;
+            need -= spend;
+            if (need <= 0) break;
+          }
+        } else {
+          const spend = Math.min(temp[c.type], c.amount);
+          temp[c.type] -= spend;
+          if (spend < c.amount) temp.random -= (c.amount - spend);
+        }
+      }
+    }
+    
+    for (const c of move.cost) {
+      if (c.type === 'random') {
+        if (getTotalEnergy(temp) < c.amount) return false;
+      } else {
+        if (temp[c.type] + temp.random < c.amount) return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSkillClick = (pIdx: number, move: Move) => {
+    if (!canUseMove(move, pIdx)) return;
+    if (move.targetType === 'self') {
+      setSelectedActions(prev => [...prev, { pokemonIndex: pIdx, move, targetIndex: pIdx }]);
+      addLog(`${playerTeam[pIdx].name} will use ${move.name}!`, 'info');
+    } else {
+      setSelectingPokemon(pIdx);
+      setSelectingMove(move);
+      setPhase('targeting');
+    }
+  };
+
+  const handleTargetSelect = (tIdx: number) => {
+    if (selectingPokemon === null || !selectingMove) return;
+    setSelectedActions(prev => [...prev, { pokemonIndex: selectingPokemon, move: selectingMove, targetIndex: tIdx }]);
+    addLog(`${playerTeam[selectingPokemon].name} targets ${opponentTeam[tIdx].name} with ${selectingMove.name}!`, 'info');
+    setSelectingPokemon(null);
+    setSelectingMove(null);
+    setPhase('selecting');
+  };
+
+  const cancelTarget = () => {
+    setSelectingPokemon(null);
+    setSelectingMove(null);
+    setPhase('selecting');
+  };
+
+  const removeAction = (pIdx: number) => {
+    setSelectedActions(prev => prev.filter(a => a.pokemonIndex !== pIdx));
+  };
+
+  // Calculate XP needed for next level
+  const getXPForLevel = (level: number): number => Math.floor(100 * Math.pow(1.5, level - 1));
+  
+  // Handle battle end - give rewards
+  const handleBattleVictory = useCallback(() => {
+    // Calculate XP reward based on opponent level
+    const baseXP = 50;
+    const levelBonus = opponentLevel * 5;
+    const xpGained = baseXP + levelBonus + Math.floor(Math.random() * 20);
+    
+    // Update stats
+    const newStats = {
+      wins: battleStats.wins + 1,
+      losses: battleStats.losses,
+      totalXP: battleStats.totalXP + xpGained
+    };
+    setBattleStats(newStats);
+    localStorage.setItem('battleStats', JSON.stringify(newStats));
+    
+    // Update player XP and check for level up
+    const newXP = playerXP + xpGained;
+    let newLevel = playerLevel;
+    let remainingXP = newXP;
+    
+    // Check for level ups
+    while (remainingXP >= getXPForLevel(newLevel)) {
+      remainingXP -= getXPForLevel(newLevel);
+      newLevel++;
+    }
+    
+    setPlayerXP(remainingXP);
+    setPlayerLevel(newLevel);
+    setPlayerRank(getRankByLevel(newLevel));
+    
+    // Save to localStorage
+    localStorage.setItem('playerData', JSON.stringify({
+      username: playerName,
+      level: newLevel,
+      xp: remainingXP,
+      lastUpdated: Date.now()
+    }));
+    
+    addLog(`Victory! You earned ${xpGained} XP!`, 'heal');
+    if (newLevel > playerLevel) {
+      addLog(`Level Up! You are now level ${newLevel}!`, 'heal');
+    }
+    
+    return xpGained;
+  }, [battleStats, playerXP, playerLevel, playerName, opponentLevel, addLog]);
+  
+  const handleBattleDefeat = useCallback(() => {
+    const newStats = {
+      wins: battleStats.wins,
+      losses: battleStats.losses + 1,
+      totalXP: battleStats.totalXP
+    };
+    setBattleStats(newStats);
+    localStorage.setItem('battleStats', JSON.stringify(newStats));
+    addLog('Defeat! Try again!', 'damage');
+  }, [battleStats, addLog]);
+
+  const handleEndTurn = async () => {
+    if (phase !== 'selecting') return;
+    setPhase('executing');
+    setTimer(100);
+
+    // SPEND ENERGY for all selected actions BEFORE executing
+    let currentEnergy = { ...energy };
+    console.log('Energy BEFORE spending:', currentEnergy);
+    for (const action of selectedActions) {
+      console.log('Spending energy for move:', action.move.name, action.move.cost);
+      currentEnergy = spendEnergyForMove(currentEnergy, action.move);
+    }
+    console.log('Energy AFTER spending:', currentEnergy);
+    setEnergy(currentEnergy);
+
+    for (const action of selectedActions) {
+      await executeAction(action, true);
+      await new Promise(r => setTimeout(r, 700));
+    }
+
+    if (opponentTeam.filter(p => p.hp > 0).length === 0) {
+      handleBattleVictory();
+      setPhase('victory');
+      return;
+    }
+
+    setPhase('opponent-turn');
+    await new Promise(r => setTimeout(r, 400));
+    await executeAITurn();
+
+    if (playerTeam.filter(p => p.hp > 0).length === 0) {
+      handleBattleDefeat();
+      setPhase('defeat');
+      return;
+    }
+
+    startNewTurn();
+  };
+
+  const executeAction = async (action: SelectedAction, isPlayer: boolean) => {
+    const atkTeam = isPlayer ? playerTeam : opponentTeam;
+    const defTeam = isPlayer ? opponentTeam : playerTeam;
+    const setDefTeam = isPlayer ? setOpponentTeam : setPlayerTeam;
+    const setAtkTeam = isPlayer ? setPlayerTeam : setOpponentTeam;
+
+    const atk = atkTeam[action.pokemonIndex];
+    const move = action.move;
+    if (atk.hp <= 0) return;
+
+    if (Math.random() * 100 > move.accuracy) {
+      addLog(`${atk.name}'s ${move.name} missed!`, 'info');
+      return;
+    }
+
+    if (move.targetType === 'self') {
+      if (['Recover', 'Roost'].includes(move.name)) {
+        const heal = move.name === 'Recover' ? 50 : 40;
+        const newHp = Math.min(atk.maxHp, atk.hp + heal);
+        setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: newHp } : p));
+        addLog(`${atk.name} recovered ${newHp - atk.hp} HP!`, 'heal');
+      } else {
+        addLog(`${atk.name} used ${move.name}!`, 'effect');
+      }
+    } else if (move.power > 0) {
+      const targets = move.targetType === 'all-enemies'
+        ? defTeam.map((_, i) => i).filter(i => defTeam[i].hp > 0)
+        : [action.targetIndex];
+
+      for (const tIdx of targets) {
+        const def = defTeam[tIdx];
+        if (def.hp <= 0) continue;
+        
+        // Use the new Smogon-based damage calculator
+        const damageResult = calculateArenaDamage(
+          move.power,
+          toGlobalType(move.type),
+          toGlobalTypes(atk.types),
+          toGlobalTypes(def.types),
+          {}
+        );
+        
+        // If immune, skip damage
+        if (damageResult.typeMultiplier === 0) {
+          addLog(`${atk.name} used ${move.name}! It doesn't affect ${def.name}...`, 'info');
+          continue;
+        }
+        
+        // Apply defense modifier
+        const defenseRatio = Math.max(0.5, Math.min(2, atk.spAtk / def.spDef));
+        const finalDamage = Math.floor(damageResult.damage * defenseRatio);
+        
+        const newHp = Math.max(0, def.hp - finalDamage);
+        setDefTeam(prev => prev.map((p, i) => i === tIdx ? { ...p, hp: newHp } : p));
+        
+        // Build log message with all effects
+        let logMessage = `${atk.name}'s ${move.name} dealt ${finalDamage} damage to ${def.name}!`;
+        
+        if (damageResult.isCrit) {
+          logMessage += ' Critical hit!';
+        }
+        
+        if (damageResult.effectivenessText) {
+          logMessage += ` ${damageResult.effectivenessText}`;
+        }
+        
+        addLog(logMessage, 'damage');
+        
+        if (newHp <= 0) {
+          addLog(`${def.name} fainted!`, 'damage');
+        }
+      }
+    } else {
+      addLog(`${atk.name} used ${move.name}!`, 'effect');
+    }
+
+    setAtkTeam(prev => prev.map((p, i) =>
+      i === action.pokemonIndex ? { ...p, moves: p.moves.map(m => m.id === move.id ? { ...m, currentCooldown: m.cooldown } : m) } : p
+    ));
+  };
+
+  const executeAITurn = async () => {
+    const aliveOpp = opponentTeam.filter(p => p.hp > 0);
+    const alivePly = playerTeam.filter(p => p.hp > 0);
+    if (!aliveOpp.length || !alivePly.length) return;
+
+    for (let i = 0; i < opponentTeam.length; i++) {
+      const poke = opponentTeam[i];
+      if (poke.hp <= 0) continue;
+      const availableMoves = poke.moves.filter(m => m.currentCooldown === 0);
+      if (!availableMoves.length) continue;
+      
+      const targets = playerTeam.map((p, idx) => ({ p, idx })).filter(x => x.p.hp > 0);
+      if (!targets.length) continue;
+      
+      // Smart AI: Evaluate each move and target combination
+      let bestMove = availableMoves[0];
+      let bestTarget = targets[0].idx;
+      let bestScore = -Infinity;
+      
+      for (const move of availableMoves) {
+        if (move.targetType === 'self') {
+          // Heal moves are valuable when HP is low
+          if (['Recover', 'Roost'].includes(move.name) && poke.hp < poke.maxHp * 0.5) {
+            const healScore = (poke.maxHp - poke.hp) * 2;
+            if (healScore > bestScore) {
+              bestScore = healScore;
+              bestMove = move;
+              bestTarget = i;
+            }
+          }
+          continue;
+        }
+        
+        for (const target of targets) {
+          // Use the new type effectiveness from damage-calculator
+          const typeMultiplier = getTypeEff(move.type, target.p.types);
+          
+          // Skip immune targets
+          if (typeMultiplier === 0) continue;
+          
+          // Calculate expected damage score with STAB
+          const stab = poke.types.includes(move.type) ? STAB_MULTIPLIER : 1;
+          const baseDmg = move.power * typeMultiplier * stab;
+          
+          // Bonus for finishing low HP targets
+          const finishBonus = target.p.hp <= baseDmg * 0.5 ? 50 : 0;
+          
+          // Bonus for super effective
+          const effectivenessBonus = typeMultiplier >= 2 ? 30 : 0;
+          
+          // Penalty for not very effective
+          const notEffectivePenalty = typeMultiplier < 1 ? -20 : 0;
+          
+          const score = baseDmg + finishBonus + effectivenessBonus + notEffectivePenalty;
+          
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = move;
+            bestTarget = target.idx;
+          }
+        }
+      }
+      
+      await executeAction({ pokemonIndex: i, move: bestMove, targetIndex: bestTarget }, false);
+      await new Promise(r => setTimeout(r, 500));
+    }
+  };
+
+  const startNewTurn = () => {
+    setPlayerTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
+    setOpponentTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
+    
+    // ACCUMULATE energy based on alive Pokemon types (not random, not reset!)
+    const newEnergy = rollEnergyByTypes(playerTeam);
+    console.log('New turn - adding energy:', newEnergy);
+    setEnergy(prev => {
+      const accumulated = addEnergy(prev, newEnergy);
+      console.log('Energy after accumulation:', accumulated);
+      return accumulated;
+    });
+    
+    setSelectedActions([]);
+    setTurn(t => t + 1);
+    setPhase('selecting');
+    addLog(`Turn ${turn + 1}! Gained energy from your Pokemon!`, 'info');
+  };
+
+  const restart = () => {
+    // Simply reload the page to get fresh state with new random opponent
+    window.location.reload();
+  };
+
+  if (!playerTeam.length) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-content">
+          <div className="pokeball-loader" />
+          <p className="loading-text">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pokedex-frame">
+      <div className="pokedex-device">
+        {/* Pokédex Top Lights */}
+        <div className="pokedex-top">
+          <div className="pokedex-light-big" />
+          <div className="pokedex-lights-small">
+            <div className="pokedex-light-small red" />
+            <div className="pokedex-light-small yellow" />
+            <div className="pokedex-light-small green" />
+          </div>
+          <div className="pokedex-title">POKéMON ARENA</div>
+        </div>
+
+        <div className="screen-container">
+          <div className="battle-screen">
+            <div className="battle-background" style={{ backgroundImage: `url(${battleBackground})` }} />
+
+            {/* TOP BAR */}
+            <div className="top-bar">
+              <div className="player-info">
+                <div className="player-avatar">
+                  <div className="rank-badge-mini" style={{ background: playerRank.gradient }} title={playerRank.name}>
+                    <span>Lv{playerLevel}</span>
+                  </div>
+                </div>
+                <div className="player-details">
+                  <div className="player-name">{playerName}</div>
+                  <div className="player-rank" style={{ color: playerRank.color }}>{playerRank.name}</div>
+                </div>
+              </div>
+
+              <div className="center-controls">
+                <button className="ready-btn" onClick={handleEndTurn} disabled={phase !== 'selecting'}>
+                  {phase === 'selecting' ? 'PRESS WHEN READY' : 'WAIT...'}
+                </button>
+                <div className="timer-container">
+                  <div className="timer-bar">
+                    <div className="timer-fill" style={{ width: `${timer}%` }} />
+                  </div>
+                </div>
+                <div className="energy-pool">
+                  {(['fire', 'water', 'grass', 'electric', 'random'] as EnergyType[]).map(type => (
+                    <div key={type} className="energy-item">
+                      <div className={`energy-orb ${type}`} />
+                      <span className="energy-count">×{energy[type]}</span>
+                    </div>
+                  ))}
+                  <div className="energy-total">
+                    <span className="total-label">T</span>
+                    <span className="energy-count">×{getTotalEnergy(energy)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="player-info">
+                <div className="player-details right">
+                  <div className="player-name" style={{ color: opponentRank.color }}>{opponentName}</div>
+                  <div className="player-rank" style={{ color: opponentRank.color }}>{opponentRank.name}</div>
+                </div>
+                <div className="player-avatar blue">
+                  <div className="rank-badge-mini" style={{ background: opponentRank.gradient }} title={opponentRank.name}>
+                    <span>Lv{opponentLevel}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* BATTLE AREA */}
+            <div className="battle-area">
+              {/* Player Characters */}
+              <div className="character-column">
+                {playerTeam.map((poke, idx) => {
+                  const hasAction = selectedActions.some(a => a.pokemonIndex === idx);
+                  const selectedMove = selectedActions.find(a => a.pokemonIndex === idx)?.move;
+                  return (
+                    <div key={poke.id} className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''}`}>
+                      <div className="portrait-container" style={{ borderColor: playerRank.color }}>
+                        <div className="pokemon-sprite flipped">
+                          <Image src={poke.sprite} alt={poke.name} width={88} height={88} unoptimized />
+                        </div>
+                        <div className="hp-text-overlay">{poke.hp}/{poke.maxHp}</div>
+                        <div className="hp-bar-overlay">
+                          <div className="hp-bar-inner">
+                            <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="skills-panel">
+                        {poke.moves.slice(0, 4).map(move => {
+                          const colors = TYPE_COLORS[move.type];
+                          const abbrev = MOVE_ABBREV[move.name] || move.name.substring(0, 3).toUpperCase();
+                          return (
+                            <div
+                              key={move.id}
+                              className={`skill-slot ${!canUseMove(move, idx) ? 'disabled' : ''} ${hasAction && selectedMove?.id === move.id ? 'selected' : ''} ${move.currentCooldown > 0 ? 'on-cooldown' : ''}`}
+                              data-cd={move.currentCooldown > 0 ? move.currentCooldown : undefined}
+                              style={{ background: colors.bg, borderColor: colors.border }}
+                              onClick={() => poke.hp > 0 && (hasAction ? removeAction(idx) : handleSkillClick(idx, move))}
+                              onMouseEnter={() => setHoveredSkill({ move, pokemonName: poke.name })}
+                              onMouseLeave={() => setHoveredSkill(null)}
+                            >
+                              <span className="skill-abbrev" style={{ color: colors.text }}>{abbrev}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Center */}
+              <div className="center-area">
+                <div className="vs-display">VS</div>
+                <div className="action-queue">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className={`queue-slot ${selectedActions[i] ? 'filled' : ''}`}>
+                      {selectedActions[i] ? '✓' : '?'}
+                    </div>
+                  ))}
+                </div>
+                {hoveredSkill && (
+                  <div className="skill-info-panel">
+                    <div className="skill-info-header">
+                      <span className="skill-info-name">{hoveredSkill.move.name}</span>
+                      <div className="skill-info-cost">
+                        {hoveredSkill.move.cost.map((c, i) => (
+                          <div key={i} className={`energy-orb ${c.type}`} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="skill-info-desc">{hoveredSkill.move.description}</div>
+                    <div className="skill-info-footer">
+                      <span>POWER: {hoveredSkill.move.power || '-'}</span>
+                      <span>ACC: {hoveredSkill.move.accuracy}%</span>
+                      <span>COOLDOWN: {hoveredSkill.move.cooldown}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Enemy Characters */}
+              <div className="character-column">
+                {opponentTeam.map((poke, idx) => (
+                  <div
+                    key={poke.id}
+                    className={`character-card enemy ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''}`}
+                    onClick={() => phase === 'targeting' && poke.hp > 0 && handleTargetSelect(idx)}
+                  >
+                    <div className="skills-panel">
+                      {poke.moves.slice(0, 4).map(move => {
+                        const colors = TYPE_COLORS[move.type];
+                        const abbrev = MOVE_ABBREV[move.name] || move.name.substring(0, 3).toUpperCase();
+                        return (
+                          <div 
+                            key={move.id} 
+                            className="skill-slot disabled"
+                            style={{ background: colors.bg, borderColor: colors.border }}
+                          >
+                            <span className="skill-abbrev" style={{ color: colors.text }}>{abbrev}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="portrait-container" style={{ borderColor: opponentRank.color }}>
+                      <div className="pokemon-sprite">
+                        <Image src={poke.sprite} alt={poke.name} width={88} height={88} unoptimized />
+                      </div>
+                      <div className="hp-text-overlay">{poke.hp}/{poke.maxHp}</div>
+                      <div className="hp-bar-overlay">
+                        <div className="hp-bar-inner">
+                          <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* BOTTOM BAR */}
+            <div className="bottom-bar">
+              <div className="bottom-left">
+                <div className="action-buttons">
+                  <button className="action-btn danger" onClick={() => setPhase('defeat')}>SURRENDER</button>
+                  <button className="chat-btn">OPEN CHAT</button>
+                </div>
+              </div>
+              <div className="battle-log">
+                {battleLog.map(entry => (
+                  <div key={entry.id} className={`log-entry ${entry.type}`}>{entry.text}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Targeting Indicator - Clique no Pokémon inimigo para atacar */}
+      {phase === 'targeting' && selectingMove && (
+        <div className="targeting-indicator">
+          <div className="targeting-text">
+            🎯 Click on an enemy Pokémon to target with <strong>{selectingMove.name}</strong>
+            <button className="cancel-target-btn" onClick={cancelTarget}>✕ Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Victory */}
+      {phase === 'victory' && (
+        <div className="overlay">
+          <div className="modal">
+            <div className="result-content victory">
+              <h1 className="result-title">VICTORY!</h1>
+              <p className="result-message">{playerName} wins!</p>
+              <button className="result-btn" onClick={restart}>PLAY AGAIN</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Defeat */}
+      {phase === 'defeat' && (
+        <div className="overlay">
+          <div className="modal">
+            <div className="result-content defeat">
+              <h1 className="result-title">DEFEAT</h1>
+              <p className="result-message">{playerName} is out of usable POKéMON!</p>
+              <button className="result-btn" onClick={restart}>TRY AGAIN</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

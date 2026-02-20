@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { getRankByLevel, RANKS, RankInfo } from '@/lib/ranks';
 
 interface TrainerRanking {
   id: number;
@@ -65,14 +67,9 @@ export default function LadderPage() {
     fetchRankings();
   }, [fetchRankings]);
 
-  const getRankTier = (points: number) => {
-    if (points >= 2000) return { name: 'Champion', color: '#FFD700', icon: '🏆', bg: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)' };
-    if (points >= 1500) return { name: 'Master', color: '#E74C3C', icon: '💎', bg: 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)' };
-    if (points >= 1200) return { name: 'Expert', color: '#9B59B6', icon: '⭐', bg: 'linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%)' };
-    if (points >= 900) return { name: 'Advanced', color: '#3498DB', icon: '🔷', bg: 'linear-gradient(135deg, #3498DB 0%, #2980B9 100%)' };
-    if (points >= 600) return { name: 'Intermediate', color: '#2ECC71', icon: '🔹', bg: 'linear-gradient(135deg, #2ECC71 0%, #27AE60 100%)' };
-    if (points >= 300) return { name: 'Beginner', color: '#95A5A6', icon: '▫️', bg: 'linear-gradient(135deg, #95A5A6 0%, #7F8C8D 100%)' };
-    return { name: 'Rookie', color: '#BDC3C7', icon: '⚪', bg: 'linear-gradient(135deg, #BDC3C7 0%, #A6ACAF 100%)' };
+  // Use new rank system based on level
+  const getTrainerRank = (level: number, position: number): RankInfo => {
+    return getRankByLevel(level, position);
   };
 
   const formatDate = (dateStr: string) => {
@@ -92,7 +89,7 @@ export default function LadderPage() {
       {/* Header com info da temporada */}
       <div className="ladder-header">
         <div className="header-content">
-          <h1>🏆 Ranking Global</h1>
+          <h1>Ranking Global</h1>
           {season && (
             <div className="season-info">
               <span className="season-name">{season.name}</span>
@@ -100,7 +97,7 @@ export default function LadderPage() {
                 {formatDate(season.startDate)} - {formatDate(season.endDate)}
               </span>
               <span className={`season-status ${season.isActive ? 'active' : ''}`}>
-                {season.isActive ? '🔴 Em andamento' : 'Encerrada'}
+                {season.isActive ? 'Em andamento' : 'Encerrada'}
               </span>
             </div>
           )}
@@ -124,23 +121,41 @@ export default function LadderPage() {
           <div className="my-rank-content">
             <span className="my-rank-position">#{myRank.rank}</span>
             <span className="my-rank-name">{myRank.username}</span>
-            <div className="my-rank-tier" style={{ background: getRankTier(myRank.ladderPoints).bg }}>
-              {getRankTier(myRank.ladderPoints).icon} {getRankTier(myRank.ladderPoints).name}
+            <div className="my-rank-tier" style={{ background: getTrainerRank(myRank.level, myRank.rank).gradient }}>
+              <Image 
+                src={getTrainerRank(myRank.level, myRank.rank).badge}
+                alt={getTrainerRank(myRank.level, myRank.rank).name}
+                width={24}
+                height={24}
+                unoptimized
+              />
+              {getTrainerRank(myRank.level, myRank.rank).name}
             </div>
             <span className="my-rank-points">{myRank.ladderPoints} LP</span>
           </div>
         </div>
       )}
 
-      {/* Tiers de ranking */}
+      {/* Tiers de ranking - Sistema baseado em Level */}
       <div className="rank-tiers">
-        <div className="tier champion"><span>🏆</span> Champion (2000+)</div>
-        <div className="tier master"><span>💎</span> Master (1500+)</div>
-        <div className="tier expert"><span>⭐</span> Expert (1200+)</div>
-        <div className="tier advanced"><span>🔷</span> Advanced (900+)</div>
-        <div className="tier intermediate"><span>🔹</span> Intermediate (600+)</div>
-        <div className="tier beginner"><span>▫️</span> Beginner (300+)</div>
-        <div className="tier rookie"><span>⚪</span> Rookie</div>
+        {RANKS.slice(0, 10).map((rank) => (
+          <div 
+            key={rank.tier}
+            className="tier"
+            style={{ background: rank.gradient, color: '#fff' }}
+          >
+            <Image 
+              src={rank.badge} 
+              alt={rank.name}
+              width={24}
+              height={24}
+              unoptimized
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+            <span>{rank.name}</span>
+            <small>Lv.{rank.minLevel}-{rank.maxLevel}</small>
+          </div>
+        ))}
       </div>
 
       {/* Tabela de ranking */}
@@ -166,7 +181,7 @@ export default function LadderPage() {
               </thead>
               <tbody>
                 {filteredTrainers.map((trainer) => {
-                  const tier = getRankTier(trainer.ladderPoints);
+                  const rankInfo = getTrainerRank(trainer.level, trainer.rank);
                   
                   return (
                     <tr 
@@ -196,16 +211,24 @@ export default function LadderPage() {
                       <td className="team-cell">
                         <div className="streak-info">
                           {trainer.streak > 0 && (
-                            <span className="streak">🔥 {trainer.streak}</span>
+                            <span className="streak">{trainer.streak} wins</span>
                           )}
                         </div>
                       </td>
                       <td className="tier-cell">
                         <span 
                           className="tier-badge"
-                          style={{ background: tier.bg }}
+                          style={{ background: rankInfo.gradient }}
                         >
-                          {tier.icon} {tier.name}
+                          <Image 
+                            src={rankInfo.badge} 
+                            alt={rankInfo.name}
+                            width={20}
+                            height={20}
+                            unoptimized
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                          {rankInfo.name}
                         </span>
                       </td>
                       <td className="lp-cell">

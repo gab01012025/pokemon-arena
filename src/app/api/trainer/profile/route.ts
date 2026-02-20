@@ -3,12 +3,16 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'poke-arena-secret-key-2024');
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'pokemon-arena-super-secret-key-change-in-production-2026'
+);
+
+const COOKIE_NAME = 'pokemon-arena-session';
 
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = cookieStore.get(COOKIE_NAME)?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -41,8 +45,16 @@ export async function GET() {
           },
         },
         unlockedPokemon: {
+          where: {
+            isActive: true,
+          },
+          orderBy: {
+            position: 'asc',
+          },
           select: {
             id: true,
+            isActive: true,
+            position: true,
             pokemon: {
               select: {
                 id: true,
@@ -59,6 +71,10 @@ export async function GET() {
                     cost: true,
                     effects: true,
                     target: true,
+                    slot: true,
+                  },
+                  orderBy: {
+                    slot: 'asc',
                   },
                 },
               },
@@ -166,7 +182,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token')?.value;
+    const token = cookieStore.get(COOKIE_NAME)?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });

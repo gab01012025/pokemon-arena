@@ -20,6 +20,7 @@ model Trainer {
   email         String    @unique
   password      String
   avatar        String    @default("default")
+  isAdmin       Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -110,6 +111,10 @@ model TrainerPokemon {
   pokemon     Pokemon   @relation(fields: [pokemonId], references: [id])
   pokemonId   String
   unlockedAt  DateTime  @default(now())
+  
+  // Battle team selection
+  isActive    Boolean   @default(true)  // Is this Pokemon in the active battle team?
+  position    Int       @default(0)     // Position in battle team (0, 1, 2)
   
   @@unique([trainerId, pokemonId])
 }

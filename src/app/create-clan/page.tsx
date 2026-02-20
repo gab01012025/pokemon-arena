@@ -61,7 +61,7 @@ export default function CreateClanPage() {
     <div className="create-clan-page">
       <div className="create-clan-container">
         <div className="form-header">
-          <h1>🏰 Criar Novo Clã</h1>
+          <h1>Criar Novo Clã</h1>
           <p>Forme sua própria equipe e conquiste o topo do ranking!</p>
         </div>
 
@@ -119,19 +119,19 @@ export default function CreateClanPage() {
           </div>
 
           <div className="info-box">
-            <h3>ℹ️ Informações Importantes</h3>
+            <h3>Informações Importantes</h3>
             <ul>
-              <li>🎯 Você será o líder do clã</li>
-              <li>👥 Clãs podem ter até 50 membros</li>
-              <li>⚔️ Batalhe em equipe para ganhar XP do clã</li>
-              <li>🏆 Compita no ranking mundial de clãs</li>
-              <li>💎 Custa 10.000 XP para criar um clã</li>
+              <li>Você será o líder do clã</li>
+              <li>Clãs podem ter até 50 membros</li>
+              <li>Batalhe em equipe para ganhar XP do clã</li>
+              <li>Compita no ranking mundial de clãs</li>
+              <li>Custa 10.000 XP para criar um clã</li>
             </ul>
           </div>
 
           <div className="form-actions">
             <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? 'Criando...' : '✨ Criar Clã'}
+              {loading ? 'Criando...' : 'Criar Clã'}
             </button>
             <Link href="/clans" className="btn-secondary">
               ← Voltar

@@ -1,0 +1,23 @@
+
+> pokemon-arena@0.1.0 test
+> vitest
+
+
+ RUN  v4.0.16 /home/gabifran/naruto-arena
+
+stdout | src/app/battle/ai/__tests__/integration.test.ts
+✅ All integration tests defined!
+
+stdout | src/app/battle/ai/__tests__/battle.test.ts
+✅ All battle system tests defined!
+
+ ✓ src/app/battle/ai/__tests__/integration.test.ts (7 tests) 6ms
+ ✓ src/app/battle/ai/__tests__/battle.test.ts (70 tests) 17ms
+ ✓ src/engine/__tests__/engine.test.ts (17 tests) 19ms
+ ✓ src/engine/__tests__/characters.test.ts (42 tests) 26ms
+
+ Test Files  4 passed (4)
+      Tests  136 passed (136)
+   Start at  05:00:31
+   Duration  473ms (transform 603ms, setup 0ms, import 733ms, tests 68ms, environment 1ms)
+

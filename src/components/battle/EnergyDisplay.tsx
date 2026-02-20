@@ -8,11 +8,11 @@ interface EnergyDisplayProps {
 }
 
 const energyEmoji: Record<EnergyType, string> = {
-  fire: '🔥',
-  water: '💧',
-  grass: '🌿',
-  electric: '⚡',
-  colorless: '⭐',
+  fire: 'F',
+  water: 'W',
+  grass: 'G',
+  electric: 'E',
+  colorless: 'C',
 };
 
 const energyColors: Record<EnergyType, string> = {

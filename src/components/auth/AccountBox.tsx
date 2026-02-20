@@ -41,6 +41,7 @@ export function AccountBox() {
             <hr style={{ margin: '8px 0', borderColor: '#ccc' }} />
             <p><Link href={`/profile/${user.username}`}>View Profile</Link></p>
             <p><Link href="/settings">Control Panel</Link></p>
+            <p><Link href="/change-avatar" style={{ color: '#22c55e' }}>🎨 Change Avatar</Link></p>
             <p><Link href="/characters">Choose Pokemon</Link></p>
             <p><Link href="/clans">Clan Panel</Link></p>
             <hr style={{ margin: '8px 0', borderColor: '#ccc' }} />

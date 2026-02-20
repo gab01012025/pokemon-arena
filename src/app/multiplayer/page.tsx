@@ -16,18 +16,18 @@ export default function MultiplayerPage() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
-              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 
         <LeftSidebar />
 
         <main className="center-content">
-          <h1 className="page-title">🎮 Multiplayer</h1>
+          <h1 className="page-title">Multiplayer</h1>
 
           <div className="content-section">
             <div className="section-title">Batalhas Online PvP</div>
@@ -43,7 +43,7 @@ export default function MultiplayerPage() {
                 margin: '0 auto 30px',
               }}>
                 <h2 style={{ color: '#FFC107', marginBottom: '15px' }}>
-                  🚧 Em Desenvolvimento
+                  Em Desenvolvimento
                 </h2>
                 <p style={{ color: '#ccc', lineHeight: '1.6', margin: 0 }}>
                   O modo Multiplayer PvP está sendo desenvolvido! Em breve você poderá 
@@ -80,7 +80,7 @@ export default function MultiplayerPage() {
                     borderRadius: '10px',
                     padding: '20px',
                   }}>
-                    <span style={{ fontSize: '2rem' }}>🏆</span>
+                    <span style={{ fontSize: '2rem' }}></span>
                     <p style={{ color: '#9c27b0', margin: '10px 0 0', fontWeight: 'bold' }}>
                       Ranked Mode
                     </p>
@@ -94,7 +94,7 @@ export default function MultiplayerPage() {
                     borderRadius: '10px',
                     padding: '20px',
                   }}>
-                    <span style={{ fontSize: '2rem' }}>👥</span>
+                    <span style={{ fontSize: '2rem' }}></span>
                     <p style={{ color: '#2196f3', margin: '10px 0 0', fontWeight: 'bold' }}>
                       Torneios
                     </p>

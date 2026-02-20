@@ -268,7 +268,7 @@ export default function MyClanPage() {
 
       <div className="clan-info-grid">
         <div className="info-card">
-          <div className="info-icon">👥</div>
+          <div className="info-icon"></div>
           <div className="info-content">
             <span className="info-label">Membros</span>
             <span className="info-value">{clan.memberCount}</span>
@@ -276,7 +276,7 @@ export default function MyClanPage() {
         </div>
 
         <div className="info-card">
-          <div className="info-icon">⭐</div>
+          <div className="info-icon"></div>
           <div className="info-content">
             <span className="info-label">XP Total</span>
             <span className="info-value">{clan.experience.toLocaleString()}</span>
@@ -284,7 +284,7 @@ export default function MyClanPage() {
         </div>
 
         <div className="info-card">
-          <div className="info-icon">🏆</div>
+          <div className="info-icon"></div>
           <div className="info-content">
             <span className="info-label">Vitórias</span>
             <span className="info-value">{clan.wins}</span>
@@ -301,16 +301,16 @@ export default function MyClanPage() {
       </div>
 
       <div className="clan-description-section">
-        <h2>📝 Descrição</h2>
+        <h2>Descrição</h2>
         <p>{clan.description || 'Sem descrição.'}</p>
       </div>
 
       <div className="clan-members-section">
         <div className="members-header">
-          <h2>👥 Membros ({clan.memberCount})</h2>
+          <h2>Membros ({clan.memberCount})</h2>
           {canManage && (
             <button onClick={() => setShowInviteModal(true)} className="btn-invite">
-              ➕ Convidar
+              Convidar
             </button>
           )}
         </div>

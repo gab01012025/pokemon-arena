@@ -93,7 +93,7 @@ export default function MatchHistory({ limit = 5, showPagination = false, compac
   if (error) {
     return (
       <div className="match-history-error">
-        <span>⚠️ {error}</span>
+        <span>{error}</span>
       </div>
     );
   }
@@ -101,7 +101,7 @@ export default function MatchHistory({ limit = 5, showPagination = false, compac
   if (matches.length === 0) {
     return (
       <div className="match-history-empty">
-        <span>🎮 No battles yet</span>
+        <span>No battles yet</span>
         <p>Start playing to see your match history!</p>
       </div>
     );
@@ -110,7 +110,7 @@ export default function MatchHistory({ limit = 5, showPagination = false, compac
   return (
     <div className={`match-history ${compact ? 'compact' : ''}`}>
       <div className="match-history-header">
-        <h3>⚔️ Recent Battles</h3>
+        <h3>Recent Battles</h3>
         {total > 0 && <span className="match-count">{total} total</span>}
       </div>
       
@@ -121,7 +121,7 @@ export default function MatchHistory({ limit = 5, showPagination = false, compac
             className={`match-item ${match.result}`}
           >
             <div className="match-result-indicator">
-              {match.result === 'victory' ? '🏆' : '💀'}
+              {match.result === 'victory' ? 'W' : 'L'}
             </div>
             
             <div className="match-opponent">

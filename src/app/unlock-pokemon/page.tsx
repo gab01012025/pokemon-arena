@@ -129,7 +129,7 @@ export default function UnlockPokemonPage() {
       <div className="unlock-header">
         <div className="header-content">
           <Link href="/" className="back-button">← Voltar</Link>
-          <h1>🔓 Desbloquear Pokémon</h1>
+          <h1>Desbloquear Pokémon</h1>
           <div className="progress-stats">
             <span className="stat-item">
               Desbloqueados: <strong>{pokemonData.unlockedCount}/{pokemonData.totalCount}</strong>
