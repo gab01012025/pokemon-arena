@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
 // Secret key para proteger o endpoint
@@ -347,74 +348,68 @@ const kantoPokemon: PokemonData[] = [
   },
 ];
 
-export async function POST(request: NextRequest) {
-  try {
-    // Verificar secret key
-    const { searchParams } = new URL(request.url);
-    const secret = searchParams.get('secret');
-    
-    if (secret !== SEED_SECRET) {
-      return NextResponse.json({ error: 'Invalid secret' }, { status: 403 });
-    }
+export const POST = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`seed-post:${ip}`, rateLimits.admin.maxRequests, rateLimits.admin.windowMs)) {
+    throw APIErrors.tooManyRequests();
+  }
 
-    // Delete all existing pokemon data
-    console.log('Deleting existing data...');
-    await prisma.move.deleteMany();
-    await prisma.battleSlot.deleteMany();
-    await prisma.trainerPokemon.deleteMany();
-    await prisma.pokemon.deleteMany();
+  const { searchParams } = new URL(req.url);
+  const secret = searchParams.get('secret');
+  
+  if (secret !== SEED_SECRET) {
+    throw APIErrors.forbidden('Invalid secret');
+  }
 
-    // Create all Pokemon
-    const created: string[] = [];
-    for (const poke of kantoPokemon) {
-      const pokemon = await prisma.pokemon.create({
-        data: {
-          name: poke.name,
-          description: poke.desc,
-          types: JSON.stringify(poke.types),
-          category: poke.category,
-          health: 100,
-          traits: JSON.stringify(poke.traits),
-          isStarter: poke.isStarter,
-          unlockCost: poke.unlockCost,
-        }
-      });
+  await prisma.move.deleteMany();
+  await prisma.battleSlot.deleteMany();
+  await prisma.trainerPokemon.deleteMany();
+  await prisma.pokemon.deleteMany();
 
-      for (const move of poke.moves) {
-        await prisma.move.create({
-          data: {
-            name: move.name,
-            description: move.desc,
-            classes: JSON.stringify(move.classes),
-            cost: JSON.stringify(move.cost),
-            damage: move.damage,
-            cooldown: move.cooldown || 0,
-            duration: 0,
-            healing: 0,
-            effects: JSON.stringify(move.effects || []),
-            target: 'OneEnemy',
-            slot: move.slot,
-            pokemonId: pokemon.id,
-          }
-        });
+  const created: string[] = [];
+  for (const poke of kantoPokemon) {
+    const pokemon = await prisma.pokemon.create({
+      data: {
+        name: poke.name,
+        description: poke.desc,
+        types: JSON.stringify(poke.types),
+        category: poke.category,
+        health: 100,
+        traits: JSON.stringify(poke.traits),
+        isStarter: poke.isStarter,
+        unlockCost: poke.unlockCost,
       }
-      created.push(poke.name);
-    }
-
-    return NextResponse.json({ 
-      success: true, 
-      message: `Criados ${created.length} Pokémon de Kanto com ataques oficiais!`,
-      pokemon: created 
     });
 
-  } catch (error) {
-    console.error('Seed error:', error);
-    return NextResponse.json({ error: 'Erro: ' + (error as Error).message }, { status: 500 });
+    for (const move of poke.moves) {
+      await prisma.move.create({
+        data: {
+          name: move.name,
+          description: move.desc,
+          classes: JSON.stringify(move.classes),
+          cost: JSON.stringify(move.cost),
+          damage: move.damage,
+          cooldown: move.cooldown || 0,
+          duration: 0,
+          healing: 0,
+          effects: JSON.stringify(move.effects || []),
+          target: 'OneEnemy',
+          slot: move.slot,
+          pokemonId: pokemon.id,
+        }
+      });
+    }
+    created.push(poke.name);
   }
-}
 
-export async function GET() {
-  return NextResponse.json({ 
-    message: 'Use POST com ?secret=kanto-seed-2026 para popular o banco com 28 Pokemon de Kanto' 
+  return APIResponse.success({
+    message: `Criados ${created.length} Pokémon de Kanto com ataques oficiais!`,
+    pokemon: created
   });
-}
+});
+
+export const GET = apiHandler(async () => {
+  return APIResponse.success({
+    message: 'Use POST com ?secret=kanto-seed-2026 para popular o banco com 28 Pokemon de Kanto'
+  });
+});

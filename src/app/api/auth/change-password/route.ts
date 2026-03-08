@@ -1,83 +1,62 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
+import { apiHandler, APIResponse, APIErrors, rateLimit, rateLimits, getClientIP } from '@/lib/api-handler';
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-    
-    const { currentPassword, newPassword } = await request.json();
-    
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: 'Current password and new password are required' },
-        { status: 400 }
-      );
-    }
-    
-    // Validate new password strength
-    const { validatePassword } = await import('@/lib/password-validator');
-    const validation = validatePassword(newPassword);
-    
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { 
-          error: 'Password does not meet security requirements',
-          details: validation.errors 
-        },
-        { status: 400 }
-      );
-    }
-    
-    // Get trainer with password
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, password: true },
-    });
-    
-    if (!trainer) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-    
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, trainer.password);
-    
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Current password is incorrect' },
-        { status: 400 }
-      );
-    }
-    
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
-    
-    // Update password
-    await prisma.trainer.update({
-      where: { id: trainer.id },
-      data: { password: hashedPassword },
-    });
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Password changed successfully',
-    });
-  } catch (error) {
-    console.error('Change password error:', error);
-    return NextResponse.json(
-      { error: 'Failed to change password' },
-      { status: 500 }
-    );
+export const POST = apiHandler(async (request: NextRequest) => {
+  // Rate limiting - 5 attempts per 15 minutes
+  const clientIP = getClientIP(request);
+  if (!rateLimit(`auth:change-pw:${clientIP}`, rateLimits.auth.maxRequests, rateLimits.auth.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many password change attempts. Please try again later.');
   }
-}
+
+  const session = await getSession();
+  if (!session) {
+    throw APIErrors.unauthorized('Not authenticated');
+  }
+
+  const { currentPassword, newPassword } = await request.json();
+
+  if (!currentPassword || !newPassword) {
+    throw APIErrors.badRequest('Current password and new password are required');
+  }
+
+  // Validate new password strength
+  const { validatePassword } = await import('@/lib/password-validator');
+  const validation = validatePassword(newPassword);
+
+  if (!validation.isValid) {
+    throw APIErrors.badRequest('Password does not meet security requirements');
+  }
+
+  // Get trainer with password
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, password: true },
+  });
+
+  if (!trainer) {
+    throw APIErrors.notFound('User not found');
+  }
+
+  // Verify current password
+  const isValidPassword = await bcrypt.compare(currentPassword, trainer.password);
+
+  if (!isValidPassword) {
+    throw APIErrors.badRequest('Current password is incorrect');
+  }
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  // Update password
+  await prisma.trainer.update({
+    where: { id: trainer.id },
+    data: { password: hashedPassword },
+  });
+
+  return APIResponse.success({
+    message: 'Password changed successfully',
+  });
+});

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { logger } from '@/lib/logger';
 import { getRankByLevel, RANKS, RankInfo } from '@/lib/ranks';
 
 interface TrainerRanking {
@@ -57,7 +58,7 @@ export default function LadderPage() {
         // Ignora erro de temporada
       }
     } catch (err) {
-      console.error('Failed to fetch rankings:', err);
+      logger.error('Failed to fetch rankings:', err instanceof Error ? err : undefined);
     } finally {
       setLoading(false);
     }

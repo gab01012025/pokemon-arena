@@ -1,0 +1,247 @@
+/* ==========================================
+   COMPETITIVE RANK BADGE COMPONENT
+   ========================================== */
+
+/* --- Badge Container --- */
+.cr-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cr-badge-sm {
+  padding: 6px 12px;
+  border-radius: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.cr-badge-md {
+  padding: 14px 18px;
+}
+
+.cr-badge-lg {
+  padding: 20px 24px;
+  border: 1px solid var(--cr-color, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--cr-glow, transparent) 30%, transparent);
+}
+
+/* Animated glow */
+.cr-badge-animated {
+  animation: cr-glow-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes cr-glow-pulse {
+  0%, 100% { box-shadow: 0 0 10px var(--cr-glow, transparent); }
+  50% { box-shadow: 0 0 25px var(--cr-glow, transparent), 0 0 40px var(--cr-glow, transparent); }
+}
+
+/* --- Rank Header --- */
+.cr-rank-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cr-rank-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.cr-badge-sm .cr-rank-icon {
+  font-size: 18px;
+}
+
+.cr-badge-lg .cr-rank-icon {
+  font-size: 36px;
+}
+
+.cr-rank-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cr-badge-sm .cr-rank-text {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.cr-rank-label {
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.cr-badge-sm .cr-rank-label {
+  font-size: 10px;
+}
+
+.cr-badge-lg .cr-rank-label {
+  font-size: 16px;
+}
+
+.cr-rank-lp {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.cr-badge-sm .cr-rank-lp {
+  font-size: 11px;
+}
+
+.cr-badge-lg .cr-rank-lp {
+  font-size: 16px;
+  color: #FFD700;
+  font-family: var(--font-pixel, 'Press Start 2P', monospace);
+}
+
+/* --- Progress Bar --- */
+.cr-progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cr-progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cr-badge-lg .cr-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.cr-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  box-shadow: 0 0 8px var(--cr-glow, transparent);
+}
+
+.cr-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cr-progress-pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cr-color, #fff);
+}
+
+.cr-progress-next {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- Stats Row --- */
+.cr-stats-row {
+  display: flex;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cr-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cr-stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cr-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cr-wins { color: #4CAF50; }
+.cr-losses { color: #F44336; }
+.cr-high { color: #4CAF50; }
+.cr-mid { color: #FFCB05; }
+.cr-low { color: #F44336; }
+.cr-streak { color: #FF9900; }
+
+/* --- Rank Pill (inline) --- */
+.cr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
+.cr-pill-icon {
+  font-size: 13px;
+}
+
+.cr-pill-label {
+  /* inherits */
+}
+
+/* --- Tier List --- */
+.cr-tier-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cr-tier-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+}
+
+.cr-tier-item.cr-tier-current {
+  border-color: var(--t-color, rgba(255, 255, 255, 0.3));
+  background: color-mix(in srgb, var(--t-color, transparent) 10%, transparent);
+  color: var(--t-color, #fff);
+  box-shadow: 0 0 12px var(--t-glow, transparent);
+}
+
+.cr-tier-icon {
+  font-size: 14px;
+}
+
+.cr-tier-name {
+  font-weight: 600;
+}
+
+.cr-tier-lp {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.cr-tier-current .cr-tier-lp {
+  color: rgba(255, 255, 255, 0.6);
+}

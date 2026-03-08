@@ -1,64 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { loginTrainer } from '@/lib/auth';
 import { loginSchema } from '@/lib/validations';
-import { ZodError } from 'zod';
+import { apiHandler, APIResponse, APIErrors, rateLimit, rateLimits, getClientIP, validateRequest } from '@/lib/api-handler';
 
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
+  // Rate limiting - 5 attempts per 15 minutes
+  const clientIP = getClientIP(request);
+  if (!rateLimit(`auth:login:${clientIP}`, rateLimits.auth.maxRequests, rateLimits.auth.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many login attempts. Please try again later.');
+  }
+
+  const validate = validateRequest(loginSchema);
+  const validatedData = await validate(request);
+
+  // Login
+  let trainer;
   try {
-    const body = await request.json();
-    
-    // Validar dados
-    const validatedData = loginSchema.parse(body);
-    
-    // Login
-    const trainer = await loginTrainer(
+    trainer = await loginTrainer(
       validatedData.usernameOrEmail,
       validatedData.password
     );
-    
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Login successful!',
-        user: trainer,
-      },
-      { status: 200 }
-    );
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Validation error',
-          errors: error.issues.map((e) => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
-        },
-        { status: 400 }
-      );
+    if (error instanceof Error && error.message === 'Invalid credentials') {
+      throw APIErrors.unauthorized('Invalid username/email or password');
     }
-    
-    if (error instanceof Error) {
-      // Credenciais inválidas
-      if (error.message === 'Invalid credentials') {
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Invalid username/email or password',
-          },
-          { status: 401 }
-        );
-      }
-    }
-    
-    console.error('Login error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+    throw error;
   }
-}
+
+  return APIResponse.success({
+    message: 'Login successful!',
+    user: trainer,
+  });
+});

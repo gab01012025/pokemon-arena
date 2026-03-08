@@ -16,25 +16,25 @@
  * - blood -> fire (bloodline -> fire type)
  * - gen   -> water (genjutsu -> water type)  
  * - nin   -> grass (ninjutsu -> grass type)
- * - tai   -> electric (taijutsu -> electric type)
- * - rand  -> random (any type)
+ * - tai   -> lightning (taijutsu -> lightning type)
+ * - rand  -> colorless (any type)
  */
-export type EnergyType = 'fire' | 'water' | 'grass' | 'electric' | 'random';
+export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'colorless';
 
 export interface Energy {
   fire: number;
   water: number;
   grass: number;
-  electric: number;
-  random: number;
+  lightning: number;
+  colorless: number;
 }
 
 export const ZERO_ENERGY: Energy = {
   fire: 0,
   water: 0,
   grass: 0,
-  electric: 0,
-  random: 0,
+  lightning: 0,
+  colorless: 0,
 };
 
 // =============================================================================
@@ -515,8 +515,8 @@ export function createBattleState(
     turnNumber: 1,
     phase: 'START_TURN',
     currentPlayer: 'player',
-    playerEnergy: { fire: 0, water: 0, grass: 0, electric: 0, random: 1 },
-    opponentEnergy: { fire: 0, water: 0, grass: 0, electric: 0, random: 1 },
+    playerEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+    opponentEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
     victor: null,
     forfeit: false,
     seed,

@@ -70,13 +70,13 @@ describe('Character System', () => {
     });
 
     it('Skill costs should be correctly defined', () => {
-      // Thunderbolt costs 1 electric
-      expect(pikachu.skills[0].cost.electric).toBe(1);
+      // Thunderbolt costs 1 lightning
+      expect(pikachu.skills[0].cost.lightning).toBe(1);
       expect(pikachu.skills[0].cost.fire).toBe(0);
       
       // Flamethrower costs 1 fire + 1 random
       expect(charizard.skills[0].cost.fire).toBe(1);
-      expect(charizard.skills[0].cost.random).toBe(1);
+      expect(charizard.skills[0].cost.colorless).toBe(1);
     });
 
     it('Skill cooldowns should be correctly defined', () => {
@@ -101,8 +101,8 @@ describe('Character System', () => {
       state = createBattleState(playerTeam, opponentTeam);
       state = {
         ...state,
-        playerEnergy: { fire: 5, water: 5, grass: 5, electric: 5, random: 5 },
-        opponentEnergy: { fire: 5, water: 5, grass: 5, electric: 5, random: 5 },
+        playerEnergy: { fire: 5, water: 5, grass: 5, lightning: 5, colorless: 5 },
+        opponentEnergy: { fire: 5, water: 5, grass: 5, lightning: 5, colorless: 5 },
       };
       rng = new DeterministicRandom(42);
     });
@@ -118,7 +118,7 @@ describe('Character System', () => {
         { userSlot: 0, skillIndex: 0, targetSlot: 3 }, // Pikachu uses Thunderbolt on Mewtwo
       ];
 
-      const result = resolveTurn(state, playerActions, [], rng);
+      const result = resolveTurn(state, playerActions, []);
       
       // Mewtwo should have taken damage
       const mewtwo = result.state.fighters.find(f => f.name === 'Mewtwo')!;
@@ -130,7 +130,7 @@ describe('Character System', () => {
         { userSlot: 0, skillIndex: 1, targetSlot: 3 }, // Pikachu uses Thunder on Mewtwo
       ];
 
-      const result = resolveTurn(state, playerActions, [], rng);
+      const result = resolveTurn(state, playerActions, []);
       
       const mewtwo = result.state.fighters.find(f => f.name === 'Mewtwo')!;
       // Mewtwo should have taken 40 damage
@@ -143,7 +143,7 @@ describe('Character System', () => {
         { userSlot: 1, skillIndex: 3, targetSlot: 1 }, // Charizard uses Fly (self)
       ];
 
-      const result = resolveTurn(state, playerActions, [], rng);
+      const result = resolveTurn(state, playerActions, []);
       
       // Check log for invulnerability application
       const hasInvulnLog = result.log.some(l => 
@@ -158,7 +158,7 @@ describe('Character System', () => {
         { userSlot: 2, skillIndex: 2, targetSlot: 2 }, // Blastoise uses Iron Defense
       ];
 
-      const result = resolveTurn(state, playerActions, [], rng);
+      const result = resolveTurn(state, playerActions, []);
       
       const blastoise = result.state.fighters.find(f => f.name === 'Blastoise')!;
       expect(blastoise.defense.length).toBe(1);

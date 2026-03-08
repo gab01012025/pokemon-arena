@@ -46,7 +46,7 @@ jobs:
         run: npm ci
       
       - name: Run tests
-        run: npm test
+        run: npm run test:run
       
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -77,6 +77,8 @@ jobs:
         run: npm run build
         env:
           SKIP_ENV_VALIDATION: true
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ci-test-secret-not-for-production
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3

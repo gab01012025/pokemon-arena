@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/lib/logger';
 import './play.css';
 
 // ============ TYPES ============
@@ -283,7 +284,7 @@ export default function PlayPage() {
         body: JSON.stringify({ pokemonNames: pokemonIds }),
       });
     } catch (e) {
-      console.log('Could not save to API, using localStorage');
+      logger.info('Could not save to API, using localStorage');
     }
     
     if (mode === 'ladder') {

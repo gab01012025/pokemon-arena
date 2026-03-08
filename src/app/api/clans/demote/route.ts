@@ -1,62 +1,53 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+export const POST = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
 
-    const body = await request.json();
-    const { memberId } = body;
-
-    if (!memberId) {
-      return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
-    }
-
-    // Verificar se é líder
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: session.user.id },
-      include: { clanMember: true },
-    });
-
-    if (!trainer?.clanMember) {
-      return NextResponse.json({ error: 'Você não está em um clã' }, { status: 404 });
-    }
-
-    if (trainer.clanMember.role !== 'leader') {
-      return NextResponse.json(
-        { error: 'Apenas o líder pode rebaixar membros' },
-        { status: 403 }
-      );
-    }
-
-    // Buscar membro
-    const targetMember = await prisma.clanMember.findFirst({
-      where: {
-        trainerId: memberId,
-        clanId: trainer.clanMember.clanId,
-      },
-    });
-
-    if (!targetMember) {
-      return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
-    }
-
-    if (targetMember.role !== 'officer') {
-      return NextResponse.json({ error: 'Membro não é oficial' }, { status: 400 });
-    }
-
-    await prisma.clanMember.update({
-      where: { id: targetMember.id },
-      data: { role: 'member' },
-    });
-
-    return NextResponse.json({ message: 'Membro rebaixado com sucesso' });
-  } catch (error) {
-    console.error('Error demoting member:', error);
-    return NextResponse.json({ error: 'Erro ao rebaixar membro' }, { status: 500 });
+  const ip = getClientIP(req);
+  if (!rateLimit(`demote-member:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+    throw APIErrors.tooManyRequests();
   }
-}
+
+  const { memberId } = await req.json();
+
+  if (!memberId) {
+    throw APIErrors.badRequest('ID do membro é obrigatório');
+  }
+
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    include: { clanMember: true },
+  });
+
+  if (!trainer?.clanMember) {
+    throw APIErrors.notFound('Você não está em um clã');
+  }
+
+  if (trainer.clanMember.role !== 'leader') {
+    throw APIErrors.forbidden('Apenas o líder pode rebaixar membros');
+  }
+
+  const targetMember = await prisma.clanMember.findFirst({
+    where: {
+      trainerId: memberId,
+      clanId: trainer.clanMember.clanId,
+    },
+  });
+
+  if (!targetMember) {
+    throw APIErrors.notFound('Membro não encontrado');
+  }
+
+  if (targetMember.role !== 'officer') {
+    throw APIErrors.badRequest('Membro não é oficial');
+  }
+
+  await prisma.clanMember.update({
+    where: { id: targetMember.id },
+    data: { role: 'member' },
+  });
+
+  return APIResponse.success({ message: 'Membro rebaixado com sucesso' });
+});

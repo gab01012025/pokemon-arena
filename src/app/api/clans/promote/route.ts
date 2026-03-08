@@ -1,62 +1,53 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+export const POST = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
 
-    const body = await request.json();
-    const { memberId } = body;
-
-    if (!memberId) {
-      return NextResponse.json({ error: 'ID do membro é obrigatório' }, { status: 400 });
-    }
-
-    // Verificar se é líder
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: session.user.id },
-      include: { clanMember: true },
-    });
-
-    if (!trainer?.clanMember) {
-      return NextResponse.json({ error: 'Você não está em um clã' }, { status: 404 });
-    }
-
-    if (trainer.clanMember.role !== 'leader') {
-      return NextResponse.json(
-        { error: 'Apenas o líder pode promover membros' },
-        { status: 403 }
-      );
-    }
-
-    // Buscar membro
-    const targetMember = await prisma.clanMember.findFirst({
-      where: {
-        trainerId: memberId,
-        clanId: trainer.clanMember.clanId,
-      },
-    });
-
-    if (!targetMember) {
-      return NextResponse.json({ error: 'Membro não encontrado' }, { status: 404 });
-    }
-
-    if (targetMember.role !== 'member') {
-      return NextResponse.json({ error: 'Membro já é oficial ou líder' }, { status: 400 });
-    }
-
-    await prisma.clanMember.update({
-      where: { id: targetMember.id },
-      data: { role: 'officer' },
-    });
-
-    return NextResponse.json({ message: 'Membro promovido a oficial com sucesso' });
-  } catch (error) {
-    console.error('Error promoting member:', error);
-    return NextResponse.json({ error: 'Erro ao promover membro' }, { status: 500 });
+  const ip = getClientIP(req);
+  if (!rateLimit(`promote-member:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+    throw APIErrors.tooManyRequests();
   }
-}
+
+  const { memberId } = await req.json();
+
+  if (!memberId) {
+    throw APIErrors.badRequest('ID do membro é obrigatório');
+  }
+
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    include: { clanMember: true },
+  });
+
+  if (!trainer?.clanMember) {
+    throw APIErrors.notFound('Você não está em um clã');
+  }
+
+  if (trainer.clanMember.role !== 'leader') {
+    throw APIErrors.forbidden('Apenas o líder pode promover membros');
+  }
+
+  const targetMember = await prisma.clanMember.findFirst({
+    where: {
+      trainerId: memberId,
+      clanId: trainer.clanMember.clanId,
+    },
+  });
+
+  if (!targetMember) {
+    throw APIErrors.notFound('Membro não encontrado');
+  }
+
+  if (targetMember.role !== 'member') {
+    throw APIErrors.badRequest('Membro já é oficial ou líder');
+  }
+
+  await prisma.clanMember.update({
+    where: { id: targetMember.id },
+    data: { role: 'officer' },
+  });
+
+  return APIResponse.success({ message: 'Membro promovido a oficial com sucesso' });
+});

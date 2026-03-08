@@ -60,10 +60,10 @@ export class DeterministicRandom {
   }
   
   /**
-   * Pick random energy type (excluding 'random')
+   * Pick random energy type (excluding 'colorless')
    */
-  pickEnergyType(): 'fire' | 'water' | 'grass' | 'electric' {
-    const types: ('fire' | 'water' | 'grass' | 'electric')[] = ['fire', 'water', 'grass', 'electric'];
+  pickEnergyType(): 'fire' | 'water' | 'grass' | 'lightning' {
+    const types: ('fire' | 'water' | 'grass' | 'lightning')[] = ['fire', 'water', 'grass', 'lightning'];
     return types[this.int(0, 3)];
   }
   
@@ -157,8 +157,8 @@ export function addEnergy(a: Energy, b: Energy): Energy {
     fire: a.fire + b.fire,
     water: a.water + b.water,
     grass: a.grass + b.grass,
-    electric: a.electric + b.electric,
-    random: a.random + b.random,
+    lightning: a.lightning + b.lightning,
+    colorless: a.colorless + b.colorless,
   };
 }
 
@@ -170,8 +170,8 @@ export function subtractEnergy(a: Energy, b: Energy): Energy {
     fire: a.fire - b.fire,
     water: a.water - b.water,
     grass: a.grass - b.grass,
-    electric: a.electric - b.electric,
-    random: a.random - b.random,
+    lightning: a.lightning - b.lightning,
+    colorless: a.colorless - b.colorless,
   };
 }
 
@@ -184,24 +184,24 @@ export function canAfford(available: Energy, cost: Energy): boolean {
   let fireNeeded = Math.max(0, cost.fire - available.fire);
   let waterNeeded = Math.max(0, cost.water - available.water);
   let grassNeeded = Math.max(0, cost.grass - available.grass);
-  let electricNeeded = Math.max(0, cost.electric - available.electric);
+  let lightningNeeded = Math.max(0, cost.lightning - available.lightning);
   
   // Total specific energy still needed
-  const specificNeeded = fireNeeded + waterNeeded + grassNeeded + electricNeeded;
+  const specificNeeded = fireNeeded + waterNeeded + grassNeeded + lightningNeeded;
   
   // Calculate leftover specific energy that can be used for random cost
   const fireLeftover = Math.max(0, available.fire - cost.fire);
   const waterLeftover = Math.max(0, available.water - cost.water);
   const grassLeftover = Math.max(0, available.grass - cost.grass);
-  const electricLeftover = Math.max(0, available.electric - cost.electric);
-  const specificLeftover = fireLeftover + waterLeftover + grassLeftover + electricLeftover;
+  const lightningLeftover = Math.max(0, available.lightning - cost.lightning);
+  const specificLeftover = fireLeftover + waterLeftover + grassLeftover + lightningLeftover;
   
   // Total random available (actual random + leftover specific)
-  const totalRandom = available.random + specificLeftover;
+  const totalRandom = available.colorless + specificLeftover;
   
   // Can we cover the specific shortfall and the random cost?
-  return specificNeeded <= available.random && 
-         cost.random <= (totalRandom - specificNeeded);
+  return specificNeeded <= available.colorless && 
+         cost.colorless <= (totalRandom - specificNeeded);
 }
 
 /**
@@ -215,37 +215,37 @@ export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRan
   result.fire -= cost.fire;
   result.water -= cost.water;
   result.grass -= cost.grass;
-  result.electric -= cost.electric;
+  result.lightning -= cost.lightning;
   
   // Use random energy to cover any negative values
   const shortfall = 
     Math.max(0, -result.fire) + 
     Math.max(0, -result.water) + 
     Math.max(0, -result.grass) + 
-    Math.max(0, -result.electric);
+    Math.max(0, -result.lightning);
   
-  result.random -= shortfall;
+  result.colorless -= shortfall;
   
   // Fix negative specific values (they were covered by random)
   result.fire = Math.max(0, result.fire);
   result.water = Math.max(0, result.water);
   result.grass = Math.max(0, result.grass);
-  result.electric = Math.max(0, result.electric);
+  result.lightning = Math.max(0, result.lightning);
   
   // Pay random cost from leftover specific energy
-  let randomCost = cost.random;
+  let randomCost = cost.colorless;
   while (randomCost > 0) {
     // Prefer using random energy first
-    if (result.random > 0) {
-      result.random--;
+    if (result.colorless > 0) {
+      result.colorless--;
       randomCost--;
     } else {
       // Use specific energy (pick randomly for fairness)
-      const available: ('fire' | 'water' | 'grass' | 'electric')[] = [];
+      const available: ('fire' | 'water' | 'grass' | 'lightning')[] = [];
       if (result.fire > 0) available.push('fire');
       if (result.water > 0) available.push('water');
       if (result.grass > 0) available.push('grass');
-      if (result.electric > 0) available.push('electric');
+      if (result.lightning > 0) available.push('lightning');
       
       if (available.length === 0) break; // Shouldn't happen if canAfford was checked
       
@@ -262,7 +262,7 @@ export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRan
  * Get total energy count
  */
 export function totalEnergy(energy: Energy): number {
-  return energy.fire + energy.water + energy.grass + energy.electric + energy.random;
+  return energy.fire + energy.water + energy.grass + energy.lightning + energy.colorless;
 }
 
 /**

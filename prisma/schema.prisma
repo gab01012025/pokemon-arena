@@ -32,6 +32,20 @@ model Trainer {
   maxStreak     Int       @default(0)
   ladderPoints  Int       @default(0)
   
+  // Referral system
+  referralCode  String?   @unique
+  referredBy    String?   // trainerId of who invited this user
+  
+  // Daily login
+  lastLoginDate DateTime?
+  loginStreak   Int       @default(0)
+  
+  // Progression system
+  totalXP       Int       @default(0)
+  pendingPacks  Int       @default(0)
+  packWinCounter Int      @default(0) // wins since last pack earned (resets at 3)
+  lastBattleDate DateTime?
+  
   team          Team?     @relation(fields: [teamId], references: [id])
   teamId        String?
   
@@ -44,6 +58,18 @@ model Trainer {
   missions      TrainerMission[]
   clanMember    ClanMember?
   leaderOfClans Clan[]    @relation("ClanLeader")
+  seasonResults SeasonResult[]
+  achievements  Achievement[]
+  referralsMade Referral[] @relation("Referrer")
+  referralReceived Referral? @relation("Referred")
+  cardPacks     CardPack[]
+  dailyQuests   DailyQuest[]
+  weeklyQuests  WeeklyQuest[]
+
+  @@index([ladderPoints])
+  @@index([level])
+  @@index([wins])
+  @@index([referralCode])
 }
 
 model Session {
@@ -52,6 +78,9 @@ model Session {
   trainerId    String
   expires      DateTime
   trainer      Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId])
+  @@index([expires])
 }
 
 // ==================== TEAMS ====================
@@ -116,6 +145,10 @@ model TrainerPokemon {
   isActive    Boolean   @default(true)  // Is this Pokemon in the active battle team?
   position    Int       @default(0)     // Position in battle team (0, 1, 2)
   
+  // Progression tracking
+  obtainedMethod String  @default("starter") // starter, level, streak, achievement, pack, mission
+  isNew       Boolean   @default(true)       // Show "NEW" badge until viewed
+  
   @@unique([trainerId, pokemonId])
 }
 
@@ -165,6 +198,12 @@ model Battle {
   startedAt   DateTime    @default(now())
   finishedAt  DateTime?
   battleType  String      @default("quick") // quick, ranked, tournament
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([status])
+  @@index([startedAt])
+  @@index([battleType])
 }
 
 // ==================== MATCHMAKING QUEUE ====================
@@ -176,6 +215,9 @@ model MatchQueue {
   queueType   String   @default("quick")
   rating      Int      @default(1000)
   joinedAt    DateTime @default(now())
+
+  @@index([queueType, rating])
+  @@index([joinedAt])
 }
 
 // ==================== MISSIONS ====================
@@ -283,6 +325,54 @@ model Season {
   isActive    Boolean  @default(false)
   
   rewards     String   // JSON with season rewards
+  results     SeasonResult[]
+}
+
+model SeasonResult {
+  id          String   @id @default(cuid())
+  trainer     Trainer  @relation(fields: [trainerId], references: [id])
+  trainerId   String
+  season      Season   @relation(fields: [seasonId], references: [id])
+  seasonId    String
+  
+  finalLP     Int
+  finalRank   String   // e.g. "Ultra Ball I"
+  finalTier   String   // e.g. "ultraball"
+  position    Int      // Final leaderboard position
+  peakLP      Int      @default(0)
+  totalWins   Int      @default(0)
+  totalLosses Int      @default(0)
+  
+  reward      String?  // JSON with earned season rewards
+  createdAt   DateTime @default(now())
+  
+  @@unique([trainerId, seasonId])
+  @@index([seasonId, position])
+}
+
+// ==================== REFERRALS ====================
+model Referral {
+  id          String   @id @default(cuid())
+  referrer    Trainer  @relation("Referrer", fields: [referrerId], references: [id])
+  referrerId  String
+  referred    Trainer  @relation("Referred", fields: [referredId], references: [id])
+  referredId  String   @unique // one referral per user
+  bonusClaimed Boolean @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([referrerId])
+}
+
+// ==================== ACHIEVEMENTS ====================
+model Achievement {
+  id          String   @id @default(cuid())
+  trainer     Trainer  @relation(fields: [trainerId], references: [id])
+  trainerId   String
+  code        String   // e.g. "first_victory", "lightning_fast"
+  unlockedAt  DateTime @default(now())
+
+  @@unique([trainerId, code])
+  @@index([trainerId])
 }
 
 // ==================== ONLINE USERS ====================
@@ -292,4 +382,55 @@ model OnlineUser {
   username    String
   status      String   @default("online") // online, in_battle, away
   lastSeen    DateTime @default(now())
+}
+
+// ==================== CARD PACKS ====================
+model CardPack {
+  id          String   @id @default(cuid())
+  trainer     Trainer  @relation(fields: [trainerId], references: [id])
+  trainerId   String
+  rarity      String   // common, uncommon, rare, ultra_rare
+  contents    String   // JSON: [{pokemonId, pokemonName, rarity, isDuplicate}]
+  openedAt    DateTime @default(now())
+
+  @@index([trainerId])
+  @@index([openedAt])
+}
+
+// ==================== DAILY/WEEKLY QUESTS ====================
+model DailyQuest {
+  id          String   @id @default(cuid())
+  trainer     Trainer  @relation(fields: [trainerId], references: [id])
+  trainerId   String
+
+  questType   String   // win_battle, use_type, win_full_team, play_battles
+  description String
+  targetValue Int      @default(1)
+  currentValue Int     @default(0)
+  rewardXP    Int      @default(20)
+  
+  completed   Boolean  @default(false)
+  assignedAt  DateTime @default(now())
+  expiresAt   DateTime // end of day UTC
+
+  @@index([trainerId, expiresAt])
+}
+
+model WeeklyQuest {
+  id          String   @id @default(cuid())
+  trainer     Trainer  @relation(fields: [trainerId], references: [id])
+  trainerId   String
+
+  questType   String   // win_battles, reach_rank, evolve, use_different_pokemon
+  description String
+  targetValue Int      @default(1)
+  currentValue Int     @default(0)
+  rewardXP    Int      @default(100)
+  rewardPack  Boolean  @default(false)
+  
+  completed   Boolean  @default(false)
+  assignedAt  DateTime @default(now())
+  expiresAt   DateTime // end of week UTC
+
+  @@index([trainerId, expiresAt])
 }

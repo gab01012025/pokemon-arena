@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { allPokemon } from '@/data/pokemon';
@@ -912,7 +913,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         setBattleResultSent(true);
       }
     } catch (error) {
-      console.error('Failed to update battle result:', error);
+      logger.error('Failed to update battle result:', error instanceof Error ? error : undefined);
     }
     
     onExit();
@@ -947,7 +948,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
         setBattleResultSent(true);
       }
     } catch (error) {
-      console.error('Failed to update battle result:', error);
+      logger.error('Failed to update battle result:', error instanceof Error ? error : undefined);
     }
   }, [battleResultSent]);
 

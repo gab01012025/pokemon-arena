@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { logger } from '@/lib/logger';
 import { PokemonSprite } from '@/components/PokemonSprite';
 import { getTypeColor } from '@/lib/pokemon-images';
 
@@ -62,7 +63,7 @@ export default function UnlockPokemonPage() {
       }
     } catch (err) {
       setError('Erro ao carregar Pokémon');
-      console.error(err);
+      logger.error('Pokemon fetch error', err instanceof Error ? err : undefined);
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ export default function UnlockPokemonPage() {
       setSelectedPokemon(null);
     } catch (err) {
       alert('Erro ao desbloquear Pokémon');
-      console.error(err);
+      logger.error('Pokemon unlock error', err instanceof Error ? err : undefined);
     } finally {
       setUnlocking(null);
     }

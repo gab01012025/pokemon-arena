@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { logger } from '@/lib/logger';
 
 interface Pokemon {
   id: number;
@@ -90,7 +91,7 @@ export default function PokedexPage() {
 
         setPokemon(pokemonDetails);
       } catch (error) {
-        console.error('Error fetching Pokemon:', error);
+        logger.error('Error fetching Pokemon:', error instanceof Error ? error : undefined);
       }
       setLoading(false);
     };
@@ -137,7 +138,7 @@ export default function PokedexPage() {
         genus: genusEntry?.genus || '',
       });
     } catch (error) {
-      console.error('Error fetching Pokemon details:', error);
+      logger.error('Error fetching Pokemon details:', error instanceof Error ? error : undefined);
     }
     setLoadingDetails(false);
   };

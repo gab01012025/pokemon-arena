@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { logger } from '@/lib/logger';
 
 interface Mission {
   id: string;
@@ -56,7 +57,7 @@ export default function MissionsPage() {
       setMissionsData(data);
     } catch (err) {
       setError('Erro ao carregar missões');
-      console.error(err);
+      logger.error('Mission fetch error', err instanceof Error ? err : undefined);
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,7 @@ export default function MissionsPage() {
       fetchMissions();
     } catch (err) {
       alert('Erro ao iniciar missão');
-      console.error(err);
+      logger.error('Mission start error', err instanceof Error ? err : undefined);
     } finally {
       setStartingMission(null);
     }

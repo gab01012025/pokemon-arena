@@ -1,111 +1,100 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
 
 const ADMIN_USERS = ['admin', 'gab01012025', 'gabriel', 'gab1234'];
 
-// GET - List all battles with pagination
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session || !ADMIN_USERS.includes(session.user.username.toLowerCase())) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { username } = await requireAuth(req);
+
+  if (!ADMIN_USERS.includes(username.toLowerCase())) {
+    throw APIErrors.forbidden('Admin access required');
+  }
+
+  const { searchParams } = new URL(req.url);
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '20');
+  const status = searchParams.get('status') || '';
+
+  const where = status ? { status } : {};
+
+  const [battles, total] = await Promise.all([
+    prisma.battle.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { startedAt: 'desc' },
+      include: {
+        player1: { select: { username: true } },
+        player2: { select: { username: true } },
+        winner: { select: { username: true } }
+      }
+    }),
+    prisma.battle.count({ where })
+  ]);
+
+  return APIResponse.success({
+    battles,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit)
     }
+  });
+});
 
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const status = searchParams.get('status') || '';
+export const DELETE = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`admin-battles-delete:${ip}`, rateLimits.admin.maxRequests, rateLimits.admin.windowMs)) {
+    throw APIErrors.tooManyRequests();
+  }
 
-    const where = status ? { status } : {};
+  const { username } = await requireAuth(req);
 
-    const [battles, total] = await Promise.all([
-      prisma.battle.findMany({
-        where,
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { startedAt: 'desc' },
-        include: {
-          player1: { select: { username: true } },
-          player2: { select: { username: true } },
-          winner: { select: { username: true } }
-        }
-      }),
-      prisma.battle.count({ where })
-    ]);
+  if (!ADMIN_USERS.includes(username.toLowerCase())) {
+    throw APIErrors.forbidden('Admin access required');
+  }
 
-    return NextResponse.json({
-      battles,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+  const { battleId } = await req.json();
+
+  if (!battleId) {
+    throw APIErrors.badRequest('ID da batalha é obrigatório');
+  }
+
+  await prisma.battle.delete({ where: { id: battleId } });
+
+  return APIResponse.success({ message: 'Batalha deletada com sucesso' });
+});
+
+export const PATCH = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`admin-battles-patch:${ip}`, rateLimits.admin.maxRequests, rateLimits.admin.windowMs)) {
+    throw APIErrors.tooManyRequests();
+  }
+
+  const { username } = await requireAuth(req);
+
+  if (!ADMIN_USERS.includes(username.toLowerCase())) {
+    throw APIErrors.forbidden('Admin access required');
+  }
+
+  const { battleId, action, winnerId } = await req.json();
+
+  if (!battleId || !action) {
+    throw APIErrors.badRequest('Dados incompletos');
+  }
+
+  if (action === 'forceEnd') {
+    await prisma.battle.update({
+      where: { id: battleId },
+      data: {
+        status: 'finished',
+        finishedAt: new Date(),
+        winnerId: winnerId || null
       }
     });
-
-  } catch (error) {
-    console.error('Admin battles error:', error);
-    return NextResponse.json({ error: 'Erro ao buscar batalhas' }, { status: 500 });
   }
-}
 
-// DELETE - Delete a battle
-export async function DELETE(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session || !ADMIN_USERS.includes(session.user.username.toLowerCase())) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
-    }
-
-    const { battleId } = await request.json();
-
-    if (!battleId) {
-      return NextResponse.json({ error: 'ID da batalha é obrigatório' }, { status: 400 });
-    }
-
-    await prisma.battle.delete({ where: { id: battleId } });
-
-    return NextResponse.json({ success: true, message: 'Batalha deletada com sucesso' });
-
-  } catch (error) {
-    console.error('Delete battle error:', error);
-    return NextResponse.json({ error: 'Erro ao deletar batalha' }, { status: 500 });
-  }
-}
-
-// PATCH - Force end a battle
-export async function PATCH(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session || !ADMIN_USERS.includes(session.user.username.toLowerCase())) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
-    }
-
-    const { battleId, action, winnerId } = await request.json();
-
-    if (!battleId || !action) {
-      return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
-    }
-
-    if (action === 'forceEnd') {
-      await prisma.battle.update({
-        where: { id: battleId },
-        data: {
-          status: 'finished',
-          finishedAt: new Date(),
-          winnerId: winnerId || null
-        }
-      });
-    }
-
-    return NextResponse.json({ success: true, message: 'Batalha atualizada' });
-
-  } catch (error) {
-    console.error('Update battle error:', error);
-    return NextResponse.json({ error: 'Erro ao atualizar batalha' }, { status: 500 });
-  }
-}
+  return APIResponse.success({ message: 'Batalha atualizada' });
+});

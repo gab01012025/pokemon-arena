@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/lib/logger';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 
 interface UserData {
@@ -39,7 +40,7 @@ export default function SettingsPage() {
           router.push('/login?redirect=/settings');
         }
       } catch {
-        console.error('Failed to fetch user');
+        logger.error('Failed to fetch user');
         router.push('/login?redirect=/settings');
       } finally {
         setLoading(false);

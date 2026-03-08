@@ -222,14 +222,15 @@ export async function requireAuth(req: NextRequest): Promise<{ userId: string; u
     const { jwtVerify } = await import('jose');
     const { payload } = await jwtVerify(token, JWT_SECRET);
 
-    if (!payload.userId || !payload.username) {
+    const trainerId = (payload.trainerId || payload.userId) as string | undefined;
+    if (!trainerId || !payload.username) {
       throw APIErrors.unauthorized('Invalid token payload');
     }
 
     return {
-      userId: payload.userId as string,
+      userId: trainerId,
       username: payload.username as string,
-      email: payload.email as string,
+      email: (payload.email as string) || '',
     };
   } catch (error) {
     logger.warn('Auth token verification failed', { metadata: { error } });

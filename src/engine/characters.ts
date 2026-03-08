@@ -12,8 +12,8 @@
  * - fire: Fire/Fighting types
  * - water: Water/Ice types
  * - grass: Grass/Bug types
- * - electric: Electric/Psychic types
- * - random: Any type (neutral)
+ * - lightning: Electric/Psychic types
+ * - random: Any type (colorless)
  */
 
 import { 
@@ -37,7 +37,7 @@ function invulnSkill(name: string, owner: number, desc: string): Skill {
     name,
     owner,
     description: desc,
-    cost: { ...ZERO_ENERGY, random: 1 },
+    cost: { ...ZERO_ENERGY, colorless: 1 },
     cooldown: 4,
     classes: ['mental'],
     start: [
@@ -63,7 +63,7 @@ export function createPikachu(slot: number): Fighter {
         name: 'Thunderbolt',
         owner: slot,
         description: 'Pikachu unleashes a powerful electric attack, dealing 25 damage to an enemy. Deals 10 additional damage if the target is affected by [Thunder Wave].',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 0,
         classes: ['special'],
         start: [
@@ -86,7 +86,7 @@ export function createPikachu(slot: number): Fighter {
         name: 'Thunder',
         owner: slot,
         description: 'Pikachu calls down a devastating lightning bolt, dealing 40 damage to an enemy and stunning them for 1 turn.',
-        cost: { ...ZERO_ENERGY, electric: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 2, colorless: 1 },
         cooldown: 2,
         classes: ['special'],
         start: [
@@ -101,7 +101,7 @@ export function createPikachu(slot: number): Fighter {
         name: 'Thunder Wave',
         owner: slot,
         description: 'Pikachu paralyzes an enemy with electricity. For 3 turns, the target cannot reduce damage or become invulnerable.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 3,
         classes: ['special'],
         start: [
@@ -133,7 +133,7 @@ export function createCharizard(slot: number): Fighter {
         name: 'Flamethrower',
         owner: slot,
         description: 'Charizard breathes intense flames, dealing 30 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, fire: 1, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 1, colorless: 1 },
         cooldown: 0,
         classes: ['special'],
         start: [
@@ -147,7 +147,7 @@ export function createCharizard(slot: number): Fighter {
         name: 'Fire Blast',
         owner: slot,
         description: 'Charizard unleashes a massive fire attack, dealing 20 damage to all enemies.',
-        cost: { ...ZERO_ENERGY, fire: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 2, colorless: 1 },
         cooldown: 2,
         classes: ['special'],
         start: [
@@ -352,7 +352,7 @@ export function createMewtwo(slot: number): Fighter {
         name: 'Psystrike',
         owner: slot,
         description: 'Mewtwo attacks with psychic waves, dealing 35 piercing damage to an enemy.',
-        cost: { ...ZERO_ENERGY, electric: 2 },
+        cost: { ...ZERO_ENERGY, lightning: 2 },
         cooldown: 1,
         classes: ['special', 'piercing'],
         start: [
@@ -366,7 +366,7 @@ export function createMewtwo(slot: number): Fighter {
         name: 'Psychic',
         owner: slot,
         description: 'Mewtwo assaults the mind of an enemy, dealing 25 damage and weakening their damage by 15 for 2 turns.',
-        cost: { ...ZERO_ENERGY, electric: 1, random: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1, colorless: 1 },
         cooldown: 0,
         classes: ['mental'],
         start: [
@@ -386,7 +386,7 @@ export function createMewtwo(slot: number): Fighter {
         name: 'Recover',
         owner: slot,
         description: 'Mewtwo regenerates its cells, restoring 35 health.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 3,
         classes: ['unique'],
         start: [
@@ -400,7 +400,7 @@ export function createMewtwo(slot: number): Fighter {
         name: 'Barrier',
         owner: slot,
         description: 'Mewtwo creates a powerful psychic barrier. For 2 turns, Mewtwo is invulnerable to physical and special attacks.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 4,
         classes: ['mental'],
         start: [
@@ -424,7 +424,7 @@ export function createGengar(slot: number): Fighter {
         name: 'Shadow Ball',
         owner: slot,
         description: 'Gengar hurls a shadowy blob, dealing 30 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, random: 2 },
+        cost: { ...ZERO_ENERGY, colorless: 2 },
         cooldown: 0,
         classes: ['special'],
         start: [
@@ -438,7 +438,7 @@ export function createGengar(slot: number): Fighter {
         name: 'Hypnosis',
         owner: slot,
         description: 'Gengar puts an enemy to sleep, stunning them for 2 turns. Cannot be used on an enemy already affected.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 3,
         classes: ['mental'],
         start: [
@@ -452,7 +452,7 @@ export function createGengar(slot: number): Fighter {
         name: 'Curse',
         owner: slot,
         description: 'Gengar sacrifices 15 health to curse an enemy. For 4 turns, they take 15 affliction damage per turn.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 3,
         classes: ['mental'],
         start: [
@@ -498,7 +498,7 @@ export function createAlakazam(slot: number): Fighter {
         name: 'Psybeam',
         owner: slot,
         description: 'Alakazam fires a peculiar ray, dealing 25 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 0,
         classes: ['special'],
         start: [
@@ -512,7 +512,7 @@ export function createAlakazam(slot: number): Fighter {
         name: 'Focus Blast',
         owner: slot,
         description: 'Alakazam releases fighting spirit, dealing 40 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, electric: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 2, colorless: 1 },
         cooldown: 2,
         classes: ['special'],
         start: [
@@ -526,7 +526,7 @@ export function createAlakazam(slot: number): Fighter {
         name: 'Calm Mind',
         owner: slot,
         description: 'Alakazam calms its mind. For 3 turns, Alakazam deals 15 additional damage and takes 15 less damage.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 4,
         classes: ['mental'],
         start: [
@@ -559,7 +559,7 @@ export function createDragonite(slot: number): Fighter {
         name: 'Dragon Claw',
         owner: slot,
         description: 'Dragonite slashes with sharp claws, dealing 25 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 0,
         classes: ['physical'],
         start: [
@@ -573,7 +573,7 @@ export function createDragonite(slot: number): Fighter {
         name: 'Outrage',
         owner: slot,
         description: 'Dragonite goes on a rampage, dealing 45 damage to an enemy. Dragonite becomes confused and is stunned for 1 turn afterward.',
-        cost: { ...ZERO_ENERGY, fire: 1, random: 2 },
+        cost: { ...ZERO_ENERGY, fire: 1, colorless: 2 },
         cooldown: 2,
         classes: ['physical'],
         start: [
@@ -608,7 +608,7 @@ export function createDragonite(slot: number): Fighter {
         name: 'Roost',
         owner: slot,
         description: 'Dragonite lands and rests, restoring 30 health but becoming vulnerable to ground attacks for 1 turn.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 3,
         classes: ['unique'],
         start: [
@@ -632,7 +632,7 @@ export function createSnorlax(slot: number): Fighter {
         name: 'Body Slam',
         owner: slot,
         description: 'Snorlax throws its weight around, dealing 25 damage to an enemy and stunning their physical skills for 1 turn.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 0,
         classes: ['physical'],
         start: [
@@ -647,7 +647,7 @@ export function createSnorlax(slot: number): Fighter {
         name: 'Hyper Beam',
         owner: slot,
         description: 'Snorlax fires a devastating beam, dealing 55 damage to an enemy. Snorlax must rest and is stunned for 1 turn.',
-        cost: { ...ZERO_ENERGY, random: 3 },
+        cost: { ...ZERO_ENERGY, colorless: 3 },
         cooldown: 2,
         classes: ['special'],
         start: [
@@ -662,7 +662,7 @@ export function createSnorlax(slot: number): Fighter {
         name: 'Rest',
         owner: slot,
         description: 'Snorlax goes to sleep, restoring all health but becoming stunned for 2 turns.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 5,
         classes: ['unique'],
         start: [
@@ -690,7 +690,7 @@ export function createSnorlax(slot: number): Fighter {
         name: 'Block',
         owner: slot,
         description: 'Snorlax braces itself, creating 50 destructible defense.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 4,
         classes: ['physical'],
         start: [
@@ -718,7 +718,7 @@ export function createTyranitar(slot: number): Fighter {
         name: 'Crunch',
         owner: slot,
         description: 'Tyranitar bites with vicious fangs, dealing 25 damage and reducing enemy defense by 10 for 2 turns.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 0,
         classes: ['physical'],
         start: [
@@ -738,7 +738,7 @@ export function createTyranitar(slot: number): Fighter {
         name: 'Stone Edge',
         owner: slot,
         description: 'Tyranitar strikes with sharp stones, dealing 35 piercing damage to an enemy.',
-        cost: { ...ZERO_ENERGY, fire: 1, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 1, colorless: 1 },
         cooldown: 1,
         classes: ['physical', 'piercing'],
         start: [
@@ -752,7 +752,7 @@ export function createTyranitar(slot: number): Fighter {
         name: 'Sandstorm',
         owner: slot,
         description: 'Tyranitar summons a sandstorm. For 3 turns, all enemies take 10 affliction damage per turn.',
-        cost: { ...ZERO_ENERGY, fire: 1, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 1, colorless: 1 },
         cooldown: 4,
         classes: ['special'],
         start: [
@@ -798,7 +798,7 @@ export function createGarchomp(slot: number): Fighter {
         name: 'Earthquake',
         owner: slot,
         description: 'Garchomp shakes the ground, dealing 20 damage to all enemies.',
-        cost: { ...ZERO_ENERGY, fire: 1, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 1, colorless: 1 },
         cooldown: 2,
         classes: ['physical'],
         start: [
@@ -812,7 +812,7 @@ export function createGarchomp(slot: number): Fighter {
         name: 'Swords Dance',
         owner: slot,
         description: 'Garchomp sharpens its claws. For 4 turns, Garchomp deals 20 additional damage.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 4,
         classes: ['mental'],
         start: [
@@ -844,7 +844,7 @@ export function createLucario(slot: number): Fighter {
         name: 'Aura Sphere',
         owner: slot,
         description: 'Lucario fires a sphere of aura energy, dealing 25 damage to an enemy. This attack never misses.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 0,
         classes: ['special', 'bypassing'],
         start: [
@@ -858,7 +858,7 @@ export function createLucario(slot: number): Fighter {
         name: 'Close Combat',
         owner: slot,
         description: 'Lucario unleashes a flurry of attacks, dealing 45 damage but reducing its own defense by 15 for 2 turns.',
-        cost: { ...ZERO_ENERGY, electric: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 2, colorless: 1 },
         cooldown: 2,
         classes: ['physical'],
         start: [
@@ -878,7 +878,7 @@ export function createLucario(slot: number): Fighter {
         name: 'Counter',
         owner: slot,
         description: 'Lucario prepares to counter. If attacked this turn, the attacker takes 25 damage.',
-        cost: { ...ZERO_ENERGY, electric: 1 },
+        cost: { ...ZERO_ENERGY, lightning: 1 },
         cooldown: 3,
         classes: ['physical'],
         start: [
@@ -924,7 +924,7 @@ export function createGyarados(slot: number): Fighter {
         name: 'Hydro Pump',
         owner: slot,
         description: 'Gyarados blasts water with extreme force, dealing 40 damage to an enemy.',
-        cost: { ...ZERO_ENERGY, water: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, water: 2, colorless: 1 },
         cooldown: 2,
         classes: ['special'],
         start: [
@@ -986,7 +986,7 @@ export function createMachamp(slot: number): Fighter {
         name: 'Cross Chop',
         owner: slot,
         description: 'Machamp slashes with both arms, dealing 35 piercing damage to an enemy.',
-        cost: { ...ZERO_ENERGY, fire: 2, random: 1 },
+        cost: { ...ZERO_ENERGY, fire: 2, colorless: 1 },
         cooldown: 2,
         classes: ['physical', 'piercing'],
         start: [
@@ -1020,7 +1020,7 @@ export function createMachamp(slot: number): Fighter {
         name: 'No Guard',
         owner: slot,
         description: 'Machamp braces for impact, creating 35 destructible defense.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 4,
         classes: ['physical'],
         start: [
@@ -1091,7 +1091,7 @@ export function createScizor(slot: number): Fighter {
         name: 'Roost',
         owner: slot,
         description: 'Scizor lands and rests, restoring 25 health.',
-        cost: { ...ZERO_ENERGY, random: 1 },
+        cost: { ...ZERO_ENERGY, colorless: 1 },
         cooldown: 3,
         classes: ['unique'],
         start: [

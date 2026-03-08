@@ -1,89 +1,128 @@
 /**
- * Pokemon Arena - Socket.io Client
- * Real-time connection to game server
+ * Pokemon Arena - Socket.io Client v2
+ * Real-time connection to game server with JWT auth
  */
 
 import { io, Socket } from 'socket.io-client';
+import { logger } from '@/lib/logger';
 
-// Types
-export interface GameSocketEvents {
-  // Server -> Client
-  authenticated: { success: boolean; oderId: string };
-  onlineCount: { count: number };
-  queueJoined: { position: number; queueType: string; estimatedWait: number };
-  queueLeft: { success: boolean };
-  battleStart: BattleStartData;
-  turnUpdate: TurnUpdateData;
-  turnTimer: { remaining: number };
-  readyConfirmed: { success: boolean };
-  energyUpdated: { energy: Energy };
-  battleEnd: BattleEndData;
-  chatMessage: { username: string; message: string; timestamp: number };
-  error: { message: string };
+// =============================================================================
+// TYPES — match server protocol
+// =============================================================================
+
+export interface Energy {
+  fire: number;
+  water: number;
+  grass: number;
+  lightning: number;
+  colorless: number;
 }
 
-export interface BattleStartData {
-  oderId: string;
-  opponent: {
-    username: string;
-    level: number;
-    team: Array<{
-      name: string;
-      types: string[];
-      currentHP: number;
-      maxHP: number;
-    }>;
-  };
-  yourTeam: BattlePokemonState[];
-  energy: Energy;
+/** Action intent sent to server */
+export interface ActionIntent {
+  userSlot: number;
+  skillIndex: number;
+  targetSlot: number;
+}
+
+/** Fighter as seen by client */
+export interface ClientFighter {
+  slot: number;
+  name: string;
+  health: number;
+  maxHealth: number;
+  alive: boolean;
+  skills: ClientSkill[];
+  statuses: Array<{ name: string; duration: number; visible: boolean; helpful: boolean }>;
+  cooldowns: number[];
+}
+
+export interface ClientSkill {
+  name: string;
+  description: string;
+  cost: Energy;
+  cooldown: number;
+  currentCooldown: number;
+  classes: string[];
+  target: string;
+}
+
+export interface ClientLogEntry {
+  type: string;
+  message: string;
+  source?: number;
+  target?: number;
+  value?: number;
+}
+
+/** Server → Client: battle state (for battleStart, turnUpdate, battleReconnect) */
+export interface ClientBattleState {
+  battleId: string;
   turn: number;
   turnTimeRemaining: number;
+  yourFighters: ClientFighter[];
+  opponentFighters: ClientFighter[];
+  yourEnergy: Energy;
+  log: ClientLogEntry[];
 }
 
-export interface TurnUpdateData {
-  turn: number;
-  yourTeam: BattlePokemonState[];
-  opponentTeam: Array<{
-    name: string;
-    currentHP: number;
-    maxHP: number;
-    status: StatusEffect | null;
-  }>;
-  energy: Energy;
-  battleLog: BattleLogEntry[];
+export interface BattleStartData extends ClientBattleState {
+  opponent: { username: string; level: number };
+}
+
+export interface TurnUpdateData extends ClientBattleState {
+  log: ClientLogEntry[];
+}
+
+export interface BattleReconnectData extends ClientBattleState {
+  opponent: { username: string; level: number };
+}
+
+export interface PlayerResultData {
+  won: boolean;
+  expGained: number;
+  ladderChange: number;
+  newLevel: number;
+  newLP: number;
+  newStreak: number;
+  leveledUp: boolean;
+  // Competitive rank info
+  oldRankLabel: string;
+  newRankLabel: string;
+  oldRankTier: string;
+  newRankTier: string;
+  oldRankDivision: string;
+  newRankDivision: string;
+  oldRankIcon: string;
+  newRankIcon: string;
+  rankUp: boolean;
+  rankDown: boolean;
+  tierChanged: boolean;
 }
 
 export interface BattleEndData {
   winnerId: string;
-  reason: 'knockout' | 'surrender' | 'disconnect';
-  battleLog: BattleLogEntry[];
-  player1Team?: BattlePokemonState[];
-  player2Team?: BattlePokemonState[];
+  reason: 'knockout' | 'surrender' | 'disconnect' | 'timeout';
+  turns: number;
+  result: PlayerResultData;
 }
 
-export interface BattlePokemonState {
-  pokemon: {
-    id: string;
-    name: string;
-    types: string[];
-    hp: number;
-    moves: MoveData[];
-  };
-  currentHP: number;
-  maxHP: number;
-  status: StatusEffect | null;
-  effects: StatusEffect[];
-  cooldowns: number[];
-  statChanges: {
-    attack: number;
-    defense: number;
-    speed: number;
-  };
+/** Team data sent to server */
+export interface TeamData {
+  pokemon: PokemonSelection[];
 }
 
-export interface MoveData {
+export interface PokemonSelection {
+  dbId: string;
   name: string;
-  type: string;
+  types: string[];
+  health: number;
+  skills: SkillData[];
+}
+
+export interface SkillData {
+  name: string;
+  description: string;
   damage: number;
   healing: number;
   target: string;
@@ -93,95 +132,58 @@ export interface MoveData {
   cooldown: number;
 }
 
-export interface StatusEffect {
-  type: string;
-  turnsRemaining: number;
-  value?: number;
-}
+// =============================================================================
+// SOCKET CLIENT
+// =============================================================================
 
-export interface Energy {
-  fire: number;
-  water: number;
-  grass: number;
-  electric: number;
-  colorless: number;
-}
-
-export interface BattleLogEntry {
-  id: string;
-  text: string;
-  type: string;
-  timestamp: number;
-}
-
-export interface TeamSelection {
-  slot1: PokemonData | null;
-  slot2: PokemonData | null;
-  slot3: PokemonData | null;
-}
-
-export interface PokemonData {
-  id: string;
-  name: string;
-  types: string[];
-  hp: number;
-  moves: MoveData[];
-}
-
-// Socket Client Class
 class GameSocketClient {
   private socket: Socket | null = null;
   private listeners: Map<string, Set<Function>> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
-  // Connection state
   public isConnected = false;
-  public oderId: string | null = null;
+  public trainerId: string | null = null;
 
-  constructor() {
-    // Will be initialized on connect
-  }
+  connect(serverUrl?: string): Promise<void> {
+    const url = serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'http://localhost:3010';
 
-  connect(serverUrl: string = 'http://localhost:3010'): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
         resolve();
         return;
       }
 
-      this.socket = io(serverUrl, {
+      this.socket = io(url, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: 1000,
-        timeout: 10000
+        timeout: 10000,
       });
 
       this.socket.on('connect', () => {
-        console.log('🎮 Connected to game server');
+        logger.debug('Connected to game server');
         this.isConnected = true;
-        this.oderId = this.socket?.id || null;
         this.reconnectAttempts = 0;
-        this.emit('connectionChange', { connected: true });
+        this.emitLocal('connectionChange', { connected: true });
         resolve();
       });
 
       this.socket.on('disconnect', (reason) => {
-        console.log('❌ Disconnected from game server:', reason);
+        logger.debug(`Disconnected: ${reason}`);
         this.isConnected = false;
-        this.emit('connectionChange', { connected: false, reason });
+        this.emitLocal('connectionChange', { connected: false, reason });
       });
 
       this.socket.on('connect_error', (error) => {
-        console.error('🔥 Connection error:', error.message);
+        logger.error(`Connection error: ${error.message}`);
         this.reconnectAttempts++;
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
           reject(new Error('Failed to connect to game server'));
         }
       });
 
-      // Setup event listeners
       this.setupEventListeners();
     });
   }
@@ -191,6 +193,8 @@ class GameSocketClient {
 
     const events = [
       'authenticated',
+      'authError',
+      'forceDisconnect',
       'onlineCount',
       'queueJoined',
       'queueLeft',
@@ -198,15 +202,22 @@ class GameSocketClient {
       'turnUpdate',
       'turnTimer',
       'readyConfirmed',
-      'energyUpdated',
+      'opponentReady',
       'battleEnd',
+      'battleReconnect',
+      'opponentDisconnected',
+      'opponentReconnected',
+      'privateRoomCreated',
+      'privateRoomExpired',
       'chatMessage',
-      'error'
+      'emote',
+      'rematchAccepted',
+      'error',
     ];
 
     events.forEach(event => {
       this.socket?.on(event, (data: unknown) => {
-        this.emit(event, data);
+        this.emitLocal(event, data);
       });
     });
   }
@@ -215,44 +226,40 @@ class GameSocketClient {
     this.socket?.disconnect();
     this.socket = null;
     this.isConnected = false;
-    this.oderId = null;
+    this.trainerId = null;
   }
 
-  // Event emitter pattern
+  // ==================== Event Emitter ====================
+
   on(event: string, callback: Function) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
     this.listeners.get(event)!.add(callback);
-
-    // Return unsubscribe function
-    return () => {
-      this.listeners.get(event)?.delete(callback);
-    };
+    return () => { this.listeners.get(event)?.delete(callback); };
   }
 
   off(event: string, callback: Function) {
     this.listeners.get(event)?.delete(callback);
   }
 
-  private emit(event: string, data: unknown) {
+  private emitLocal(event: string, data: unknown) {
     this.listeners.get(event)?.forEach(cb => {
-      try {
-        cb(data);
-      } catch (error) {
-        console.error(`Error in ${event} listener:`, error);
+      try { cb(data); } catch (error) {
+        logger.error(`Error in ${event} listener:`, error instanceof Error ? error : undefined);
       }
     });
   }
 
-  // ==================== GAME ACTIONS ====================
+  // ==================== ACTIONS ====================
 
-  authenticate(data: { oderId: string; username: string; level: number; ladderPoints: number }) {
-    this.socket?.emit('authenticate', data);
-    this.oderId = data.oderId;
+  /** Authenticate with JWT token */
+  authenticate(token: string) {
+    this.socket?.emit('authenticate', { token });
   }
 
-  joinQueue(team: TeamSelection, queueType: 'quick' | 'ranked' = 'quick') {
+  /** Join matchmaking queue */
+  joinQueue(team: TeamData, queueType: 'quick' | 'ranked' = 'quick') {
     this.socket?.emit('joinQueue', { team, queueType });
   }
 
@@ -260,12 +267,9 @@ class GameSocketClient {
     this.socket?.emit('leaveQueue');
   }
 
-  submitMoves(moves: Record<number, number | null>, targets: Record<number, number | null>) {
-    this.socket?.emit('playerReady', { moves, targets });
-  }
-
-  exchangeEnergy(fromType: string) {
-    this.socket?.emit('exchangeEnergy', { fromType });
+  /** Submit move intents for this turn */
+  submitMoves(intents: ActionIntent[]) {
+    this.socket?.emit('submitMoves', { intents });
   }
 
   surrender() {
@@ -276,24 +280,30 @@ class GameSocketClient {
     this.socket?.emit('chatMessage', { message });
   }
 
-  // ==================== GETTERS ====================
+  /** Create a private battle room */
+  createPrivateRoom(team: TeamData) {
+    this.socket?.emit('createPrivateRoom', { team });
+  }
+
+  /** Join a private battle room by code */
+  joinPrivateRoom(roomId: string, team: TeamData) {
+    this.socket?.emit('joinPrivateRoom', { roomId, team });
+  }
+
+  /** Send an emote during battle */
+  sendEmote(emote: string) {
+    this.socket?.emit('sendEmote', { emote });
+  }
+
+  /** Request a rematch after battle ends */
+  requestRematch() {
+    this.socket?.emit('requestRematch');
+  }
 
   getSocket(): Socket | null {
     return this.socket;
   }
-
-  getConnectionState(): { connected: boolean; oderId: string | null } {
-    return {
-      connected: this.isConnected,
-      oderId: this.oderId
-    };
-  }
 }
 
-// Singleton instance
+// Singleton
 export const gameSocket = new GameSocketClient();
-
-// React hook for socket
-export function useGameSocket() {
-  return gameSocket;
-}

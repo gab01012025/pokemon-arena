@@ -1,65 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { registerTrainer } from '@/lib/auth';
 import { registerSchema } from '@/lib/validations';
-import { ZodError } from 'zod';
+import { apiHandler, APIResponse, APIErrors, rateLimit, rateLimits, getClientIP, validateRequest } from '@/lib/api-handler';
 
-export async function POST(request: NextRequest) {
+export const POST = apiHandler(async (request: NextRequest) => {
+  // Rate limiting - 5 attempts per 15 minutes
+  const clientIP = getClientIP(request);
+  if (!rateLimit(`auth:register:${clientIP}`, rateLimits.auth.maxRequests, rateLimits.auth.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many registration attempts. Please try again later.');
+  }
+
+  const validate = validateRequest(registerSchema);
+  const validatedData = await validate(request);
+
+  // Registrar treinador
+  let trainer;
   try {
-    const body = await request.json();
-    
-    // Validar dados
-    const validatedData = registerSchema.parse(body);
-    
-    // Registrar treinador
-    const trainer = await registerTrainer(
+    trainer = await registerTrainer(
       validatedData.username,
       validatedData.email,
-      validatedData.password
-    );
-    
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Account created successfully!',
-        user: trainer,
-      },
-      { status: 201 }
+      validatedData.password,
+      validatedData.referralCode,
     );
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Validation error',
-          errors: error.issues.map((e) => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
-        },
-        { status: 400 }
-      );
+    if (error instanceof Error && error.message.includes('already')) {
+      throw APIErrors.conflict(error.message);
     }
-    
-    if (error instanceof Error) {
-      // Erros conhecidos (username/email já existe)
-      if (error.message.includes('already')) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: error.message,
-          },
-          { status: 409 }
-        );
-      }
-    }
-    
-    console.error('Register error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'An unexpected error occurred',
-      },
-      { status: 500 }
-    );
+    throw error;
   }
-}
+
+  return APIResponse.created({
+    message: 'Account created successfully!',
+    user: trainer,
+  });
+});

@@ -1,122 +1,91 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 
 const CLAN_CREATION_COST = 10000;
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+export const POST = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
 
-    const body = await request.json();
-    const { name, tag, description } = body;
+  const ip = getClientIP(req);
+  if (!rateLimit(`create-clan:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+    throw APIErrors.tooManyRequests();
+  }
 
-    // Validação
-    if (!name || name.length < 3 || name.length > 30) {
-      return NextResponse.json(
-        { error: 'Nome deve ter entre 3 e 30 caracteres' },
-        { status: 400 }
-      );
-    }
+  const { name, tag, description } = await req.json();
 
-    if (!tag || tag.length < 2 || tag.length > 5) {
-      return NextResponse.json(
-        { error: 'Tag deve ter entre 2 e 5 caracteres' },
-        { status: 400 }
-      );
-    }
+  if (!name || name.length < 3 || name.length > 30) {
+    throw APIErrors.badRequest('Nome deve ter entre 3 e 30 caracteres');
+  }
 
-    if (!/^[A-Z0-9]+$/.test(tag)) {
-      return NextResponse.json(
-        { error: 'Tag deve conter apenas letras maiúsculas e números' },
-        { status: 400 }
-      );
-    }
+  if (!tag || tag.length < 2 || tag.length > 5) {
+    throw APIErrors.badRequest('Tag deve ter entre 2 e 5 caracteres');
+  }
 
-    if (description && description.length > 500) {
-      return NextResponse.json(
-        { error: 'Descrição não pode ter mais de 500 caracteres' },
-        { status: 400 }
-      );
-    }
+  if (!/^[A-Z0-9]+$/.test(tag)) {
+    throw APIErrors.badRequest('Tag deve conter apenas letras maiúsculas e números');
+  }
 
-    // Verificar se trainer já está em um clã
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: session.user.id },
-      include: { clanMember: true },
-    });
+  if (description && description.length > 500) {
+    throw APIErrors.badRequest('Descrição não pode ter mais de 500 caracteres');
+  }
 
-    if (!trainer) {
-      return NextResponse.json({ error: 'Trainer não encontrado' }, { status: 404 });
-    }
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    include: { clanMember: true },
+  });
 
-    if (trainer.clanMember) {
-      return NextResponse.json(
-        { error: 'Você já está em um clã' },
-        { status: 400 }
-      );
-    }
+  if (!trainer) {
+    throw APIErrors.notFound('Trainer não encontrado');
+  }
 
-    // Verificar XP
-    if (trainer.experience < CLAN_CREATION_COST) {
-      return NextResponse.json(
-        { error: `Você precisa de ${CLAN_CREATION_COST.toLocaleString()} XP para criar um clã` },
-        { status: 400 }
-      );
-    }
+  if (trainer.clanMember) {
+    throw APIErrors.badRequest('Você já está em um clã');
+  }
 
-    // Verificar se nome ou tag já existem
-    const existingClan = await prisma.clan.findFirst({
-      where: {
-        OR: [
-          { name: { equals: name, mode: 'insensitive' } },
-          { tag: { equals: tag, mode: 'insensitive' } },
-        ],
-      },
-    });
+  if (trainer.experience < CLAN_CREATION_COST) {
+    throw APIErrors.badRequest(`Você precisa de ${CLAN_CREATION_COST.toLocaleString()} XP para criar um clã`);
+  }
 
-    if (existingClan) {
-      return NextResponse.json(
-        { error: 'Nome ou tag do clã já está em uso' },
-        { status: 400 }
-      );
-    }
+  const existingClan = await prisma.clan.findFirst({
+    where: {
+      OR: [
+        { name: { equals: name, mode: 'insensitive' } },
+        { tag: { equals: tag, mode: 'insensitive' } },
+      ],
+    },
+  });
 
-    // Criar clã e adicionar líder
-    const clan = await prisma.clan.create({
-      data: {
-        name,
-        tag,
-        description: description || '',
-        leaderId: trainer.id,
-        members: {
-          create: {
-            trainerId: trainer.id,
-            role: 'leader',
-          },
+  if (existingClan) {
+    throw APIErrors.conflict('Nome ou tag do clã já está em uso');
+  }
+
+  const clan = await prisma.clan.create({
+    data: {
+      name,
+      tag,
+      description: description || '',
+      leaderId: userId,
+      members: {
+        create: {
+          trainerId: userId,
+          role: 'leader',
         },
       },
-    });
+    },
+  });
 
-    // Descontar XP
-    await prisma.trainer.update({
-      where: { id: trainer.id },
-      data: { experience: { decrement: CLAN_CREATION_COST } },
-    });
+  await prisma.trainer.update({
+    where: { id: userId },
+    data: { experience: { decrement: CLAN_CREATION_COST } },
+  });
 
-    return NextResponse.json({
-      message: 'Clã criado com sucesso',
-      clan: {
-        id: clan.id,
-        name: clan.name,
-        tag: clan.tag,
-      },
-    });
-  } catch (error) {
-    console.error('Error creating clan:', error);
-    return NextResponse.json({ error: 'Erro ao criar clã' }, { status: 500 });
-  }
-}
+  return APIResponse.success({
+    message: 'Clã criado com sucesso',
+    clan: {
+      id: clan.id,
+      name: clan.name,
+      tag: clan.tag,
+    },
+  });
+});

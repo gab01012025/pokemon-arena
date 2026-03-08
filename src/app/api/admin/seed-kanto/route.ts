@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
 
 const ADMIN_USERS = ['admin', 'gab01012025', 'gabriel', 'gab1234'];
 
@@ -216,81 +216,76 @@ const kantoPokemon = [
     ]},
 ];
 
-export async function POST() {
-  try {
-    const session = await getSession();
-    
-    if (!session || !ADMIN_USERS.includes(session.user?.username?.toLowerCase() || '')) {
-      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
-    }
+export const POST = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`admin-seed-kanto:${ip}`, rateLimits.admin.maxRequests, rateLimits.admin.windowMs)) {
+    throw APIErrors.tooManyRequests();
+  }
 
-    // Delete all existing data
-    await prisma.move.deleteMany();
-    await prisma.battleSlot.deleteMany();
-    await prisma.battle.deleteMany();
-    await prisma.trainerPokemon.deleteMany();
-    await prisma.pokemon.deleteMany();
-    await prisma.mission.deleteMany();
-    await prisma.season.deleteMany();
+  const { username } = await requireAuth(req);
 
-    // Create all Pokemon
-    const created: string[] = [];
-    for (const poke of kantoPokemon) {
-      const pokemon = await prisma.pokemon.create({
+  if (!ADMIN_USERS.includes(username.toLowerCase())) {
+    throw APIErrors.forbidden('Admin access required');
+  }
+
+  await prisma.move.deleteMany();
+  await prisma.battleSlot.deleteMany();
+  await prisma.battle.deleteMany();
+  await prisma.trainerPokemon.deleteMany();
+  await prisma.pokemon.deleteMany();
+  await prisma.mission.deleteMany();
+  await prisma.season.deleteMany();
+
+  const created: string[] = [];
+  for (const poke of kantoPokemon) {
+    const pokemon = await prisma.pokemon.create({
+      data: {
+        name: poke.name,
+        description: `The ${poke.name} Pokémon from Kanto region.`,
+        types: JSON.stringify(poke.types),
+        category: poke.category,
+        health: 100,
+        traits: JSON.stringify(poke.traits),
+        isStarter: poke.isStarter,
+        unlockCost: poke.unlockCost,
+      }
+    });
+
+    for (const move of poke.moves) {
+      const moveData = move as { name: string; classes: string[]; cost: Record<string, number>; damage: number; slot: number; cooldown?: number; effects?: unknown[] };
+      await prisma.move.create({
         data: {
-          name: poke.name,
-          description: `The ${poke.name} Pokémon from Kanto region.`,
-          types: JSON.stringify(poke.types),
-          category: poke.category,
-          health: 100,
-          traits: JSON.stringify(poke.traits),
-          isStarter: poke.isStarter,
-          unlockCost: poke.unlockCost,
+          name: moveData.name,
+          description: `${moveData.name} attack.`,
+          classes: JSON.stringify(moveData.classes),
+          cost: JSON.stringify(moveData.cost),
+          damage: moveData.damage,
+          cooldown: moveData.cooldown || 0,
+          duration: 0,
+          healing: 0,
+          effects: JSON.stringify(moveData.effects || []),
+          target: 'OneEnemy',
+          slot: moveData.slot,
+          pokemonId: pokemon.id,
         }
       });
-
-      for (const move of poke.moves) {
-        const moveData = move as { name: string; classes: string[]; cost: Record<string, number>; damage: number; slot: number; cooldown?: number; effects?: unknown[] };
-        await prisma.move.create({
-          data: {
-            name: moveData.name,
-            description: `${moveData.name} attack.`,
-            classes: JSON.stringify(moveData.classes),
-            cost: JSON.stringify(moveData.cost),
-            damage: moveData.damage,
-            cooldown: moveData.cooldown || 0,
-            duration: 0,
-            healing: 0,
-            effects: JSON.stringify(moveData.effects || []),
-            target: 'OneEnemy',
-            slot: moveData.slot,
-            pokemonId: pokemon.id,
-          }
-        });
-      }
-      created.push(poke.name);
     }
-
-    // Create season
-    await prisma.season.create({
-      data: {
-        name: 'Season 1 - Kanto',
-        number: 1,
-        startDate: new Date('2026-01-01'),
-        endDate: new Date('2026-04-01'),
-        isActive: true,
-        rewards: JSON.stringify({ top1: { title: 'Pokemon Master', exp: 10000 } }),
-      }
-    });
-
-    return NextResponse.json({ 
-      success: true, 
-      message: `Criados ${created.length} Pokémon de Kanto!`,
-      pokemon: created 
-    });
-
-  } catch (error) {
-    console.error('Seed error:', error);
-    return NextResponse.json({ error: 'Erro ao popular banco: ' + (error as Error).message }, { status: 500 });
+    created.push(poke.name);
   }
-}
+
+  await prisma.season.create({
+    data: {
+      name: 'Season 1 - Kanto',
+      number: 1,
+      startDate: new Date('2026-01-01'),
+      endDate: new Date('2026-04-01'),
+      isActive: true,
+      rewards: JSON.stringify({ top1: { title: 'Pokemon Master', exp: 10000 } }),
+    }
+  });
+
+  return APIResponse.success({
+    message: `Criados ${created.length} Pokémon de Kanto!`,
+    pokemon: created
+  });
+});

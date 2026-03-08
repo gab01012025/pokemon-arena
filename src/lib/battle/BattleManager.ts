@@ -5,6 +5,7 @@
 
 import { BattleEngine, BattlePlayer, BattleState, createBattlePlayer, createBattlePokemon, BattleMove, TargetType } from './BattleEngine';
 import { prisma } from '../prisma';
+import { logger } from '@/lib/logger';
 
 // ==================== TYPES ====================
 
@@ -343,9 +344,9 @@ class BattleManager {
   private async saveBattleToDb(battleId: string, state: BattleState): Promise<void> {
     try {
       // For now, just log - we can implement full persistence later
-      console.log(`Battle ${battleId} state saved (turn ${state.turn})`);
+      logger.info(`Battle ${battleId} state saved (turn ${state.turn})`);
     } catch (error) {
-      console.error('Error saving battle:', error);
+      logger.error('Error saving battle:', error instanceof Error ? error : undefined);
     }
   }
 
@@ -357,7 +358,7 @@ class BattleManager {
 
     for (const [battleId, battle] of this.activeBattles) {
       if (now - battle.lastActivity.getTime() > timeout) {
-        console.log(`Cleaning up inactive battle: ${battleId}`);
+        logger.info(`Cleaning up inactive battle: ${battleId}`);
         const state = battle.engine.getState();
         this.playerToBattle.delete(state.player1.playerId);
         this.playerToBattle.delete(state.player2.playerId);

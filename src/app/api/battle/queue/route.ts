@@ -2,119 +2,73 @@
  * API: Join Battle Queue
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { battleManager } from '@/lib/battle/BattleManager';
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { teamPokemonIds, queueType = 'quick' } = body;
-
-    if (!teamPokemonIds || !Array.isArray(teamPokemonIds)) {
-      return NextResponse.json(
-        { error: 'teamPokemonIds is required and must be an array' },
-        { status: 400 }
-      );
-    }
-
-    if (teamPokemonIds.length !== 3) {
-      return NextResponse.json(
-        { error: 'You must select exactly 3 Pokemon' },
-        { status: 400 }
-      );
-    }
-
-    const result = await battleManager.joinQueue(
-      session.user.id,
-      session.user.username,
-      teamPokemonIds,
-      queueType
-    );
-
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.message },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({
-      message: result.message,
-      battleId: result.battleId,
-      inQueue: !result.battleId,
-    });
-
-  } catch (error) {
-    console.error('Queue join error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+export const POST = apiHandler(async (req: NextRequest) => {
+  // Rate limit
+  const ip = getClientIP(req);
+  if (!rateLimit(`battle:queue:${ip}`, rateLimits.battle.maxRequests, rateLimits.battle.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many requests');
   }
-}
 
-export async function DELETE(_request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const { userId, username } = await requireAuth(req);
 
-    const left = battleManager.leaveQueue(session.user.id);
+  const body = await req.json();
+  const { teamPokemonIds, queueType = 'quick' } = body;
 
-    return NextResponse.json({
-      success: true,
-      message: left ? 'Left queue' : 'You were not in queue',
-    });
-
-  } catch (error) {
-    console.error('Queue leave error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  if (!teamPokemonIds || !Array.isArray(teamPokemonIds)) {
+    throw APIErrors.badRequest('teamPokemonIds is required and must be an array');
   }
-}
 
-export async function GET(_request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const status = battleManager.getQueueStatus(session.user.id);
-    const stats = battleManager.getStats();
-
-    return NextResponse.json({
-      ...status,
-      stats,
-    });
-
-  } catch (error) {
-    console.error('Queue status error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  if (teamPokemonIds.length !== 3) {
+    throw APIErrors.badRequest('You must select exactly 3 Pokemon');
   }
-}
+
+  const result = await battleManager.joinQueue(
+    userId,
+    username,
+    teamPokemonIds,
+    queueType
+  );
+
+  if (!result.success) {
+    throw APIErrors.badRequest(result.message);
+  }
+
+  return APIResponse.success({
+    message: result.message,
+    battleId: result.battleId,
+    inQueue: !result.battleId,
+  });
+});
+
+export const DELETE = apiHandler(async (req: NextRequest) => {
+  // Rate limit
+  const ip = getClientIP(req);
+  if (!rateLimit(`battle:queue-leave:${ip}`, rateLimits.battle.maxRequests, rateLimits.battle.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many requests');
+  }
+
+  const { userId } = await requireAuth(req);
+
+  const left = battleManager.leaveQueue(userId);
+
+  return APIResponse.success({
+    message: left ? 'Left queue' : 'You were not in queue',
+  });
+});
+
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
+
+  const status = battleManager.getQueueStatus(userId);
+  const stats = battleManager.getStats();
+
+  return APIResponse.success({
+    ...status,
+    stats,
+  });
+});
 

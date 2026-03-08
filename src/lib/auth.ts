@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
+import { generateReferralCode, applyReferral } from './social';
 
 // Chave secreta para JWT - Em produção, use variável de ambiente
 const JWT_SECRET = new TextEncoder().encode(
@@ -135,7 +136,8 @@ export async function destroySession() {
 export async function registerTrainer(
   username: string,
   email: string,
-  password: string
+  password: string,
+  referredByCode?: string,
 ) {
   // Verificar se usuário já existe
   const existingUser = await prisma.trainer.findFirst({
@@ -154,14 +156,35 @@ export async function registerTrainer(
   // Hash da senha
   const hashedPassword = await hashPassword(password);
   
+  // Generate unique referral code for the new trainer
+  let referralCode: string | undefined;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateReferralCode();
+    const taken = await prisma.trainer.findUnique({ where: { referralCode: code } });
+    if (!taken) {
+      referralCode = code;
+      break;
+    }
+  }
+  
   // Criar treinador
   const trainer = await prisma.trainer.create({
     data: {
       username,
       email: email.toLowerCase(),
       password: hashedPassword,
+      referralCode,
     },
   });
+
+  // Process referral if a code was provided
+  if (referredByCode) {
+    try {
+      await applyReferral(trainer.id, referredByCode);
+    } catch {
+      // Don't fail registration if referral fails
+    }
+  }
   
   // Criar sessão
   await createSession(trainer.id, trainer.username, trainer.email);

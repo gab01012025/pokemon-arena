@@ -61,7 +61,7 @@ function createTestSkill(
     name,
     owner,
     description: `Test skill: ${name}`,
-    cost: { fire: 1, water: 0, grass: 0, electric: 0, random: 0 },
+    cost: { fire: 1, water: 0, grass: 0, lightning: 0, colorless: 0 },
     cooldown: 1,
     start: effects,
     effects: [],
@@ -117,8 +117,8 @@ function createTestBattle(): BattleState {
   // Give both teams some energy
   return {
     ...state,
-    playerEnergy: { fire: 3, water: 2, grass: 2, electric: 1, random: 2 },
-    opponentEnergy: { fire: 3, water: 2, grass: 2, electric: 1, random: 2 },
+    playerEnergy: { fire: 3, water: 2, grass: 2, lightning: 1, colorless: 2 },
+    opponentEnergy: { fire: 3, water: 2, grass: 2, lightning: 1, colorless: 2 },
   };
 }
 
@@ -322,7 +322,7 @@ describe('Destructible Defense vs Damage', () => {
     const defenseSkill = createSkill({
       name: 'Barrier',
       owner: 0,
-      cost: { fire: 1, water: 0, grass: 0, electric: 0, random: 0 },
+      cost: { fire: 1, water: 0, grass: 0, lightning: 0, colorless: 0 },
       cooldown: 2,
       start: [
         { target: 'self', apply: defense('Barrier', 30) },
@@ -353,7 +353,7 @@ describe('Destructible Defense vs Damage', () => {
     const attackSkill = createSkill({
       name: 'Psychic',
       owner: 3,
-      cost: { fire: 0, water: 0, grass: 0, electric: 0, random: 1 },
+      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
       cooldown: 0,
       start: [
         { target: 'enemy', apply: damage(25) },

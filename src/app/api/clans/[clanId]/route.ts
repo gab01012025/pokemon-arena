@@ -1,20 +1,14 @@
-/**
- * API: Specific Clan Details
- */
-
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession } from '@/lib/auth';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 
 // GET - Get clan details
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ clanId: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ clanId: string }> }
 ) {
-  try {
-    const { clanId } = await params;
-
-    // Try to find by ID or by name/tag (SQLite case-insensitive workaround)
+  const { clanId } = await context.params;
+  return apiHandler(async () => {
     const clan = await prisma.clan.findFirst({
       where: {
         OR: [
@@ -92,18 +86,13 @@ export async function GET(
     });
 
     if (!clan) {
-      return NextResponse.json(
-        { error: 'Clan not found' },
-        { status: 404 }
-      );
+      throw APIErrors.notFound('Clan not found');
     }
 
-    // Calculate rank
     const rank = await prisma.clan.count({
       where: { points: { gt: clan.points } }
     }) + 1;
 
-    // Format members
     const members = clan.members.map(m => ({
       id: m.trainer.id,
       username: m.trainer.username,
@@ -115,7 +104,6 @@ export async function GET(
       joinedAt: m.joinedAt,
     }));
 
-    // Format wars history
     const warHistory = [
       ...clan.warsAsAttacker.map(w => ({
         id: w.id,
@@ -137,7 +125,7 @@ export async function GET(
       }))
     ].sort((a, b) => new Date(b.date!).getTime() - new Date(a.date!).getTime()).slice(0, 10);
 
-    return NextResponse.json({
+    return APIResponse.success({
       id: clan.id,
       name: clan.name,
       tag: clan.tag,
@@ -149,8 +137,8 @@ export async function GET(
         points: clan.points,
         wins: clan.wins,
         losses: clan.losses,
-        winRate: clan.wins + clan.losses > 0 
-          ? Math.round((clan.wins / (clan.wins + clan.losses)) * 100) 
+        winRate: clan.wins + clan.losses > 0
+          ? Math.round((clan.wins / (clan.wins + clan.losses)) * 100)
           : 0,
       },
       recruitment: {
@@ -164,34 +152,23 @@ export async function GET(
       warHistory,
       createdAt: clan.createdAt,
     });
-
-  } catch (error) {
-    console.error('Clan fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch clan' },
-      { status: 500 }
-    );
-  }
+  })(req);
 }
 
 // POST - Join clan
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ clanId: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ clanId: string }> }
 ) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+  const { clanId } = await context.params;
+  return apiHandler(async (req) => {
+    const { userId } = await requireAuth(req);
+
+    const ip = getClientIP(req);
+    if (!rateLimit(`join-clan:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+      throw APIErrors.tooManyRequests();
     }
 
-    const { clanId } = await params;
-
-    // Get clan
     const clan = await prisma.clan.findUnique({
       where: { id: clanId },
       include: {
@@ -200,95 +177,63 @@ export async function POST(
     });
 
     if (!clan) {
-      return NextResponse.json(
-        { error: 'Clan not found' },
-        { status: 404 }
-      );
+      throw APIErrors.notFound('Clan not found');
     }
 
     if (!clan.isRecruiting) {
-      return NextResponse.json(
-        { error: 'This clan is not recruiting' },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest('This clan is not recruiting');
     }
 
     if (clan._count.members >= clan.maxMembers) {
-      return NextResponse.json(
-        { error: 'This clan is full' },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest('This clan is full');
     }
 
-    // Check if user already in a clan
     const existingMember = await prisma.clanMember.findUnique({
-      where: { trainerId: session.user.id }
+      where: { trainerId: userId }
     });
 
     if (existingMember) {
-      return NextResponse.json(
-        { error: 'You are already in a clan' },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest('You are already in a clan');
     }
 
-    // Check user level
     const trainer = await prisma.trainer.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { level: true }
     });
 
     if (trainer && trainer.level < clan.minLevel) {
-      return NextResponse.json(
-        { error: `Requires level ${clan.minLevel} to join` },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest(`Requires level ${clan.minLevel} to join`);
     }
 
-    // Join clan
     await prisma.clanMember.create({
       data: {
         clanId: clan.id,
-        trainerId: session.user.id,
+        trainerId: userId,
         role: 'member'
       }
     });
 
-    return NextResponse.json({
-      success: true,
-      message: `Joined ${clan.name}!`
-    });
-
-  } catch (error) {
-    console.error('Clan join error:', error);
-    return NextResponse.json(
-      { error: 'Failed to join clan' },
-      { status: 500 }
-    );
-  }
+    return APIResponse.success({ message: `Joined ${clan.name}!` });
+  })(req);
 }
 
 // DELETE - Leave clan
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ clanId: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ clanId: string }> }
 ) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+  const { clanId } = await context.params;
+  return apiHandler(async (req) => {
+    const { userId } = await requireAuth(req);
+
+    const ip = getClientIP(req);
+    if (!rateLimit(`leave-clan:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+      throw APIErrors.tooManyRequests();
     }
 
-    const { clanId } = await params;
-
-    // Get member record
     const member = await prisma.clanMember.findFirst({
       where: {
-        trainerId: session.user.id,
+        trainerId: userId,
         clanId
       },
       include: {
@@ -297,35 +242,17 @@ export async function DELETE(
     });
 
     if (!member) {
-      return NextResponse.json(
-        { error: 'You are not a member of this clan' },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest('You are not a member of this clan');
     }
 
-    // Leaders can't leave (must transfer or disband)
-    if (member.clan.leaderId === session.user.id) {
-      return NextResponse.json(
-        { error: 'Leaders cannot leave. Transfer leadership or disband the clan.' },
-        { status: 400 }
-      );
+    if (member.clan.leaderId === userId) {
+      throw APIErrors.badRequest('Leaders cannot leave. Transfer leadership or disband the clan.');
     }
 
-    // Leave clan
     await prisma.clanMember.delete({
       where: { id: member.id }
     });
 
-    return NextResponse.json({
-      success: true,
-      message: `Left ${member.clan.name}`
-    });
-
-  } catch (error) {
-    console.error('Clan leave error:', error);
-    return NextResponse.json(
-      { error: 'Failed to leave clan' },
-      { status: 500 }
-    );
-  }
+    return APIResponse.success({ message: `Left ${member.clan.name}` });
+  })(req);
 }

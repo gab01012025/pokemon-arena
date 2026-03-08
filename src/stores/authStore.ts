@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { logger } from '@/lib/logger';
 
 interface User {
   id: string;
@@ -70,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
           
           return { success: data.success, message: data.message };
         } catch (error) {
-          console.error('Login error:', error);
+          logger.error('Login error:', error instanceof Error ? error : undefined);
           return { success: false, message: 'Connection error. Please try again.' };
         }
       },
@@ -105,7 +106,7 @@ export const useAuthStore = create<AuthState>()(
             errors: data.errors,
           };
         } catch (error) {
-          console.error('Register error:', error);
+          logger.error('Register error:', error instanceof Error ? error : undefined);
           return { success: false, message: 'Connection error. Please try again.' };
         }
       },
@@ -139,7 +140,7 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } catch (error) {
-          console.error('Session check error:', error);
+          logger.error('Session check error:', error instanceof Error ? error : undefined);
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },

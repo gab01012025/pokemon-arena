@@ -4,139 +4,96 @@
  * Note: Team model is for Clans, BattleTeam/BattleSlot for battle teams
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { pokemonIds } = body;
-
-    if (!pokemonIds || !Array.isArray(pokemonIds) || pokemonIds.length !== 3) {
-      return NextResponse.json(
-        { error: 'You must select exactly 3 Pokémon' },
-        { status: 400 }
-      );
-    }
-
-    // Verify all Pokemon exist and are starters
-    const pokemon = await prisma.pokemon.findMany({
-      where: { 
-        id: { in: pokemonIds },
-        isStarter: true,
-      },
-    });
-
-    if (pokemon.length !== 3) {
-      return NextResponse.json(
-        { error: 'Invalid Pokémon selection. Please select 3 starter Pokémon.' },
-        { status: 400 }
-      );
-    }
-
-    // Check if trainer already has unlocked Pokemon
-    const existingPokemon = await prisma.trainerPokemon.findMany({
-      where: { trainerId: session.user.id },
-    });
-
-    if (existingPokemon.length > 0) {
-      return NextResponse.json(
-        { error: 'You already have Pokémon selected' },
-        { status: 400 }
-      );
-    }
-
-    // Add Pokemon to trainer's unlocked collection with battle team settings
-    await prisma.trainerPokemon.createMany({
-      data: pokemonIds.map((pokemonId: string, index: number) => ({
-        trainerId: session.user.id,
-        pokemonId: pokemonId,
-        isActive: true,    // All initially selected Pokemon are active in battle team
-        position: index,   // Position 0, 1, 2 based on selection order
-      })),
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Team selected successfully!',
-      pokemon: pokemon.map(p => ({ id: p.id, name: p.name })),
-    });
-
-  } catch (error) {
-    console.error('Select team error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+export const POST = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`select-team-post:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+    throw APIErrors.tooManyRequests();
   }
-}
 
-export async function GET() {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const { userId } = await requireAuth(req);
 
-    // Get trainer's unlocked Pokemon
-    const trainerPokemon = await prisma.trainerPokemon.findMany({
-      where: { trainerId: session.user.id },
-      include: {
-        pokemon: {
-          include: {
-            moves: {
-              orderBy: { slot: 'asc' },
-            },
+  const body = await req.json();
+  const { pokemonIds } = body;
+
+  if (!pokemonIds || !Array.isArray(pokemonIds) || pokemonIds.length !== 3) {
+    throw APIErrors.badRequest('You must select exactly 3 Pokémon');
+  }
+
+  const pokemon = await prisma.pokemon.findMany({
+    where: { 
+      id: { in: pokemonIds },
+      isStarter: true,
+    },
+  });
+
+  if (pokemon.length !== 3) {
+    throw APIErrors.badRequest('Invalid Pokémon selection. Please select 3 starter Pokémon.');
+  }
+
+  const existingPokemon = await prisma.trainerPokemon.findMany({
+    where: { trainerId: userId },
+  });
+
+  if (existingPokemon.length > 0) {
+    throw APIErrors.badRequest('You already have Pokémon selected');
+  }
+
+  await prisma.trainerPokemon.createMany({
+    data: pokemonIds.map((pokemonId: string, index: number) => ({
+      trainerId: userId,
+      pokemonId: pokemonId,
+      isActive: true,
+      position: index,
+    })),
+  });
+
+  return APIResponse.success({
+    message: 'Team selected successfully!',
+    pokemon: pokemon.map(p => ({ id: p.id, name: p.name })),
+  });
+});
+
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
+
+  const trainerPokemon = await prisma.trainerPokemon.findMany({
+    where: { trainerId: userId },
+    include: {
+      pokemon: {
+        include: {
+          moves: {
+            orderBy: { slot: 'asc' },
           },
         },
       },
-      orderBy: [
-        { isActive: 'desc' },  // Active Pokemon first
-        { position: 'asc' },    // Then by position
-        { unlockedAt: 'asc' },  // Then by unlock date
-      ],
-    });
+    },
+    orderBy: [
+      { isActive: 'desc' },
+      { position: 'asc' },
+      { unlockedAt: 'asc' },
+    ],
+  });
 
-    if (trainerPokemon.length === 0) {
-      return NextResponse.json({
-        hasTeam: false,
-      });
-    }
-
-    return NextResponse.json({
-      hasTeam: true,
-      pokemon: trainerPokemon.map(tp => ({
-        id: tp.pokemon.id,
-        name: tp.pokemon.name,
-        description: tp.pokemon.description,
-        types: JSON.parse(tp.pokemon.types),
-        health: tp.pokemon.health,
-        moves: tp.pokemon.moves,
-        unlockedAt: tp.unlockedAt,
-        isActive: tp.isActive,
-        position: tp.position,
-      })),
-    });
-
-  } catch (error) {
-    console.error('Get team error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  if (trainerPokemon.length === 0) {
+    return APIResponse.success({ hasTeam: false });
   }
-}
+
+  return APIResponse.success({
+    hasTeam: true,
+    pokemon: trainerPokemon.map(tp => ({
+      id: tp.pokemon.id,
+      name: tp.pokemon.name,
+      description: tp.pokemon.description,
+      types: JSON.parse(tp.pokemon.types),
+      health: tp.pokemon.health,
+      moves: tp.pokemon.moves,
+      unlockedAt: tp.unlockedAt,
+      isActive: tp.isActive,
+      position: tp.position,
+    })),
+  });
+});

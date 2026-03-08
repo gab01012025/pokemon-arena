@@ -3,13 +3,9 @@
  * POST /api/battle/result
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'pokemon-arena-secret-key-2024'
-);
 
 // EXP required for each level (like Naruto Arena)
 const EXP_TABLE: Record<number, number> = {
@@ -125,48 +121,45 @@ function calculateLadderPoints(
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    // Get session token from cookie
-    const sessionCookie = request.cookies.get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+export const POST = apiHandler(async (req: NextRequest) => {
+  // Rate limit
+  const ip = getClientIP(req);
+  if (!rateLimit(`battle:result:${ip}`, rateLimits.battle.maxRequests, rateLimits.battle.windowMs)) {
+    throw APIErrors.tooManyRequests('Too many requests');
+  }
+
+  const { userId } = await requireAuth(req);
+
+  const body = await req.json();
+  const { 
+    won, 
+    surrendered = false,
+    opponentLevel = 1,
+    opponentLadderPoints = 0 
+  } = body;
+
+  if (typeof won !== 'boolean') {
+    throw APIErrors.badRequest('Invalid result');
+  }
+
+  // Get current trainer stats
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      level: true,
+      experience: true,
+      wins: true,
+      losses: true,
+      streak: true,
+      maxStreak: true,
+      ladderPoints: true,
     }
+  });
 
-    // Verify JWT
-    const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-    const trainerId = payload.trainerId as string;
-
-    const body = await request.json();
-    const { 
-      won, 
-      surrendered = false,
-      opponentLevel = 1,
-      opponentLadderPoints = 0 
-    } = body;
-
-    if (typeof won !== 'boolean') {
-      return NextResponse.json({ error: 'Invalid result' }, { status: 400 });
-    }
-
-    // Get current trainer stats
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: trainerId },
-      select: {
-        id: true,
-        level: true,
-        experience: true,
-        wins: true,
-        losses: true,
-        streak: true,
-        maxStreak: true,
-        ladderPoints: true,
-      }
-    });
-
-    if (!trainer) {
-      return NextResponse.json({ error: 'Trainer not found' }, { status: 404 });
-    }
+  if (!trainer) {
+    throw APIErrors.notFound('Trainer not found');
+  }
 
     // Calculate rewards
     const expGained = calculateExpReward(won, trainer.level, opponentLevel, surrendered);
@@ -194,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     // Update trainer in database
     const updatedTrainer = await prisma.trainer.update({
-      where: { id: trainerId },
+      where: { id: userId },
       data: {
         experience: newExp,
         level: newLevel,
@@ -214,8 +207,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
-      success: true,
+    return APIResponse.success({
       rewards: {
         exp: expGained,
         streakBonus: won && newStreak > 1 ? Math.floor(expGained * Math.min(newStreak - 1, 10) * 0.05) : 0,
@@ -233,52 +225,35 @@ export async function POST(request: NextRequest) {
         ladderPoints: updatedTrainer.ladderPoints,
       }
     });
-
-  } catch (error) {
-    console.error('Battle result error:', error);
-    return NextResponse.json({ error: 'Failed to update battle result' }, { status: 500 });
-  }
-}
+});
 
 // GET - Get current trainer stats
-export async function GET(request: NextRequest) {
-  try {
-    const sessionCookie = request.cookies.get('session');
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
+
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    select: {
+      username: true,
+      level: true,
+      experience: true,
+      wins: true,
+      losses: true,
+      streak: true,
+      maxStreak: true,
+      ladderPoints: true,
     }
+  });
 
-    const { payload } = await jwtVerify(sessionCookie.value, JWT_SECRET);
-    const trainerId = payload.trainerId as string;
-
-    const trainer = await prisma.trainer.findUnique({
-      where: { id: trainerId },
-      select: {
-        username: true,
-        level: true,
-        experience: true,
-        wins: true,
-        losses: true,
-        streak: true,
-        maxStreak: true,
-        ladderPoints: true,
-      }
-    });
-
-    if (!trainer) {
-      return NextResponse.json({ error: 'Trainer not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      ...trainer,
-      expToNextLevel: getExpForLevel(trainer.level),
-      winRate: trainer.wins + trainer.losses > 0 
-        ? ((trainer.wins / (trainer.wins + trainer.losses)) * 100).toFixed(1)
-        : '0.0'
-    });
-
-  } catch (error) {
-    console.error('Get stats error:', error);
-    return NextResponse.json({ error: 'Failed to get stats' }, { status: 500 });
+  if (!trainer) {
+    throw APIErrors.notFound('Trainer not found');
   }
-}
+
+  return APIResponse.success({
+    ...trainer,
+    expToNextLevel: getExpForLevel(trainer.level),
+    winRate: trainer.wins + trainer.losses > 0 
+      ? ((trainer.wins / (trainer.wins + trainer.losses)) * 100).toFixed(1)
+      : '0.0'
+  });
+});

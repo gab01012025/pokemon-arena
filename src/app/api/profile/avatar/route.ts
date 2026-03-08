@@ -1,124 +1,83 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
 
-export async function POST(req: NextRequest) {
-  try {
-    // Get session
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('session')?.value;
-    
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    // Validate session
-    const session = await prisma.session.findUnique({
-      where: { sessionToken: sessionToken },
-      include: { trainer: true },
-    });
-
-    if (!session || session.expires < new Date()) {
-      return NextResponse.json({ error: 'Session expired' }, { status: 401 });
-    }
-
-    // Get avatar from body
-    const { avatar } = await req.json();
-
-    if (!avatar || typeof avatar !== 'string') {
-      return NextResponse.json({ error: 'Avatar is required' }, { status: 400 });
-    }
-
-    // Validate avatar format
-    const isValidAvatar = 
-      avatar === 'default' ||
-      avatar.startsWith('pokemon-') ||
-      avatar.startsWith('http://') ||
-      avatar.startsWith('https://') ||
-      /^[a-z0-9-]+$/.test(avatar); // predefined avatar id
-
-    if (!isValidAvatar) {
-      return NextResponse.json({ error: 'Invalid avatar format' }, { status: 400 });
-    }
-
-    // If it's a URL, validate it's from allowed domains
-    if (avatar.startsWith('http')) {
-      const allowedDomains = [
-        'i.imgur.com',
-        'imgur.com',
-        'raw.githubusercontent.com',
-        'pokeres.bastionbot.org',
-        'assets.pokemon.com',
-      ];
-      
-      try {
-        const url = new URL(avatar);
-        if (!allowedDomains.some(domain => url.hostname.includes(domain))) {
-          return NextResponse.json({ 
-            error: 'Only images from imgur.com, github, or pokemon.com are allowed' 
-          }, { status: 400 });
-        }
-      } catch {
-        return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
-      }
-    }
-
-    // Update trainer's avatar
-    const updatedTrainer = await prisma.trainer.update({
-      where: { id: session.trainerId },
-      data: { avatar },
-      select: {
-        id: true,
-        username: true,
-        avatar: true,
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Avatar updated successfully',
-      user: updatedTrainer,
-    });
-
-  } catch (error) {
-    console.error('Error updating avatar:', error);
-    return NextResponse.json(
-      { error: 'Failed to update avatar' },
-      { status: 500 }
-    );
+export const POST = apiHandler(async (req: NextRequest) => {
+  const ip = getClientIP(req);
+  if (!rateLimit(`avatar-post:${ip}`, rateLimits.api.maxRequests, rateLimits.api.windowMs)) {
+    throw APIErrors.tooManyRequests();
   }
-}
 
-export async function GET(req: NextRequest) {
-  try {
-    // Get session
-    const cookieStore = await cookies();
-    const sessionToken = cookieStore.get('session')?.value;
-    
-    if (!sessionToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+  const { userId } = await requireAuth(req);
 
-    // Validate session
-    const session = await prisma.session.findUnique({
-      where: { sessionToken: sessionToken },
-      include: { trainer: { select: { avatar: true, username: true } } },
-    });
+  const { avatar } = await req.json();
 
-    if (!session || session.expires < new Date()) {
-      return NextResponse.json({ error: 'Session expired' }, { status: 401 });
-    }
-
-    return NextResponse.json({
-      avatar: session.trainer.avatar,
-      username: session.trainer.username,
-    });
-
-  } catch (error) {
-    console.error('Error getting avatar:', error);
-    return NextResponse.json(
-      { error: 'Failed to get avatar' },
-      { status: 500 }
-    );
+  if (!avatar || typeof avatar !== 'string') {
+    throw APIErrors.badRequest('Avatar is required');
   }
-}
+
+  const isValidAvatar = 
+    avatar === 'default' ||
+    avatar.startsWith('pokemon-') ||
+    avatar.startsWith('http://') ||
+    avatar.startsWith('https://') ||
+    /^[a-z0-9-]+$/.test(avatar);
+
+  if (!isValidAvatar) {
+    throw APIErrors.badRequest('Invalid avatar format');
+  }
+
+  if (avatar.startsWith('http')) {
+    const allowedDomains = [
+      'i.imgur.com',
+      'imgur.com',
+      'raw.githubusercontent.com',
+      'pokeres.bastionbot.org',
+      'assets.pokemon.com',
+    ];
+    
+    let url: URL;
+    try {
+      url = new URL(avatar);
+    } catch {
+      throw APIErrors.badRequest('Invalid URL format');
+    }
+
+    if (!allowedDomains.some(domain => url.hostname.includes(domain))) {
+      throw APIErrors.badRequest('Only images from imgur.com, github, or pokemon.com are allowed');
+    }
+  }
+
+  const updatedTrainer = await prisma.trainer.update({
+    where: { id: userId },
+    data: { avatar },
+    select: {
+      id: true,
+      username: true,
+      avatar: true,
+    },
+  });
+
+  return APIResponse.success({
+    message: 'Avatar updated successfully',
+    user: updatedTrainer,
+  });
+});
+
+export const GET = apiHandler(async (req: NextRequest) => {
+  const { userId } = await requireAuth(req);
+
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: userId },
+    select: { avatar: true, username: true },
+  });
+
+  if (!trainer) {
+    throw APIErrors.notFound('Trainer not found');
+  }
+
+  return APIResponse.success({
+    avatar: trainer.avatar,
+    username: trainer.username,
+  });
+});

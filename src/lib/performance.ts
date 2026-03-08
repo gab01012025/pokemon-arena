@@ -1,4 +1,5 @@
 // Performance optimization utilities
+import { logger } from '@/lib/logger';
 
 // Debounce function
 export function debounce<T extends (...args: any[]) => any>(
@@ -106,7 +107,7 @@ export function measureRenderTime(componentName: string) {
           window.performance.measure(measureName, startMark, endMark);
           const measure = window.performance.getEntriesByName(measureName)[0];
           if (measure && process.env.NODE_ENV === 'development') {
-            console.log(`[Performance] ${componentName} rendered in ${measure.duration.toFixed(2)}ms`);
+            logger.debug(`[Performance] ${componentName} rendered in ${measure.duration.toFixed(2)}ms`);
           }
         } catch (error) {
           // Marks might not exist
@@ -128,7 +129,7 @@ export function trackWebVitals() {
       const lastEntry = entries[entries.length - 1] as any;
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Web Vitals] LCP:', lastEntry.renderTime || lastEntry.loadTime);
+        logger.debug(`[Web Vitals] LCP: ${lastEntry.renderTime || lastEntry.loadTime}`);
       }
 
       // Send to analytics
@@ -152,7 +153,7 @@ export function trackWebVitals() {
       const entries = list.getEntries();
       entries.forEach((entry: any) => {
         if (process.env.NODE_ENV === 'development') {
-          console.log('[Web Vitals] FID:', entry.processingStart - entry.startTime);
+          logger.debug(`[Web Vitals] FID: ${entry.processingStart - entry.startTime}`);
         }
 
         if ((window as any).gtag) {
@@ -181,7 +182,7 @@ export function trackWebVitals() {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Web Vitals] CLS:', clsValue);
+        logger.debug(`[Web Vitals] CLS: ${clsValue}`);
       }
     });
 

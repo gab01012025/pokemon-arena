@@ -1,8 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { prisma } from '@/lib/prisma';
+import { formatRank, getRankIcon, getRankColor } from '@/lib/ranking';
+import { getAchievementDef } from '@/lib/achievements';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -11,6 +14,41 @@ interface ProfilePageProps {
   params: Promise<{
     username: string;
   }>;
+}
+
+// ==================== OG META TAGS ====================
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { username } = await params;
+  const trainer = await prisma.trainer.findFirst({
+    where: { username: decodeURIComponent(username) },
+    select: { username: true, wins: true, losses: true, ladderPoints: true, level: true },
+  });
+
+  if (!trainer) {
+    return { title: 'Trainer Not Found — Pokémon Arena' };
+  }
+
+  const rank = formatRank(trainer.ladderPoints);
+  const winRate = trainer.wins + trainer.losses > 0
+    ? Math.round((trainer.wins / (trainer.wins + trainer.losses)) * 100)
+    : 0;
+  const desc = `${getRankIcon(trainer.ladderPoints)} ${rank} | Lv.${trainer.level} | ${trainer.wins}W/${trainer.losses}L (${winRate}%) | Challenge ${trainer.username} on Pokémon Arena!`;
+
+  return {
+    title: `${trainer.username} — Pokémon Arena Profile`,
+    description: desc,
+    openGraph: {
+      title: `${trainer.username} — ${rank}`,
+      description: desc,
+      type: 'profile',
+      siteName: 'Pokémon Arena',
+    },
+    twitter: {
+      card: 'summary',
+      title: `${trainer.username} — ${rank}`,
+      description: desc,
+    },
+  };
 }
 
 async function getProfile(username: string) {
@@ -30,6 +68,7 @@ async function getProfile(username: string) {
       streak: true,
       maxStreak: true,
       ladderPoints: true,
+      referralCode: true,
       clanMember: {
         select: {
           role: true,
@@ -37,6 +76,10 @@ async function getProfile(username: string) {
             select: { id: true, name: true, tag: true }
           }
         }
+      },
+      achievements: {
+        select: { code: true, unlockedAt: true },
+        orderBy: { unlockedAt: 'desc' },
       },
       unlockedPokemon: {
         select: {
@@ -145,6 +188,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   }
 
   const levelTitle = getLevelTitle(profile.level);
+  const competitiveRank = formatRank(profile.ladderPoints);
+  const rankIcon = getRankIcon(profile.ladderPoints);
+  const rankColor = getRankColor(profile.ladderPoints);
 
   return (
     <div className="page-wrapper">
@@ -198,10 +244,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 <div className="profile-dates">
                   <span>Joined: {formatDate(profile.createdAt)}</span>
                   <span>Level: {profile.level}</span>
+                  <span style={{ color: rankColor, fontWeight: 600 }}>{rankIcon} {competitiveRank}</span>
                 </div>
               </div>
               <div className="profile-actions">
-                <button className="btn-primary">Challenge</button>
+                <Link 
+                  href={`/battle/challenge/${encodeURIComponent(profile.username)}`}
+                  className="btn-primary"
+                >
+                  ⚔️ Challenge
+                </Link>
                 <Link href="/change-avatar" className="btn-secondary">Change Avatar</Link>
               </div>
             </div>
@@ -243,6 +295,29 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </div>
             </div>
           </div>
+
+          {/* Achievements */}
+          {profile.achievements.length > 0 && (
+            <div className="content-box">
+              <div className="content-box-header">
+                <h2>🏅 Achievements ({profile.achievements.length})</h2>
+              </div>
+              <div className="content-box-body">
+                <div className="achievement-badges">
+                  {profile.achievements.map((a) => {
+                    const def = getAchievementDef(a.code);
+                    if (!def) return null;
+                    return (
+                      <div key={a.code} className="achievement-badge" title={def.description}>
+                        <span className="achievement-badge-icon">{def.icon}</span>
+                        <span className="achievement-badge-name">{def.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Unlocked Pokemon */}
           {profile.unlockedPokemon.length > 0 && (

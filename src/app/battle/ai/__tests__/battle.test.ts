@@ -41,7 +41,7 @@ describe('Energy System', () => {
     const aliveCount = 3;
     const expectedEnergy = 1;
     
-    expect(turn === 1 ? 1 : aliveCount).toBe(expectedEnergy);
+    expect((turn as number) === 1 ? 1 : aliveCount).toBe(expectedEnergy);
   });
 
   it('should generate energy equal to alive Pokemon after turn 1', () => {
@@ -49,39 +49,39 @@ describe('Energy System', () => {
     const aliveCount = 3;
     const expectedEnergy = 3;
     
-    expect(turn === 1 ? 1 : aliveCount).toBe(expectedEnergy);
+    expect((turn as number) === 1 ? 1 : aliveCount).toBe(expectedEnergy);
   });
 
   it('should accumulate energy between turns', () => {
-    let energy = { grass: 1, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
-    const newEnergy = { grass: 2, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+    let energy = { grass: 1, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
+    const newEnergy = { grass: 2, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
     
     // Accumulate
     energy = {
       grass: energy.grass + newEnergy.grass,
       fire: energy.fire + newEnergy.fire,
       water: energy.water + newEnergy.water,
-      electric: energy.electric + newEnergy.electric,
+      lightning: energy.lightning + newEnergy.lightning,
       psychic: energy.psychic + newEnergy.psychic,
       fighting: energy.fighting + newEnergy.fighting,
       darkness: energy.darkness + newEnergy.darkness,
       metal: energy.metal + newEnergy.metal,
       dragon: energy.dragon + newEnergy.dragon,
-      random: energy.random + newEnergy.random,
+      colorless: energy.colorless + newEnergy.colorless,
     };
     
     expect(energy.grass).toBe(3); // 1 + 2 = 3 (accumulated!)
   });
 
   it('should require exactly 4 energy types to be selected', () => {
-    const selectedTypes = ['grass', 'fire', 'water', 'electric'];
+    const selectedTypes = ['grass', 'fire', 'water', 'lightning'];
     expect(selectedTypes.length).toBe(4);
   });
 
-  it('should include random energy type in battle', () => {
-    const selectedTypes = ['grass', 'fire', 'water', 'electric'];
-    const availableInBattle = [...selectedTypes, 'random'];
-    expect(availableInBattle).toContain('random');
+  it('should include colorless energy type in battle', () => {
+    const selectedTypes = ['grass', 'fire', 'water', 'lightning'];
+    const availableInBattle = [...selectedTypes, 'colorless'];
+    expect(availableInBattle).toContain('colorless');
     expect(availableInBattle.length).toBe(5);
   });
 });
@@ -106,7 +106,7 @@ describe('Turn-Based System', () => {
   it('should not allow simultaneous actions', () => {
     const phase = 'player1-turn';
     const canPlayer1Act = phase === 'player1-turn';
-    const canPlayer2Act = phase === 'player2-turn';
+    const canPlayer2Act = (phase as string) === 'player2-turn';
     
     expect(canPlayer1Act).toBe(true);
     expect(canPlayer2Act).toBe(false);
@@ -278,16 +278,16 @@ describe('Evolution System', () => {
   });
 
   it('should require energy to evolve', () => {
-    const energy = { grass: 2, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 1 };
-    const evolutionCost = [{ type: 'grass', amount: 2 }, { type: 'random', amount: 1 }];
+    const energy = { grass: 2, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 1 };
+    const evolutionCost = [{ type: 'grass', amount: 2 }, { type: 'colorless', amount: 1 }];
     
     let canAfford = true;
     for (const cost of evolutionCost) {
-      if (cost.type === 'random') {
+      if (cost.type === 'colorless') {
         const totalEnergy = Object.values(energy).reduce((sum, v) => sum + v, 0);
         if (totalEnergy < cost.amount) canAfford = false;
       } else {
-        if (energy[cost.type] < cost.amount) canAfford = false;
+        if ((energy as Record<string, number>)[cost.type] < cost.amount) canAfford = false;
       }
     }
     
@@ -307,7 +307,7 @@ describe('Trainer Passives', () => {
   });
 
   it('Misty: should add water energy every 2 turns', () => {
-    let energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+    let energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
     const turn = 2;
     
     if (turn > 1 && turn % 2 === 0) {
@@ -317,15 +317,15 @@ describe('Trainer Passives', () => {
     expect(energy.water).toBe(1);
   });
 
-  it('Lt. Surge: should add electric energy every 2 turns', () => {
-    let energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+  it('Lt. Surge: should add lightning energy every 2 turns', () => {
+    let energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
     const turn = 4;
     
     if (turn > 1 && turn % 2 === 0) {
-      energy.electric += 1;
+      energy.lightning += 1;
     }
     
-    expect(energy.electric).toBe(1);
+    expect(energy.lightning).toBe(1);
   });
 
   it('Erika: should heal Grass Pokemon each turn', () => {
@@ -432,10 +432,10 @@ describe('Items System', () => {
   });
 
   it('Energy Boost: should add 1 random energy', () => {
-    let energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
-    energy.random += 1;
+    let energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
+    energy.colorless += 1;
     
-    expect(energy.random).toBe(1);
+    expect(energy.colorless).toBe(1);
   });
 
   it('should consume item after use', () => {
@@ -479,7 +479,7 @@ describe('Cooldown System', () => {
 
   it('should prevent using move on cooldown', () => {
     const currentCooldown = 2;
-    const canUse = currentCooldown === 0;
+    const canUse = (currentCooldown as number) === 0;
     
     expect(canUse).toBe(false);
   });
@@ -556,40 +556,40 @@ describe('Damage Calculation', () => {
 // ==================== ENERGY COST TESTS ====================
 describe('Energy Cost System', () => {
   it('should spend energy when using move', () => {
-    let energy = { grass: 3, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+    let energy = { grass: 3, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
     const moveCost = [{ type: 'grass', amount: 2 }];
     
     for (const cost of moveCost) {
-      energy[cost.type] -= cost.amount;
+      (energy as Record<string, number>)[cost.type] -= cost.amount;
     }
     
     expect(energy.grass).toBe(1);
   });
 
   it('should use random energy as wildcard', () => {
-    let energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 2 };
+    let energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 2 };
     const moveCost = [{ type: 'grass', amount: 1 }];
     
-    // Can use random as grass
+    // Can use colorless as grass
     if (energy.grass < moveCost[0].amount) {
       const needed = moveCost[0].amount - energy.grass;
-      energy.random -= needed;
+      energy.colorless -= needed;
     }
     
-    expect(energy.random).toBe(1);
+    expect(energy.colorless).toBe(1);
   });
 
   it('should check if can afford move', () => {
-    const energy = { grass: 2, fire: 1, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 1 };
-    const moveCost = [{ type: 'grass', amount: 2 }, { type: 'random', amount: 1 }];
+    const energy = { grass: 2, fire: 1, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 1 };
+    const moveCost = [{ type: 'grass', amount: 2 }, { type: 'colorless', amount: 1 }];
     
     let canAfford = true;
     for (const cost of moveCost) {
-      if (cost.type === 'random') {
+      if (cost.type === 'colorless') {
         const totalEnergy = Object.values(energy).reduce((sum, v) => sum + v, 0);
         if (totalEnergy < cost.amount) canAfford = false;
       } else {
-        if (energy[cost.type] + energy.random < cost.amount) canAfford = false;
+        if ((energy as Record<string, number>)[cost.type] + energy.colorless < cost.amount) canAfford = false;
       }
     }
     
@@ -642,10 +642,10 @@ describe('Integration Tests', () => {
   it('should handle complete turn cycle', () => {
     let turn = 1;
     let phase = 'player1-turn';
-    let energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 1 };
+    let energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 1 };
     
     // Turn 1: Player 1 gets 1 energy
-    expect(energy.random).toBe(1);
+    expect(energy.colorless).toBe(1);
     expect(phase).toBe('player1-turn');
     
     // Player 1 acts
@@ -693,13 +693,13 @@ describe('Integration Tests', () => {
   });
 
   it('should handle evolution with energy cost', () => {
-    let energy = { grass: 3, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 1 };
+    let energy = { grass: 3, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 1 };
     let pokemon = { name: 'Bulbasaur', hp: 80, maxHp: 100, attack: 50 };
-    const evolutionCost = [{ type: 'grass', amount: 2 }, { type: 'random', amount: 1 }];
+    const evolutionCost = [{ type: 'grass', amount: 2 }, { type: 'colorless', amount: 1 }];
     
     // Spend energy
     energy.grass -= 2;
-    energy.random -= 1;
+    energy.colorless -= 1;
     
     // Evolve
     pokemon = {
@@ -710,7 +710,7 @@ describe('Integration Tests', () => {
     };
     
     expect(energy.grass).toBe(1);
-    expect(energy.random).toBe(0);
+    expect(energy.colorless).toBe(0);
     expect(pokemon.name).toBe('Ivysaur');
     expect(pokemon.hp).toBe(100);
     expect(pokemon.maxHp).toBe(120);
@@ -751,7 +751,7 @@ describe('Edge Cases', () => {
   });
 
   it('should handle 0 energy correctly', () => {
-    const energy = { grass: 0, fire: 0, water: 0, electric: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, random: 0 };
+    const energy = { grass: 0, fire: 0, water: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, dragon: 0, colorless: 0 };
     const totalEnergy = Object.values(energy).reduce((sum, v) => sum + v, 0);
     
     expect(totalEnergy).toBe(0);

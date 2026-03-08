@@ -2,8 +2,8 @@
  * API: Battle Actions
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { battleManager } from '@/lib/battle/BattleManager';
 
 // GET - Get current battle state
@@ -11,40 +11,27 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ battleId: string }> }
 ) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+  const { battleId } = await params;
+  return apiHandler(async (req: NextRequest) => {
+    const { userId } = await requireAuth(req);
 
-    const { battleId } = await params;
     const battle = battleManager.getBattle(battleId);
 
     if (!battle) {
-      return NextResponse.json(
-        { error: 'Battle not found' },
-        { status: 404 }
-      );
+      throw APIErrors.notFound('Battle not found');
     }
 
     const state = battle.engine.getState();
 
     // Check if player is part of this battle
-    if (state.player1.playerId !== session.user.id && state.player2.playerId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'You are not part of this battle' },
-        { status: 403 }
-      );
+    if (state.player1.playerId !== userId && state.player2.playerId !== userId) {
+      throw APIErrors.forbidden('You are not part of this battle');
     }
 
     // Return state with player perspective
-    const isPlayer1 = state.player1.playerId === session.user.id;
+    const isPlayer1 = state.player1.playerId === userId;
 
-    return NextResponse.json({
+    return APIResponse.success({
       battleId: state.id,
       turn: state.turn,
       phase: state.phase,
@@ -54,14 +41,7 @@ export async function GET(
       opponent: isPlayer1 ? state.player2 : state.player1,
       log: state.log.slice(-20), // Last 20 log entries
     });
-
-  } catch (error) {
-    console.error('Battle state error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  })(request);
 }
 
 // POST - Submit action
@@ -69,72 +49,53 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ battleId: string }> }
 ) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+  const { battleId } = await params;
+  return apiHandler(async (req: NextRequest) => {
+    // Rate limit
+    const ip = getClientIP(req);
+    if (!rateLimit(`battle:action:${ip}`, rateLimits.battle.maxRequests, rateLimits.battle.windowMs)) {
+      throw APIErrors.tooManyRequests('Too many requests');
     }
 
-    const { battleId } = await params;
-    const body = await request.json();
+    const { userId } = await requireAuth(req);
+
+    const body = await req.json();
     const { pokemonId, moveId, targetIds, skipTurn } = body;
 
     if (skipTurn) {
-      const result = await battleManager.skipTurn(battleId, session.user.id);
-      
+      const result = await battleManager.skipTurn(battleId, userId);
+
       if (!result.success) {
-        return NextResponse.json(
-          { error: result.message },
-          { status: 400 }
-        );
+        throw APIErrors.badRequest(result.message);
       }
 
-      return NextResponse.json({
-        success: true,
+      return APIResponse.success({
         message: result.message,
         state: result.state,
       });
     }
 
     if (!pokemonId || !moveId || !targetIds) {
-      return NextResponse.json(
-        { error: 'pokemonId, moveId, and targetIds are required' },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest('pokemonId, moveId, and targetIds are required');
     }
 
     const result = await battleManager.submitAction(
       battleId,
-      session.user.id,
+      userId,
       pokemonId,
       moveId,
       targetIds
     );
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.message },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest(result.message);
     }
 
-    return NextResponse.json({
-      success: true,
+    return APIResponse.success({
       message: result.message,
       state: result.state,
     });
-
-  } catch (error) {
-    console.error('Battle action error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  })(request);
 }
 
 // DELETE - Surrender
@@ -142,36 +103,24 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ battleId: string }> }
 ) {
-  try {
-    const session = await getSession();
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+  const { battleId } = await params;
+  return apiHandler(async (req: NextRequest) => {
+    // Rate limit
+    const ip = getClientIP(req);
+    if (!rateLimit(`battle:surrender:${ip}`, rateLimits.battle.maxRequests, rateLimits.battle.windowMs)) {
+      throw APIErrors.tooManyRequests('Too many requests');
     }
 
-    const { battleId } = await params;
-    const result = await battleManager.surrender(battleId, session.user.id);
+    const { userId } = await requireAuth(req);
+
+    const result = await battleManager.surrender(battleId, userId);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.message },
-        { status: 400 }
-      );
+      throw APIErrors.badRequest(result.message);
     }
 
-    return NextResponse.json({
-      success: true,
+    return APIResponse.success({
       message: result.message,
     });
-
-  } catch (error) {
-    console.error('Battle surrender error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  })(request);
 }

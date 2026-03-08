@@ -1,118 +1,186 @@
 /**
- * Pokemon Arena - React Hook for Game Socket
- * Manages WebSocket connection state in React components
+ * Pokemon Arena - Multiplayer React Hook v2
+ * Manages WebSocket connection, authentication, queue, battle, and result state.
  */
 
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  gameSocket, 
-  BattleStartData, 
-  TurnUpdateData, 
-  BattleEndData,
-  TeamSelection,
-  Energy,
-  BattleLogEntry,
-  BattlePokemonState
+import { logger } from '@/lib/logger';
+import {
+  gameSocket,
+  type BattleStartData,
+  type TurnUpdateData,
+  type BattleEndData,
+  type BattleReconnectData,
+  type ClientFighter,
+  type ClientLogEntry,
+  type Energy,
+  type ActionIntent,
+  type TeamData,
+  type PlayerResultData,
 } from '@/lib/game-socket';
+
+// =============================================================================
+// STATE TYPES
+// =============================================================================
 
 export interface UseMultiplayerState {
   // Connection
   isConnected: boolean;
   isConnecting: boolean;
+  isAuthenticated: boolean;
   connectionError: string | null;
   onlineCount: number;
-  
+  trainerId: string | null;
+  username: string | null;
+
   // Queue
   inQueue: boolean;
   queuePosition: number;
   queueType: 'quick' | 'ranked' | null;
   estimatedWait: number;
-  
+
   // Battle
   inBattle: boolean;
-  oderId: string | null;
-  opponent: {
-    username: string;
-    level: number;
-    team: Array<{ name: string; types: string[]; currentHP: number; maxHP: number; status: any }>;
-  } | null;
-  yourTeam: BattlePokemonState[];
-  energy: Energy;
+  battleId: string | null;
+  opponent: { username: string; level: number } | null;
+  yourFighters: ClientFighter[];
+  opponentFighters: ClientFighter[];
+  yourEnergy: Energy;
   currentTurn: number;
   turnTimer: number;
   isReady: boolean;
-  battleLog: BattleLogEntry[];
-  
+  battleLog: ClientLogEntry[];
+  opponentReady: boolean;
+
   // Result
   battleResult: BattleEndData | null;
-  
+
   // Chat
   chatMessages: Array<{ username: string; message: string; timestamp: number }>;
+
+  // Private rooms
+  privateRoomId: string | null;
+
+  // Opponent status
+  opponentDisconnected: boolean;
+  opponentGracePeriod: number;
 }
 
 export interface UseMultiplayerActions {
   connect: () => Promise<void>;
   disconnect: () => void;
-  authenticate: (oderId: string, username: string, level: number, ladderPoints: number) => void;
-  joinQueue: (team: TeamSelection, queueType?: 'quick' | 'ranked') => void;
+  joinQueue: (team: TeamData, queueType?: 'quick' | 'ranked') => void;
   leaveQueue: () => void;
-  submitMoves: (moves: Record<number, number | null>, targets: Record<number, number | null>) => void;
-  exchangeEnergy: (fromType: string) => void;
+  submitMoves: (intents: ActionIntent[]) => void;
   surrender: () => void;
   sendChat: (message: string) => void;
+  sendEmote?: (emote: string) => void;
+  requestRematch?: () => void;
+  createPrivateRoom: (team: TeamData) => void;
+  joinPrivateRoom: (roomId: string, team: TeamData) => void;
   resetBattle: () => void;
 }
+
+// =============================================================================
+// INITIAL STATE
+// =============================================================================
 
 const initialState: UseMultiplayerState = {
   isConnected: false,
   isConnecting: false,
+  isAuthenticated: false,
   connectionError: null,
   onlineCount: 0,
+  trainerId: null,
+  username: null,
   inQueue: false,
   queuePosition: 0,
   queueType: null,
   estimatedWait: 0,
   inBattle: false,
-  oderId: null,
+  battleId: null,
   opponent: null,
-  yourTeam: [],
-  energy: { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 },
+  yourFighters: [],
+  opponentFighters: [],
+  yourEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 },
   currentTurn: 1,
   turnTimer: 90,
   isReady: false,
   battleLog: [],
+  opponentReady: false,
   battleResult: null,
-  chatMessages: []
+  chatMessages: [],
+  privateRoomId: null,
+  opponentDisconnected: false,
+  opponentGracePeriod: 0,
 };
+
+// =============================================================================
+// HOOK
+// =============================================================================
 
 export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
   const [state, setState] = useState<UseMultiplayerState>(initialState);
-  const unsubscribesRef = useRef<Array<() => void>>([]);
+  const tokenRef = useRef<string | null>(null);
 
-  // Setup event listeners
+  // ==================== Event Handlers ====================
   useEffect(() => {
     const unsubscribes: Array<() => void> = [];
 
-    // Connection change
+    // Connection
     unsubscribes.push(
       gameSocket.on('connectionChange', (data: { connected: boolean; reason?: string }) => {
         setState(prev => ({
           ...prev,
           isConnected: data.connected,
           isConnecting: false,
-          connectionError: data.connected ? null : data.reason || 'Disconnected'
+          connectionError: data.connected ? null : data.reason || 'Disconnected',
+          isAuthenticated: data.connected ? prev.isAuthenticated : false,
+        }));
+
+        // Auto-authenticate on reconnect
+        if (data.connected && tokenRef.current) {
+          gameSocket.authenticate(tokenRef.current);
+        }
+      })
+    );
+
+    // Auth success
+    unsubscribes.push(
+      gameSocket.on('authenticated', (data: { success: boolean; trainerId: string; username: string; level: number; ladderPoints: number }) => {
+        if (data.success) {
+          setState(prev => ({
+            ...prev,
+            isAuthenticated: true,
+            trainerId: data.trainerId,
+            username: data.username,
+          }));
+          logger.debug('Authenticated with game server');
+        }
+      })
+    );
+
+    // Auth error
+    unsubscribes.push(
+      gameSocket.on('authError', (data: { message: string }) => {
+        setState(prev => ({
+          ...prev,
+          connectionError: `Auth failed: ${data.message}`,
+          isAuthenticated: false,
         }));
       })
     );
 
-    // Authenticated
+    // Force disconnect
     unsubscribes.push(
-      gameSocket.on('authenticated', (data: { success: boolean }) => {
-        if (data.success) {
-          console.log('✅ Authenticated with game server');
-        }
+      gameSocket.on('forceDisconnect', (data: { reason: string }) => {
+        setState(prev => ({
+          ...prev,
+          connectionError: data.reason,
+          isAuthenticated: false,
+        }));
       })
     );
 
@@ -123,7 +191,7 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
       })
     );
 
-    // Queue events
+    // Queue
     unsubscribes.push(
       gameSocket.on('queueJoined', (data: { position: number; queueType: string; estimatedWait: number }) => {
         setState(prev => ({
@@ -131,7 +199,7 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
           inQueue: true,
           queuePosition: data.position,
           queueType: data.queueType as 'quick' | 'ranked',
-          estimatedWait: data.estimatedWait
+          estimatedWait: data.estimatedWait,
         }));
       })
     );
@@ -143,7 +211,7 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
           inQueue: false,
           queuePosition: 0,
           queueType: null,
-          estimatedWait: 0
+          estimatedWait: 0,
         }));
       })
     );
@@ -155,19 +223,18 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
           ...prev,
           inQueue: false,
           inBattle: true,
-          oderId: data.oderId,
-          opponent: {
-            username: data.opponent.username,
-            level: data.opponent.level,
-            team: data.opponent.team.map(p => ({ ...p, status: null }))
-          },
-          yourTeam: data.yourTeam,
-          energy: data.energy,
+          battleId: data.battleId,
+          opponent: data.opponent,
+          yourFighters: data.yourFighters,
+          opponentFighters: data.opponentFighters,
+          yourEnergy: data.yourEnergy,
           currentTurn: data.turn,
           turnTimer: data.turnTimeRemaining,
           isReady: false,
           battleLog: [],
-          battleResult: null
+          opponentReady: false,
+          battleResult: null,
+          opponentDisconnected: false,
         }));
       })
     );
@@ -177,19 +244,14 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
       gameSocket.on('turnUpdate', (data: TurnUpdateData) => {
         setState(prev => ({
           ...prev,
-          yourTeam: data.yourTeam,
-          opponent: prev.opponent ? {
-            ...prev.opponent,
-            team: data.opponentTeam.map(p => ({ 
-              ...p, 
-              types: prev.opponent?.team.find(t => t.name === p.name)?.types || [] 
-            }))
-          } : null,
-          energy: data.energy,
+          yourFighters: data.yourFighters,
+          opponentFighters: data.opponentFighters,
+          yourEnergy: data.yourEnergy,
           currentTurn: data.turn,
-          turnTimer: 90,
+          turnTimer: data.turnTimeRemaining,
           isReady: false,
-          battleLog: data.battleLog
+          opponentReady: false,
+          battleLog: data.log || [],
         }));
       })
     );
@@ -208,10 +270,10 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
       })
     );
 
-    // Energy updated
+    // Opponent ready status
     unsubscribes.push(
-      gameSocket.on('energyUpdated', (data: { energy: Energy }) => {
-        setState(prev => ({ ...prev, energy: data.energy }));
+      gameSocket.on('opponentReady', (data: { ready: boolean }) => {
+        setState(prev => ({ ...prev, opponentReady: data.ready }));
       })
     );
 
@@ -221,17 +283,72 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
         setState(prev => ({
           ...prev,
           inBattle: false,
-          battleResult: data
+          battleResult: data,
         }));
       })
     );
 
-    // Chat message
+    // Battle reconnect
+    unsubscribes.push(
+      gameSocket.on('battleReconnect', (data: BattleReconnectData) => {
+        setState(prev => ({
+          ...prev,
+          inBattle: true,
+          battleId: data.battleId,
+          opponent: data.opponent,
+          yourFighters: data.yourFighters,
+          opponentFighters: data.opponentFighters,
+          yourEnergy: data.yourEnergy,
+          currentTurn: data.turn,
+          turnTimer: data.turnTimeRemaining,
+          isReady: false,
+          battleLog: [],
+          battleResult: null,
+          opponentDisconnected: false,
+        }));
+      })
+    );
+
+    // Opponent disconnect/reconnect
+    unsubscribes.push(
+      gameSocket.on('opponentDisconnected', (data: { gracePeriod: number }) => {
+        setState(prev => ({
+          ...prev,
+          opponentDisconnected: true,
+          opponentGracePeriod: data.gracePeriod,
+        }));
+      })
+    );
+
+    unsubscribes.push(
+      gameSocket.on('opponentReconnected', () => {
+        setState(prev => ({
+          ...prev,
+          opponentDisconnected: false,
+          opponentGracePeriod: 0,
+        }));
+      })
+    );
+
+    // Private rooms
+    unsubscribes.push(
+      gameSocket.on('privateRoomCreated', (data: { roomId: string }) => {
+        setState(prev => ({ ...prev, privateRoomId: data.roomId }));
+      })
+    );
+
+    unsubscribes.push(
+      gameSocket.on('privateRoomExpired', () => {
+        setState(prev => ({ ...prev, privateRoomId: null }));
+      })
+    );
+
+    // Chat
     unsubscribes.push(
       gameSocket.on('chatMessage', (data: { username: string; message: string; timestamp: number }) => {
         setState(prev => ({
           ...prev,
-          chatMessages: [...prev.chatMessages.slice(-50), data]
+          chatMessages: [...prev.chatMessages.slice(-50), data],
         }));
       })
     );
@@ -239,28 +356,38 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
     // Error
     unsubscribes.push(
       gameSocket.on('error', (data: { message: string }) => {
-        console.error('🔥 Game server error:', data.message);
+        logger.error(`Game server error: ${data.message}`);
       })
     );
 
-    unsubscribesRef.current = unsubscribes;
-
-    // Cleanup
-    return () => {
-      unsubscribes.forEach(unsub => unsub());
-    };
+    return () => { unsubscribes.forEach(u => u()); };
   }, []);
 
-  // Actions
+  // ==================== Actions ====================
+
   const connect = useCallback(async () => {
     setState(prev => ({ ...prev, isConnecting: true, connectionError: null }));
     try {
       await gameSocket.connect();
+
+      // Get JWT token from API
+      const res = await fetch('/api/auth/socket-token');
+      if (!res.ok) {
+        setState(prev => ({
+          ...prev,
+          isConnecting: false,
+          connectionError: 'Not logged in. Please log in first.',
+        }));
+        return;
+      }
+      const tokenData = await res.json();
+      tokenRef.current = tokenData.token;
+      gameSocket.authenticate(tokenData.token);
     } catch (error) {
       setState(prev => ({
         ...prev,
         isConnecting: false,
-        connectionError: error instanceof Error ? error.message : 'Connection failed'
+        connectionError: error instanceof Error ? error.message : 'Connection failed',
       }));
       throw error;
     }
@@ -268,14 +395,11 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
 
   const disconnect = useCallback(() => {
     gameSocket.disconnect();
+    tokenRef.current = null;
     setState(initialState);
   }, []);
 
-  const authenticate = useCallback((oderId: string, username: string, level: number, ladderPoints: number) => {
-    gameSocket.authenticate({ oderId, username, level, ladderPoints });
-  }, []);
-
-  const joinQueue = useCallback((team: TeamSelection, queueType: 'quick' | 'ranked' = 'quick') => {
+  const joinQueue = useCallback((team: TeamData, queueType: 'quick' | 'ranked' = 'quick') => {
     gameSocket.joinQueue(team, queueType);
   }, []);
 
@@ -283,12 +407,8 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
     gameSocket.leaveQueue();
   }, []);
 
-  const submitMoves = useCallback((moves: Record<number, number | null>, targets: Record<number, number | null>) => {
-    gameSocket.submitMoves(moves, targets);
-  }, []);
-
-  const exchangeEnergy = useCallback((fromType: string) => {
-    gameSocket.exchangeEnergy(fromType);
+  const submitMoves = useCallback((intents: ActionIntent[]) => {
+    gameSocket.submitMoves(intents);
   }, []);
 
   const surrender = useCallback(() => {
@@ -299,35 +419,56 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
     gameSocket.sendChat(message);
   }, []);
 
+  const createPrivateRoom = useCallback((team: TeamData) => {
+    gameSocket.createPrivateRoom(team);
+  }, []);
+
+  const joinPrivateRoom = useCallback((roomId: string, team: TeamData) => {
+    gameSocket.joinPrivateRoom(roomId, team);
+  }, []);
+
+  const sendEmote = useCallback((emote: string) => {
+    gameSocket.sendEmote(emote);
+  }, []);
+
+  const requestRematch = useCallback(() => {
+    gameSocket.requestRematch();
+  }, []);
+
   const resetBattle = useCallback(() => {
     setState(prev => ({
       ...prev,
       inBattle: false,
-      oderId: null,
+      battleId: null,
       opponent: null,
-      yourTeam: [],
-      energy: { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 },
+      yourFighters: [],
+      opponentFighters: [],
+      yourEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 },
       currentTurn: 1,
       turnTimer: 90,
       isReady: false,
       battleLog: [],
+      opponentReady: false,
       battleResult: null,
-      chatMessages: []
+      chatMessages: [],
+      privateRoomId: null,
+      opponentDisconnected: false,
+      opponentGracePeriod: 0,
     }));
   }, []);
 
-  const actions: UseMultiplayerActions = {
+  return [state, {
     connect,
     disconnect,
-    authenticate,
     joinQueue,
     leaveQueue,
     submitMoves,
-    exchangeEnergy,
     surrender,
     sendChat,
-    resetBattle
-  };
-
-  return [state, actions];
+    sendEmote,
+    requestRematch,
+    createPrivateRoom,
+    joinPrivateRoom,
+    resetBattle,
+  }];
 }

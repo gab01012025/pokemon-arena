@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { logger } from '@/lib/logger';
 
 const GAME_SERVER_URL = process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'http://localhost:3010';
 
@@ -25,7 +26,7 @@ export interface Energy {
   fire: number;
   water: number;
   grass: number;
-  electric: number;
+  lightning: number;
   colorless: number;
 }
 
@@ -84,7 +85,12 @@ export type GameSocketState =
 
 // ==================== HOOK ====================
 
-export function useGameSocket(playerId: string | null, username: string | null) {
+export function useGameSocket(
+  playerId: string | null,
+  username: string | null,
+  level: number = 1,
+  ladderPoints: number = 1000,
+) {
   const socketRef = useRef<Socket | null>(null);
   const [state, setState] = useState<GameSocketState>('disconnected');
   const [battleId, setBattleId] = useState<string | null>(null);
@@ -113,53 +119,53 @@ export function useGameSocket(playerId: string | null, username: string | null) 
 
     // Connection events
     socket.on('connect', () => {
-      console.log('🔌 Connected to game server');
+      logger.debug('🔌 Connected to game server');
       setState('connected');
       
       // Authenticate
       socket.emit('authenticate', {
         playerId,
         username,
-        level: 1, // TODO: Get from user data
-        ladderPoints: 1000, // TODO: Get from user data
+        level,
+        ladderPoints,
       });
     });
 
     socket.on('authenticated', (data: { success: boolean; playerId: string }) => {
       if (data.success) {
-        console.log('✅ Authenticated:', data.playerId);
+        logger.debug('✅ Authenticated:', { metadata: { playerId: data.playerId } });
         setState('authenticated');
       }
     });
 
     socket.on('disconnect', () => {
-      console.log('❌ Disconnected from game server');
+      logger.debug('❌ Disconnected from game server');
       setState('disconnected');
       setBattleId(null);
       setBattleData(null);
     });
 
     socket.on('error', (data: { message: string }) => {
-      console.error('❌ Socket error:', data.message);
+      logger.error(`❌ Socket error: ${data.message}`);
       setError(data.message);
     });
 
     // Queue events
     socket.on('queueJoined', (data: { position: number; queueType: string; estimatedWait: number }) => {
-      console.log('🔍 Joined queue:', data);
+      logger.debug('🔍 Joined queue:', { metadata: { ...data } });
       setState('inQueue');
       setQueuePosition(data.position);
     });
 
     socket.on('queueLeft', () => {
-      console.log('❌ Left queue');
+      logger.debug('❌ Left queue');
       setState('authenticated');
       setQueuePosition(null);
     });
 
     // Battle events
     socket.on('battleStart', (data: BattleStartData) => {
-      console.log('⚔️ Battle started:', data);
+      logger.debug('⚔️ Battle started:', { metadata: { battleId: data.battleId } });
       setState('inBattle');
       setBattleId(data.battleId);
       setBattleData(data);
@@ -168,7 +174,7 @@ export function useGameSocket(playerId: string | null, username: string | null) 
     });
 
     socket.on('turnUpdate', (data: TurnUpdateData) => {
-      console.log('🔄 Turn update:', data);
+      logger.debug('🔄 Turn update:', { metadata: { turn: data.turn } });
       setTurnData(data);
       setTurnTimer(90); // Reset timer
     });
@@ -178,11 +184,11 @@ export function useGameSocket(playerId: string | null, username: string | null) 
     });
 
     socket.on('readyConfirmed', () => {
-      console.log('✅ Ready confirmed');
+      logger.debug('✅ Ready confirmed');
     });
 
     socket.on('battleEnd', (data: BattleEndData) => {
-      console.log('🏆 Battle ended:', data);
+      logger.debug('🏆 Battle ended:', { metadata: { winner: data.winnerId } });
       setBattleResult(data);
       setState('authenticated');
     });

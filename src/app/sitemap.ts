@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { prisma } from '@/lib/prisma';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://naruto-arena-delta.vercel.app';
 
   // Static pages
@@ -21,17 +22,56 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/the-basics',
     '/game-manual',
     '/news-archive',
+    '/select-team',
+    '/trainer-ladder',
+    '/road-to-champion',
+    '/collection',
+    '/ladders',
+    '/unlock-pokemon',
   ];
 
-  const staticRoutes = staticPages.map((route) => ({
+  const staticRoutes: MetadataRoute.Sitemap = staticPages.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
-    priority: route === '' ? 1.0 : 0.8,
+    priority: route === '' ? 1.0 : route === '/play' ? 0.9 : 0.8,
   }));
 
-  // TODO: Add dynamic routes (profiles, clans, characters)
-  // This would require fetching from database
+  // Dynamic routes: Player profiles
+  let profileRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const trainers = await prisma.trainer.findMany({
+      select: { username: true, updatedAt: true },
+      orderBy: { ladderPoints: 'desc' },
+      take: 200,
+    });
+    profileRoutes = trainers.map((t) => ({
+      url: `${baseUrl}/profile/${encodeURIComponent(t.username)}`,
+      lastModified: t.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }));
+  } catch {
+    // DB unavailable during build — skip dynamic routes
+  }
 
-  return staticRoutes;
+  // Dynamic routes: Clans
+  let clanRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const clans = await prisma.clan.findMany({
+      select: { id: true, createdAt: true },
+      orderBy: { points: 'desc' },
+      take: 100,
+    });
+    clanRoutes = clans.map((c) => ({
+      url: `${baseUrl}/clan/${c.id}`,
+      lastModified: c.createdAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
+  } catch {
+    // DB unavailable during build — skip dynamic routes
+  }
+
+  return [...staticRoutes, ...profileRoutes, ...clanRoutes];
 }

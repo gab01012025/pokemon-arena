@@ -2,17 +2,16 @@
  * API: User Profile
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { apiHandler, APIResponse, APIErrors } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ username: string }> }
+  req: NextRequest,
+  context: { params: Promise<{ username: string }> }
 ) {
-  try {
-    const { username } = await params;
-
-    // Get trainer with all related data (SQLite case-insensitive workaround)
+  const { username } = await context.params;
+  return apiHandler(async () => {
     const trainer = await prisma.trainer.findFirst({
       where: { 
         username: username
@@ -74,13 +73,9 @@ export async function GET(
     });
 
     if (!trainer) {
-      return NextResponse.json(
-        { error: 'Trainer not found' },
-        { status: 404 }
-      );
+      throw APIErrors.notFound('Trainer not found');
     }
 
-    // Get recent battles
     const recentBattles = await prisma.battle.findMany({
       where: {
         OR: [
@@ -103,12 +98,10 @@ export async function GET(
       take: 10
     });
 
-    // Calculate rank
     const rank = await prisma.trainer.count({
       where: { ladderPoints: { gt: trainer.ladderPoints } }
     }) + 1;
 
-    // Format response
     const profile = {
       id: trainer.id,
       username: trainer.username,
@@ -153,13 +146,6 @@ export async function GET(
       joinDate: trainer.createdAt,
     };
 
-    return NextResponse.json(profile);
-
-  } catch (error) {
-    console.error('Profile fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch profile' },
-      { status: 500 }
-    );
-  }
+    return APIResponse.success(profile);
+  })(req);
 }

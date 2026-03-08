@@ -23,14 +23,14 @@ describe('Full Battle Integration', () => {
     
     // Step 3: Player 1 Turn
     let playerTeam = [
-      { name: 'Bulbasaur', hp: 100, maxHp: 100, statusEffects: [] },
-      { name: 'Charmander', hp: 100, maxHp: 100, statusEffects: [] },
-      { name: 'Squirtle', hp: 100, maxHp: 100, statusEffects: [] },
+      { name: 'Bulbasaur', hp: 100, maxHp: 100, statusEffects: [] as { type: string; duration: number; source: string }[] },
+      { name: 'Charmander', hp: 100, maxHp: 100, statusEffects: [] as { type: string; duration: number; source: string }[] },
+      { name: 'Squirtle', hp: 100, maxHp: 100, statusEffects: [] as { type: string; duration: number; source: string }[] },
     ];
     let enemyTeam = [
-      { name: 'Pidgey', hp: 80, maxHp: 80, statusEffects: [] },
-      { name: 'Rattata', hp: 70, maxHp: 70, statusEffects: [] },
-      { name: 'Spearow', hp: 75, maxHp: 75, statusEffects: [] },
+      { name: 'Pidgey', hp: 80, maxHp: 80, statusEffects: [] as { type: string; duration: number; source: string }[] },
+      { name: 'Rattata', hp: 70, maxHp: 70, statusEffects: [] as { type: string; duration: number; source: string }[] },
+      { name: 'Spearow', hp: 75, maxHp: 75, statusEffects: [] as { type: string; duration: number; source: string }[] },
     ];
     
     // Player uses Vine Whip (costs 1 grass, but we have 1 random)
