@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { type ActionIntent, type TeamData } from '@/lib/game-socket';
@@ -29,6 +29,14 @@ const BATTLE_BACKGROUNDS = [
 ];
 
 export default function MultiplayerPage() {
+  return (
+    <Suspense fallback={<div className="multiplayer-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}><p>Loading...</p></div>}>
+      <MultiplayerPageContent />
+    </Suspense>
+  );
+}
+
+function MultiplayerPageContent() {
   const searchParams = useSearchParams();
   const [state, actions] = useMultiplayer();
   const [roster, setRoster] = useState<RosterPokemon[]>([]);
