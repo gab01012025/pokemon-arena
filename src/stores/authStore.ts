@@ -60,16 +60,19 @@ export const useAuthStore = create<AuthState>()(
             const sessionRes = await fetch('/api/auth/session');
             const sessionData = await sessionRes.json();
             
-            if (sessionData.success) {
+            if (sessionData.success && sessionData.data?.user) {
               set({ 
-                user: sessionData.user, 
+                user: sessionData.data.user, 
                 isAuthenticated: true,
                 isLoading: false,
               });
             }
           }
           
-          return { success: data.success, message: data.message };
+          const message = data.success
+            ? data.data?.message
+            : data.error?.message || 'Login failed';
+          return { success: data.success, message };
         } catch (error) {
           logger.error('Login error:', error instanceof Error ? error : undefined);
           return { success: false, message: 'Connection error. Please try again.' };
@@ -91,18 +94,21 @@ export const useAuthStore = create<AuthState>()(
             const sessionRes = await fetch('/api/auth/session');
             const sessionData = await sessionRes.json();
             
-            if (sessionData.success) {
+            if (sessionData.success && sessionData.data?.user) {
               set({ 
-                user: sessionData.user, 
+                user: sessionData.data.user, 
                 isAuthenticated: true,
                 isLoading: false,
               });
             }
           }
           
+          const message = data.success
+            ? data.data?.message
+            : data.error?.message || 'Registration failed';
           return { 
             success: data.success, 
-            message: data.message,
+            message,
             errors: data.errors,
           };
         } catch (error) {
@@ -126,9 +132,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await fetch('/api/auth/session');
           const data = await response.json();
           
-          if (data.success && data.user) {
+          if (data.success && data.data?.user) {
             set({ 
-              user: data.user, 
+              user: data.data.user, 
               isAuthenticated: true,
               isLoading: false,
             });
