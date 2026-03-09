@@ -3,20 +3,20 @@
 import Image from 'next/image';
 import { Trainer } from '../types';
 
-// Trainer sprite map - using PokeAPI trainer sprites
+// Official trainer artwork - using Pokémon Showdown trainer sprites (full-body character art)
 const TRAINER_SPRITES: Record<string, string> = {
-  'Brock': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/74.png',       // Geodude represents Brock
-  'Misty': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/121.png',      // Starmie represents Misty
-  'Lt. Surge': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/26.png',   // Raichu represents Lt. Surge
-  'Erika': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/45.png',       // Vileplume represents Erika
-  'Sabrina': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/65.png',     // Alakazam represents Sabrina
-  'Koga': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/110.png',       // Weezing represents Koga
-  'Blaine': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/59.png',      // Arcanine represents Blaine
-  'Giovanni': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/112.png',   // Rhydon represents Giovanni
-  'Professor Oak': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/132.png', // Ditto represents Prof Oak
-  'Nurse Joy': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/113.png',  // Chansey represents Nurse Joy
-  'Lance': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png',      // Dragonite represents Lance
-  'Red': 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png',          // Charizard represents Red
+  'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock-gen1.png',
+  'Misty': 'https://play.pokemonshowdown.com/sprites/trainers/misty-gen1.png',
+  'Lt. Surge': 'https://play.pokemonshowdown.com/sprites/trainers/ltsurge-gen1.png',
+  'Erika': 'https://play.pokemonshowdown.com/sprites/trainers/erika-gen1.png',
+  'Sabrina': 'https://play.pokemonshowdown.com/sprites/trainers/sabrina-gen1.png',
+  'Koga': 'https://play.pokemonshowdown.com/sprites/trainers/koga-gen1.png',
+  'Blaine': 'https://play.pokemonshowdown.com/sprites/trainers/blaine-gen1.png',
+  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni-gen1.png',
+  'Professor Oak': 'https://play.pokemonshowdown.com/sprites/trainers/oak.png',
+  'Nurse Joy': 'https://play.pokemonshowdown.com/sprites/trainers/pokemonbreeder-gen4.png',
+  'Lance': 'https://play.pokemonshowdown.com/sprites/trainers/lance-gen2.png',
+  'Red': 'https://play.pokemonshowdown.com/sprites/trainers/red-gen1.png',
 };
 
 const TRAINER_COLORS: Record<string, string> = {
@@ -68,25 +68,25 @@ export default function TrainerSelectScreen({
               {isSelected && <span className="checkmark">✓</span>}
               {sprite && (
                 <div style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: 12,
-                  background: `linear-gradient(180deg, ${color}22 0%, ${color}08 100%)`,
-                  border: `2px solid ${color}44`,
+                  width: 100,
+                  height: 100,
+                  borderRadius: 14,
+                  background: `linear-gradient(180deg, ${color}30 0%, ${color}10 100%)`,
+                  border: `2px solid ${color}55`,
                   display: 'flex',
                   alignItems: 'flex-end',
                   justifyContent: 'center',
-                  marginBottom: 4,
+                  marginBottom: 6,
                   overflow: 'hidden',
-                  boxShadow: `0 4px 12px ${color}22`,
+                  boxShadow: `0 4px 16px ${color}33`,
                 }}>
                   <Image
                     src={sprite}
                     alt={trainer.name}
-                    width={72}
-                    height={72}
+                    width={88}
+                    height={88}
                     unoptimized
-                    style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 6px ${color}55)` }}
+                    style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 8px ${color}66)`, imageRendering: 'pixelated' }}
                   />
                 </div>
               )}

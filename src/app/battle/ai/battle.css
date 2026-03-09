@@ -105,7 +105,7 @@ html, body { background: #080a14 !important; }
   width: 140px;
   height: 120px;
   border-radius: 16px;
-  border: 3px solid rgba(255,255,255,0.15);
+  border: 3px solid rgba(100, 160, 255, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,6 +115,8 @@ html, body { background: #080a14 !important; }
   gap: 10px;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(180deg, rgba(20, 24, 50, 0.6) 0%, rgba(12, 16, 36, 0.5) 100%);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 .energy-select-card::before {
   content: '';
@@ -249,8 +251,8 @@ html, body { background: #080a14 !important; }
 .trainer-select-card {
   padding: 18px 12px 14px;
   border-radius: 16px;
-  border: 2px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(100, 160, 255, 0.12);
+  background: linear-gradient(180deg, rgba(20, 24, 50, 0.7) 0%, rgba(12, 16, 36, 0.6) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -260,19 +262,20 @@ html, body { background: #080a14 !important; }
   gap: 6px;
   position: relative;
   text-align: center;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 .trainer-select-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border-color: rgba(100, 200, 255, 0.35);
+  background: linear-gradient(180deg, rgba(30, 36, 70, 0.8) 0%, rgba(16, 20, 44, 0.7) 100%);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.4), 0 0 20px rgba(100, 160, 255, 0.08);
 }
 .trainer-select-card.selected {
   border-color: #4CAF50;
   transform: translateY(-6px);
-  box-shadow: 0 0 25px rgba(76, 175, 80, 0.35);
-  background: rgba(76, 175, 80, 0.12);
+  box-shadow: 0 0 30px rgba(76, 175, 80, 0.35), 0 10px 36px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, rgba(30, 50, 40, 0.8) 0%, rgba(20, 35, 28, 0.7) 100%);
 }
 .trainer-select-card .checkmark {
   position: absolute;
@@ -366,12 +369,12 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px;
-  background: rgba(8, 10, 24, 0.88);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 20px;
+  background: linear-gradient(180deg, rgba(8, 10, 24, 0.95) 0%, rgba(12, 16, 36, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(100, 160, 255, 0.12);
   min-height: 72px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.04);
 }
 .player-info {
   display: flex;
@@ -547,8 +550,8 @@ html, body { background: #080a14 !important; }
 }
 .energy-count {
   font-family: var(--font-pixel);
-  font-size: 8px;
-  color: rgba(255,255,255,0.8);
+  font-size: 10px;
+  color: rgba(255,255,255,0.9);
 }
 .energy-total {
   display: flex;
@@ -560,8 +563,8 @@ html, body { background: #080a14 !important; }
 }
 .total-label {
   font-family: var(--font-pixel);
-  font-size: 8px;
-  color: rgba(255,255,255,0.5);
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
 }
 
 /* ==================== BATTLE AREA ==================== */
@@ -569,9 +572,20 @@ html, body { background: #080a14 !important; }
   flex: 1;
   display: flex;
   align-items: stretch;
-  padding: 10px 16px;
-  gap: 12px;
+  padding: 12px 20px;
+  gap: 14px;
   min-height: 0;
+  position: relative;
+}
+.battle-area::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  height: 40%;
+  background: radial-gradient(ellipse at center bottom, rgba(0,0,0,0.3) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 /* Character Column */
@@ -587,25 +601,27 @@ html, body { background: #080a14 !important; }
 /* Character Card */
 .character-card {
   display: flex;
-  gap: 8px;
-  background: rgba(10, 14, 32, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 10px;
+  gap: 10px;
+  background: linear-gradient(145deg, rgba(16, 20, 44, 0.92) 0%, rgba(10, 14, 32, 0.88) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(100, 160, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px;
   transition: all 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   align-items: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .character-card.player {
   flex-direction: row;
-  border-left: 3px solid rgba(76, 175, 80, 0.6);
+  border-left: 3px solid rgba(76, 175, 80, 0.7);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), -4px 0 20px rgba(76, 175, 80, 0.08);
 }
 .character-card.enemy {
   flex-direction: row-reverse;
-  border-right: 3px solid rgba(244, 67, 54, 0.5);
+  border-right: 3px solid rgba(244, 67, 54, 0.6);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 4px 0 20px rgba(244, 67, 54, 0.08);
 }
 .character-card.fainted {
   opacity: 0.3;
@@ -626,15 +642,15 @@ html, body { background: #080a14 !important; }
 
 /* Portrait Container */
 .portrait-container {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
+  width: 106px;
+  height: 106px;
+  border-radius: 14px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-  background: rgba(0,0,0,0.4);
-  border: 2px solid rgba(255,255,255,0.12);
-  box-shadow: inset 0 0 16px rgba(0,0,0,0.5);
+  background: linear-gradient(180deg, rgba(20,30,60,0.6) 0%, rgba(0,0,0,0.5) 100%);
+  border: 2px solid rgba(100, 160, 255, 0.15);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.3);
 }
 .pokemon-sprite {
   width: 100%;
@@ -658,11 +674,11 @@ html, body { background: #080a14 !important; }
   right: 0;
   text-align: center;
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 8px;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  padding: 2px 0;
-  background: rgba(0,0,0,0.6);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.95);
+  padding: 3px 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.3) 100%);
   letter-spacing: 0.5px;
 }
 
@@ -737,9 +753,9 @@ html, body { background: #080a14 !important; }
   bottom: 12px;
   right: 6px;
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 8px;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.95);
 }
 
 /* Status Effects on card */
@@ -781,21 +797,21 @@ html, body { background: #080a14 !important; }
 .skills-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  gap: 5px;
   flex: 1;
 }
 .skill-slot {
-  height: 44px;
+  height: 48px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 2px solid rgba(255,255,255,0.08);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .skill-slot::before {
   content: '';
@@ -842,12 +858,12 @@ html, body { background: #080a14 !important; }
 }
 .skill-abbrev {
   font-family: var(--font-pixel);
-  font-size: 7px;
-  letter-spacing: 0.3px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.85);
   text-align: center;
   line-height: 1.3;
-  padding: 0 2px;
+  padding: 0 3px;
 }
 
 /* Skill Info Tooltip */
@@ -891,8 +907,8 @@ html, body { background: #080a14 !important; }
   display: flex;
   gap: 12px;
   font-family: var(--font-pixel);
-  font-size: 7px;
-  color: rgba(255,255,255,0.5);
+  font-size: 9px;
+  color: rgba(255,255,255,0.55);
 }
 .skill-info-status {
   margin-top: 6px;
@@ -913,10 +929,14 @@ html, body { background: #080a14 !important; }
 }
 .vs-display {
   font-family: var(--font-pixel);
-  font-size: 20px;
+  font-size: 22px;
   color: #fff;
-  text-shadow: 0 0 20px rgba(255,100,100,0.5), 0 2px 4px rgba(0,0,0,0.5);
-  letter-spacing: 4px;
+  text-shadow: 0 0 24px rgba(255,80,80,0.6), 0 0 48px rgba(255,50,50,0.3), 0 2px 4px rgba(0,0,0,0.7);
+  letter-spacing: 5px;
+  background: linear-gradient(180deg, rgba(255,60,60,0.15) 0%, transparent 100%);
+  padding: 6px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,80,80,0.2);
 }
 .action-queue {
   display: flex;
@@ -944,12 +964,12 @@ html, body { background: #080a14 !important; }
 /* ==================== BOTTOM BAR ==================== */
 .bottom-bar {
   display: flex;
-  background: rgba(8, 10, 24, 0.88);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(0deg, rgba(8, 10, 24, 0.95) 0%, rgba(12, 16, 36, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(100, 160, 255, 0.12);
   min-height: 100px;
   max-height: 130px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 .bottom-left {
   display: flex;
@@ -966,19 +986,22 @@ html, body { background: #080a14 !important; }
 }
 .action-btn {
   font-family: var(--font-pixel);
-  font-size: 7px;
-  padding: 6px 12px;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 6px;
-  background: rgba(255,255,255,0.05);
+  font-size: 9px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   color: #fff;
   cursor: pointer;
   transition: all 0.15s;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 .action-btn:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.3);
+  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 100%);
+  border-color: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
 }
 .action-btn.danger {
   border-color: rgba(255,80,80,0.3);
@@ -1032,10 +1055,10 @@ html, body { background: #080a14 !important; }
 }
 .items-panel-limit {
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 9px;
   color: #f66;
   background: rgba(255,50,50,0.15);
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
 }
 .items-panel-scroll {

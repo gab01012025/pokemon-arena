@@ -36,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {/* ARIA live region for screen readers */}
         <div id="aria-live-announcer" role="status" aria-live="polite" aria-atomic="true" style={{
           position: 'absolute',
@@ -45,10 +47,6 @@ export default function RootLayout({
           height: '1px',
           overflow: 'hidden',
         }} />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
         <ErrorBoundary>
           <ToastProvider />
           <SkipLink />

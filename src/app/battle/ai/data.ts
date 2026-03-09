@@ -137,12 +137,6 @@ export const BATTLE_BACKGROUNDS = [
   '/images/cenarios/or_as_battle_background_6__evening__by_phoenixoflight92_d88ajms-414w-2x.jpg',
   '/images/cenarios/pokemon_x_and_y_battle_background_5_by_phoenixoflight92_d83pwna-414w-2x.jpg',
   '/images/cenarios/pokemon_x_and_y_forest_battle_background_by_phoenixoflight92_d85ijvr-414w-2x.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season15/season15_ep42_ss01.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season01/season01_ep01_ss01.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season01/season01_ep75_ss02.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season02/season02_ep34_ss02.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season08/season08_ep01_ss01.jpg',
-  'https://www.pokemon.com/static-assets/content-assets/cms2/img/watch-pokemon-tv/seasons/season25/season25_ep01_ss04.jpg',
 ];
 
 // ==================== SPRITE HELPERS ====================

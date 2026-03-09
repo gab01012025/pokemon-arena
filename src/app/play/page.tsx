@@ -21,186 +21,224 @@ interface Pokemon {
   skills: Skill[];
 }
 
-// ============ ALL 28 KANTO POKEMON ============
+// ============ BASE-STAGE KANTO POKEMON (evolve during battle) ============
 const ALL_POKEMON: Pokemon[] = [
-  // #001-003 Bulbasaur line
+  // === STARTERS ===
   { id: 1, name: 'Bulbasaur', type: 'grass', description: 'A strange seed was planted on its back at birth.', skills: [
     { id: 's1', name: 'Tackle', description: '15 damage' },
     { id: 's2', name: 'Vine Whip', description: '20 damage' },
     { id: 's3', name: 'Leech Seed', description: 'Drain 10/turn' },
     { id: 's4', name: 'Razor Leaf', description: '30 damage' },
   ]},
-  { id: 2, name: 'Ivysaur', type: 'grass', description: 'The bulb on its back grows as it absorbs nutrients.', skills: [
-    { id: 's1', name: 'Razor Leaf', description: '25 damage' },
-    { id: 's2', name: 'Poison Powder', description: 'Poison 12/turn' },
-    { id: 's3', name: 'Sleep Powder', description: 'Stun 2 turns' },
-    { id: 's4', name: 'Solar Beam', description: '50 damage' },
-  ]},
-  { id: 3, name: 'Venusaur', type: 'grass', description: 'The flower blooms when absorbing solar energy.', skills: [
-    { id: 's1', name: 'Petal Dance', description: '40 damage' },
-    { id: 's2', name: 'Sludge Bomb', description: '35 damage' },
-    { id: 's3', name: 'Solar Beam', description: '55 damage' },
-    { id: 's4', name: 'Frenzy Plant', description: '70 damage' },
-  ]},
-  // #004-006 Charmander line
   { id: 4, name: 'Charmander', type: 'fire', description: 'The flame on its tail shows its life force.', skills: [
     { id: 's1', name: 'Scratch', description: '15 damage' },
     { id: 's2', name: 'Ember', description: '20 damage, burn' },
     { id: 's3', name: 'Dragon Rage', description: '25 damage' },
     { id: 's4', name: 'Flamethrower', description: '35 damage' },
   ]},
-  { id: 5, name: 'Charmeleon', type: 'fire', description: 'It has a barbaric nature in battle.', skills: [
-    { id: 's1', name: 'Slash', description: '25 damage' },
-    { id: 's2', name: 'Flamethrower', description: '40 damage' },
-    { id: 's3', name: 'Fire Fang', description: '30 damage' },
-    { id: 's4', name: 'Fire Spin', description: '25 trap damage' },
-  ]},
-  { id: 6, name: 'Charizard', type: 'fire', description: 'It spits fire hot enough to melt boulders.', skills: [
-    { id: 's1', name: 'Wing Attack', description: '25 damage' },
-    { id: 's2', name: 'Flamethrower', description: '45 damage' },
-    { id: 's3', name: 'Fire Blast', description: '55 damage' },
-    { id: 's4', name: 'Blast Burn', description: '70 damage' },
-  ]},
-  // #007-009 Squirtle line
   { id: 7, name: 'Squirtle', type: 'water', description: 'It shelters in its shell and sprays water.', skills: [
     { id: 's1', name: 'Tackle', description: '15 damage' },
     { id: 's2', name: 'Water Gun', description: '20 damage' },
     { id: 's3', name: 'Withdraw', description: '+30 defense' },
     { id: 's4', name: 'Bubble Beam', description: '30 damage' },
   ]},
-  { id: 8, name: 'Wartortle', type: 'water', description: 'Its fluffy tail is a symbol of longevity.', skills: [
-    { id: 's1', name: 'Bite', description: '25 damage' },
-    { id: 's2', name: 'Water Pulse', description: '35 damage' },
-    { id: 's3', name: 'Protect', description: 'Invulnerable 1 turn' },
-    { id: 's4', name: 'Aqua Tail', description: '45 damage' },
-  ]},
-  { id: 9, name: 'Blastoise', type: 'water', description: 'The cannons on its shell can blast water.', skills: [
-    { id: 's1', name: 'Skull Bash', description: '35 damage' },
-    { id: 's2', name: 'Hydro Pump', description: '55 damage' },
-    { id: 's3', name: 'Rain Dance', description: '+Water damage' },
-    { id: 's4', name: 'Hydro Cannon', description: '70 damage' },
-  ]},
-  // #010-012 Caterpie line
-  { id: 10, name: 'Caterpie', type: 'bug', description: 'For protection, it releases a stench from antennae.', skills: [
-    { id: 's1', name: 'Tackle', description: '15 damage' },
-    { id: 's2', name: 'String Shot', description: 'Slow enemy' },
-    { id: 's3', name: 'Bug Bite', description: '20 damage' },
-    { id: 's4', name: 'Struggle', description: '25 damage' },
-  ]},
-  { id: 11, name: 'Metapod', type: 'bug', description: 'A steel-hard shell protects its tender body.', skills: [
-    { id: 's1', name: 'Harden', description: '+20 defense' },
-    { id: 's2', name: 'Tackle', description: '15 damage' },
-    { id: 's3', name: 'Bug Bite', description: '20 damage' },
-    { id: 's4', name: 'Iron Defense', description: '+40 defense' },
-  ]},
-  { id: 12, name: 'Butterfree', type: 'bug', description: 'It loves honey and can find flowers miles away.', skills: [
-    { id: 's1', name: 'Gust', description: '25 damage' },
-    { id: 's2', name: 'Psybeam', description: '35 damage' },
-    { id: 's3', name: 'Sleep Powder', description: 'Stun 2 turns' },
-    { id: 's4', name: 'Bug Buzz', description: '45 damage' },
-  ]},
-  // #013-015 Weedle line
-  { id: 13, name: 'Weedle', type: 'bug', description: 'It eats its weight in leaves every day.', skills: [
-    { id: 's1', name: 'Poison Sting', description: '15 poison' },
-    { id: 's2', name: 'String Shot', description: 'Slow enemy' },
-    { id: 's3', name: 'Bug Bite', description: '20 damage' },
-    { id: 's4', name: 'Struggle', description: '25 damage' },
-  ]},
-  { id: 14, name: 'Kakuna', type: 'bug', description: 'Almost incapable of moving, it can only harden.', skills: [
-    { id: 's1', name: 'Harden', description: '+20 defense' },
-    { id: 's2', name: 'Poison Sting', description: '15 poison' },
-    { id: 's3', name: 'Bug Bite', description: '20 damage' },
-    { id: 's4', name: 'Iron Defense', description: '+40 defense' },
-  ]},
-  { id: 15, name: 'Beedrill', type: 'bug', description: 'It has 3 poisonous stingers on its body.', skills: [
-    { id: 's1', name: 'Fury Attack', description: '25 damage' },
-    { id: 's2', name: 'Twineedle', description: '30 damage' },
-    { id: 's3', name: 'Poison Jab', description: '40 damage' },
-    { id: 's4', name: 'Pin Missile', description: '50 damage' },
-  ]},
-  // #016-018 Pidgey line
-  { id: 16, name: 'Pidgey', type: 'flying', description: 'A common sight in forests and woods.', skills: [
-    { id: 's1', name: 'Tackle', description: '15 damage' },
-    { id: 's2', name: 'Gust', description: '20 damage' },
-    { id: 's3', name: 'Quick Attack', description: '25 priority' },
-    { id: 's4', name: 'Wing Attack', description: '30 damage' },
-  ]},
-  { id: 17, name: 'Pidgeotto', type: 'flying', description: 'Very protective of its territory.', skills: [
-    { id: 's1', name: 'Wing Attack', description: '30 damage' },
-    { id: 's2', name: 'Aerial Ace', description: '35 damage' },
-    { id: 's3', name: 'Agility', description: 'Speed boost' },
-    { id: 's4', name: 'Air Slash', description: '45 damage' },
-  ]},
-  { id: 18, name: 'Pidgeot', type: 'flying', description: 'It can fly at Mach 2 speed.', skills: [
-    { id: 's1', name: 'Quick Attack', description: '30 priority' },
-    { id: 's2', name: 'Air Slash', description: '45 damage' },
-    { id: 's3', name: 'Roost', description: 'Heal 40 HP' },
-    { id: 's4', name: 'Hurricane', description: '55 damage' },
-  ]},
-  // #019-020 Rattata line
-  { id: 19, name: 'Rattata', type: 'normal', description: 'Its fangs are long and sharp.', skills: [
-    { id: 's1', name: 'Tackle', description: '15 damage' },
-    { id: 's2', name: 'Quick Attack', description: '20 priority' },
-    { id: 's3', name: 'Bite', description: '25 damage' },
-    { id: 's4', name: 'Hyper Fang', description: '35 damage' },
-  ]},
-  { id: 20, name: 'Raticate', type: 'normal', description: 'Its whiskers help it balance.', skills: [
-    { id: 's1', name: 'Quick Attack', description: '25 priority' },
-    { id: 's2', name: 'Hyper Fang', description: '40 damage' },
-    { id: 's3', name: 'Crunch', description: '45 damage' },
-    { id: 's4', name: 'Super Fang', description: '50% HP damage' },
-  ]},
-  // #021-022 Spearow line
-  { id: 21, name: 'Spearow', type: 'flying', description: 'It flaps its short wings to flush out insects.', skills: [
-    { id: 's1', name: 'Peck', description: '15 damage' },
-    { id: 's2', name: 'Fury Attack', description: '25 damage' },
-    { id: 's3', name: 'Aerial Ace', description: '30 damage' },
-    { id: 's4', name: 'Mirror Move', description: 'Copy last attack' },
-  ]},
-  { id: 22, name: 'Fearow', type: 'flying', description: 'It has the stamina to fly all day.', skills: [
-    { id: 's1', name: 'Fury Attack', description: '30 damage' },
-    { id: 's2', name: 'Aerial Ace', description: '35 damage' },
-    { id: 's3', name: 'Drill Peck', description: '45 damage' },
-    { id: 's4', name: 'Drill Run', description: '50 damage' },
-  ]},
-  // #023-024 Ekans line
-  { id: 23, name: 'Ekans', type: 'poison', description: 'It sneaks through grass without making a sound.', skills: [
-    { id: 's1', name: 'Wrap', description: '15 trap damage' },
-    { id: 's2', name: 'Poison Sting', description: '20 poison' },
-    { id: 's3', name: 'Bite', description: '25 damage' },
-    { id: 's4', name: 'Acid', description: '30 damage' },
-  ]},
-  { id: 24, name: 'Arbok', type: 'poison', description: 'The pattern on its belly scares enemies.', skills: [
-    { id: 's1', name: 'Bite', description: '25 damage' },
-    { id: 's2', name: 'Poison Fang', description: '35 poison' },
-    { id: 's3', name: 'Glare', description: 'Paralyze enemy' },
-    { id: 's4', name: 'Gunk Shot', description: '50 damage' },
-  ]},
-  // #025-026 Pikachu line
+  // === ICONIC ===
   { id: 25, name: 'Pikachu', type: 'electric', description: 'It stores electricity in its cheeks.', skills: [
     { id: 's1', name: 'Thunder Shock', description: '20 damage' },
     { id: 's2', name: 'Quick Attack', description: '25 priority' },
     { id: 's3', name: 'Thunderbolt', description: '35 damage' },
     { id: 's4', name: 'Thunder', description: '50 damage' },
   ]},
-  { id: 26, name: 'Raichu', type: 'electric', description: 'Its long tail serves as ground protection.', skills: [
-    { id: 's1', name: 'Thunder Punch', description: '30 damage' },
-    { id: 's2', name: 'Thunderbolt', description: '45 damage' },
-    { id: 's3', name: 'Thunder', description: '55 damage' },
-    { id: 's4', name: 'Volt Tackle', description: '60 recoil' },
+  { id: 133, name: 'Eevee', type: 'normal', description: 'Its genetic code is irregular. It may mutate if exposed to radiation from elemental stones.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Quick Attack', description: '20 priority' },
+    { id: 's3', name: 'Bite', description: '25 damage' },
+    { id: 's4', name: 'Swift', description: '30 never miss' },
   ]},
-  // #027-028 Sandshrew line
+  { id: 52, name: 'Meowth', type: 'normal', description: 'It loves coins. It searches for shiny objects at night.', skills: [
+    { id: 's1', name: 'Scratch', description: '15 damage' },
+    { id: 's2', name: 'Bite', description: '20 damage' },
+    { id: 's3', name: 'Pay Day', description: '25 damage' },
+    { id: 's4', name: 'Slash', description: '35 damage' },
+  ]},
+  // === EARLY ROUTES ===
+  { id: 10, name: 'Caterpie', type: 'bug', description: 'For protection, it releases a stench from antennae.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'String Shot', description: 'Slow enemy' },
+    { id: 's3', name: 'Bug Bite', description: '20 damage' },
+    { id: 's4', name: 'Struggle', description: '25 damage' },
+  ]},
+  { id: 13, name: 'Weedle', type: 'bug', description: 'It eats its weight in leaves every day.', skills: [
+    { id: 's1', name: 'Poison Sting', description: '15 poison' },
+    { id: 's2', name: 'String Shot', description: 'Slow enemy' },
+    { id: 's3', name: 'Bug Bite', description: '20 damage' },
+    { id: 's4', name: 'Struggle', description: '25 damage' },
+  ]},
+  { id: 16, name: 'Pidgey', type: 'flying', description: 'A common sight in forests and woods.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Gust', description: '20 damage' },
+    { id: 's3', name: 'Quick Attack', description: '25 priority' },
+    { id: 's4', name: 'Wing Attack', description: '30 damage' },
+  ]},
+  { id: 19, name: 'Rattata', type: 'normal', description: 'Its fangs are long and sharp.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Quick Attack', description: '20 priority' },
+    { id: 's3', name: 'Bite', description: '25 damage' },
+    { id: 's4', name: 'Hyper Fang', description: '35 damage' },
+  ]},
+  { id: 21, name: 'Spearow', type: 'flying', description: 'It flaps its short wings to flush out insects.', skills: [
+    { id: 's1', name: 'Peck', description: '15 damage' },
+    { id: 's2', name: 'Fury Attack', description: '25 damage' },
+    { id: 's3', name: 'Aerial Ace', description: '30 damage' },
+    { id: 's4', name: 'Mirror Move', description: 'Copy last attack' },
+  ]},
+  // === POISON/GROUND ===
+  { id: 23, name: 'Ekans', type: 'poison', description: 'It sneaks through grass without making a sound.', skills: [
+    { id: 's1', name: 'Wrap', description: '15 trap damage' },
+    { id: 's2', name: 'Poison Sting', description: '20 poison' },
+    { id: 's3', name: 'Bite', description: '25 damage' },
+    { id: 's4', name: 'Acid', description: '30 damage' },
+  ]},
   { id: 27, name: 'Sandshrew', type: 'ground', description: 'It burrows and lives underground.', skills: [
     { id: 's1', name: 'Scratch', description: '15 damage' },
     { id: 's2', name: 'Sand Attack', description: 'Lower accuracy' },
     { id: 's3', name: 'Swift', description: '25 never miss' },
     { id: 's4', name: 'Dig', description: '35 damage' },
   ]},
-  { id: 28, name: 'Sandslash', type: 'ground', description: 'It curls up to protect itself.', skills: [
-    { id: 's1', name: 'Slash', description: '30 damage' },
-    { id: 's2', name: 'Dig', description: '40 damage' },
-    { id: 's3', name: 'Sandstorm', description: '10/turn AoE' },
-    { id: 's4', name: 'Earthquake', description: '55 AoE damage' },
+  // === NIDORAN ===
+  { id: 29, name: 'Nidoran♀', type: 'poison', description: 'A docile Pokémon that prefers to avoid fighting.', skills: [
+    { id: 's1', name: 'Scratch', description: '15 damage' },
+    { id: 's2', name: 'Poison Sting', description: '20 poison' },
+    { id: 's3', name: 'Bite', description: '25 damage' },
+    { id: 's4', name: 'Double Kick', description: '30 damage' },
+  ]},
+  { id: 32, name: 'Nidoran♂', type: 'poison', description: 'It stiffens its ears to sense danger.', skills: [
+    { id: 's1', name: 'Peck', description: '15 damage' },
+    { id: 's2', name: 'Poison Sting', description: '20 poison' },
+    { id: 's3', name: 'Horn Attack', description: '25 damage' },
+    { id: 's4', name: 'Double Kick', description: '30 damage' },
+  ]},
+  // === FIRE ===
+  { id: 37, name: 'Vulpix', type: 'fire', description: 'At birth, it has just one tail that splits as it grows.', skills: [
+    { id: 's1', name: 'Ember', description: '15 damage' },
+    { id: 's2', name: 'Quick Attack', description: '20 priority' },
+    { id: 's3', name: 'Fire Spin', description: '25 trap' },
+    { id: 's4', name: 'Flamethrower', description: '35 damage' },
+  ]},
+  { id: 58, name: 'Growlithe', type: 'fire', description: 'Extremely loyal. It will fearlessly bark at any foe.', skills: [
+    { id: 's1', name: 'Bite', description: '15 damage' },
+    { id: 's2', name: 'Ember', description: '20 damage' },
+    { id: 's3', name: 'Flame Wheel', description: '25 damage' },
+    { id: 's4', name: 'Flamethrower', description: '35 damage' },
+  ]},
+  { id: 77, name: 'Ponyta', type: 'fire', description: 'Its hooves are 10 times harder than diamonds.', skills: [
+    { id: 's1', name: 'Ember', description: '15 damage' },
+    { id: 's2', name: 'Stomp', description: '20 damage' },
+    { id: 's3', name: 'Fire Spin', description: '25 trap' },
+    { id: 's4', name: 'Flame Charge', description: '30 damage' },
+  ]},
+  // === WATER ===
+  { id: 60, name: 'Poliwag', type: 'water', description: 'The spiral pattern on its belly is its internal organs showing through.', skills: [
+    { id: 's1', name: 'Water Gun', description: '15 damage' },
+    { id: 's2', name: 'Bubble Beam', description: '20 damage' },
+    { id: 's3', name: 'Hypnosis', description: 'Sleep enemy' },
+    { id: 's4', name: 'Body Slam', description: '30 damage' },
+  ]},
+  { id: 116, name: 'Horsea', type: 'water', description: 'Known to shoot down flying bugs with precision blasts of ink.', skills: [
+    { id: 's1', name: 'Water Gun', description: '15 damage' },
+    { id: 's2', name: 'Smokescreen', description: 'Lower accuracy' },
+    { id: 's3', name: 'Bubble Beam', description: '25 damage' },
+    { id: 's4', name: 'Dragon Rage', description: '30 damage' },
+  ]},
+  { id: 129, name: 'Magikarp', type: 'water', description: 'Virtually useless in battle, but evolves into the fearsome Gyarados.', skills: [
+    { id: 's1', name: 'Splash', description: 'Nothing happens' },
+    { id: 's2', name: 'Tackle', description: '10 damage' },
+    { id: 's3', name: 'Flail', description: '20 damage' },
+    { id: 's4', name: 'Bounce', description: '25 damage' },
+  ]},
+  // === PSYCHIC/GHOST ===
+  { id: 63, name: 'Abra', type: 'psychic', description: 'It sleeps 18 hours a day. It uses a variety of psychic moves.', skills: [
+    { id: 's1', name: 'Teleport', description: 'Dodge attack' },
+    { id: 's2', name: 'Confusion', description: '20 damage' },
+    { id: 's3', name: 'Psybeam', description: '25 damage' },
+    { id: 's4', name: 'Hidden Power', description: '30 damage' },
+  ]},
+  { id: 92, name: 'Gastly', type: 'ghost', description: 'Almost invisible, this gaseous Pokémon cloaks the target to put it to sleep.', skills: [
+    { id: 's1', name: 'Lick', description: '15 damage' },
+    { id: 's2', name: 'Hypnosis', description: 'Sleep enemy' },
+    { id: 's3', name: 'Night Shade', description: '25 damage' },
+    { id: 's4', name: 'Shadow Ball', description: '30 damage' },
+  ]},
+  // === FIGHTING/ROCK ===
+  { id: 66, name: 'Machop', type: 'fighting', description: 'It trains by lifting rocks in the mountains.', skills: [
+    { id: 's1', name: 'Karate Chop', description: '15 damage' },
+    { id: 's2', name: 'Low Kick', description: '20 damage' },
+    { id: 's3', name: 'Seismic Toss', description: '25 damage' },
+    { id: 's4', name: 'Cross Chop', description: '35 damage' },
+  ]},
+  { id: 74, name: 'Geodude', type: 'rock', description: 'Found in fields and mountains. Mistaken for boulders.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Rock Throw', description: '20 damage' },
+    { id: 's3', name: 'Rock Slide', description: '30 damage' },
+    { id: 's4', name: 'Self-Destruct', description: '50 recoil' },
+  ]},
+  // === ELECTRIC/STEEL ===
+  { id: 81, name: 'Magnemite', type: 'electric', description: 'Uses anti-gravity to stay suspended. Emits electromagnetic waves.', skills: [
+    { id: 's1', name: 'Thunder Shock', description: '15 damage' },
+    { id: 's2', name: 'Spark', description: '20 damage' },
+    { id: 's3', name: 'Thunder Wave', description: 'Paralyze' },
+    { id: 's4', name: 'Thunderbolt', description: '30 damage' },
+  ]},
+  // === DRAGON ===
+  { id: 147, name: 'Dratini', type: 'dragon', description: 'Long considered a mythical Pokémon until recently, when a colony was found living underwater.', skills: [
+    { id: 's1', name: 'Wrap', description: '15 damage' },
+    { id: 's2', name: 'Dragon Rage', description: '25 damage' },
+    { id: 's3', name: 'Twister', description: '30 damage' },
+    { id: 's4', name: 'Slam', description: '35 damage' },
+  ]},
+  // === GRASS/POISON ===
+  { id: 43, name: 'Oddish', type: 'grass', description: 'During the day, it buries itself in soil. At night, it wanders around sowing seeds.', skills: [
+    { id: 's1', name: 'Absorb', description: '15 drain' },
+    { id: 's2', name: 'Acid', description: '20 damage' },
+    { id: 's3', name: 'Sleep Powder', description: 'Sleep enemy' },
+    { id: 's4', name: 'Razor Leaf', description: '30 damage' },
+  ]},
+  // === MISC ===
+  { id: 35, name: 'Clefairy', type: 'fairy', description: 'Its adorable appearance makes it popular as a pet. It is rare and found only in certain areas.', skills: [
+    { id: 's1', name: 'Pound', description: '15 damage' },
+    { id: 's2', name: 'Double Slap', description: '20 damage' },
+    { id: 's3', name: 'Sing', description: 'Sleep enemy' },
+    { id: 's4', name: 'Metronome', description: 'Random move' },
+  ]},
+  { id: 39, name: 'Jigglypuff', type: 'fairy', description: 'When its huge eyes waver, it sings a mysteriously soothing melody that lulls its enemies to sleep.', skills: [
+    { id: 's1', name: 'Pound', description: '15 damage' },
+    { id: 's2', name: 'Sing', description: 'Sleep enemy' },
+    { id: 's3', name: 'Body Slam', description: '25 damage' },
+    { id: 's4', name: 'Double Slap', description: '30 damage' },
+  ]},
+  { id: 104, name: 'Cubone', type: 'ground', description: 'It always wears the skull of its dead mother as a helmet.', skills: [
+    { id: 's1', name: 'Bone Club', description: '15 damage' },
+    { id: 's2', name: 'Headbutt', description: '20 damage' },
+    { id: 's3', name: 'Bonemerang', description: '30 damage' },
+    { id: 's4', name: 'Bone Rush', description: '35 damage' },
+  ]},
+  { id: 109, name: 'Koffing', type: 'poison', description: 'Because it stores several kinds of toxic gases in its body, it is prone to exploding without warning.', skills: [
+    { id: 's1', name: 'Poison Gas', description: 'Poison enemy' },
+    { id: 's2', name: 'Tackle', description: '15 damage' },
+    { id: 's3', name: 'Sludge', description: '25 damage' },
+    { id: 's4', name: 'Self-Destruct', description: '50 recoil' },
+  ]},
+  { id: 100, name: 'Voltorb', type: 'electric', description: 'Usually found in power plants. It resembles a Poké Ball.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Spark', description: '20 damage' },
+    { id: 's3', name: 'Rollout', description: '25 damage' },
+    { id: 's4', name: 'Self-Destruct', description: '50 recoil' },
+  ]},
+  { id: 79, name: 'Slowpoke', type: 'water', description: 'Incredibly slow and sluggish. It is quite content to laze about.', skills: [
+    { id: 's1', name: 'Tackle', description: '15 damage' },
+    { id: 's2', name: 'Water Gun', description: '20 damage' },
+    { id: 's3', name: 'Confusion', description: '25 damage' },
+    { id: 's4', name: 'Headbutt', description: '30 damage' },
   ]},
 ];
 
