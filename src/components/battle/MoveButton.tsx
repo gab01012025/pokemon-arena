@@ -72,9 +72,9 @@ export function MoveButton({
         background: isDisabled
           ? 'linear-gradient(180deg, #444 0%, #222 100%)'
           : isSelected
-            ? 'linear-gradient(180deg, #FFCB05 0%, #B69E31 100%)'
+            ? 'linear-gradient(180deg, #f59e0b 0%, #B69E31 100%)'
             : 'linear-gradient(180deg, #3B5BA7 0%, #2A4073 100%)',
-        border: `2px solid ${isSelected ? '#FFCB05' : isDisabled ? '#555' : '#6890F0'}`,
+        border: `2px solid ${isSelected ? '#f59e0b' : isDisabled ? '#555' : '#6890F0'}`,
         borderRadius: '8px',
         padding: '10px 12px',
         cursor: isDisabled ? 'not-allowed' : 'pointer',

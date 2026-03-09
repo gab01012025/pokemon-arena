@@ -94,7 +94,7 @@ export default async function CharsPage() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
-              <Link href="/chars" className="nav-btn-top" style={{background: '#DC0A2D', color: 'white'}}>Characters</Link>
+              <Link href="/chars" className="nav-btn-top" style={{background: 'rgba(239,68,68,0.2)', color: '#e2e8f0', border: '1px solid rgba(239,68,68,0.3)'}}>Characters</Link>
             </div>
           </div>
           <div className="header-banner">

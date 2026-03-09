@@ -208,7 +208,7 @@ export const LoadingSpinner = ({
 
       .loading-text {
         font-size: 14px;
-        color: #666;
+        color: #64748b;
         margin: 0;
       }
     `}</style>
@@ -236,7 +236,7 @@ export const PokeballLoader = ({ text = 'Loading...' }: { text?: string }) => (
       .pokeball {
         width: 60px;
         height: 60px;
-        background: linear-gradient(180deg, #ff1a1a 50%, #fff 50%);
+        background: linear-gradient(180deg, #ef4444 50%, #1e293b 50%);
         border-radius: 50%;
         border: 4px solid #333;
         position: relative;
@@ -250,7 +250,7 @@ export const PokeballLoader = ({ text = 'Loading...' }: { text?: string }) => (
         transform: translate(-50%, -50%);
         width: 18px;
         height: 18px;
-        background: #fff;
+        background: rgba(15, 20, 40, 0.7);
         border-radius: 50%;
         border: 4px solid #333;
       }
@@ -352,7 +352,7 @@ export const ProgressBar = ({
       .progress-text {
         font-size: 12px;
         font-weight: 600;
-        color: #666;
+        color: #64748b;
         min-width: 40px;
         text-align: right;
       }

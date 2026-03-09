@@ -197,7 +197,7 @@ export default function ChangeAvatarPage() {
 
           {/* Instructions */}
           <div className="content-box mb-6">
-            <div className="content-box-body text-center p-4" style={{ backgroundColor: '#fffbeb', border: '1px solid #fcd34d' }}>
+            <div className="content-box-body text-center p-4" style={{ backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
               <p className="text-gray-800">
                 Use imgur to upload your custom avatar: <a href="https://imgur.com/upload" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">https://imgur.com/upload</a>
               </p>

@@ -31,10 +31,10 @@ export default function EnemyColumn({
             <div className="skills-panel">
               {poke.moves.slice(0, 4).map(move => {
                 const colors = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
-                const abbrev = MOVE_ABBREV[move.name] || move.name.substring(0, 3).toUpperCase();
+                const displayName = move.name.length > 10 ? (MOVE_ABBREV[move.name] || move.name.substring(0, 8)) : move.name;
                 return (
                   <div key={move.id} className="skill-slot disabled" style={{ background: colors.bg, borderColor: colors.border }}>
-                    <span className="skill-abbrev" style={{ color: colors.text }}>{abbrev}</span>
+                    <span className="skill-abbrev" style={{ color: colors.text }}>{displayName}</span>
                   </div>
                 );
               })}

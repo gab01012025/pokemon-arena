@@ -146,7 +146,7 @@ export const RANKS: RankInfo[] = [
     maxLevel: 50,
     badge: '/images/badges/grao-mestre.jpeg',
     crown: '/images/badges/crowns/grao-mestre.jpeg',
-    color: '#8B0000',
+    color: '#dc2626',
     gradient: 'linear-gradient(135deg, #DC143C 0%, #8B0000 50%, #4A0000 100%)',
     glow: 'rgba(220, 20, 60, 0.6)',
   },

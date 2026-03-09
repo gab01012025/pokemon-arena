@@ -196,7 +196,7 @@ export function BattleArena({
       }}>
         <div>
           <span style={{ 
-            color: '#FFCB05', 
+            color: '#f59e0b', 
             fontSize: '12px', 
             marginRight: '15px',
             fontWeight: 'bold',
@@ -296,7 +296,7 @@ export function BattleArena({
           border: '2px solid #FFC107',
           textAlign: 'center',
         }}>
-          <p style={{ color: '#FFCB05', margin: '0 0 10px 0', fontWeight: 'bold' }}>
+          <p style={{ color: '#f59e0b', margin: '0 0 10px 0', fontWeight: 'bold' }}>
             Select a target for {selectedMove.name}
           </p>
           <button

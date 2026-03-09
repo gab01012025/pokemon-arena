@@ -71,7 +71,7 @@ export function PokemonCard({
         background: isAlive 
           ? `linear-gradient(180deg, ${typeColor}30 0%, rgba(0,0,0,0.6) 100%)`
           : 'linear-gradient(180deg, #333 0%, #111 100%)',
-        border: `3px solid ${isSelected ? '#FFCB05' : isTargetable ? '#FF4444' : typeColor}`,
+        border: `3px solid ${isSelected ? '#f59e0b' : isTargetable ? '#FF4444' : typeColor}`,
         borderRadius: '12px',
         padding: '12px',
         width: '140px',

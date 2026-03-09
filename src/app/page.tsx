@@ -56,7 +56,7 @@ export default function Home() {
 
           {/* Pokédex */}
           <div className="sidebar-box pokedex-box">
-            <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, #E3350D, #FFCB05)' }}>Pokédex</div>
+            <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(245,158,11,0.2))' }}>Pokédex</div>
             <div className="sidebar-box-content">
               <p>Explore todos os Pokémon!</p>
               <Link href="/pokedex" className="pokedex-button">
@@ -201,7 +201,7 @@ export default function Home() {
                 <li>Top 20 Highest Streak has been added.</li>
               </ul>
 
-              <hr style={{ borderColor: '#333', margin: '15px 0' }} />
+              <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '15px 0' }} />
 
               <p>So for now, we didn&apos;t want to leave the game with no update, so we&apos;re bringing a new BU with 3 nerfs and 3 buffs to shake up the META!</p>
 

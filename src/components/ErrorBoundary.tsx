@@ -106,7 +106,7 @@ export class ErrorBoundary extends Component<Props, State> {
             }
 
             .error-content {
-              background: white;
+              background: #111827;
               border-radius: 16px;
               padding: 40px;
               max-width: 600px;

@@ -249,7 +249,7 @@ export default function LadderPage() {
                               backgroundColor: trainer.winRate >= 60 
                                 ? '#4CAF50' 
                                 : trainer.winRate >= 50 
-                                  ? '#FFCB05' 
+                                  ? '#f59e0b' 
                                   : '#F44336'
                             }}
                           />

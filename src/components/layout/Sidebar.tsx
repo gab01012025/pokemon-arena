@@ -61,7 +61,7 @@ export function LeftSidebar() {
 
       {/* Pokédex */}
       <div className="sidebar-box pokedex-box">
-        <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, #E3350D, #FFCB05)' }}>Pokédex</div>
+        <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(245,158,11,0.2))' }}>Pokédex</div>
         <div className="sidebar-box-content">
           <p>Explore todos os Pokémon!</p>
           <Link href="/pokedex" className="pokedex-button">

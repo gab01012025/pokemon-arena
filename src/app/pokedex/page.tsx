@@ -169,7 +169,7 @@ export default function PokedexPage() {
         .pokedex-title {
           font-size: 3rem;
           font-weight: 900;
-          background: linear-gradient(135deg, #E3350D 0%, #FFCB05 50%, #3B5CA8 100%);
+          background: linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #3B5CA8 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -204,7 +204,7 @@ export default function PokedexPage() {
         }
 
         .search-input:focus {
-          border-color: #FFCB05;
+          border-color: #f59e0b;
           box-shadow: 0 0 15px rgba(255, 203, 5, 0.2);
         }
 
@@ -241,7 +241,7 @@ export default function PokedexPage() {
 
         .pokemon-card:hover {
           transform: translateY(-10px);
-          border-color: #FFCB05;
+          border-color: #f59e0b;
           box-shadow: 0 15px 40px rgba(255, 203, 5, 0.2);
         }
 
@@ -314,7 +314,7 @@ export default function PokedexPage() {
           padding: 12px 30px;
           border-radius: 50px;
           border: none;
-          background: linear-gradient(135deg, #E3350D 0%, #b02000 100%);
+          background: linear-gradient(135deg, #ef4444 0%, #b02000 100%);
           color: #fff;
           font-weight: 700;
           cursor: pointer;
@@ -340,7 +340,7 @@ export default function PokedexPage() {
         .loading {
           text-align: center;
           padding: 100px 0;
-          color: #FFCB05;
+          color: #f59e0b;
           font-size: 1.5rem;
         }
 
@@ -349,7 +349,7 @@ export default function PokedexPage() {
           height: 60px;
           margin: 0 auto 20px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #E3350D 50%, #fff 50%);
+          background: linear-gradient(135deg, #ef4444 50%, #fff 50%);
           border: 4px solid #fff;
           animation: spin 1s linear infinite;
         }
@@ -388,7 +388,7 @@ export default function PokedexPage() {
           max-height: 90vh;
           overflow-y: auto;
           position: relative;
-          border: 4px solid var(--type-color, #FFCB05);
+          border: 4px solid var(--type-color, #f59e0b);
           animation: slideIn 0.3s ease;
         }
 
@@ -413,7 +413,7 @@ export default function PokedexPage() {
         }
 
         .modal-close:hover {
-          background: #E3350D;
+          background: #ef4444;
           transform: rotate(90deg);
         }
 
@@ -452,7 +452,7 @@ export default function PokedexPage() {
           background: rgba(0,0,0,0.2);
           border-radius: 15px;
           margin: 20px 0;
-          border-left: 4px solid #FFCB05;
+          border-left: 4px solid #f59e0b;
         }
 
         .modal-section {
@@ -462,7 +462,7 @@ export default function PokedexPage() {
         .section-title {
           font-size: 1.1rem;
           font-weight: 700;
-          color: #FFCB05;
+          color: #f59e0b;
           text-transform: uppercase;
           margin-bottom: 15px;
           letter-spacing: 2px;
@@ -537,9 +537,9 @@ export default function PokedexPage() {
         .ability-tag {
           padding: 8px 16px;
           background: rgba(255, 203, 5, 0.1);
-          border: 1px solid #FFCB05;
+          border: 1px solid #f59e0b;
           border-radius: 20px;
-          color: #FFCB05;
+          color: #f59e0b;
           font-size: 0.9rem;
           text-transform: capitalize;
         }
@@ -547,7 +547,7 @@ export default function PokedexPage() {
         .back-link {
           display: inline-block;
           margin-bottom: 20px;
-          color: #FFCB05;
+          color: #f59e0b;
           text-decoration: none;
           font-weight: 600;
         }

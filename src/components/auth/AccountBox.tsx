@@ -73,12 +73,12 @@ export function AccountBox() {
       <div className="sidebar-box-content">
         <form className="login-form" action="/login" method="GET">
           <p style={{ marginBottom: '10px', fontSize: '11px' }}>
-            <Link href="/login" className="btn-login" style={{ display: 'block', textAlign: 'center', padding: '8px', background: '#fff', border: '1px solid #333', textDecoration: 'none', color: '#333', fontWeight: 'bold' }}>
+            <Link href="/login" className="btn-login" style={{ display: 'block', textAlign: 'center', padding: '8px', background: 'rgba(15, 20, 40, 0.8)', border: '1px solid rgba(255,255,255,0.1)', textDecoration: 'none', color: '#e2e8f0', fontWeight: 'bold', borderRadius: '8px' }}>
               Login
             </Link>
           </p>
           <p style={{ marginBottom: '10px', fontSize: '11px' }}>
-            <Link href="/register" className="btn-register" style={{ display: 'block', textAlign: 'center', padding: '8px', background: 'var(--header-blue)', color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
+            <Link href="/register" className="btn-register" style={{ display: 'block', textAlign: 'center', padding: '8px', background: 'var(--header-blue)', color: 'white', textDecoration: 'none', fontWeight: 'bold', borderRadius: '8px' }}>
               Register
             </Link>
           </p>
