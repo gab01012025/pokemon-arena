@@ -68,23 +68,25 @@ export default function TrainerSelectScreen({
               {isSelected && <span className="checkmark">✓</span>}
               {sprite && (
                 <div style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
-                  background: `radial-gradient(circle at 30% 30%, ${color}33, ${color}11)`,
-                  border: `2px solid ${color}55`,
+                  width: 80,
+                  height: 80,
+                  borderRadius: 12,
+                  background: `linear-gradient(180deg, ${color}22 0%, ${color}08 100%)`,
+                  border: `2px solid ${color}44`,
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-end',
                   justifyContent: 'center',
                   marginBottom: 4,
+                  overflow: 'hidden',
+                  boxShadow: `0 4px 12px ${color}22`,
                 }}>
                   <Image
                     src={sprite}
                     alt={trainer.name}
-                    width={40}
-                    height={40}
+                    width={72}
+                    height={72}
                     unoptimized
-                    style={{ imageRendering: 'pixelated', filter: `drop-shadow(0 2px 4px ${color}44)` }}
+                    style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 6px ${color}55)` }}
                   />
                 </div>
               )}

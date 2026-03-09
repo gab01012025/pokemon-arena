@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { BattleItem, Move, GamePhase, EvolutionOption } from '../types';
-import { getSpriteById, ENERGY_ICONS } from '../data';
+import { getSpriteById } from '../data';
+import EnergyIcon from './EnergyIcon';
 
 interface EvolveChoiceData {
   idx: number;
@@ -162,8 +163,8 @@ export default function BattleOverlays({
                   </div>
                   <div className="evo-option-cost">
                     {opt.energyCost.map((c, ci) => (
-                      <span key={ci} className="evo-cost-item">
-                        {ENERGY_ICONS[c.type]} ×{c.amount}
+                      <span key={ci} className="evo-cost-item" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <EnergyIcon type={c.type} size={16} /> ×{c.amount}
                       </span>
                     ))}
                   </div>

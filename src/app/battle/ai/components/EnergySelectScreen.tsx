@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import { EnergyType, BattlePokemon } from '../types';
-import { ALL_SELECTABLE_ENERGY_TYPES, ENERGY_ICONS, ENERGY_NAMES, TYPE_TO_ENERGY } from '../data';
+import { ALL_SELECTABLE_ENERGY_TYPES, ENERGY_NAMES, TYPE_TO_ENERGY } from '../data';
+import EnergyIcon from './EnergyIcon';
 
 interface EnergySelectScreenProps {
   playerTeam: BattlePokemon[];
@@ -54,11 +55,11 @@ export default function EnergySelectScreen({
                     key={e}
                     title={ENERGY_NAMES[e]}
                     style={{
-                      fontSize: 16,
+                      display: 'inline-flex',
                       filter: selectedEnergyTypes.includes(e) || e === 'colorless' ? 'none' : 'grayscale(1) opacity(0.5)',
                     }}
                   >
-                    {ENERGY_ICONS[e]}
+                    <EnergyIcon type={e} size={18} />
                   </span>
                 ))}
               </div>
@@ -72,8 +73,8 @@ export default function EnergySelectScreen({
         <div className="energy-select-hint">
           Your team needs:&nbsp;
           {neededEnergies.map(e => (
-            <span key={e} style={{ marginRight: 4 }} title={ENERGY_NAMES[e]}>
-              {ENERGY_ICONS[e]} {ENERGY_NAMES[e]}
+            <span key={e} style={{ marginRight: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }} title={ENERGY_NAMES[e]}>
+              <EnergyIcon type={e} size={18} /> {ENERGY_NAMES[e]}
             </span>
           ))}
         </div>
@@ -90,7 +91,7 @@ export default function EnergySelectScreen({
             >
               {selectedEnergyTypes.includes(type) && <span className="checkmark">✓</span>}
               {isNeeded && !selectedEnergyTypes.includes(type) && <span className="recommended-badge">★</span>}
-              <div className={`energy-icon-big ${type}`}>{ENERGY_ICONS[type]}</div>
+              <div className={`energy-icon-big ${type}`}><EnergyIcon type={type} size={44} /></div>
               <span className="energy-label">{ENERGY_NAMES[type]}</span>
             </div>
           );

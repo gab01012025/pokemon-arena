@@ -146,10 +146,8 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  /* No background needed - SVG EnergyIcon handles the circle */
+  background: transparent;
 }
 .energy-select-card .energy-label {
   font-family: var(--font-main);
@@ -1526,16 +1524,16 @@ html, body { background: #080a14 !important; }
 .energy-select-card.colorless { background: rgba(168, 168, 120, 0.2); }
 .energy-select-card.colorless::before { background: var(--color-colorless); }
 
-/* Energy icon backgrounds */
-.energy-icon-big.grass { background: var(--color-grass); }
-.energy-icon-big.fire { background: var(--color-fire); }
-.energy-icon-big.water { background: var(--color-water); }
-.energy-icon-big.lightning { background: var(--color-lightning); }
-.energy-icon-big.psychic { background: var(--color-psychic); }
-.energy-icon-big.fighting { background: var(--color-fighting); }
-.energy-icon-big.darkness { background: var(--color-darkness); }
-.energy-icon-big.metal { background: var(--color-metal); }
-.energy-icon-big.colorless { background: var(--color-colorless); }
+/* Energy icon backgrounds - no longer needed, SVG handles colors */
+.energy-icon-big.grass,
+.energy-icon-big.fire,
+.energy-icon-big.water,
+.energy-icon-big.lightning,
+.energy-icon-big.psychic,
+.energy-icon-big.fighting,
+.energy-icon-big.darkness,
+.energy-icon-big.metal,
+.energy-icon-big.colorless { background: transparent; }
 
 /* ==================== ENHANCED BATTLE ANIMATIONS ==================== */
 

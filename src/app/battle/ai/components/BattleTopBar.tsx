@@ -2,8 +2,9 @@
 
 import { EnergyType, EnergyState, Trainer, GamePhase } from '../types';
 import { RankInfo } from '@/lib/ranks';
-import { ENERGY_ICONS, ENERGY_NAMES } from '../data';
+import { ENERGY_NAMES } from '../data';
 import { getTotalEnergy } from '../engine';
+import EnergyIcon from './EnergyIcon';
 
 interface BattleTopBarProps {
   playerName: string;
@@ -79,7 +80,7 @@ export default function BattleTopBar({
           {[...new Set([...selectedEnergyTypes, 'colorless' as EnergyType])].map(type => (
             energy[type] > 0 ? (
               <div key={type} className="energy-item">
-                <div className={`energy-orb ${type}`} title={ENERGY_NAMES[type]}>{ENERGY_ICONS[type]}</div>
+                <EnergyIcon type={type} size={22} />
                 <span className="energy-count">×{energy[type]}</span>
               </div>
             ) : null

@@ -1,7 +1,8 @@
 'use client';
 
 import { Move, SelectedAction } from '../types';
-import { ENERGY_ICONS, STATUS_ICONS } from '../data';
+import { STATUS_ICONS } from '../data';
+import EnergyIcon from './EnergyIcon';
 
 interface BattleCenterProps {
   selectedActions: SelectedAction[];
@@ -29,7 +30,7 @@ export default function BattleCenter({
             <div className="skill-info-cost">
               {hoveredSkill.move.cost.map((c, i) => (
                 <div key={i} className={`energy-orb ${c.type}`} title={`${c.amount}× ${c.type}`}>
-                  {c.amount > 1 ? c.amount : ENERGY_ICONS[c.type]}
+                  {c.amount > 1 ? c.amount : <EnergyIcon type={c.type} size={16} />}
                 </div>
               ))}
             </div>

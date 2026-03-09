@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { BattlePokemon, GamePhase } from '../types';
-import { TYPE_COLORS, MOVE_ABBREV, STATUS_ICONS, ENERGY_ICONS, TYPE_TO_ENERGY } from '../data';
+import { TYPE_COLORS, MOVE_ABBREV, STATUS_ICONS, TYPE_TO_ENERGY } from '../data';
 import { getHpClass } from '../engine';
+import EnergyIcon from './EnergyIcon';
 
 interface EnemyColumnProps {
   opponentTeam: BattlePokemon[];
@@ -63,12 +64,12 @@ export default function EnemyColumn({
                 <div className="wr-badges">
                   {poke.weakness && (
                     <span className="wr-badge weakness" title={`Weak to ${poke.weakness} (+20 dmg)`}>
-                      {ENERGY_ICONS[TYPE_TO_ENERGY[poke.weakness]]} ×2
+                      <EnergyIcon type={TYPE_TO_ENERGY[poke.weakness]} size={12} /> ×2
                     </span>
                   )}
                   {poke.resistance && (
                     <span className="wr-badge resistance" title={`Resists ${poke.resistance} (-20 dmg)`}>
-                      {ENERGY_ICONS[TYPE_TO_ENERGY[poke.resistance]]} -20
+                      <EnergyIcon type={TYPE_TO_ENERGY[poke.resistance]} size={12} /> -20
                     </span>
                   )}
                 </div>
