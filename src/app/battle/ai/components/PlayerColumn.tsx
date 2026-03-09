@@ -54,7 +54,7 @@ export default function PlayerColumn({
                 </div>
               )}
               <div className="pokemon-sprite flipped">
-                <Image src={poke.sprite} alt={poke.name} width={68} height={68} unoptimized />
+                <Image src={poke.sprite} alt={poke.name} width={76} height={76} unoptimized />
               </div>
               <div className="pokemon-name-tag">{poke.name}</div>
               <div className="hp-text-overlay">{poke.hp}/{poke.maxHp}</div>
@@ -81,7 +81,7 @@ export default function PlayerColumn({
             <div className="skills-panel">
               {poke.moves.slice(0, 4).map(move => {
                 const colors = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
-                const displayName = move.name.length > 10 ? (MOVE_ABBREV[move.name] || move.name.substring(0, 8)) : move.name;
+                const displayName = MOVE_ABBREV[move.name] || (move.name.length > 10 ? move.name.substring(0, 8) : move.name);
                 return (
                   <div
                     key={move.id}
@@ -92,7 +92,15 @@ export default function PlayerColumn({
                     onMouseEnter={() => onHoverSkill(move, poke.name)}
                     onMouseLeave={onLeaveSkill}
                   >
+                    <div className="skill-cost-icons">
+                      {move.cost.map((c, ci) => (
+                        Array.from({ length: c.amount }).map((_, ai) => (
+                          <EnergyIcon key={`${ci}-${ai}`} type={c.type} size={14} />
+                        ))
+                      ))}
+                    </div>
                     <span className="skill-abbrev" style={{ color: colors.text }}>{displayName}</span>
+                    {move.power > 0 && <span className="skill-power" style={{ color: colors.text }}>{move.power}</span>}
                   </div>
                 );
               })}

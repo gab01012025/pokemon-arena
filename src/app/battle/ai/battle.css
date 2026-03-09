@@ -370,11 +370,11 @@ html, body { background: #080a14 !important; }
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  background: linear-gradient(180deg, rgba(8, 10, 24, 0.95) 0%, rgba(12, 16, 36, 0.9) 100%);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(100, 160, 255, 0.12);
-  min-height: 72px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.04);
+  background: linear-gradient(180deg, rgba(6, 8, 20, 0.97) 0%, rgba(12, 16, 40, 0.93) 100%);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+  min-height: 68px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(255,255,255,0.06);
 }
 .player-info {
   display: flex;
@@ -445,25 +445,27 @@ html, body { background: #080a14 !important; }
 }
 .ready-btn {
   font-family: var(--font-pixel);
-  font-size: 9px;
-  padding: 8px 20px;
+  font-size: 10px;
+  padding: 10px 28px;
   border: none;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  border-radius: 22px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
   color: #fff;
   cursor: pointer;
   transition: all 0.2s;
   letter-spacing: 1px;
+  box-shadow: 0 3px 12px rgba(76, 175, 80, 0.35);
 }
 .ready-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 10px rgba(76, 175, 80, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(76, 175, 80, 0.5);
 }
 .ready-btn:disabled {
-  background: linear-gradient(135deg, #555 0%, #333 100%);
+  background: linear-gradient(135deg, #444 0%, #2a2a2a 100%);
   opacity: 0.5;
   cursor: wait;
+  box-shadow: none;
 }
 .timer-container { width: 100%; max-width: 200px; }
 .timer-bar {
@@ -572,8 +574,8 @@ html, body { background: #080a14 !important; }
   flex: 1;
   display: flex;
   align-items: stretch;
-  padding: 12px 20px;
-  gap: 14px;
+  padding: 14px 24px;
+  gap: 16px;
   min-height: 0;
   position: relative;
 }
@@ -592,36 +594,37 @@ html, body { background: #080a14 !important; }
 .character-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   justify-content: center;
-  max-width: 320px;
+  max-width: 380px;
 }
 
-/* Character Card */
+/* Character Card — TCG Pocket inspired */
 .character-card {
   display: flex;
-  gap: 10px;
-  background: linear-gradient(145deg, rgba(16, 20, 44, 0.92) 0%, rgba(10, 14, 32, 0.88) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(100, 160, 255, 0.12);
-  border-radius: 16px;
-  padding: 12px;
+  gap: 0;
+  background: linear-gradient(160deg, rgba(22, 28, 55, 0.96) 0%, rgba(12, 16, 38, 0.94) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 2px solid rgba(100, 160, 255, 0.15);
+  border-radius: 18px;
+  padding: 0;
   transition: all 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  align-items: center;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  align-items: stretch;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
 }
 .character-card.player {
   flex-direction: row;
-  border-left: 3px solid rgba(76, 175, 80, 0.7);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), -4px 0 20px rgba(76, 175, 80, 0.08);
+  border-left: 4px solid rgba(76, 175, 80, 0.8);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08), -6px 0 24px rgba(76, 175, 80, 0.1);
 }
 .character-card.enemy {
   flex-direction: row-reverse;
-  border-right: 3px solid rgba(244, 67, 54, 0.6);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 4px 0 20px rgba(244, 67, 54, 0.08);
+  border-right: 4px solid rgba(244, 67, 54, 0.7);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08), 6px 0 24px rgba(244, 67, 54, 0.1);
 }
 .character-card.fainted {
   opacity: 0.3;
@@ -640,32 +643,39 @@ html, body { background: #080a14 !important; }
   50% { box-shadow: 0 0 28px rgba(255, 215, 0, 0.55); }
 }
 
-/* Portrait Container */
+/* Portrait Container — TCG card art area */
 .portrait-container {
-  width: 106px;
-  height: 106px;
-  border-radius: 14px;
+  width: 120px;
+  min-height: 130px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-  background: linear-gradient(180deg, rgba(20,30,60,0.6) 0%, rgba(0,0,0,0.5) 100%);
-  border: 2px solid rgba(100, 160, 255, 0.15);
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.3);
+  background: linear-gradient(180deg, rgba(20,30,65,0.7) 0%, rgba(8,12,28,0.8) 100%);
+  border-right: 1px solid rgba(100, 160, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.character-card.enemy .portrait-container {
+  border-right: none;
+  border-left: 1px solid rgba(100, 160, 255, 0.1);
 }
 .pokemon-sprite {
   width: 100%;
-  height: 70%;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px 0 2px;
 }
 .pokemon-sprite.flipped { transform: scaleX(-1); }
 .pokemon-sprite img {
-  width: 76px;
-  height: 76px;
+  width: 84px;
+  height: 84px;
   image-rendering: pixelated;
   object-fit: contain;
-  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
 }
 .pokemon-name-tag {
   position: absolute;
@@ -676,9 +686,9 @@ html, body { background: #080a14 !important; }
   font-family: var(--font-pixel);
   font-size: 8px;
   color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.95);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.95);
   padding: 3px 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.3) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.6) 70%, transparent 100%);
   letter-spacing: 0.5px;
 }
 
@@ -688,16 +698,16 @@ html, body { background: #080a14 !important; }
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 4px 6px 5px;
-  background: rgba(0,0,0,0.55);
+  padding: 4px 8px 6px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.65) 40%);
 }
 .hp-bar-inner {
   width: 100%;
-  height: 7px;
-  background: rgba(0,0,0,0.65);
+  height: 8px;
+  background: rgba(0,0,0,0.7);
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05);
 }
 .hp-fill {
   height: 100%;
@@ -722,7 +732,7 @@ html, body { background: #080a14 !important; }
 /* Weakness / Resistance badges (TCG Pocket) */
 .wr-badges {
   position: absolute;
-  bottom: 16px;
+  bottom: 17px;
   left: 4px;
   display: flex;
   gap: 3px;
@@ -731,31 +741,37 @@ html, body { background: #080a14 !important; }
 .wr-badge {
   font-size: 8px;
   font-family: var(--font-pixel);
-  padding: 1px 4px;
+  padding: 2px 5px;
   border-radius: 4px;
   line-height: 1.2;
   white-space: nowrap;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 .wr-badge.weakness {
-  background: rgba(255, 60, 60, 0.75);
+  background: rgba(255, 50, 50, 0.8);
   color: #fff;
-  border: 1px solid rgba(255,100,100,0.5);
+  border: 1px solid rgba(255,100,100,0.6);
+  box-shadow: 0 1px 4px rgba(255,50,50,0.3);
 }
 .wr-badge.resistance {
-  background: rgba(60, 130, 255, 0.75);
+  background: rgba(50, 120, 255, 0.8);
   color: #fff;
-  border: 1px solid rgba(100,160,255,0.5);
+  border: 1px solid rgba(100,160,255,0.6);
+  box-shadow: 0 1px 4px rgba(50,120,255,0.3);
 }
 
 .hp-text-overlay {
   position: absolute;
-  bottom: 12px;
-  right: 6px;
+  bottom: 14px;
+  right: 8px;
   font-family: var(--font-pixel);
   font-size: 8px;
   color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.95);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,1);
+  z-index: 2;
 }
 
 /* Status Effects on card */
@@ -793,25 +809,28 @@ html, body { background: #080a14 !important; }
 .status-badge.confuse { border-color: #F85888; color: #F85888; box-shadow: 0 0 6px rgba(248,88,136,0.4); }
 .status-badge.stun { border-color: #FFD700; color: #FFD700; box-shadow: 0 0 6px rgba(255,215,0,0.4); }
 
-/* ==================== SKILLS PANEL ==================== */
+/* ==================== SKILLS PANEL — TCG Move List ==================== */
 .skills-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
+  padding: 8px 10px;
+  justify-content: center;
 }
 .skill-slot {
-  height: 48px;
-  border-radius: 10px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
   cursor: pointer;
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.1);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  padding: 0 10px 0 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .skill-slot::before {
   content: '';
@@ -819,51 +838,76 @@ html, body { background: #080a14 !important; }
   top: 0;
   left: 0;
   right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
   border-radius: 6px 6px 0 0;
   pointer-events: none;
 }
 .skill-slot:hover:not(.disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-  filter: brightness(1.25);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  filter: brightness(1.2);
 }
 .skill-slot:active:not(.disabled) {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   filter: brightness(0.95);
 }
 .skill-slot.disabled {
   opacity: 0.35;
   cursor: default;
-  filter: grayscale(0.6);
+  filter: grayscale(0.5);
   box-shadow: none;
 }
 .skill-slot.selected {
   border-color: #fff !important;
-  box-shadow: 0 0 12px rgba(255,255,255,0.35), inset 0 0 6px rgba(255,255,255,0.1);
+  box-shadow: 0 0 14px rgba(255,255,255,0.4), inset 0 0 8px rgba(255,255,255,0.12);
+  transform: scale(1.03);
 }
 .skill-slot.on-cooldown::after {
   content: attr(data-cd);
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.72);
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-pixel);
-  font-size: 12px;
+  font-size: 11px;
   color: #ff6666;
   border-radius: 6px;
 }
+
+/* Energy cost mini-icons on the left of each move */
+.skill-cost-icons {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
 .skill-abbrev {
-  font-family: var(--font-pixel);
-  font-size: 9px;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.85);
-  text-align: center;
-  line-height: 1.3;
-  padding: 0 3px;
+  font-family: var(--font-main);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  text-align: left;
+  line-height: 1.2;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Power number on the right of each move (like TCG damage) */
+.skill-power {
+  font-family: var(--font-main);
+  font-weight: 800;
+  font-size: 16px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  flex-shrink: 0;
+  min-width: 24px;
+  text-align: right;
 }
 
 /* Skill Info Tooltip */
@@ -923,53 +967,60 @@ html, body { background: #080a14 !important; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-width: 100px;
+  gap: 14px;
+  min-width: 90px;
   flex-shrink: 0;
 }
 .vs-display {
   font-family: var(--font-pixel);
-  font-size: 22px;
+  font-size: 26px;
   color: #fff;
-  text-shadow: 0 0 24px rgba(255,80,80,0.6), 0 0 48px rgba(255,50,50,0.3), 0 2px 4px rgba(0,0,0,0.7);
-  letter-spacing: 5px;
-  background: linear-gradient(180deg, rgba(255,60,60,0.15) 0%, transparent 100%);
-  padding: 6px 18px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,80,80,0.2);
+  text-shadow: 0 0 30px rgba(255,80,80,0.7), 0 0 60px rgba(255,50,50,0.35), 0 3px 6px rgba(0,0,0,0.8);
+  letter-spacing: 6px;
+  background: linear-gradient(180deg, rgba(255,60,60,0.18) 0%, rgba(255,30,30,0.06) 100%);
+  padding: 10px 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,80,80,0.25);
+  animation: vs-pulse-glow 2.5s ease-in-out infinite;
+}
+@keyframes vs-pulse-glow {
+  0%, 100% { text-shadow: 0 0 30px rgba(255,80,80,0.7), 0 0 60px rgba(255,50,50,0.35); }
+  50% { text-shadow: 0 0 40px rgba(255,80,80,0.9), 0 0 80px rgba(255,50,50,0.5); }
 }
 .action-queue {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 .queue-slot {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-pixel);
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  transition: all 0.3s ease;
 }
 .queue-slot.filled {
-  background: rgba(76, 175, 80, 0.3);
-  border-color: rgba(76, 175, 80, 0.5);
-  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.35);
+  border-color: rgba(76, 175, 80, 0.6);
+  color: #66BB6A;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
 }
 
 /* ==================== BOTTOM BAR ==================== */
 .bottom-bar {
   display: flex;
-  background: linear-gradient(0deg, rgba(8, 10, 24, 0.95) 0%, rgba(12, 16, 36, 0.9) 100%);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(100, 160, 255, 0.12);
-  min-height: 100px;
-  max-height: 130px;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  background: linear-gradient(0deg, rgba(6, 8, 20, 0.97) 0%, rgba(12, 16, 40, 0.93) 100%);
+  backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(100, 160, 255, 0.15);
+  min-height: 90px;
+  max-height: 120px;
+  box-shadow: 0 -6px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .bottom-left {
   display: flex;
@@ -988,20 +1039,22 @@ html, body { background: #080a14 !important; }
   font-family: var(--font-pixel);
   font-size: 9px;
   padding: 8px 14px;
-  border: 1px solid rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%);
   color: #fff;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .action-btn:hover {
-  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 100%);
-  border-color: rgba(255,255,255,0.35);
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%);
+  border-color: rgba(255,255,255,0.4);
   transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
 }
 .action-btn.danger {
   border-color: rgba(255,80,80,0.3);
@@ -1496,32 +1549,35 @@ html, body { background: #080a14 !important; }
 @media (max-width: 900px) {
   .battle-area { flex-direction: column; padding: 6px; gap: 6px; }
   .character-column { flex-direction: row; max-width: 100%; gap: 6px; overflow-x: auto; }
-  .character-card { min-width: 0; padding: 6px; }
-  .portrait-container { width: 70px; height: 70px; }
-  .pokemon-sprite img { width: 52px; height: 52px; }
-  .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 60px; }
+  .character-card { min-width: 0; }
+  .portrait-container { width: 80px; min-height: 100px; }
+  .pokemon-sprite img { width: 60px; height: 60px; }
+  .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
   .energy-pool { gap: 3px; }
   .energy-orb { width: 18px; height: 18px; font-size: 9px; }
   .center-area { flex-direction: row; min-width: auto; }
-  .vs-display { font-size: 14px; }
-  .bottom-bar { min-height: 80px; }
-  .skill-slot { height: 32px; }
-  .skill-abbrev { font-size: 7px; }
-  .skills-panel { gap: 3px; }
+  .vs-display { font-size: 14px; padding: 6px 14px; }
+  .bottom-bar { min-height: 70px; }
+  .skill-slot { height: 28px; }
+  .skill-abbrev { font-size: 11px; }
+  .skill-power { font-size: 13px; }
+  .skill-cost-icons svg { width: 12px; height: 12px; }
+  .skills-panel { padding: 4px 6px; gap: 3px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 11px; }
-  .portrait-container { width: 56px; height: 56px; }
-  .pokemon-sprite img { width: 40px; height: 40px; }
-  .pokemon-name-tag { font-size: 5px; }
-  .skills-panel { gap: 2px; }
-  .skill-slot { height: 26px; }
-  .skill-abbrev { font-size: 6px; }
+  .portrait-container { width: 60px; min-height: 80px; }
+  .pokemon-sprite img { width: 44px; height: 44px; }
+  .pokemon-name-tag { font-size: 6px; }
+  .skills-panel { gap: 2px; padding: 3px 4px; }
+  .skill-slot { height: 24px; padding: 0 6px 0 4px; }
+  .skill-abbrev { font-size: 10px; }
+  .skill-power { font-size: 11px; }
+  .skill-cost-icons svg { width: 10px; height: 10px; }
   .bottom-left { min-width: 120px; }
-  .character-card { padding: 5px; gap: 4px; }
-  .hp-bar-inner { height: 5px; }
+  .hp-bar-inner { height: 6px; }
   .hp-text-overlay { font-size: 6px; }
   .status-badge { width: 16px; height: 16px; font-size: 10px; }
   .wr-badge { font-size: 6px; padding: 1px 3px; }

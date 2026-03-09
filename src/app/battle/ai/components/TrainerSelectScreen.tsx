@@ -3,20 +3,20 @@
 import Image from 'next/image';
 import { Trainer } from '../types';
 
-// Official trainer artwork - using Pokémon Showdown trainer sprites (full-body character art)
+// Modern trainer artwork - Pokémon Showdown default (latest gen) trainer sprites
 const TRAINER_SPRITES: Record<string, string> = {
-  'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock-gen1.png',
-  'Misty': 'https://play.pokemonshowdown.com/sprites/trainers/misty-gen1.png',
-  'Lt. Surge': 'https://play.pokemonshowdown.com/sprites/trainers/ltsurge-gen1.png',
-  'Erika': 'https://play.pokemonshowdown.com/sprites/trainers/erika-gen1.png',
-  'Sabrina': 'https://play.pokemonshowdown.com/sprites/trainers/sabrina-gen1.png',
-  'Koga': 'https://play.pokemonshowdown.com/sprites/trainers/koga-gen1.png',
-  'Blaine': 'https://play.pokemonshowdown.com/sprites/trainers/blaine-gen1.png',
-  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni-gen1.png',
+  'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock.png',
+  'Misty': 'https://play.pokemonshowdown.com/sprites/trainers/misty.png',
+  'Lt. Surge': 'https://play.pokemonshowdown.com/sprites/trainers/ltsurge.png',
+  'Erika': 'https://play.pokemonshowdown.com/sprites/trainers/erika.png',
+  'Sabrina': 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png',
+  'Koga': 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
+  'Blaine': 'https://play.pokemonshowdown.com/sprites/trainers/blaine.png',
+  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png',
   'Professor Oak': 'https://play.pokemonshowdown.com/sprites/trainers/oak.png',
-  'Nurse Joy': 'https://play.pokemonshowdown.com/sprites/trainers/pokemonbreeder-gen4.png',
-  'Lance': 'https://play.pokemonshowdown.com/sprites/trainers/lance-gen2.png',
-  'Red': 'https://play.pokemonshowdown.com/sprites/trainers/red-gen1.png',
+  'Nurse Joy': 'https://play.pokemonshowdown.com/sprites/trainers/pokemonbreeder.png',
+  'Lance': 'https://play.pokemonshowdown.com/sprites/trainers/lance.png',
+  'Red': 'https://play.pokemonshowdown.com/sprites/trainers/red.png',
 };
 
 const TRAINER_COLORS: Record<string, string> = {
@@ -86,7 +86,7 @@ export default function TrainerSelectScreen({
                     width={88}
                     height={88}
                     unoptimized
-                    style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 8px ${color}66)`, imageRendering: 'pixelated' }}
+                    style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 8px ${color}66)` }}
                   />
                 </div>
               )}
