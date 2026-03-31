@@ -425,6 +425,8 @@ export const KANTO_POKEMON: KantoPokemonData[] = [
   { id: 10, name: 'Caterpie', types: ['bug'], hp: 150, canEvolve: true, evolvesTo: { id: 11, name: 'Metapod', hpBonus: 20, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
   { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 150, canEvolve: true, evolvesTo: { id: 14, name: 'Kakuna', hpBonus: 20, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
   { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 175, canEvolve: true, evolvesTo: { id: 17, name: 'Pidgeotto', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 19, name: 'Rattata', types: ['normal'], hp: 160, canEvolve: true, evolvesTo: { id: 20, name: 'Raticate', hpBonus: 45, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 170, canEvolve: true, evolvesTo: { id: 22, name: 'Fearow', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === NIDORAN LINES ===
   { id: 29, name: 'NidoranF', types: ['poison'], hp: 180, canEvolve: true, evolvesTo: { id: 30, name: 'Nidorina', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
   { id: 32, name: 'NidoranM', types: ['poison'], hp: 176, canEvolve: true, evolvesTo: { id: 33, name: 'Nidorino', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
@@ -518,10 +520,16 @@ export const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
   // === Pidgey line ===
   17: { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 215, canEvolve: true, evolvesTo: { id: 18, name: 'Pidgeot', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
   18: { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 250, canEvolve: false },
+  // === Rattata line ===
+  20: { id: 20, name: 'Raticate', types: ['normal'], hp: 240, canEvolve: false },
+  // === Spearow line ===
+  22: { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 245, canEvolve: false },
   // === Ekans line ===
   24: { id: 24, name: 'Arbok', types: ['poison'], hp: 230, canEvolve: false },
   // === Pikachu line ===
   26: { id: 26, name: 'Raichu', types: ['electric'], hp: 230, canEvolve: false },
+  // === Sandshrew line ===
+  28: { id: 28, name: 'Sandslash', types: ['ground'], hp: 245, canEvolve: false },
   // === NidoranF line ===
   30: { id: 30, name: 'Nidorina', types: ['poison'], hp: 220, canEvolve: true, evolvesTo: { id: 31, name: 'Nidoqueen', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
   31: { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 260, canEvolve: false },
@@ -619,16 +627,21 @@ export const TRAINERS: Trainer[] = [
     passive: 'Natural Cure',
     passiveDesc: 'Grass Pokemon heal 10 HP each turn',
     passiveDesc2: 'Grass Pokemon are immune to Poison',
-    applyPassive: ({ playerTeam, addLog }) => {
-      playerTeam.forEach(p => {
+    applyPassive: ({ playerTeam, setPlayerTeam, addLog }) => {
+      const heals: { idx: number; heal: number; name: string }[] = [];
+      playerTeam.forEach((p, i) => {
         if (p.hp > 0 && p.types.includes('grass')) {
           const heal = Math.min(10, p.maxHp - p.hp);
-          if (heal > 0) {
-            p.hp += heal;
-            addLog(`Erika's Natural Cure: ${p.name} healed ${heal} HP!`, 'heal');
-          }
+          if (heal > 0) heals.push({ idx: i, heal, name: p.name });
         }
       });
+      if (heals.length > 0) {
+        setPlayerTeam(prev => prev.map((p, i) => {
+          const h = heals.find(x => x.idx === i);
+          return h ? { ...p, hp: p.hp + h.heal } : p;
+        }));
+        heals.forEach(h => addLog(`Erika's Natural Cure: ${h.name} healed ${h.heal} HP!`, 'heal'));
+      }
     },
   },
   {
@@ -657,19 +670,18 @@ export const TRAINERS: Trainer[] = [
     passive: 'Intimidate',
     passiveDesc: 'Enemy Pokemon deal 10% less damage',
     passiveDesc2: 'On turn 1, removes 1 random energy from opponent',
-    applyPassive: ({ turn, setAiEnergy, addLog }) => {
-      if (turn === 1) {
-        setAiEnergy((prev: EnergyState) => {
-          const e = { ...prev };
-          const types: EnergyType[] = ALL_ENERGY_TYPES.filter(t => e[t] > 0);
-          if (types.length > 0) {
-            const picked = types[Math.floor(Math.random() * types.length)];
-            e[picked]--;
-            addLog(`Giovanni's Intimidate: Removed 1 ${picked} energy from opponent!`, 'effect');
-          }
-          return e;
-        });
-      }
+    applyPassive: ({ addLog }) => { addLog('Giovanni\'s Intimidate is active!', 'effect'); },
+    onBattleStart: ({ setAiEnergy, addLog }) => {
+      setAiEnergy((prev: EnergyState) => {
+        const e = { ...prev };
+        const types: EnergyType[] = ALL_ENERGY_TYPES.filter(t => e[t] > 0);
+        if (types.length > 0) {
+          const picked = types[Math.floor(Math.random() * types.length)];
+          e[picked]--;
+          addLog(`Giovanni's Intimidate: Removed 1 ${picked} energy from opponent!`, 'effect');
+        }
+        return e;
+      });
     },
   },
   {

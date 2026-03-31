@@ -631,6 +631,10 @@ html, body { background: #080a14 !important; }
   align-items: center;
   gap: 2px;
 }
+.energy-item.empty {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
 .energy-orb {
   width: 22px;
   height: 22px;

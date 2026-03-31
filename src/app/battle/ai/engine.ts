@@ -56,7 +56,10 @@ export const addEnergy = (current: EnergyState, toAdd: EnergyState): EnergyState
 /** Spend energy for a move */
 export const spendEnergyForMove = (currentEnergy: EnergyState, move: Move): EnergyState => {
   const e = { ...currentEnergy };
-  for (const cost of move.cost) {
+  // Process specific-type costs first, then colorless — avoids greedy over-spending
+  const specificCosts = move.cost.filter(c => c.type !== 'colorless');
+  const colorlessCosts = move.cost.filter(c => c.type === 'colorless');
+  for (const cost of [...specificCosts, ...colorlessCosts]) {
     if (cost.type === 'colorless') {
       let remaining = cost.amount;
       if (e.colorless >= remaining) {
@@ -90,7 +93,10 @@ export const canAffordMove = (energy: EnergyState, alreadySpent: SelectedAction[
   for (const a of alreadySpent) {
     temp = spendEnergyForMove(temp, a.move);
   }
-  for (const cost of move.cost) {
+  // Process specific-type costs first, then colorless — avoids greedy over-spending
+  const specificCosts = move.cost.filter(c => c.type !== 'colorless');
+  const colorlessCosts = move.cost.filter(c => c.type === 'colorless');
+  for (const cost of [...specificCosts, ...colorlessCosts]) {
     if (cost.type === 'colorless') {
       if (getTotalEnergy(temp) < cost.amount) return false;
       let remaining = cost.amount;

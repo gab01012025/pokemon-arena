@@ -78,12 +78,10 @@ export default function BattleTopBar({
         </div>
         <div className="energy-pool">
           {[...new Set([...selectedEnergyTypes, 'colorless' as EnergyType])].map(type => (
-            energy[type] > 0 ? (
-              <div key={type} className="energy-item">
+              <div key={type} className={`energy-item ${energy[type] === 0 ? 'empty' : ''}`}>
                 <EnergyIcon type={type} size={22} />
                 <span className="energy-count">×{energy[type]}</span>
               </div>
-            ) : null
           ))}
           <div className="energy-total">
             <span className="total-label">T</span>
