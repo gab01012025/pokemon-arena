@@ -34,9 +34,9 @@ export default function EnergySelectScreen({
 
   return (
     <div className="energy-select-screen">
-      <div>
+      <div className="energy-select-header">
         <div className="energy-select-title">SELECT YOUR ENERGY TYPES</div>
-        <div className="energy-select-subtitle">Choose exactly 4 energy types for your deck (you can pick duplicates)</div>
+        <div className="energy-select-subtitle">Choose exactly 4 energy types for your deck</div>
       </div>
 
       {/* Team overview with energy needs per pokemon */}
@@ -47,9 +47,9 @@ export default function EnergySelectScreen({
             .filter((v, i, a) => a.indexOf(v) === i);
           return (
             <div key={p.id} className="energy-select-pokemon">
-              <Image src={p.sprite} alt={p.name} width={64} height={64} unoptimized />
+              <Image src={p.sprite} alt={p.name} width={56} height={56} unoptimized />
               <span>{p.name}</span>
-              <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+              <div style={{ display: 'flex', gap: 3, marginTop: 2 }}>
                 {pokemonEnergies.map(e => (
                   <span
                     key={e}
@@ -59,7 +59,7 @@ export default function EnergySelectScreen({
                       filter: selectedEnergyTypes.includes(e) || e === 'colorless' ? 'none' : 'grayscale(1) opacity(0.5)',
                     }}
                   >
-                    <EnergyIcon type={e} size={18} />
+                    <EnergyIcon type={e} size={16} />
                   </span>
                 ))}
               </div>
@@ -74,29 +74,52 @@ export default function EnergySelectScreen({
           Your team needs:&nbsp;
           {neededEnergies.map(e => (
             <span key={e} style={{ marginRight: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }} title={ENERGY_NAMES[e]}>
-              <EnergyIcon type={e} size={18} /> {ENERGY_NAMES[e]}
+              <EnergyIcon type={e} size={16} /> {ENERGY_NAMES[e]}
             </span>
           ))}
         </div>
       )}
 
-      <div className="energy-select-grid">
+      {/* TCG Energy Card Grid */}
+      <div className="energy-tcg-grid">
         {ALL_SELECTABLE_ENERGY_TYPES.map(type => {
+          const isSelected = selectedEnergyTypes.includes(type);
           const isNeeded = neededEnergies.includes(type);
+          const isDisabled = selectedEnergyTypes.length >= 4 && !isSelected;
           return (
             <div
               key={type}
-              className={`energy-select-card ${type} ${selectedEnergyTypes.includes(type) ? 'selected' : ''} ${selectedEnergyTypes.length >= 4 && !selectedEnergyTypes.includes(type) ? 'disabled' : ''}`}
+              className={`energy-tcg-card ${type} ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
               onClick={() => toggleEnergyType(type)}
             >
-              {selectedEnergyTypes.includes(type) && <span className="checkmark">✓</span>}
-              {isNeeded && !selectedEnergyTypes.includes(type) && <span className="recommended-badge">★</span>}
-              <div className={`energy-icon-big ${type}`}><EnergyIcon type={type} size={44} /></div>
-              <span className="energy-label">{ENERGY_NAMES[type]}</span>
+              <div className="energy-tcg-card-inner">
+                {isSelected && <span className="energy-tcg-check">&#10003;</span>}
+                {isNeeded && !isSelected && <span className="energy-tcg-rec">REC</span>}
+                <div className="energy-tcg-symbol">
+                  <EnergyIcon type={type} size={56} />
+                </div>
+                <span className="energy-tcg-name">{ENERGY_NAMES[type]}</span>
+              </div>
             </div>
           );
         })}
       </div>
+
+      {/* Selected summary */}
+      <div className="energy-select-summary">
+        <span>Selected:</span>
+        {selectedEnergyTypes.length === 0 ? (
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>None</span>
+        ) : (
+          selectedEnergyTypes.map((e, i) => (
+            <EnergyIcon key={`${e}-${i}`} type={e} size={24} />
+          ))
+        )}
+        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+          ({selectedEnergyTypes.length}/4)
+        </span>
+      </div>
+
       <button
         className="energy-confirm-btn"
         onClick={onConfirm}

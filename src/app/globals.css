@@ -1002,12 +1002,22 @@ a:hover {
 .mission-card {
   display: flex;
   gap: 15px;
-  padding: 15px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 18px;
+  border-bottom: none;
+  background: rgba(15, 20, 40, 0.85);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.mission-card:hover {
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .mission-card:last-child {
   border-bottom: none;
+  margin-bottom: 0;
 }
 
 .mission-text {
@@ -1022,24 +1032,33 @@ a:hover {
 }
 
 .mission-desc {
-  font-size: 11px;
+  font-size: 12px;
   margin-bottom: 8px;
+  color: #c0c8d8;
+  line-height: 1.5;
 }
 
 .mission-link {
-  color: var(--text-orange);
-  font-size: 11px;
+  color: #60a5fa;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mission-link:hover {
+  text-decoration: underline;
 }
 
 .mission-images {
   display: flex;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .mission-images img {
   width: 60px;
   height: 60px;
-  border: 2px solid var(--border-light);
+  border: 2px solid rgba(255,255,255,0.1);
   border-radius: var(--radius-md);
   object-fit: cover;
   transition: transform 0.2s ease;

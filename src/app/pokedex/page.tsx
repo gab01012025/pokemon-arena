@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { logger } from '@/lib/logger';
 
 interface Pokemon {
@@ -54,6 +55,8 @@ const TYPE_COLORS: Record<string, string> = {
   fairy: '#EE99AC',
 };
 
+const ALL_TYPES = Object.keys(TYPE_COLORS);
+
 export default function PokedexPage() {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonDetails | null>(null);
@@ -100,7 +103,7 @@ export default function PokedexPage() {
   }, [page]);
 
   // Fetch Pokemon details
-  const fetchDetails = async (id: number) => {
+  const fetchDetails = useCallback(async (id: number) => {
     setLoadingDetails(true);
     try {
       const [pokemonRes, speciesRes] = await Promise.all([
@@ -141,7 +144,7 @@ export default function PokedexPage() {
       logger.error('Error fetching Pokemon details:', error instanceof Error ? error : undefined);
     }
     setLoadingDetails(false);
-  };
+  }, []);
 
   const filteredPokemon = pokemon.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -152,590 +155,336 @@ export default function PokedexPage() {
 
   const totalPages = Math.ceil(total / limit);
 
+  const getStatColor = (value: number) => {
+    if (value >= 150) return '#ff5555';
+    if (value >= 100) return '#f8d030';
+    if (value >= 70) return '#78c850';
+    return '#6890f0';
+  };
+
   return (
-    <div className="pokedex-container">
-      <style jsx>{`
-        .pokedex-container {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-          padding: 20px;
-        }
-
-        .pokedex-header {
-          text-align: center;
-          padding: 30px 0;
-        }
-
-        .pokedex-title {
-          font-size: 3rem;
-          font-weight: 900;
-          background: linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #3B5CA8 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 10px;
-        }
-
-        .pokedex-subtitle {
-          color: #888;
-          font-size: 1.1rem;
-        }
-
-        .controls {
-          display: flex;
-          gap: 15px;
-          max-width: 800px;
-          margin: 0 auto 30px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .search-input {
-          flex: 1;
-          min-width: 250px;
-          padding: 15px 20px;
-          border-radius: 50px;
-          border: 2px solid #333;
-          background: #1a1a2e;
-          color: #fff;
-          font-size: 1rem;
-          outline: none;
-          transition: all 0.3s;
-        }
-
-        .search-input:focus {
-          border-color: #f59e0b;
-          box-shadow: 0 0 15px rgba(255, 203, 5, 0.2);
-        }
-
-        .type-select {
-          padding: 15px 25px;
-          border-radius: 50px;
-          border: 2px solid #333;
-          background: #1a1a2e;
-          color: #fff;
-          font-size: 1rem;
-          cursor: pointer;
-          text-transform: capitalize;
-        }
-
-        .pokemon-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 20px;
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-
-        .pokemon-card {
-          background: linear-gradient(145deg, #2a2a4a 0%, #1a1a2e 100%);
-          border-radius: 20px;
-          padding: 20px;
-          cursor: pointer;
-          transition: all 0.3s;
-          border: 3px solid transparent;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .pokemon-card:hover {
-          transform: translateY(-10px);
-          border-color: #f59e0b;
-          box-shadow: 0 15px 40px rgba(255, 203, 5, 0.2);
-        }
-
-        .pokemon-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 60%;
-          background: var(--type-bg);
-          opacity: 0.1;
-          border-radius: 20px 20px 50% 50%;
-        }
-
-        .pokemon-id {
-          position: absolute;
-          top: 10px;
-          right: 15px;
-          font-size: 0.9rem;
-          color: #666;
-          font-weight: 700;
-        }
-
-        .pokemon-image {
-          width: 120px;
-          height: 120px;
-          margin: 0 auto;
-          display: block;
-          position: relative;
-          z-index: 1;
-          filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
-        }
-
-        .pokemon-name {
-          text-align: center;
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: #fff;
-          text-transform: capitalize;
-          margin: 15px 0 10px;
-        }
-
-        .pokemon-types {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .type-badge {
-          padding: 5px 15px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          color: #fff;
-          text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .pagination {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 15px;
-          margin-top: 40px;
-          padding-bottom: 40px;
-        }
-
-        .page-btn {
-          padding: 12px 30px;
-          border-radius: 50px;
-          border: none;
-          background: linear-gradient(135deg, #ef4444 0%, #b02000 100%);
-          color: #fff;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s;
-          text-transform: uppercase;
-        }
-
-        .page-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .page-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 20px rgba(227, 53, 13, 0.4);
-        }
-
-        .page-info {
-          color: #888;
-          font-size: 1rem;
-        }
-
-        .loading {
-          text-align: center;
-          padding: 100px 0;
-          color: #f59e0b;
-          font-size: 1.5rem;
-        }
-
-        .loading-spinner {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 20px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #ef4444 50%, #fff 50%);
-          border: 4px solid #fff;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        /* Modal */
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.85);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          padding: 20px;
-          animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .modal-content {
-          background: linear-gradient(145deg, #2a2a4a 0%, #1a1a2e 100%);
-          border-radius: 30px;
-          padding: 40px;
-          max-width: 600px;
-          width: 100%;
-          max-height: 90vh;
-          overflow-y: auto;
-          position: relative;
-          border: 4px solid var(--type-color, #f59e0b);
-          animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-          from { transform: scale(0.9) translateY(20px); opacity: 0; }
-          to { transform: scale(1) translateY(0); opacity: 1; }
-        }
-
-        .modal-close {
-          position: absolute;
-          top: 15px;
-          right: 20px;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          border: none;
-          background: #333;
-          color: #fff;
-          font-size: 1.5rem;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-          background: #ef4444;
-          transform: rotate(90deg);
-        }
-
-        .modal-header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        .modal-image {
-          width: 200px;
-          height: 200px;
-          margin: 0 auto;
-          display: block;
-          filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-        }
-
-        .modal-name {
-          font-size: 2.5rem;
-          font-weight: 900;
-          color: #fff;
-          text-transform: capitalize;
-          margin: 20px 0 5px;
-        }
-
-        .modal-genus {
-          color: #888;
-          font-size: 1rem;
-          margin-bottom: 15px;
-        }
-
-        .modal-description {
-          color: #aaa;
-          font-size: 1rem;
-          line-height: 1.6;
-          padding: 15px;
-          background: rgba(0,0,0,0.2);
-          border-radius: 15px;
-          margin: 20px 0;
-          border-left: 4px solid #f59e0b;
-        }
-
-        .modal-section {
-          margin-bottom: 25px;
-        }
-
-        .section-title {
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #f59e0b;
-          text-transform: uppercase;
-          margin-bottom: 15px;
-          letter-spacing: 2px;
-        }
-
-        .info-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 15px;
-        }
-
-        .info-item {
-          background: rgba(0,0,0,0.2);
-          padding: 12px 15px;
-          border-radius: 10px;
-        }
-
-        .info-label {
-          font-size: 0.8rem;
-          color: #888;
-          text-transform: uppercase;
-        }
-
-        .info-value {
-          font-size: 1.1rem;
-          color: #fff;
-          font-weight: 600;
-        }
-
-        .stat-bar {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 10px;
-        }
-
-        .stat-name {
-          width: 80px;
-          font-size: 0.85rem;
-          color: #888;
-          text-transform: uppercase;
-        }
-
-        .stat-bar-bg {
-          flex: 1;
-          height: 12px;
-          background: #1a1a2e;
-          border-radius: 6px;
-          overflow: hidden;
-        }
-
-        .stat-bar-fill {
-          height: 100%;
-          border-radius: 6px;
-          transition: width 0.5s ease;
-        }
-
-        .stat-value {
-          width: 40px;
-          font-size: 0.9rem;
-          color: #fff;
-          font-weight: 700;
-          text-align: right;
-        }
-
-        .abilities-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        .ability-tag {
-          padding: 8px 16px;
-          background: rgba(255, 203, 5, 0.1);
-          border: 1px solid #f59e0b;
-          border-radius: 20px;
-          color: #f59e0b;
-          font-size: 0.9rem;
-          text-transform: capitalize;
-        }
-
-        .back-link {
-          display: inline-block;
-          margin-bottom: 20px;
-          color: #f59e0b;
-          text-decoration: none;
-          font-weight: 600;
-        }
-
-        .back-link:hover {
-          text-decoration: underline;
-        }
-      `}</style>
-
-      <div className="pokedex-header">
-        <Link href="/" className="back-link">← Voltar ao Início</Link>
-        <h1 className="pokedex-title">POKÉDEX</h1>
-        <p className="pokedex-subtitle">Dados em tempo real da PokeAPI</p>
-      </div>
-
-      <div className="controls">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="🔍 Buscar por nome ou número..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="type-select"
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-        >
-          <option value="all">Todos os Tipos</option>
-          {Object.keys(TYPE_COLORS).map((type) => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-      </div>
-
-      {loading ? (
-        <div className="loading">
-          <div className="loading-spinner" />
-          <p>Carregando Pokémon...</p>
+    <div className="page-wrapper">
+      <div className="main-container">
+        {/* Header Section */}
+        <div className="header-section">
+          <div className="header-left">
+            <div className="nav-buttons-top">
+              <Link href="/" className="nav-btn-top">Startpage</Link>
+              <Link href="/play" className="nav-btn-top">Start Playing</Link>
+              <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
+              <Link href="/ladders" className="nav-btn-top">Ladders</Link>
+              <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">DISCORD</a>
+            </div>
+          </div>
+          <div className="header-banner">
+            <h1>POKEMON ARENA</h1>
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="pokemon-grid">
-            {filteredPokemon.map((p) => (
-              <div
-                key={p.id}
-                className="pokemon-card"
-                onClick={() => fetchDetails(p.id)}
-                style={{ '--type-bg': TYPE_COLORS[p.types[0]] } as React.CSSProperties}
+
+        <LeftSidebar />
+
+        <main className="center-content">
+          <h1 className="page-title">Pokedex</h1>
+          <div className="breadcrumb">
+            <Link href="/">Home</Link> &gt; <span>Pokedex</span>
+          </div>
+
+          {/* Search & Type Filter */}
+          <div className="content-box" style={{ marginBottom: 16 }}>
+            <div className="content-box-header" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(245,158,11,0.15))' }}>
+              Search Pokemon
+            </div>
+            <div className="content-box-body" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="Search by name or number..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  flex: 1,
+                  minWidth: 180,
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(0,0,0,0.3)',
+                  color: '#fff',
+                  fontSize: 13,
+                  outline: 'none',
+                }}
+              />
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(0,0,0,0.3)',
+                  color: '#fff',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  textTransform: 'capitalize',
+                }}
               >
-                <span className="pokemon-id">#{p.id.toString().padStart(3, '0')}</span>
-                <Image
-                  src={p.artwork || p.sprite}
-                  alt={p.name}
-                  width={120}
-                  height={120}
-                  className="pokemon-image"
-                  unoptimized
-                />
-                <h3 className="pokemon-name">{p.name}</h3>
-                <div className="pokemon-types">
-                  {p.types.map((type) => (
-                    <span
-                      key={type}
-                      className="type-badge"
-                      style={{ background: TYPE_COLORS[type] }}
-                    >
-                      {type}
-                    </span>
-                  ))}
-                </div>
+                <option value="all">All Types</option>
+                {ALL_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                Page {page + 1}/{totalPages} ({total} Pokemon)
+              </span>
+            </div>
+          </div>
+
+          {/* Grid */}
+          {loading ? (
+            <div className="content-box">
+              <div className="content-box-body" style={{ textAlign: 'center', padding: 60 }}>
+                <div style={{
+                  width: 48, height: 48, margin: '0 auto 16px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(180deg, #ff1a1a 50%, #fff 50%)',
+                  border: '3px solid #444',
+                  animation: 'spin 1s linear infinite',
+                }} />
+                <p style={{ color: '#f59e0b', fontSize: 14, fontWeight: 600 }}>Loading Pokemon...</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+              gap: 10,
+              marginBottom: 16,
+            }}>
+              {filteredPokemon.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => fetchDetails(p.id)}
+                  style={{
+                    background: 'rgba(15, 20, 40, 0.85)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: 12,
+                    padding: '14px 10px 12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.25s ease',
+                    position: 'relative',
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.borderColor = TYPE_COLORS[p.types[0]] || '#f59e0b';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = `0 8px 24px ${TYPE_COLORS[p.types[0]]}33`;
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute', top: 6, right: 8,
+                    fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 700,
+                  }}>#{p.id.toString().padStart(3, '0')}</span>
+                  <Image
+                    src={p.artwork || p.sprite}
+                    alt={p.name}
+                    width={80}
+                    height={80}
+                    style={{ margin: '0 auto', display: 'block', filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))' }}
+                    unoptimized
+                  />
+                  <p style={{
+                    fontSize: 12, fontWeight: 700, color: '#fff',
+                    textTransform: 'capitalize', margin: '8px 0 6px',
+                  }}>{p.name}</p>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
+                    {p.types.map((type) => (
+                      <span
+                        key={type}
+                        style={{
+                          padding: '2px 8px', borderRadius: 10,
+                          fontSize: 9, fontWeight: 700, textTransform: 'uppercase',
+                          color: '#fff', background: TYPE_COLORS[type],
+                          textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                        }}
+                      >{type}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div className="pagination">
-            <button
-              className="page-btn"
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0}
-            >
-              ← Anterior
-            </button>
-            <span className="page-info">
-              Página {page + 1} de {totalPages}
-            </span>
-            <button
-              className="page-btn"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= totalPages - 1}
-            >
-              Próximo →
-            </button>
-          </div>
-        </>
-      )}
+          {/* Pagination */}
+          {!loading && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, alignItems: 'center', marginBottom: 20 }}>
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                style={{
+                  padding: '8px 20px', borderRadius: 8, border: 'none',
+                  background: page === 0 ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #ef4444, #b02000)',
+                  color: '#fff', fontWeight: 700, cursor: page === 0 ? 'not-allowed' : 'pointer',
+                  opacity: page === 0 ? 0.4 : 1, fontSize: 12,
+                }}
+              >Previous</button>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= totalPages - 1}
+                style={{
+                  padding: '8px 20px', borderRadius: 8, border: 'none',
+                  background: page >= totalPages - 1 ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #ef4444, #b02000)',
+                  color: '#fff', fontWeight: 700,
+                  cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
+                  opacity: page >= totalPages - 1 ? 0.4 : 1, fontSize: 12,
+                }}
+              >Next</button>
+            </div>
+          )}
+        </main>
 
-      {/* Pokemon Details Modal */}
+        <RightSidebar />
+      </div>
+
+      {/* Pokemon Detail Modal */}
       {selectedPokemon && (
-        <div className="modal-overlay" onClick={() => setSelectedPokemon(null)}>
+        <div
+          onClick={() => setSelectedPokemon(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: 20,
+          }}
+        >
           <div
-            className="modal-content"
             onClick={(e) => e.stopPropagation()}
-            style={{ '--type-color': TYPE_COLORS[selectedPokemon.types[0]] } as React.CSSProperties}
+            style={{
+              background: 'linear-gradient(160deg, rgba(18, 24, 48, 0.98) 0%, rgba(10, 14, 32, 0.98) 100%)',
+              border: `2px solid ${TYPE_COLORS[selectedPokemon.types[0]] || '#f59e0b'}`,
+              borderRadius: 20, padding: '30px 28px', maxWidth: 480,
+              width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative',
+              boxShadow: `0 0 60px ${TYPE_COLORS[selectedPokemon.types[0]]}44, 0 20px 60px rgba(0,0,0,0.6)`,
+            }}
           >
-            <button className="modal-close" onClick={() => setSelectedPokemon(null)}>×</button>
-            
+            <button
+              onClick={() => setSelectedPokemon(null)}
+              style={{
+                position: 'absolute', top: 12, right: 16,
+                width: 32, height: 32, borderRadius: '50%', border: 'none',
+                background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: 18,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >x</button>
+
             {loadingDetails ? (
-              <div className="loading">
-                <div className="loading-spinner" />
+              <div style={{ textAlign: 'center', padding: 40 }}>
+                <p style={{ color: '#f59e0b' }}>Loading...</p>
               </div>
             ) : (
               <>
-                <div className="modal-header">
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <Image
                     src={selectedPokemon.artwork}
                     alt={selectedPokemon.name}
-                    width={200}
-                    height={200}
-                    className="modal-image"
+                    width={160}
+                    height={160}
+                    style={{ margin: '0 auto', display: 'block', filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.5))' }}
                     unoptimized
                   />
-                  <h2 className="modal-name">
+                  <h2 style={{
+                    fontSize: 24, fontWeight: 900, color: '#fff',
+                    textTransform: 'capitalize', margin: '14px 0 4px',
+                  }}>
                     #{selectedPokemon.id.toString().padStart(3, '0')} {selectedPokemon.name}
                   </h2>
-                  <p className="modal-genus">{selectedPokemon.genus}</p>
-                  <div className="pokemon-types">
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 10 }}>
+                    {selectedPokemon.genus}
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
                     {selectedPokemon.types.map((type) => (
-                      <span
-                        key={type}
-                        className="type-badge"
-                        style={{ background: TYPE_COLORS[type] }}
-                      >
-                        {type}
-                      </span>
+                      <span key={type} style={{
+                        padding: '4px 14px', borderRadius: 14, fontSize: 11,
+                        fontWeight: 700, textTransform: 'uppercase', color: '#fff',
+                        background: TYPE_COLORS[type],
+                      }}>{type}</span>
                     ))}
                   </div>
                 </div>
 
-                <p className="modal-description">{selectedPokemon.description}</p>
+                {/* Description */}
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)', fontSize: 13, lineHeight: 1.6,
+                  padding: 14, background: 'rgba(0,0,0,0.25)', borderRadius: 10,
+                  borderLeft: `3px solid ${TYPE_COLORS[selectedPokemon.types[0]]}`,
+                  marginBottom: 18,
+                }}>{selectedPokemon.description}</p>
 
-                <div className="modal-section">
-                  <h3 className="section-title">Informações</h3>
-                  <div className="info-grid">
-                    <div className="info-item">
-                      <div className="info-label">Altura</div>
-                      <div className="info-value">{selectedPokemon.height} m</div>
-                    </div>
-                    <div className="info-item">
-                      <div className="info-label">Peso</div>
-                      <div className="info-value">{selectedPokemon.weight} kg</div>
-                    </div>
+                {/* Info */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: 8 }}>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 2 }}>Height</div>
+                    <div style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{selectedPokemon.height} m</div>
+                  </div>
+                  <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: 8 }}>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', marginBottom: 2 }}>Weight</div>
+                    <div style={{ fontSize: 15, color: '#fff', fontWeight: 600 }}>{selectedPokemon.weight} kg</div>
                   </div>
                 </div>
 
-                <div className="modal-section">
-                  <h3 className="section-title">Base Stats</h3>
+                {/* Stats */}
+                <div style={{ marginBottom: 18 }}>
+                  <h3 style={{ fontSize: 12, fontWeight: 700, color: TYPE_COLORS[selectedPokemon.types[0]], textTransform: 'uppercase', marginBottom: 10, letterSpacing: 1.5 }}>
+                    Base Stats
+                  </h3>
                   {[
-                    { name: 'HP', value: selectedPokemon.stats.hp, color: '#ff5555' },
-                    { name: 'Attack', value: selectedPokemon.stats.attack, color: '#f08030' },
-                    { name: 'Defense', value: selectedPokemon.stats.defense, color: '#f8d030' },
-                    { name: 'Sp. Atk', value: selectedPokemon.stats.spAtk, color: '#6890f0' },
-                    { name: 'Sp. Def', value: selectedPokemon.stats.spDef, color: '#78c850' },
-                    { name: 'Speed', value: selectedPokemon.stats.speed, color: '#f85888' },
+                    { name: 'HP', value: selectedPokemon.stats.hp },
+                    { name: 'ATK', value: selectedPokemon.stats.attack },
+                    { name: 'DEF', value: selectedPokemon.stats.defense },
+                    { name: 'SP.A', value: selectedPokemon.stats.spAtk },
+                    { name: 'SP.D', value: selectedPokemon.stats.spDef },
+                    { name: 'SPD', value: selectedPokemon.stats.speed },
                   ].map((stat) => (
-                    <div key={stat.name} className="stat-bar">
-                      <span className="stat-name">{stat.name}</span>
-                      <div className="stat-bar-bg">
-                        <div
-                          className="stat-bar-fill"
-                          style={{
-                            width: `${(stat.value / 255) * 100}%`,
-                            background: stat.color,
-                          }}
-                        />
+                    <div key={stat.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ width: 36, fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase' }}>{stat.name}</span>
+                      <div style={{ flex: 1, height: 8, background: 'rgba(0,0,0,0.4)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{
+                          width: `${(stat.value / 255) * 100}%`,
+                          height: '100%', borderRadius: 4,
+                          background: getStatColor(stat.value),
+                          transition: 'width 0.5s ease',
+                        }} />
                       </div>
-                      <span className="stat-value">{stat.value}</span>
+                      <span style={{ width: 28, fontSize: 12, color: '#fff', fontWeight: 700, textAlign: 'right' }}>{stat.value}</span>
                     </div>
                   ))}
+                  <div style={{ textAlign: 'right', fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                    Total: {selectedPokemon.stats.hp + selectedPokemon.stats.attack + selectedPokemon.stats.defense + selectedPokemon.stats.spAtk + selectedPokemon.stats.spDef + selectedPokemon.stats.speed}
+                  </div>
                 </div>
 
-                <div className="modal-section">
-                  <h3 className="section-title">Habilidades</h3>
-                  <div className="abilities-list">
+                {/* Abilities */}
+                <div>
+                  <h3 style={{ fontSize: 12, fontWeight: 700, color: TYPE_COLORS[selectedPokemon.types[0]], textTransform: 'uppercase', marginBottom: 10, letterSpacing: 1.5 }}>
+                    Abilities
+                  </h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {selectedPokemon.abilities.map((ability) => (
-                      <span key={ability} className="ability-tag">
-                        {ability}
-                      </span>
+                      <span key={ability} style={{
+                        padding: '6px 14px',
+                        background: `${TYPE_COLORS[selectedPokemon.types[0]]}1A`,
+                        border: `1px solid ${TYPE_COLORS[selectedPokemon.types[0]]}55`,
+                        borderRadius: 14, color: TYPE_COLORS[selectedPokemon.types[0]],
+                        fontSize: 12, textTransform: 'capitalize', fontWeight: 600,
+                      }}>{ability}</span>
                     ))}
                   </div>
                 </div>
@@ -744,6 +493,12 @@ export default function PokedexPage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
