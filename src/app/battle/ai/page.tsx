@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './battle.css';
 import './mobile.css';
 import { getRankByLevel, RankInfo } from '@/lib/ranks';
@@ -117,6 +117,12 @@ export default function AIBattlePage() {
     superEffectiveHits: 0,
     pokemonDamage: {} as Record<string, number>,
   });
+
+  // Refs to always have fresh team state in async callbacks
+  const playerTeamRef = useRef<BattlePokemon[]>(playerTeam);
+  const opponentTeamRef = useRef<BattlePokemon[]>(opponentTeam);
+  playerTeamRef.current = playerTeam;
+  opponentTeamRef.current = opponentTeam;
 
   // ==================== DATA LOADING ====================
   useEffect(() => {
@@ -798,8 +804,8 @@ export default function AIBattlePage() {
 
   // ==================== EXECUTE ACTION ====================
   const executeAction = async (action: SelectedAction, isPlayer: boolean) => {
-    const atkTeam = isPlayer ? playerTeam : opponentTeam;
-    const defTeam = isPlayer ? opponentTeam : playerTeam;
+    const atkTeam = isPlayer ? playerTeamRef.current : opponentTeamRef.current;
+    const defTeam = isPlayer ? opponentTeamRef.current : playerTeamRef.current;
     const setDefTeam = isPlayer ? setOpponentTeam : setPlayerTeam;
     const setAtkTeam = isPlayer ? setPlayerTeam : setOpponentTeam;
     const atk = atkTeam[action.pokemonIndex];
@@ -1172,6 +1178,24 @@ export default function AIBattlePage() {
           }
         }
       }
+
+      // Self-Destruct: faints the user after dealing damage
+      if (move.name === 'Self-Destruct') {
+        setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: 0 } : p));
+        addLog(`${atk.name} fainted from the explosion!`, 'damage');
+      }
+
+      // Outrage: confuses the user after dealing damage
+      if (move.name === 'Outrage') {
+        const hasConfuse = atk.statusEffects.some(e => e.type === 'confuse');
+        if (!hasConfuse) {
+          setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? {
+            ...p,
+            statusEffects: [...p.statusEffects, { type: 'confuse' as StatusType, duration: 2, source: 'self' }],
+          } : p));
+          addLog(`${atk.name} became confused from its rampage!`, 'status');
+        }
+      }
     } else {
       if (move.statusEffect) {
         const tIdx = action.targetIndex;
@@ -1307,15 +1331,15 @@ export default function AIBattlePage() {
 
   // ==================== AI TURN ====================
   const executeAITurn = async () => {
-    const aliveOpp = opponentTeam.filter(p => p.hp > 0);
-    const alivePly = playerTeam.filter(p => p.hp > 0);
+    const aliveOpp = opponentTeamRef.current.filter(p => p.hp > 0);
+    const alivePly = playerTeamRef.current.filter(p => p.hp > 0);
     if (!aliveOpp.length || !alivePly.length) return;
 
     // AI gets energy like the player
     let currentAiEnergy = { ...aiEnergy };
 
-    for (let i = 0; i < opponentTeam.length; i++) {
-      const poke = opponentTeam[i];
+    for (let i = 0; i < opponentTeamRef.current.length; i++) {
+      const poke = opponentTeamRef.current[i];
       if (poke.hp <= 0) continue;
       if (!canAct(poke)) {
         addLog(`${poke.name} can't move!`, 'status');
@@ -1332,7 +1356,7 @@ export default function AIBattlePage() {
         return canAffordMove(currentAiEnergy, [], m);
       });
       if (!availableMoves.length) continue;
-      const targets = playerTeam.map((p, idx) => ({ p, idx })).filter(x => x.p.hp > 0);
+      const targets = playerTeamRef.current.map((p, idx) => ({ p, idx })).filter(x => x.p.hp > 0);
       if (!targets.length) continue;
 
       let bestMove = availableMoves[0];
@@ -1400,7 +1424,7 @@ export default function AIBattlePage() {
     }
 
     // Check win after player actions
-    if (opponentTeam.filter(p => p.hp > 0).length === 0) {
+    if (opponentTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleVictory();
       setPhase('victory');
       return;
@@ -1416,7 +1440,7 @@ export default function AIBattlePage() {
     await executeAITurn();
 
     // Check loss after AI actions
-    if (playerTeam.filter(p => p.hp > 0).length === 0) {
+    if (playerTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleDefeat();
       setPhase('defeat');
       return;
@@ -1440,8 +1464,8 @@ export default function AIBattlePage() {
 
     if (playerTrainer) {
       playerTrainer.applyPassive({
-        playerTeam,
-        opponentTeam,
+        playerTeam: playerTeamRef.current,
+        opponentTeam: opponentTeamRef.current,
         energy,
         setEnergy,
         setPlayerTeam,
@@ -1451,7 +1475,7 @@ export default function AIBattlePage() {
       });
     }
 
-    const newEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, newTurn);
+    const newEnergy = generateTurnEnergy(playerTeamRef.current, selectedEnergyTypes, newTurn);
     console.log('[ENERGY] Turn', newTurn, '— player generated:', JSON.stringify(newEnergy));
     setEnergy(prev => {
       const result = addEnergy(prev, newEnergy);
@@ -1460,8 +1484,8 @@ export default function AIBattlePage() {
     });
 
     // AI gets energy based on ALL alive Pokemon types
-    const aiTypes = getAiEnergyTypes(opponentTeam);
-    const aiNewEnergy = generateTurnEnergy(opponentTeam, aiTypes, newTurn);
+    const aiTypes = getAiEnergyTypes(opponentTeamRef.current);
+    const aiNewEnergy = generateTurnEnergy(opponentTeamRef.current, aiTypes, newTurn);
     console.log('[ENERGY] Turn', newTurn, '— AI generated:', JSON.stringify(aiNewEnergy));
     setAiEnergy(prev => {
       const result = addEnergy(prev, aiNewEnergy);
@@ -1469,7 +1493,7 @@ export default function AIBattlePage() {
       return result;
     });
 
-    const aliveCount = playerTeam.filter(p => p.hp > 0).length;
+    const aliveCount = playerTeamRef.current.filter(p => p.hp > 0).length;
     const energyGained = newTurn === 1 ? 1 : aliveCount;
     addLog(`Turn ${newTurn}! Gained ${energyGained} energy!`, 'info');
 
