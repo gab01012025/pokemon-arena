@@ -258,7 +258,6 @@ export default function PlayPage() {
   const router = useRouter();
   const [hoveredPokemon, setHoveredPokemon] = useState<Pokemon | null>(null);
   const [team, setTeam] = useState<(Pokemon | null)[]>([null, null, null]);
-  const [isSearching, setIsSearching] = useState(false);
   const [user, setUser] = useState({ name: 'TRAINER', clan: 'CLANLESS', level: 1, wins: 0, losses: 0 });
 
   useEffect(() => {
@@ -325,10 +324,12 @@ export default function PlayPage() {
       logger.info('Could not save to API, using localStorage');
     }
     
-    if (mode === 'ladder') {
-      setIsSearching(true);
-      setTimeout(() => router.push('/battle/ai'), 2500);
+    if (mode === 'pvp' || mode === 'quick' || mode === 'ladder') {
+      // PvP modes → multiplayer page
+      const queueType = mode === 'ladder' ? 'ranked' : 'quick';
+      router.push(`/multiplayer?queue=${queueType}`);
     } else {
+      // AI battle
       router.push('/battle/ai');
     }
   }, [teamComplete, team, router]);
@@ -338,18 +339,6 @@ export default function PlayPage() {
   return (
     <div className="pokedex-page">
       <div className="pokedex-device">
-        {/* Search Overlay */}
-        {isSearching && (
-          <div className="search-overlay">
-            <div className="search-content">
-              <div className="pokeball-spinner"></div>
-              <h2>SEARCHING FOR OPPONENT...</h2>
-              <p>Finding a worthy challenger</p>
-              <button onClick={() => setIsSearching(false)}>CANCEL</button>
-            </div>
-          </div>
-        )}
-
         {/* Pokedex Top LEDs */}
         <div className="pokedex-top">
           <div className="led-big blue"></div>
@@ -486,15 +475,15 @@ export default function PlayPage() {
             <div className="pokedex-buttons">
               <button className="poke-btn battle" onClick={() => startBattle('ai')} disabled={!teamComplete}>
                 <span className="btn-light"></span>
-                BATTLE
+                VS AI
               </button>
               <button className="poke-btn quick" onClick={() => startBattle('quick')} disabled={!teamComplete}>
                 <span className="btn-light"></span>
-                QUICK
+                PVP QUICK
               </button>
               <button className="poke-btn ladder" onClick={() => startBattle('ladder')} disabled={!teamComplete}>
                 <span className="btn-light"></span>
-                LADDER
+                PVP RANKED
               </button>
               <button className="poke-btn logout" onClick={() => router.push('/')}>
                 <span className="btn-light"></span>

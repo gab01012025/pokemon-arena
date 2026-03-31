@@ -13,6 +13,7 @@ export default function Home() {
             <div className="nav-buttons-top">
               <Link href="/" className="nav-btn-top">Startpage</Link>
               <Link href="/play" className="nav-btn-top">Start Playing</Link>
+              <Link href="/multiplayer" className="nav-btn-top">PvP Online</Link>
               <Link href="/tutorial" className="nav-btn-top">Tutorial</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/missions" className="nav-btn-top">Missões</Link>

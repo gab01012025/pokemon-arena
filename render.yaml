@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: pokemon-arena-game-server
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx tsx src/server/game-server.ts
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GAME_SERVER_PORT
+        value: 10000
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://naruto-arena-delta.vercel.app
+      - key: NODE_ENV
+        value: production
