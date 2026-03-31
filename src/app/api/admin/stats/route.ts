@@ -1,15 +1,9 @@
 import { NextRequest } from 'next/server';
-import { apiHandler, APIResponse, APIErrors, requireAuth } from '@/lib/api-handler';
+import { apiHandler, APIResponse, requireAdmin } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
-const ADMIN_USERS = ['admin', 'gab01012025', 'gabriel', 'gab1234'];
-
 export const GET = apiHandler(async (req: NextRequest) => {
-  const { username } = await requireAuth(req);
-
-  if (!ADMIN_USERS.includes(username.toLowerCase())) {
-    throw APIErrors.forbidden('Admin access required');
-  }
+  await requireAdmin(req);
 
   const [
     totalTrainers,

@@ -238,6 +238,23 @@ export async function requireAuth(req: NextRequest): Promise<{ userId: string; u
   }
 }
 
+// Require admin access (checks isAdmin flag in database)
+export async function requireAdmin(req: NextRequest): Promise<{ userId: string; username: string; email: string }> {
+  const user = await requireAuth(req);
+
+  const { prisma } = await import('@/lib/prisma');
+  const trainer = await prisma.trainer.findUnique({
+    where: { id: user.userId },
+    select: { isAdmin: true },
+  });
+
+  if (!trainer?.isAdmin) {
+    throw APIErrors.forbidden('Admin access required');
+  }
+
+  return user;
+}
+
 // CORS headers
 export function corsHeaders() {
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];

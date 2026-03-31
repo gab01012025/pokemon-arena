@@ -1,15 +1,9 @@
 import { NextRequest } from 'next/server';
-import { apiHandler, APIResponse, APIErrors, requireAuth, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
+import { apiHandler, APIResponse, APIErrors, requireAdmin, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
-const ADMIN_USERS = ['admin', 'gab01012025', 'gabriel', 'gab1234'];
-
 export const GET = apiHandler(async (req: NextRequest) => {
-  const { username } = await requireAuth(req);
-
-  if (!ADMIN_USERS.includes(username.toLowerCase())) {
-    throw APIErrors.forbidden('Admin access required');
-  }
+  await requireAdmin(req);
 
   const clans = await prisma.clan.findMany({
     include: {
@@ -47,11 +41,7 @@ export const DELETE = apiHandler(async (req: NextRequest) => {
     throw APIErrors.tooManyRequests();
   }
 
-  const { username } = await requireAuth(req);
-
-  if (!ADMIN_USERS.includes(username.toLowerCase())) {
-    throw APIErrors.forbidden('Admin access required');
-  }
+  await requireAdmin(req);
 
   const { clanId } = await req.json();
 
@@ -71,11 +61,7 @@ export const PATCH = apiHandler(async (req: NextRequest) => {
     throw APIErrors.tooManyRequests();
   }
 
-  const { username } = await requireAuth(req);
-
-  if (!ADMIN_USERS.includes(username.toLowerCase())) {
-    throw APIErrors.forbidden('Admin access required');
-  }
+  await requireAdmin(req);
 
   const { clanId, updates } = await req.json();
 
