@@ -54,11 +54,12 @@ export default function UnlockPokemonPage() {
         }
         throw new Error('Falha ao carregar Pokémon');
       }
-      const data = await res.json();
+      const json = await res.json();
+      const data = json.data ?? json;
       setPokemonData(data);
       
       // Definir categoria inicial
-      if (data.categories.length > 0 && !selectedCategory) {
+      if (data.categories?.length > 0 && !selectedCategory) {
         setSelectedCategory(data.categories[0]);
       }
     } catch (err) {

@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { BattlePokemon, Move, SelectedAction, GamePhase } from '../types';
-import { TYPE_COLORS, MOVE_ABBREV, STATUS_ICONS, TYPE_TO_ENERGY } from '../data';
+import { TYPE_COLORS, STATUS_ICONS, TYPE_TO_ENERGY } from '../data';
 import { getHpClass } from '../engine';
 import EnergyIcon from './EnergyIcon';
 
@@ -81,7 +81,7 @@ export default function PlayerColumn({
             <div className="skills-panel">
               {poke.moves.slice(0, 4).map(move => {
                 const colors = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
-                const displayName = MOVE_ABBREV[move.name] || (move.name.length > 10 ? move.name.substring(0, 8) : move.name);
+                const displayName = move.name;
                 return (
                   <div
                     key={move.id}

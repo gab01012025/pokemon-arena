@@ -53,8 +53,8 @@ export default function MissionsPage() {
         }
         throw new Error('Falha ao carregar missões');
       }
-      const data = await res.json();
-      setMissionsData(data);
+      const json = await res.json();
+      setMissionsData(json.data ?? json);
     } catch (err) {
       setError('Erro ao carregar missões');
       logger.error('Mission fetch error', err instanceof Error ? err : undefined);
