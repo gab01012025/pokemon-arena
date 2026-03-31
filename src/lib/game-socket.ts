@@ -146,7 +146,7 @@ class GameSocketClient {
   public trainerId: string | null = null;
 
   connect(serverUrl?: string): Promise<void> {
-    const url = serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'http://localhost:3010';
+    const url = (serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'http://localhost:3010').trim();
 
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {

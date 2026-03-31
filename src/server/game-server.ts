@@ -52,7 +52,7 @@ const DISCONNECT_GRACE_PERIOD = 30_000; // 30s to reconnect
 const CORS_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3002',
-  process.env.NEXT_PUBLIC_APP_URL || 'https://naruto-arena-delta.vercel.app',
+  (process.env.NEXT_PUBLIC_APP_URL || 'https://naruto-arena-delta.vercel.app').trim(),
 ].filter(Boolean);
 
 // =============================================================================
