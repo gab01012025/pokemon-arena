@@ -42,7 +42,7 @@ import { damage, heal, applyStatus, stun } from '../engine/action';
 // CONFIGURATION
 // =============================================================================
 
-const PORT = parseInt(process.env.GAME_SERVER_PORT || '3010', 10);
+const PORT = parseInt(process.env.PORT || process.env.GAME_SERVER_PORT || '3010', 10);
 const TURN_TIME = 90; // seconds
 const MMR_RANGE_START = 100;
 const MMR_RANGE_GROWTH = 50;
@@ -244,7 +244,16 @@ const disconnectTimers = new Map<string, NodeJS.Timeout>();
 // SERVER SETUP
 // =============================================================================
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  // Health check endpoint for Railway/monitoring
+  if (req.url === '/' || req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', players: connectedPlayers.size, battles: activeBattles.size }));
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
 const io = new Server(httpServer, {
   cors: {
     origin: CORS_ORIGINS,
