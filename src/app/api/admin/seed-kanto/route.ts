@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { apiHandler, APIResponse, requireAdmin, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
+import { apiHandler, APIResponse, APIErrors, requireAdmin, rateLimit, getClientIP, rateLimits } from '@/lib/api-handler';
 import { prisma } from '@/lib/prisma';
 
 const TYPES = {
