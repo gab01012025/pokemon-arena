@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { apiHandler, APIResponse } from '@/lib/api-handler';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -54,7 +55,7 @@ export const GET = apiHandler(async (request: NextRequest) => {
       types: Array.isArray(types) ? types.join(',') : types,
       category: p.category,
       health: p.health,
-      imageUrl: `/images/pokemon/${p.name.toLowerCase()}.png`,
+      imageUrl: getPokemonImageUrl(p.name, 'default'),
       traits: JSON.parse(p.traits),
       isStarter: p.isStarter,
       isUnlockable: !p.isStarter,

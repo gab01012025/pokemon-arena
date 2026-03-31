@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMultiplayer } from '@/hooks/useMultiplayer';
 import { type ActionIntent, type TeamData } from '@/lib/game-socket';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 import './multiplayer.css';
 
 import { RosterPokemon, fetchRoster } from './data';
@@ -302,7 +303,7 @@ function MultiplayerPageContent() {
                   <div className="vs-screen-name">{state.username || 'You'}</div>
                   <div className="vs-screen-team">
                     {state.yourFighters.map((f, i) => (
-                      <img key={i} src={`/images/pokemon/${f.name.toLowerCase()}.png`} alt={f.name} />
+                      <img key={i} src={getPokemonImageUrl(f.name, 'default')} alt={f.name} />
                     ))}
                   </div>
                 </div>
@@ -311,7 +312,7 @@ function MultiplayerPageContent() {
                   <div className="vs-screen-name">{state.opponent?.username || 'Opponent'}</div>
                   <div className="vs-screen-team">
                     {state.opponentFighters.map((f, i) => (
-                      <img key={i} src={`/images/pokemon/${f.name.toLowerCase()}.png`} alt={f.name} />
+                      <img key={i} src={getPokemonImageUrl(f.name, 'default')} alt={f.name} />
                     ))}
                   </div>
                 </div>

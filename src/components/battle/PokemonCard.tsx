@@ -1,6 +1,7 @@
 'use client';
 
 import { BattlePokemon, PokemonType } from '@/types/game';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 
 interface PokemonCardProps {
   pokemon: BattlePokemon;
@@ -29,21 +30,6 @@ const typeColors: Record<PokemonType, string> = {
   Dark: '#705848',
   Steel: '#B8B8D0',
   Fairy: '#EE99AC',
-};
-
-const pokemonEmojis: Record<string, string> = {
-  'Pikachu': '⚡',
-  'Charizard': '🔥',
-  'Blastoise': '💧',
-  'Venusaur': '🌿',
-  'Mewtwo': '🔮',
-  'Dragonite': '🐉',
-  'Gengar': '👻',
-  'Alakazam': '🧠',
-  'Machamp': '💪',
-  'Gyarados': '🌊',
-  'Eevee': '🦊',
-  'Snorlax': '😴',
 };
 
 export function PokemonCard({ 
@@ -98,14 +84,24 @@ export function PokemonCard({
         {pokemon.name}
       </div>
 
-      {/* Pokemon Sprite/Emoji */}
+      {/* Pokemon Sprite */}
       <div style={{
-        fontSize: '40px',
         textAlign: 'center',
         marginBottom: '8px',
         filter: isAlive ? 'none' : 'grayscale(1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '64px',
       }}>
-        {pokemonEmojis[pokemon.name] || '❓'}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getPokemonImageUrl(pokemon.name, 'default')}
+          alt={pokemon.name}
+          width={64}
+          height={64}
+          style={{ imageRendering: 'pixelated' }}
+        />
       </div>
 
       {/* Health Bar */}
@@ -206,8 +202,10 @@ export function PokemonCard({
           justifyContent: 'center',
           fontSize: '10px',
           border: '2px solid white',
+          fontWeight: 'bold',
+          color: 'white',
         }}>
-          ⚔️
+          !
         </div>
       )}
     </div>

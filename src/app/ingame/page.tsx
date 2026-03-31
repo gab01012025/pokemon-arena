@@ -17,33 +17,20 @@ import {
 } from '@/lib/battle-mechanics';
 import './ingame.css';
 
-// Mapeamento das extensões das imagens
-const pokemonImages: Record<string, string> = {
-  'pikachu': '/images/pokemon/pikachu.jpg',
-  'charizard': '/images/pokemon/charizard.webp',
-  'blastoise': '/images/pokemon/blastoise.jpg',
-  'venusaur': '/images/pokemon/venusaur.webp',
-  'gengar': '/images/pokemon/gengar.jpeg',
-  'alakazam': '/images/pokemon/alakazam.webp',
-  'machamp': '/images/pokemon/machamp.jpeg',
-  'dragonite': '/images/pokemon/Dragonite.webp',
-  'mewtwo': '/images/pokemon/mewtwo.png',
-  'lucario': '/images/pokemon/lucario.webp',
-  'garchomp': '/images/pokemon/garchomp.webp',
-  'vaporeon': '/images/pokemon/vaporeon.webp',
-  'jolteon': '/images/pokemon/jolteon.webp',
-  'arcanine': '/images/pokemon/arcanine.webp',
-  'exeggutor': '/images/pokemon/exeggutor.png',
-  'golem': '/images/pokemon/golem.webp',
-  'lapras': '/images/pokemon/lapras.jpeg',
-  'nidoking': '/images/pokemon/nidoking.webp',
-  'scizor': '/images/pokemon/scizor.jpeg',
-  'snorlax': '/images/pokemon/snrolax.webp',
-  'tyranitar': '/images/pokemon/tyranitar.webp',
+const POKEAPI_SPRITE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
+const POKEMON_IDS: Record<string, number> = {
+  bulbasaur:1,ivysaur:2,venusaur:3,charmander:4,charmeleon:5,charizard:6,squirtle:7,wartortle:8,blastoise:9,
+  pikachu:25,raichu:26,nidoking:34,vulpix:37,ninetales:38,growlithe:58,arcanine:59,abra:63,kadabra:64,
+  alakazam:65,machop:66,machoke:67,machamp:68,geodude:74,graveler:75,golem:76,gastly:92,haunter:93,gengar:94,
+  onix:95,exeggcute:102,exeggutor:103,hitmonlee:106,hitmonchan:107,rhyhorn:111,rhydon:112,scyther:123,
+  electabuzz:125,magmar:126,magikarp:129,gyarados:130,lapras:131,eevee:133,vaporeon:134,jolteon:135,flareon:136,
+  snorlax:143,dratini:147,dragonair:148,dragonite:149,mewtwo:150,mew:151,scizor:212,tyranitar:248,
+  lucario:448,garchomp:445,
 };
 
 const getPokemonImage = (pokemonId: string): string => {
-  return pokemonImages[pokemonId] || '/images/pokemon/pikachu.jpg';
+  const id = POKEMON_IDS[pokemonId?.toLowerCase()] || 25;
+  return `${POKEAPI_SPRITE}/${id}.png`;
 };
 
 type GameMode = 'ladder' | 'quick' | 'private';

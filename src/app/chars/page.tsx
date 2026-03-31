@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { PokemonImage } from '@/components/PokemonImage';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 
 // Force dynamic rendering (no static generation)
 export const dynamic = 'force-dynamic';
@@ -30,32 +31,9 @@ function getTypeColor(type: string): string {
   return colors[type] || '#888888';
 }
 
-// Mapeamento de imagens de Pokemon (extensões corretas)
+// Sprite do Pokemon via PokeAPI
 function getPokemonImage(name: string): string {
-  const imageMap: Record<string, string> = {
-    'pikachu': '/images/pokemon/pikachu.jpg',
-    'charizard': '/images/pokemon/charizard.webp',
-    'blastoise': '/images/pokemon/blastoise.jpg',
-    'venusaur': '/images/pokemon/venusaur.webp',
-    'gengar': '/images/pokemon/gengar.jpeg',
-    'machamp': '/images/pokemon/machamp.jpeg',
-    'mewtwo': '/images/pokemon/mewtwo.png',
-    'dragonite': '/images/pokemon/Dragonite.webp',
-    'alakazam': '/images/pokemon/alakazam.webp',
-    'arcanine': '/images/pokemon/arcanine.webp',
-    'garchomp': '/images/pokemon/garchomp.webp',
-    'lucario': '/images/pokemon/lucario.webp',
-    'tyranitar': '/images/pokemon/tyranitar.webp',
-    'lapras': '/images/pokemon/lapras.jpeg',
-    'scizor': '/images/pokemon/scizor.jpeg',
-    'jolteon': '/images/pokemon/jolteon.webp',
-    'vaporeon': '/images/pokemon/vaporeon.webp',
-    'nidoking': '/images/pokemon/nidoking.webp',
-    'golem': '/images/pokemon/golem.webp',
-    'exeggutor': '/images/pokemon/exeggutor.png',
-    'snorlax': '/images/pokemon/snrolax.webp',
-  };
-  return imageMap[name?.toLowerCase() || 'pikachu'] || '/images/pokemon-pikachu.jpg';
+  return getPokemonImageUrl(name, 'default');
 }
 
 async function getPokemon() {

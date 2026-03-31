@@ -10,7 +10,7 @@ interface PokemonImageProps {
   className?: string;
 }
 
-export function PokemonImage({ src, alt, fallback = '/images/pokemon-pikachu.jpg', className = '' }: PokemonImageProps) {
+export function PokemonImage({ src, alt, fallback = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png', className = '' }: PokemonImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
 
   return (

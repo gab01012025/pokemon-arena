@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 
 interface CharacterPageProps {
   params: Promise<{
@@ -154,7 +155,7 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
               <div className="character-header">
                 <div className="character-image">
                   <img 
-                    src={`/images/pokemon/${pokemon.name.toLowerCase()}.png`} 
+                    src={getPokemonImageUrl(pokemon.name, 'default')} 
                     alt={pokemon.name}
                   />
                 </div>

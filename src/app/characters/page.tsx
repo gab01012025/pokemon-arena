@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { prisma } from '@/lib/prisma';
+import { getPokemonImageUrl } from '@/lib/pokemon-images';
 
 // Force dynamic rendering (no prerender at build time)
 export const dynamic = 'force-dynamic';
@@ -154,7 +155,7 @@ export default async function CharactersPage() {
                               background: `${typeColor}20`,
                             }}>
                               <img 
-                                src={`/images/pokemon/${pokemon.name.toLowerCase()}.png`} 
+                                src={getPokemonImageUrl(pokemon.name, 'default')} 
                                 alt={pokemon.name}
                                 style={{
                                   width: '100%',
