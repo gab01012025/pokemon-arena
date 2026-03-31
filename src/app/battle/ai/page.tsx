@@ -65,7 +65,7 @@ export default function AIBattlePage() {
   const [selectedActions, setSelectedActions] = useState<SelectedAction[]>([]);
   const [selectingPokemon, setSelectingPokemon] = useState<number | null>(null);
   const [selectingMove, setSelectingMove] = useState<Move | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string } | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string; pokemonTypes?: PokemonType[] } | null>(null);
   const [battleLog, setBattleLog] = useState<LogEntry[]>([]);
   const [timer, setTimer] = useState(100);
   const [battleBackground, setBattleBackground] = useState('');
@@ -104,6 +104,10 @@ export default function AIBattlePage() {
   const [winStreak, setWinStreak] = useState(0);
   const [isDailyChallenge, setIsDailyChallenge] = useState(false);
   const [dailyChallengeCompleted, setDailyChallengeCompleted] = useState(false);
+
+  // Combat animations (applied briefly to character cards)
+  const [playerAnims, setPlayerAnims] = useState<string[]>(['', '', '']);
+  const [enemyAnims, setEnemyAnims] = useState<string[]>(['', '', '']);
 
   // Battle Stats Tracking
   const [battleTracker, setBattleTracker] = useState({
@@ -807,6 +811,13 @@ export default function AIBattlePage() {
   }, [battleStats, addLog, saveBattleResult, winStreak]);
 
   // ==================== EXECUTE ACTION ====================
+  /** Trigger a brief CSS animation class on a Pokemon card */
+  const triggerAnim = (isPlayerSide: boolean, idx: number, anim: string, duration = 600) => {
+    const setter = isPlayerSide ? setPlayerAnims : setEnemyAnims;
+    setter(prev => prev.map((a, i) => i === idx ? anim : a));
+    setTimeout(() => setter(prev => prev.map((a, i) => i === idx ? '' : a)), duration);
+  };
+
   const executeAction = async (action: SelectedAction, isPlayer: boolean) => {
     const atkTeam = isPlayer ? playerTeamRef.current : opponentTeamRef.current;
     const defTeam = isPlayer ? opponentTeamRef.current : playerTeamRef.current;
@@ -844,6 +855,7 @@ export default function AIBattlePage() {
           const newHp = Math.min(atk.maxHp, atk.hp + healAmount);
           const healed = newHp - atk.hp;
           setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: newHp } : p));
+          triggerAnim(isPlayer, action.pokemonIndex, 'healed', 800);
           if (healed > 0) addLog(`${atk.name} used ${move.name}! Healed ${healed} HP!`, 'heal');
           else addLog(`${atk.name} used ${move.name}! HP is already full!`, 'info');
         }
@@ -961,6 +973,10 @@ export default function AIBattlePage() {
         }
 
         setDefTeam(prev => prev.map((p, i) => i === tIdx ? { ...p, hp: newHp } : p));
+
+        // Trigger visual feedback animations
+        triggerAnim(isPlayer, action.pokemonIndex, 'attacking', 500);
+        triggerAnim(!isPlayer, tIdx, damageResult.isCrit ? 'critical' : 'damaged', 600);
 
         let logMsg = `${atk.name}'s ${move.name} dealt ${finalDamage} damage to ${def.name}!`;
         if (damageResult.isCrit) logMsg += ' Critical hit!';
@@ -1646,8 +1662,12 @@ export default function AIBattlePage() {
             onSkillClick={handleSkillClick}
             onRemoveAction={removeAction}
             onItemTarget={applyItemToTarget}
-            onHoverSkill={(move, name) => setHoveredSkill({ move, pokemonName: name })}
+            onHoverSkill={(move, name) => {
+              const poke = playerTeam.find(p => p.name === name);
+              setHoveredSkill({ move, pokemonName: name, pokemonTypes: poke?.types });
+            }}
             onLeaveSkill={() => setHoveredSkill(null)}
+            anims={playerAnims}
           />
 
           <BattleCenter
@@ -1659,6 +1679,7 @@ export default function AIBattlePage() {
             opponentTeam={opponentTeam}
             phase={phase}
             onTargetSelect={handleTargetSelect}
+            anims={enemyAnims}
           />
         </div>
 

@@ -16,6 +16,7 @@ interface PlayerColumnProps {
   onItemTarget: (pIdx: number) => void;
   onHoverSkill: (move: Move, pokemonName: string) => void;
   onLeaveSkill: () => void;
+  anims?: string[];
 }
 
 export default function PlayerColumn({
@@ -28,6 +29,7 @@ export default function PlayerColumn({
   onItemTarget,
   onHoverSkill,
   onLeaveSkill,
+  anims = [],
 }: PlayerColumnProps) {
   return (
     <div className="character-column">
@@ -40,7 +42,7 @@ export default function PlayerColumn({
         return (
           <div
             key={`p-${poke.id}-${idx}`}
-            className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''}`}
+            className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'item-target' && poke.hp > 0 && onItemTarget(idx)}
           >
             <div className="portrait-container">

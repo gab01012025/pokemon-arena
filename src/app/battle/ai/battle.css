@@ -778,12 +778,12 @@ html, body { background: #080a14 !important; }
 }
 .character-card.enemy {
   flex-direction: row-reverse;
-  border-right: 3px solid rgba(255, 61, 113, 0.45);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05), 6px 0 24px rgba(255, 61, 113, 0.05);
+  border-right: 3px solid rgba(100, 160, 255, 0.45);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05), 6px 0 24px rgba(100, 160, 255, 0.05);
 }
 .character-card.enemy:hover {
-  box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), 6px 0 36px rgba(255, 61, 113, 0.08);
-  border-right-color: rgba(255, 61, 113, 0.65);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), 6px 0 36px rgba(100, 160, 255, 0.08);
+  border-right-color: rgba(100, 160, 255, 0.65);
   transform: translateX(-3px);
 }
 .character-card.fainted {
@@ -1093,15 +1093,15 @@ html, body { background: #080a14 !important; }
   border: 1px solid var(--glass-border);
   border-radius: 10px;
   padding: 12px;
-  min-width: 220px;
-  max-width: 280px;
+  min-width: 230px;
+  max-width: 290px;
   z-index: 10;
 }
 .skill-info-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .skill-info-name {
   font-family: var(--font-title);
@@ -1110,24 +1110,61 @@ html, body { background: #080a14 !important; }
   color: #fff;
   letter-spacing: 0.5px;
 }
-.skill-info-cost {
+.skill-info-type-badge {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+.skill-info-cost-row {
   display: flex;
   gap: 3px;
+  margin-bottom: 6px;
+  align-items: center;
 }
-.skill-info-cost .energy-orb {
-  width: 18px;
-  height: 18px;
-  font-size: 9px;
+.skill-info-cost-row .energy-orb {
+  display: flex;
+  gap: 1px;
+}
+.skill-free-tag {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--accent-green);
+  letter-spacing: 1px;
 }
 .skill-info-desc {
   font-size: 13px;
   color: rgba(255,255,255,0.7);
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+.skill-info-damage {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+}
+.dmg-base { color: rgba(255,255,255,0.6); }
+.dmg-stab { color: var(--accent-cyan); }
+.dmg-weak { color: var(--accent-gold); }
+.skill-info-heal {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--accent-green);
+  margin-bottom: 6px;
 }
 .skill-info-footer {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   font-family: var(--font-title);
   font-size: 9px;
   font-weight: 600;
@@ -1155,12 +1192,12 @@ html, body { background: #080a14 !important; }
   font-size: 24px;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 24px rgba(255,80,80,0.7), 0 0 60px rgba(255,50,50,0.3), 0 2px 4px rgba(0,0,0,0.9);
+  text-shadow: 0 0 24px rgba(100,160,255,0.7), 0 0 60px rgba(100,160,255,0.3), 0 2px 4px rgba(0,0,0,0.9);
   letter-spacing: 8px;
-  background: linear-gradient(180deg, rgba(255,60,60,0.14) 0%, rgba(255,30,30,0.05) 100%);
+  background: linear-gradient(180deg, rgba(100,160,255,0.14) 0%, rgba(80,120,200,0.05) 100%);
   padding: 10px 24px;
   border-radius: 12px;
-  border: 1px solid rgba(255,80,80,0.12);
+  border: 1px solid rgba(100,160,255,0.12);
   animation: vs-pulse-glow 3s ease-in-out infinite;
   position: relative;
 }
@@ -1173,8 +1210,8 @@ html, body { background: #080a14 !important; }
   pointer-events: none;
 }
 @keyframes vs-pulse-glow {
-  0%, 100% { text-shadow: 0 0 30px rgba(255,80,80,0.7), 0 0 60px rgba(255,50,50,0.35); }
-  50% { text-shadow: 0 0 40px rgba(255,80,80,0.9), 0 0 80px rgba(255,50,50,0.5); }
+  0%, 100% { text-shadow: 0 0 30px rgba(100,160,255,0.7), 0 0 60px rgba(100,160,255,0.35); }
+  50% { text-shadow: 0 0 40px rgba(100,160,255,0.9), 0 0 80px rgba(100,160,255,0.5); }
 }
 .action-queue {
   display: flex;

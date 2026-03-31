@@ -10,12 +10,14 @@ interface EnemyColumnProps {
   opponentTeam: BattlePokemon[];
   phase: GamePhase;
   onTargetSelect: (tIdx: number) => void;
+  anims?: string[];
 }
 
 export default function EnemyColumn({
   opponentTeam,
   phase,
   onTargetSelect,
+  anims = [],
 }: EnemyColumnProps) {
   return (
     <div className="character-column">
@@ -26,7 +28,7 @@ export default function EnemyColumn({
         return (
           <div
             key={`e-${poke.id}-${idx}`}
-            className={`character-card enemy ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''}`}
+            className={`character-card enemy ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'targeting' && poke.hp > 0 && onTargetSelect(idx)}
           >
             <div className="skills-panel">
