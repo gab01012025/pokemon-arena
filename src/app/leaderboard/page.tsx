@@ -278,7 +278,7 @@ export default function LeaderboardPage() {
                   </td>
                   <td className="lb-cell-streak">
                     {entry.streak > 0 ? (
-                      <span className="lb-streak-value">🔥 {entry.streak}</span>
+                      <span className="lb-streak-value">{entry.streak}</span>
                     ) : (
                       <span className="lb-streak-none">—</span>
                     )}

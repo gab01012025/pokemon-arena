@@ -177,7 +177,7 @@ export default function ChangeAvatarPage() {
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 

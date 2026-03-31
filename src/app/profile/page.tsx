@@ -426,7 +426,7 @@ export default function ProfilePage() {
                     className={`battle-record ${battle.result}`}
                   >
                     <div className="battle-result-icon">
-                      {battle.result === 'win' ? '🏆' : '❌'}
+                      {battle.result === 'win' ? 'W' : 'L'}
                     </div>
                     <div className="battle-info">
                       <span className="battle-result-text">
@@ -460,14 +460,14 @@ export default function ProfilePage() {
             <h2>Conquistas</h2>
             <div className="achievements-grid">
               <div className={`achievement ${profile.wins >= 1 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">🎖️</div>
+                <div className="achievement-icon">I</div>
                 <div className="achievement-info">
                   <h4>Primeira Vitória</h4>
                   <p>Vença sua primeira batalha</p>
                 </div>
               </div>
               <div className={`achievement ${profile.wins >= 10 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">⚔️</div>
+                <div className="achievement-icon">II</div>
                 <div className="achievement-info">
                   <h4>Guerreiro</h4>
                   <p>Vença 10 batalhas</p>
@@ -475,7 +475,7 @@ export default function ProfilePage() {
                 <div className="achievement-progress">{Math.min(profile.wins, 10)}/10</div>
               </div>
               <div className={`achievement ${profile.wins >= 50 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">🏆</div>
+                <div className="achievement-icon">III</div>
                 <div className="achievement-info">
                   <h4>Campeão</h4>
                   <p>Vença 50 batalhas</p>
@@ -483,7 +483,7 @@ export default function ProfilePage() {
                 <div className="achievement-progress">{Math.min(profile.wins, 50)}/50</div>
               </div>
               <div className={`achievement ${profile.wins >= 100 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">👑</div>
+                <div className="achievement-icon">IV</div>
                 <div className="achievement-info">
                   <h4>Lenda</h4>
                   <p>Vença 100 batalhas</p>
@@ -491,28 +491,28 @@ export default function ProfilePage() {
                 <div className="achievement-progress">{Math.min(profile.wins, 100)}/100</div>
               </div>
               <div className={`achievement ${profile.ladderPoints >= 1000 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">📈</div>
+                <div className="achievement-icon">V</div>
                 <div className="achievement-info">
                   <h4>Escalada</h4>
                   <p>Alcance 1000 Ladder Points</p>
                 </div>
               </div>
               <div className={`achievement ${profile.level >= 10 ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">⭐</div>
+                <div className="achievement-icon">VI</div>
                 <div className="achievement-info">
                   <h4>Veterano</h4>
                   <p>Alcance nível 10</p>
                 </div>
               </div>
               <div className={`achievement ${profile.clan ? 'unlocked' : 'locked'}`}>
-                <div className="achievement-icon">🛡️</div>
+                <div className="achievement-icon">VII</div>
                 <div className="achievement-info">
                   <h4>Aliado</h4>
                   <p>Entre em um clã</p>
                 </div>
               </div>
               <div className={`achievement locked`}>
-                <div className="achievement-icon">🔥</div>
+                <div className="achievement-icon">VIII</div>
                 <div className="achievement-info">
                   <h4>Invicto</h4>
                   <p>Vença 5 batalhas seguidas</p>

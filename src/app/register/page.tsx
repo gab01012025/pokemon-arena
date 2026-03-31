@@ -43,17 +43,17 @@ export default function Register() {
           {/* Info Boxes */}
           <div className="info-grid">
             <div className="info-box">
-              <div className="info-box-icon">⚔️</div>
+              <div className="info-box-icon"></div>
               <h3>Battle System</h3>
               <p>Choose 3 Pokemon and battle against other trainers in strategic turn-based combat.</p>
             </div>
             <div className="info-box">
-              <div className="info-box-icon">🏆</div>
+              <div className="info-box-icon"></div>
               <h3>Ranking System</h3>
               <p>Climb the ladder from Beginner to Champion and become a legend!</p>
             </div>
             <div className="info-box">
-              <div className="info-box-icon">👥</div>
+              <div className="info-box-icon"></div>
               <h3>Join a Team</h3>
               <p>Team up with other trainers and compete in team battles and tournaments.</p>
             </div>

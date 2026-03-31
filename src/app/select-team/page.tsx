@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 
 interface Move {
   id: string;
@@ -25,46 +26,11 @@ interface Pokemon {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  electric: '#F7D02C',
-  fire: '#EE8130',
-  water: '#6390F0',
-  grass: '#7AC74C',
-  psychic: '#F95587',
-  fighting: '#C22E28',
-  ghost: '#735797',
-  dragon: '#6F35FC',
-  normal: '#A8A77A',
-  poison: '#A33EA1',
-  ice: '#96D9D6',
-  dark: '#705746',
-  fairy: '#D685AD',
-  steel: '#B7B7CE',
-  rock: '#B6A136',
-  ground: '#E2BF65',
-  flying: '#A98FF3',
-  bug: '#A6B91A',
-};
-
-const TYPE_ICONS: Record<string, string> = {
-  electric: '⚡',
-  fire: '🔥',
-  water: '💧',
-  grass: '🌿',
-  psychic: '🔮',
-  fighting: '👊',
-  ghost: '👻',
-  dragon: '🐉',
-  normal: '⭐',
-  poison: '☠️',
-  ice: '❄️',
-  dark: '🌙',
-  fairy: '✨',
-  steel: '⚙️',
-  rock: '🪨',
-  ground: '🌍',
-  flying: '🦅',
-  bug: '🐛',
-  random: '🎲',
+  electric: '#F7D02C', fire: '#EE8130', water: '#6390F0', grass: '#7AC74C',
+  psychic: '#F95587', fighting: '#C22E28', ghost: '#735797', dragon: '#6F35FC',
+  normal: '#A8A77A', poison: '#A33EA1', ice: '#96D9D6', dark: '#705746',
+  fairy: '#D685AD', steel: '#B7B7CE', rock: '#B6A136', ground: '#E2BF65',
+  flying: '#A98FF3', bug: '#A6B91A',
 };
 
 const IMAGE_MAP: Record<string, string> = {
@@ -79,27 +45,17 @@ const IMAGE_MAP: Record<string, string> = {
   'alakazam': '/images/pokemon/alakazam.webp',
 };
 
-// Helper function to normalize types from API
 const normalizeTypes = (pokemon: Record<string, unknown>): string => {
-  // If types is already a simple string like "Water,Fire"
   if (typeof pokemon.types === 'string') {
-    // Check if it's a JSON string like "[\"Water\"]"
     if (pokemon.types.startsWith('[')) {
       try {
         const parsed = JSON.parse(pokemon.types);
-        if (Array.isArray(parsed)) {
-          return parsed.join(',');
-        }
-      } catch {
-        // Not valid JSON, use as is
-      }
+        if (Array.isArray(parsed)) return parsed.join(',');
+      } catch { /* use as is */ }
     }
     return pokemon.types;
   }
-  // If types is an array
-  if (Array.isArray(pokemon.types)) {
-    return pokemon.types.join(',');
-  }
+  if (Array.isArray(pokemon.types)) return pokemon.types.join(',');
   return 'Normal';
 };
 
@@ -107,13 +63,11 @@ export default function SelectTeamPage() {
   const router = useRouter();
   const [starters, setStarters] = useState<Pokemon[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Pokemon[]>([]);
-  const [hoveredPokemon, setHoveredPokemon] = useState<Pokemon | null>(null);
   const [previewPokemon, setPreviewPokemon] = useState<Pokemon | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [animatingSlot, setAnimatingSlot] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchStarters() {
@@ -121,7 +75,6 @@ export default function SelectTeamPage() {
         const res = await fetch('/api/pokemon?starters=true&includeMoves=true');
         if (res.ok) {
           const data = await res.json();
-          // Normalize types from API response
           const normalized = data.map((p: Record<string, unknown>) => ({
             ...p,
             types: normalizeTypes(p),
@@ -138,45 +91,31 @@ export default function SelectTeamPage() {
   }, []);
 
   const togglePokemon = useCallback((pokemon: Pokemon) => {
-    const existingIndex = selectedTeam.findIndex(p => p.id === pokemon.id);
-    
-    if (existingIndex !== -1) {
-      // Remover
-      setAnimatingSlot(existingIndex);
-      setTimeout(() => {
-        setSelectedTeam(prev => prev.filter(p => p.id !== pokemon.id));
-        setAnimatingSlot(null);
-      }, 200);
+    const exists = selectedTeam.findIndex(p => p.id === pokemon.id);
+    if (exists !== -1) {
+      setSelectedTeam(prev => prev.filter(p => p.id !== pokemon.id));
     } else if (selectedTeam.length < 3) {
-      // Adicionar
-      setAnimatingSlot(selectedTeam.length);
       setSelectedTeam(prev => [...prev, pokemon]);
-      setTimeout(() => setAnimatingSlot(null), 300);
     }
   }, [selectedTeam]);
 
-  const confirmTeam = async () => {
+  const confirmTeam = () => {
     if (selectedTeam.length !== 3) {
       setError('Selecione exatamente 3 Pokémon');
       return;
     }
-
     setShowConfirmation(true);
   };
 
   const finalConfirm = async () => {
     setSubmitting(true);
     setError(null);
-
     try {
       const res = await fetch('/api/trainer/select-team', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pokemonIds: selectedTeam.map(p => p.id),
-        }),
+        body: JSON.stringify({ pokemonIds: selectedTeam.map(p => p.id) }),
       });
-
       if (res.ok) {
         router.push('/play');
       } else {
@@ -193,8 +132,7 @@ export default function SelectTeamPage() {
   };
 
   const getTypeColor = (types: string) => {
-    if (!types) return '#777';
-    const firstType = types.split(',')[0]?.toLowerCase() || 'normal';
+    const firstType = types?.split(',')[0]?.toLowerCase() || 'normal';
     return TYPE_COLORS[firstType] || '#777';
   };
 
@@ -203,353 +141,286 @@ export default function SelectTeamPage() {
   };
 
   const parseEnergyCost = (costStr: string): Record<string, number> => {
-    try {
-      return JSON.parse(costStr);
-    } catch {
-      return {};
-    }
+    try { return JSON.parse(costStr); } catch { return {}; }
   };
 
-  const renderEnergyCost = (costStr: string) => {
-    const costs = parseEnergyCost(costStr);
-    return Object.entries(costs).map(([type, count]) => (
-      <span key={type} className="energy-icon" title={`${type}: ${count}`}>
-        {Array(count).fill(TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐').join('')}
-      </span>
-    ));
+  const displayPokemon = previewPokemon || (selectedTeam.length > 0 ? selectedTeam[selectedTeam.length - 1] : null);
+
+  const overlayStyle: React.CSSProperties = {
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
   };
-
-  if (loading) {
-    return (
-      <div className="select-team-page-v2">
-        <div className="loading-container">
-          <div className="loading-pokeball">
-            <div className="pokeball-top"></div>
-            <div className="pokeball-center"></div>
-            <div className="pokeball-bottom"></div>
-          </div>
-          <p className="loading-text">Carregando Pokémon...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const displayPokemon = hoveredPokemon || previewPokemon || (selectedTeam.length > 0 ? selectedTeam[selectedTeam.length - 1] : null);
 
   return (
-    <div className="select-team-page-v2">
-      {/* Background Effects */}
-      <div className="arena-bg-effects">
-        <div className="floating-orb orb-1"></div>
-        <div className="floating-orb orb-2"></div>
-        <div className="floating-orb orb-3"></div>
-        <div className="energy-wave"></div>
-      </div>
-
-      <div className="select-team-layout">
-        {/* Left Panel - Team Slots */}
-        <div className="team-panel">
-          <div className="panel-header">
-            <div className="header-decoration left"></div>
-            <h2>SEU TIME</h2>
-            <div className="header-decoration right"></div>
-          </div>
-          
-          <div className="team-slots-v2">
-            {[0, 1, 2].map(idx => {
-              const pokemon = selectedTeam[idx];
-              const isAnimating = animatingSlot === idx;
-              
-              return (
-                <div 
-                  key={idx}
-                  className={`team-slot-v2 ${pokemon ? 'filled' : 'empty'} ${isAnimating ? 'animating' : ''}`}
-                  style={pokemon ? { 
-                    '--slot-color': getTypeColor(pokemon.types),
-                    '--slot-glow': `${getTypeColor(pokemon.types)}66`
-                  } as React.CSSProperties : {}}
-                  onClick={() => pokemon && togglePokemon(pokemon)}
-                  onMouseEnter={() => pokemon && setHoveredPokemon(pokemon)}
-                  onMouseLeave={() => setHoveredPokemon(null)}
-                >
-                  <div className="slot-number">{idx + 1}</div>
-                  {pokemon ? (
-                    <>
-                      <div className="slot-portrait">
-                        <img src={getImage(pokemon.name)} alt={pokemon.name} />
-                        <div className="slot-glow"></div>
-                      </div>
-                      <div className="slot-info">
-                        <span className="slot-name">{pokemon.name}</span>
-                        <div className="slot-types">
-                          {(pokemon.types || 'Normal').split(',').filter(t => t).map((type, i) => (
-                            <span key={i} className="mini-type" style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}>
-                              {TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <button className="remove-btn" title="Remover">✕</button>
-                    </>
-                  ) : (
-                    <div className="empty-slot-content">
-                      <div className="empty-slot-icon">?</div>
-                      <span>Vazio</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Progress Indicator */}
-          <div className="selection-progress">
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${(selectedTeam.length / 3) * 100}%` }}
-              ></div>
+    <div className="page-wrapper">
+      <div className="main-container">
+        <div className="header-section">
+          <div className="header-left">
+            <div className="nav-buttons-top">
+              <Link href="/" className="nav-btn-top">Startpage</Link>
+              <Link href="/play" className="nav-btn-top">Start Playing</Link>
+              <Link href="/tutorial" className="nav-btn-top">Tutorial</Link>
+              <Link href="/ladders" className="nav-btn-top">Ladders</Link>
+              <Link href="/missions" className="nav-btn-top">Missões</Link>
+              <Link href="/unlock-pokemon" className="nav-btn-top">Desbloquear</Link>
+              <Link href="/my-clan" className="nav-btn-top">Meu Clã</Link>
             </div>
-            <span className="progress-text">
-              {selectedTeam.length}/3 Selecionados
-            </span>
           </div>
-
-          {/* Confirm Button */}
-          <button
-            className={`confirm-btn-v2 ${selectedTeam.length === 3 ? 'ready pulse' : ''}`}
-            onClick={confirmTeam}
-            disabled={selectedTeam.length !== 3 || submitting}
-          >
-            <span className="btn-icon">⚔️</span>
-            <span className="btn-text">
-              {selectedTeam.length === 3 ? 'CONFIRMAR TIME!' : `Faltam ${3 - selectedTeam.length}`}
-            </span>
-            <span className="btn-shine"></span>
-          </button>
-
-          <Link href="/" className="back-link">
-            ← Voltar ao Menu
-          </Link>
+          <div className="header-banner">
+            <h1>POKEMON ARENA</h1>
+          </div>
         </div>
 
-        {/* Center Panel - Pokemon Grid */}
-        <div className="pokemon-selection-panel">
-          <div className="panel-header">
-            <h1>⚡ SELECIONE SEU TIME ⚡</h1>
-            <p>Escolha 3 Pokémon para batalhar na Arena!</p>
-          </div>
+        <LeftSidebar />
 
-          {error && (
-            <div className="error-banner">
-              <span className="error-icon">⚠️</span>
-              {error}
+        <main className="center-content">
+          <div className="content-box">
+            <div className="content-box-header">
+              <h2>Selecionar Time</h2>
             </div>
-          )}
+            <div className="content-box-body">
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
+                  Carregando Pokémon...
+                </div>
+              ) : (
+                <>
+                  <p style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '16px' }}>
+                    Escolha 3 Pokémon para batalhar na Arena.
+                  </p>
 
-          <div className="pokemon-grid-v2">
-            {starters.map((pokemon, index) => {
-              const isSelected = selectedTeam.find(p => p.id === pokemon.id);
-              const typeColor = getTypeColor(pokemon.types);
-              const isDisabled = !isSelected && selectedTeam.length >= 3;
-              
-              return (
-                <div
-                  key={pokemon.id}
-                  className={`pokemon-card-v2 ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                  style={{ 
-                    '--card-color': typeColor,
-                    '--animation-delay': `${index * 0.1}s`
-                  } as React.CSSProperties}
-                  onClick={() => !isDisabled && togglePokemon(pokemon)}
-                  onMouseEnter={() => setPreviewPokemon(pokemon)}
-                  onMouseLeave={() => setPreviewPokemon(null)}
-                >
-                  <div className="card-bg-glow"></div>
-                  
-                  {/* Selection Order Badge */}
-                  {isSelected && (
-                    <div className="selection-order">
-                      {selectedTeam.findIndex(p => p.id === pokemon.id) + 1}
+                  {error && (
+                    <div style={{
+                      padding: '8px 12px', borderRadius: '6px', marginBottom: '12px',
+                      background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#f87171', fontSize: '12px',
+                    }}>
+                      {error}
                     </div>
                   )}
 
-                  <div className="card-portrait">
-                    <img src={getImage(pokemon.name)} alt={pokemon.name} />
-                    <div className="portrait-overlay"></div>
-                  </div>
-
-                  <div className="card-content">
-                    <h3 className="pokemon-name">{pokemon.name}</h3>
-                    
-                    <div className="type-badges">
-                      {pokemon.types.split(',').filter(t => t).map((type, i) => (
-                        <span 
-                          key={i} 
-                          className="type-badge-v2"
-                          style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}
+                  {/* Selected Team Slots */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+                    {[0, 1, 2].map(idx => {
+                      const pokemon = selectedTeam[idx];
+                      return (
+                        <div key={idx} style={{
+                          background: pokemon ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+                          border: pokemon ? `1px solid ${getTypeColor(pokemon.types)}40` : '1px solid rgba(255,255,255,0.06)',
+                          borderRadius: '8px', padding: '10px', textAlign: 'center', minHeight: '80px',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          cursor: pokemon ? 'pointer' : 'default',
+                        }}
+                          onClick={() => pokemon && togglePokemon(pokemon)}
                         >
-                          <span className="type-icon">{TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'}</span>
-                          {type || 'Normal'}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="stat-bar">
-                      <span className="stat-label">❤️ HP</span>
-                      <div className="stat-fill-container">
-                        <div className="stat-fill" style={{ width: `${(pokemon.health / 150) * 100}%` }}></div>
-                      </div>
-                      <span className="stat-value">{pokemon.health}</span>
-                    </div>
+                          {pokemon ? (
+                            <>
+                              <img src={getImage(pokemon.name)} alt={pokemon.name}
+                                style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', marginBottom: '4px' }} />
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>{pokemon.name}</span>
+                              <div style={{ display: 'flex', gap: '3px', marginTop: '3px' }}>
+                                {pokemon.types.split(',').filter(t => t).map((type, i) => (
+                                  <span key={i} style={{
+                                    fontSize: '8px', fontWeight: 600, padding: '1px 5px', borderRadius: '3px',
+                                    background: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777', color: '#fff',
+                                  }}>
+                                    {type}
+                                  </span>
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <span style={{ fontSize: '11px', color: '#334155' }}>Slot {idx + 1}</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  <div className="card-actions">
-                    <button className="preview-btn" onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewPokemon(pokemon);
+                  {/* Progress + Confirm */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ flex: 1, marginRight: '12px' }}>
+                      <div style={{ height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+                        <div style={{
+                          width: `${(selectedTeam.length / 3) * 100}%`, height: '100%',
+                          background: selectedTeam.length === 3 ? '#22c55e' : 'linear-gradient(90deg, #ef4444, #f59e0b)',
+                          borderRadius: '2px', transition: 'width 0.3s',
+                        }} />
+                      </div>
+                      <span style={{ fontSize: '10px', color: '#64748b', marginTop: '4px', display: 'block' }}>
+                        {selectedTeam.length}/3 Selecionados
+                      </span>
+                    </div>
+                    <button onClick={confirmTeam} disabled={selectedTeam.length !== 3 || submitting} style={{
+                      padding: '8px 20px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                      background: selectedTeam.length === 3 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+                      border: selectedTeam.length === 3 ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                      color: selectedTeam.length === 3 ? '#f87171' : '#334155',
+                      cursor: selectedTeam.length === 3 ? 'pointer' : 'not-allowed',
                     }}>
-                      👁️ Ver Skills
+                      {selectedTeam.length === 3 ? 'Confirmar Time' : `Faltam ${3 - selectedTeam.length}`}
                     </button>
                   </div>
 
-                  {isSelected && <div className="selected-overlay">✓ SELECIONADO</div>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  {/* Pokemon Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+                    {starters.map(pokemon => {
+                      const isSelected = selectedTeam.find(p => p.id === pokemon.id);
+                      const isDisabled = !isSelected && selectedTeam.length >= 3;
 
-        {/* Right Panel - Pokemon Details */}
-        <div className="details-panel">
-          <div className="panel-header">
-            <div className="header-decoration left"></div>
-            <h2>DETALHES</h2>
-            <div className="header-decoration right"></div>
-          </div>
-
-          {displayPokemon ? (
-            <div className="pokemon-details-v2" style={{ '--detail-color': getTypeColor(displayPokemon.types) } as React.CSSProperties}>
-              <div className="detail-portrait">
-                <img src={getImage(displayPokemon.name)} alt={displayPokemon.name} />
-                <div className="portrait-ring"></div>
-              </div>
-
-              <h3 className="detail-name">{displayPokemon.name}</h3>
-              
-              <div className="detail-types">
-                {(displayPokemon.types || 'Normal').split(',').filter(t => t).map((type, i) => (
-                  <span 
-                    key={i} 
-                    className="detail-type-badge"
-                    style={{ backgroundColor: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777' }}
-                  >
-                    {TYPE_ICONS[type?.toLowerCase() || 'normal'] || '⭐'} {type || 'Normal'}
-                  </span>
-                ))}
-              </div>
-
-              <div className="detail-stats">
-                <div className="detail-stat">
-                  <span className="stat-icon">❤️</span>
-                  <span className="stat-name">Vida</span>
-                  <span className="stat-val">{displayPokemon.health}</span>
-                </div>
-              </div>
-
-              {displayPokemon.description && (
-                <p className="detail-description">{displayPokemon.description}</p>
-              )}
-
-              {/* Skills Preview */}
-              <div className="skills-preview">
-                <h4>⚔️ Habilidades</h4>
-                <div className="skills-list">
-                  {displayPokemon.moves && displayPokemon.moves.length > 0 ? (
-                    displayPokemon.moves.map((move, idx) => (
-                      <div key={move.id} className="skill-item">
-                        <div className="skill-header">
-                          <span className="skill-number">{idx + 1}</span>
-                          <span className="skill-name">{move.name}</span>
-                        </div>
-                        <div className="skill-cost">
-                          {renderEnergyCost(move.energyCost)}
-                        </div>
-                        <p className="skill-desc">{move.description}</p>
-                        <div className="skill-stats">
-                          {move.damage > 0 && (
-                            <span className="skill-damage">💥 {move.damage} dano</span>
+                      return (
+                        <div
+                          key={pokemon.id}
+                          style={{
+                            background: isSelected ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.03)',
+                            border: isSelected ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                            borderRadius: '8px', padding: '10px', cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            opacity: isDisabled ? 0.4 : 1, textAlign: 'center', transition: 'all 0.2s',
+                          }}
+                          onClick={() => !isDisabled && togglePokemon(pokemon)}
+                          onMouseEnter={() => setPreviewPokemon(pokemon)}
+                          onMouseLeave={() => setPreviewPokemon(null)}
+                        >
+                          {isSelected && (
+                            <div style={{
+                              fontSize: '10px', fontWeight: 700, color: '#f87171', marginBottom: '4px',
+                            }}>
+                              #{selectedTeam.findIndex(p => p.id === pokemon.id) + 1}
+                            </div>
                           )}
-                          {move.cooldown > 0 && (
-                            <span className="skill-cooldown">⏱️ {move.cooldown} turnos</span>
-                          )}
+                          <img src={getImage(pokemon.name)} alt={pokemon.name}
+                            style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', marginBottom: '6px' }} />
+                          <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
+                            {pokemon.name}
+                          </h4>
+                          <div style={{ display: 'flex', gap: '3px', justifyContent: 'center', marginBottom: '4px' }}>
+                            {pokemon.types.split(',').filter(t => t).map((type, i) => (
+                              <span key={i} style={{
+                                fontSize: '9px', fontWeight: 600, padding: '1px 6px', borderRadius: '3px',
+                                background: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777', color: '#fff',
+                              }}>
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                            HP {pokemon.health}
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="no-skills">
-                      <span>Clique em &quot;Ver Skills&quot; para detalhes</span>
+                      );
+                    })}
+                  </div>
+
+                  {/* Details Preview */}
+                  {displayPokemon && (
+                    <div style={{
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                      borderRadius: '8px', padding: '16px',
+                    }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#e2e8f0', marginBottom: '8px' }}>
+                        {displayPokemon.name} — Habilidades
+                      </h4>
+                      {displayPokemon.description && (
+                        <p style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '10px' }}>{displayPokemon.description}</p>
+                      )}
+                      {displayPokemon.moves && displayPokemon.moves.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {displayPokemon.moves.map((move, idx) => {
+                            const costs = parseEnergyCost(move.energyCost);
+                            return (
+                              <div key={move.id} style={{
+                                background: 'rgba(255,255,255,0.03)', borderRadius: '6px', padding: '8px',
+                                border: '1px solid rgba(255,255,255,0.04)',
+                              }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>
+                                    {idx + 1}. {move.name}
+                                  </span>
+                                  <div style={{ display: 'flex', gap: '6px', fontSize: '10px' }}>
+                                    {move.damage > 0 && (
+                                      <span style={{ color: '#f87171', fontWeight: 600 }}>{move.damage} DMG</span>
+                                    )}
+                                    {move.cooldown > 0 && (
+                                      <span style={{ color: '#64748b' }}>CD {move.cooldown}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '3px', marginBottom: '3px' }}>
+                                  {Object.entries(costs).map(([type, count]) => (
+                                    <span key={type} style={{
+                                      fontSize: '9px', fontWeight: 600, padding: '1px 5px', borderRadius: '3px',
+                                      background: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777', color: '#fff',
+                                    }}>
+                                      {count} {type}
+                                    </span>
+                                  ))}
+                                </div>
+                                <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
+                                  {move.description}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '10px', color: '#64748b' }}>
+                          Passe o mouse sobre um Pokémon para ver detalhes.
+                        </p>
+                      )}
                     </div>
                   )}
-                </div>
-              </div>
+                </>
+              )}
             </div>
-          ) : (
-            <div className="no-selection">
-              <div className="no-selection-icon">🎮</div>
-              <p>Passe o mouse sobre um Pokémon para ver seus detalhes e habilidades</p>
-            </div>
-          )}
-        </div>
+          </div>
+        </main>
+
+        <RightSidebar />
       </div>
 
       {/* Confirmation Modal */}
       {showConfirmation && (
-        <div className="confirmation-modal-overlay" onClick={() => setShowConfirmation(false)}>
-          <div className="confirmation-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>⚔️ CONFIRMAR TIME ⚔️</h2>
-            </div>
-            
-            <div className="modal-team-preview">
+        <div style={overlayStyle} onClick={() => setShowConfirmation(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#0f1428', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px', padding: '24px', maxWidth: '420px', width: '90%',
+          }}>
+            <h3 style={{ color: '#e2e8f0', fontSize: '14px', fontWeight: 700, marginBottom: '16px', textAlign: 'center' }}>
+              Confirmar Time
+            </h3>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '16px' }}>
               {selectedTeam.map((pokemon, idx) => (
-                <div key={pokemon.id} className="modal-team-member">
-                  <div className="member-portrait" style={{ borderColor: getTypeColor(pokemon.types) }}>
-                    <img src={getImage(pokemon.name)} alt={pokemon.name} />
+                <div key={pokemon.id} style={{ textAlign: 'center' }}>
+                  <div style={{
+                    width: '64px', height: '64px', borderRadius: '8px', overflow: 'hidden',
+                    border: `2px solid ${getTypeColor(pokemon.types)}`, marginBottom: '4px',
+                  }}>
+                    <img src={getImage(pokemon.name)} alt={pokemon.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
-                  <span className="member-number">{idx + 1}</span>
-                  <span className="member-name">{pokemon.name}</span>
+                  <span style={{ fontSize: '10px', color: '#94a3b8' }}>#{idx + 1}</span>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>{pokemon.name}</div>
                 </div>
               ))}
             </div>
-
-            <p className="modal-text">
-              Você está pronto para começar sua jornada com este time?
+            <p style={{ color: '#94a3b8', fontSize: '12px', textAlign: 'center', marginBottom: '16px' }}>
+              Pronto para começar sua jornada com este time?
             </p>
-
-            <div className="modal-actions">
-              <button 
-                className="modal-btn cancel" 
-                onClick={() => setShowConfirmation(false)}
-                disabled={submitting}
-              >
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button onClick={() => setShowConfirmation(false)} disabled={submitting} style={{
+                padding: '8px 20px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+                color: '#94a3b8', cursor: 'pointer',
+              }}>
                 Voltar
               </button>
-              <button 
-                className="modal-btn confirm" 
-                onClick={finalConfirm}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <span className="loading-dots"></span>
-                    Salvando...
-                  </>
-                ) : (
-                  <>
-                    🎮 COMEÇAR!
-                  </>
-                )}
+              <button onClick={finalConfirm} disabled={submitting} style={{
+                padding: '8px 20px', borderRadius: '6px', fontSize: '12px', fontWeight: 600,
+                background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)',
+                color: '#f87171', cursor: submitting ? 'not-allowed' : 'pointer',
+                opacity: submitting ? 0.5 : 1,
+              }}>
+                {submitting ? 'Salvando...' : 'Confirmar'}
               </button>
             </div>
           </div>

@@ -65,18 +65,18 @@ export default async function TrainerLadder() {
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
-              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">🎮 DISCORD</a>
+              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">DISCORD</a>
             </div>
           </div>
           <div className="header-banner">
-            <h1>⚡ POKEMON ARENA ⚡</h1>
+            <h1>POKEMON ARENA</h1>
           </div>
         </div>
 
         <LeftSidebar />
 
         <main className="center-content">
-          <h1 className="page-title">🏆 Trainer Ladder</h1>
+          <h1 className="page-title">Trainer Ladder</h1>
           <div className="breadcrumb">
             <Link href="/">Pokemon Arena</Link> &gt; 
             <Link href="/ladders">Ladders</Link> &gt; 
@@ -132,7 +132,7 @@ export default async function TrainerLadder() {
                         <td className="losses-cell">{trainer.losses}</td>
                         <td className="winrate-cell">{trainer.winRate}%</td>
                         <td className="streak-cell">
-                          {trainer.streak > 0 ? `🔥 ${trainer.streak}` : trainer.streak}
+                          {trainer.streak > 0 ? `${trainer.streak}` : trainer.streak}
                         </td>
                       </tr>
                     ))}

@@ -221,19 +221,7 @@ export default async function CharactersPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        {type === 'fire' ? '🔥' : 
-                         type === 'water' ? '💧' :
-                         type === 'grass' ? '🌿' :
-                         type === 'electric' ? '⚡' :
-                         type === 'psychic' ? '🔮' :
-                         type === 'ghost' ? '👻' :
-                         type === 'dragon' ? '🐲' :
-                         type === 'dark' ? '🌑' :
-                         type === 'fairy' ? '✨' :
-                         type === 'fighting' ? '👊' :
-                         type === 'flying' ? '🪽' :
-                         type === 'ice' ? '❄️' :
-                         type === 'poison' ? '☠️' : '⭐'}
+                        {type.charAt(0).toUpperCase()}
                       </div>
                       <div className="class-info">
                         <strong style={{ color: color, textTransform: 'capitalize' }}>{type}</strong>

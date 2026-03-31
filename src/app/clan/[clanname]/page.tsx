@@ -131,7 +131,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
             <div className="content-box-body">
               <div className="leadership-grid">
                 <div className="leader-card leader-main">
-                  <div className="leader-avatar">👑</div>
+                  <div className="leader-avatar">L</div>
                   <div className="leader-info">
                     <span className="leader-role">Leader</span>
                     <Link href={`/profile/${clanData.leader}`} className="leader-name">
@@ -141,7 +141,7 @@ export default async function ClanPage({ params }: ClanPageProps) {
                 </div>
                 {clanData.coLeaders.map((coLeader, i) => (
                   <div key={i} className="leader-card leader-co">
-                    <div className="leader-avatar">⭐</div>
+                    <div className="leader-avatar">CL</div>
                     <div className="leader-info">
                       <span className="leader-role">Co-Leader</span>
                       <Link href={`/profile/${coLeader}`} className="leader-name">
