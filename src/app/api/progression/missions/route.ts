@@ -12,7 +12,6 @@ import {
   pickWeeklyQuests,
   getEndOfDayUTC,
   getEndOfWeekUTC,
-  levelFromTotalXP,
 } from '@/lib/progression';
 
 /**
@@ -163,7 +162,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
     if (!quest.completed) throw APIErrors.badRequest('Quest not yet completed');
 
     // Grant rewards
-    const updates: Record<string, any> = {
+    const updates: Record<string, { increment: number }> = {
       totalXP: { increment: quest.rewardXP },
       experience: { increment: quest.rewardXP },
     };

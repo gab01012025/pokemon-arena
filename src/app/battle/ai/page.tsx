@@ -124,6 +124,11 @@ export default function AIBattlePage() {
   playerTeamRef.current = playerTeam;
   opponentTeamRef.current = opponentTeam;
 
+  // Ref to always call the latest handleEndTurn from timer (avoids stale closure)
+  const handleEndTurnRef = useRef<() => void>(() => {});
+  // Guard against timer + manual end-turn firing concurrently
+  const isExecutingRef = useRef(false);
+
   // ==================== DATA LOADING ====================
   useEffect(() => {
     // Set random opponent data client-side only (avoids hydration mismatch)
@@ -221,13 +226,12 @@ export default function AIBattlePage() {
     if (phase !== 'player1-turn') return;
     const int = setInterval(() => setTimer(t => {
       if (t <= 0) {
-        handleEndTurn();
+        handleEndTurnRef.current();
         return 100;
       }
       return t - 1;
     }), 600);
     return () => clearInterval(int);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   // ==================== LOG ====================
@@ -991,8 +995,7 @@ export default function AIBattlePage() {
         const counterEffect = def.statusEffects.find(e => e.type === 'counter');
         if (counterEffect && finalDamage > 0 && !isExposed) {
           const counterDmg = Math.floor(finalDamage * ((counterEffect.value || 30) / 100));
-          const atkNewHp = Math.max(0, atk.hp - counterDmg);
-          setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: atkNewHp } : p));
+          setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: Math.max(0, p.hp - counterDmg) } : p));
           addLog(`${def.name}'s Counter reflects ${counterDmg} damage back to ${atk.name}!`, 'damage');
         }
 
@@ -1000,8 +1003,7 @@ export default function AIBattlePage() {
         const reflectEffect = def.statusEffects.find(e => e.type === 'reflect');
         if (reflectEffect && finalDamage > 0 && !isExposed) {
           const reflectDmg = Math.floor(finalDamage * ((reflectEffect.value || 25) / 100));
-          const atkNewHp = Math.max(0, atk.hp - reflectDmg);
-          setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: atkNewHp } : p));
+          setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: Math.max(0, p.hp - reflectDmg) } : p));
           addLog(`${def.name}'s Reflect returns ${reflectDmg} damage to ${atk.name}!`, 'damage');
         }
 
@@ -1123,6 +1125,7 @@ export default function AIBattlePage() {
 
               if (move.statusEffect.type === 'steal-energy') {
                 const energyToSteal = move.statusEffect.value || 1;
+                let lastStolen = 0;
                 if (isPlayer) {
                   // Player attacking: steal from AI, give to player
                   setAiEnergy(prev => {
@@ -1132,10 +1135,11 @@ export default function AIBattlePage() {
                       if (stolen >= energyToSteal) break;
                       if (e[t] > 0) { e[t]--; stolen++; }
                     }
+                    lastStolen = stolen;
                     if (stolen > 0) addLog(`${atk.name} stole ${stolen} energy!`, 'status');
                     return e;
                   });
-                  setEnergy(prev => ({ ...prev, colorless: prev.colorless + energyToSteal }));
+                  setEnergy(prev => ({ ...prev, colorless: prev.colorless + lastStolen }));
                 } else {
                   // AI attacking: steal from player, give to AI
                   setEnergy(prev => {
@@ -1145,10 +1149,11 @@ export default function AIBattlePage() {
                       if (stolen >= energyToSteal) break;
                       if (e[t] > 0) { e[t]--; stolen++; }
                     }
+                    lastStolen = stolen;
                     if (stolen > 0) addLog(`${atk.name} stole ${stolen} energy!`, 'status');
                     return e;
                   });
-                  setAiEnergy(prev => ({ ...prev, colorless: prev.colorless + energyToSteal }));
+                  setAiEnergy(prev => ({ ...prev, colorless: prev.colorless + lastStolen }));
                 }
               }
 
@@ -1268,6 +1273,7 @@ export default function AIBattlePage() {
 
                 if (move.statusEffect!.type === 'steal-energy') {
                   const energyToSteal = move.statusEffect!.value || 1;
+                  let lastStolen = 0;
                   if (isPlayer) {
                     setAiEnergy(prev => {
                       const e = { ...prev };
@@ -1276,10 +1282,11 @@ export default function AIBattlePage() {
                         if (stolen >= energyToSteal) break;
                         if (e[t] > 0) { e[t]--; stolen++; }
                       }
+                      lastStolen = stolen;
                       if (stolen > 0) addLog(`${atk.name} stole ${stolen} energy!`, 'status');
                       return e;
                     });
-                    setEnergy(prev => ({ ...prev, colorless: prev.colorless + energyToSteal }));
+                    setEnergy(prev => ({ ...prev, colorless: prev.colorless + lastStolen }));
                   } else {
                     setEnergy(prev => {
                       const e = { ...prev };
@@ -1288,10 +1295,11 @@ export default function AIBattlePage() {
                         if (stolen >= energyToSteal) break;
                         if (e[t] > 0) { e[t]--; stolen++; }
                       }
+                      lastStolen = stolen;
                       if (stolen > 0) addLog(`${atk.name} stole ${stolen} energy!`, 'status');
                       return e;
                     });
-                    setAiEnergy(prev => ({ ...prev, colorless: prev.colorless + energyToSteal }));
+                    setAiEnergy(prev => ({ ...prev, colorless: prev.colorless + lastStolen }));
                   }
                 }
 
@@ -1336,6 +1344,7 @@ export default function AIBattlePage() {
     if (!aliveOpp.length || !alivePly.length) return;
 
     // AI gets energy like the player
+    const startingAiEnergy = { ...aiEnergy };
     let currentAiEnergy = { ...aiEnergy };
 
     for (let i = 0; i < opponentTeamRef.current.length; i++) {
@@ -1393,13 +1402,23 @@ export default function AIBattlePage() {
     }
 
     console.log('[ENERGY] AI spend (end AI turn) — final aiEnergy:', JSON.stringify(currentAiEnergy));
-    setAiEnergy(currentAiEnergy);
+    // Apply spending as a diff to preserve any steal-energy state updates from executeAction
+    setAiEnergy(prev => {
+      const result = { ...prev };
+      for (const t of ALL_ENERGY_TYPES) {
+        const spent = startingAiEnergy[t] - currentAiEnergy[t];
+        if (spent > 0) result[t] = Math.max(0, result[t] - spent);
+      }
+      return result;
+    });
   };
 
   // ==================== TURN MANAGEMENT ====================
   // Flow: player1-turn → executing → player2-turn → executing → player1-turn
   const handleEndTurn = async () => {
     if (phase !== 'player1-turn') return;
+    if (isExecutingRef.current) return; // Prevent double-fire (timer + manual click)
+    isExecutingRef.current = true;
 
     // === Phase 1: Execute player actions ===
     setPhase('executing');
@@ -1427,6 +1446,7 @@ export default function AIBattlePage() {
     if (opponentTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleVictory();
       setPhase('victory');
+      isExecutingRef.current = false;
       return;
     }
 
@@ -1443,12 +1463,16 @@ export default function AIBattlePage() {
     if (playerTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleDefeat();
       setPhase('defeat');
+      isExecutingRef.current = false;
       return;
     }
 
     // === Phase 3: New turn ===
+    isExecutingRef.current = false;
     startNewTurn();
   };
+  // Keep ref updated so timer always calls latest handleEndTurn
+  handleEndTurnRef.current = handleEndTurn;
 
   const startNewTurn = () => {
     const newTurn = turn + 1;
@@ -1459,8 +1483,23 @@ export default function AIBattlePage() {
     setPlayerTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
     setOpponentTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
 
-    setPlayerTeam(prev => processStatusEffects(prev, addLog));
-    setOpponentTeam(prev => processStatusEffects(prev, addLog));
+    // Process status effects (burn, poison, etc.) and check for deaths
+    const newPlayerState = processStatusEffects(playerTeamRef.current, addLog);
+    const newOpponentState = processStatusEffects(opponentTeamRef.current, addLog);
+    setPlayerTeam(newPlayerState);
+    setOpponentTeam(newOpponentState);
+
+    // Check if status effects killed all pokemon on either side
+    if (newOpponentState.filter(p => p.hp > 0).length === 0) {
+      handleBattleVictory();
+      setPhase('victory');
+      return;
+    }
+    if (newPlayerState.filter(p => p.hp > 0).length === 0) {
+      handleBattleDefeat();
+      setPhase('defeat');
+      return;
+    }
 
     if (playerTrainer) {
       playerTrainer.applyPassive({
@@ -1522,6 +1561,7 @@ export default function AIBattlePage() {
     setEnergy({ ...EMPTY_ENERGY });
     setAiEnergy({ ...EMPTY_ENERGY });
     setTurn(1);
+    setTimer(100);
     setSelectedActions([]);
     setUsedItemThisTurn(false);
     setBattleLog([]);
@@ -1630,7 +1670,7 @@ export default function AIBattlePage() {
           battleLog={battleLog}
           evolvableList={getEvolvableList()}
           onEvolve={handleEvolveClick}
-          onSurrender={() => setPhase('defeat')}
+          onSurrender={() => { handleBattleDefeat(); setPhase('defeat'); }}
           usedItemThisTurn={usedItemThisTurn}
         />
       </div>
