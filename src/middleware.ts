@@ -19,6 +19,8 @@ const protectedRoutes = [
   '/profile',
   '/settings',
   '/battle',
+  '/admin',
+  '/multiplayer',
 ];
 
 // Rotas que só podem ser acessadas sem autenticação

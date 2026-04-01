@@ -131,6 +131,13 @@ function MultiplayerPageContent() {
     }
   }, [actions]);
 
+  // Auto-connect on page load
+  useEffect(() => {
+    if (!state.isConnected && !state.isConnecting && !state.connectionError) {
+      handleConnect();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Join queue handler
   const handleJoinQueue = useCallback(() => {
     if (selectedTeam.length !== 3) return;
