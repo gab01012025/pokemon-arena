@@ -146,13 +146,24 @@ class GameSocketClient {
   public trainerId: string | null = null;
 
   connect(serverUrl?: string): Promise<void> {
-    const url = (serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || 'http://localhost:3010').trim();
+    const defaultUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'http://localhost:3010'
+      : 'https://game-server-production-3440.up.railway.app';
+    const url = (serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || defaultUrl).trim();
 
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
         resolve();
         return;
       }
+
+      // Clean up any existing disconnected socket
+      if (this.socket) {
+        this.socket.removeAllListeners();
+        this.socket.disconnect();
+        this.socket = null;
+      }
+      this.reconnectAttempts = 0;
 
       this.socket = io(url, {
         transports: ['websocket', 'polling'],
@@ -180,7 +191,8 @@ class GameSocketClient {
         logger.error(`Connection error: ${error.message}`);
         this.reconnectAttempts++;
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          reject(new Error('Failed to connect to game server'));
+          this.emitLocal('connectionChange', { connected: false, reason: 'Server unreachable' });
+          reject(new Error('Failed to connect to game server. Please try again later.'));
         }
       });
 
