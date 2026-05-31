@@ -5,6 +5,7 @@ import { NewsFeed } from '@/components/NewsFeed';
 import { DiscordInviteCard } from '@/components/DiscordWidget';
 import { ScrollAnimations } from '@/components/ScrollAnimations';
 import { OnlineCounter } from '@/components/OnlineCounter';
+import { MobileNav } from '@/components/MobileNav';
 
 export default function Home() {
   return (
@@ -28,6 +29,7 @@ export default function Home() {
             <Link href="/login" className="landing-btn-login">Login</Link>
             <Link href="/register" className="landing-btn-register">Register</Link>
           </div>
+          <MobileNav />
         </div>
       </nav>
 
@@ -35,6 +37,12 @@ export default function Home() {
       <section className="landing-hero">
         <div className="landing-hero-bg" />
         <div className="landing-hero-particles">
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
           <div className="landing-particle" />
           <div className="landing-particle" />
           <div className="landing-particle" />
@@ -52,6 +60,38 @@ export default function Home() {
           <p className="landing-hero-subtitle">
             Strategic turn-based battles. Build your team. Conquer the ladder.
           </p>
+
+          {/* Hero Pokemon Showcase */}
+          <div className="landing-hero-pokemon">
+            <div className="landing-hero-poke landing-hero-poke-left">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
+                alt="Charizard"
+                width={140}
+                height={140}
+                unoptimized
+              />
+            </div>
+            <div className="landing-hero-poke landing-hero-poke-center">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"
+                alt="Mewtwo"
+                width={160}
+                height={160}
+                unoptimized
+              />
+            </div>
+            <div className="landing-hero-poke landing-hero-poke-right">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png"
+                alt="Blastoise"
+                width={140}
+                height={140}
+                unoptimized
+              />
+            </div>
+          </div>
+
           <div className="landing-hero-actions">
             <Link href="/play" className="landing-cta-primary">
               <span className="landing-cta-glow" />
