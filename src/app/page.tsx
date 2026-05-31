@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { AccountBox } from '@/components/auth/AccountBox';
 import { NewsFeed } from '@/components/NewsFeed';
 import { DiscordInviteCard } from '@/components/DiscordWidget';
+import { ScrollAnimations } from '@/components/ScrollAnimations';
+import { OnlineCounter } from '@/components/OnlineCounter';
 
 export default function Home() {
   return (
@@ -30,7 +33,18 @@ export default function Home() {
       {/* Hero Section */}
       <section className="landing-hero">
         <div className="landing-hero-bg" />
+        <div className="landing-hero-particles">
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+          <div className="landing-particle" />
+        </div>
         <div className="landing-hero-content">
+          <div className="landing-hero-badge">
+            <OnlineCounter />
+          </div>
           <h1 className="landing-hero-title">
             POKEMON<br /><span className="landing-hero-accent">ARENA</span>
           </h1>
@@ -39,6 +53,7 @@ export default function Home() {
           </p>
           <div className="landing-hero-actions">
             <Link href="/play" className="landing-cta-primary">
+              <span className="landing-cta-glow" />
               Play Now
             </Link>
             <Link href="/register" className="landing-cta-secondary">
@@ -65,7 +80,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="landing-features">
+      <section className="landing-features scroll-reveal">
         <h2 className="landing-section-title">Choose Your Path</h2>
         <p className="landing-section-subtitle">Multiple ways to prove your skills as a Pokemon trainer</p>
         <div className="landing-features-grid">
@@ -93,7 +108,7 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="landing-how">
+      <section className="landing-how scroll-reveal">
         <h2 className="landing-section-title">How It Works</h2>
         <div className="landing-how-steps">
           <div className="landing-step">
@@ -117,36 +132,90 @@ export default function Home() {
       </section>
 
       {/* Starter Pokemon Showcase */}
-      <section className="landing-showcase">
+      <section className="landing-showcase scroll-reveal">
         <h2 className="landing-section-title">Starter Pokemon</h2>
         <p className="landing-section-subtitle">Begin your journey with these classic partners</p>
         <div className="landing-pokemon-grid">
-          <div className="landing-pokemon-card landing-pokemon-fire">
+          <div className="landing-pokemon-card landing-pokemon-fire scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png"
+                alt="Charmander"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Fire</div>
             <div className="landing-pokemon-name">Charmander</div>
             <div className="landing-pokemon-desc">A fierce fire-type with powerful offensive moves</div>
           </div>
-          <div className="landing-pokemon-card landing-pokemon-water">
+          <div className="landing-pokemon-card landing-pokemon-water scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png"
+                alt="Squirtle"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Water</div>
             <div className="landing-pokemon-name">Squirtle</div>
             <div className="landing-pokemon-desc">A sturdy water-type with strong defensive options</div>
           </div>
-          <div className="landing-pokemon-card landing-pokemon-grass">
+          <div className="landing-pokemon-card landing-pokemon-grass scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"
+                alt="Bulbasaur"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Grass</div>
             <div className="landing-pokemon-name">Bulbasaur</div>
             <div className="landing-pokemon-desc">A versatile grass-type with healing and poison</div>
           </div>
-          <div className="landing-pokemon-card landing-pokemon-electric">
+          <div className="landing-pokemon-card landing-pokemon-electric scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png"
+                alt="Pikachu"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Electric</div>
             <div className="landing-pokemon-name">Pikachu</div>
             <div className="landing-pokemon-desc">A fast electric-type with paralyzing attacks</div>
           </div>
-          <div className="landing-pokemon-card landing-pokemon-normal">
+          <div className="landing-pokemon-card landing-pokemon-normal scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png"
+                alt="Eevee"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Normal</div>
             <div className="landing-pokemon-name">Eevee</div>
             <div className="landing-pokemon-desc">An adaptable Pokemon with diverse evolution potential</div>
           </div>
-          <div className="landing-pokemon-card landing-pokemon-normal2">
+          <div className="landing-pokemon-card landing-pokemon-normal2 scroll-reveal-item">
+            <div className="landing-pokemon-sprite">
+              <Image
+                src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/52.png"
+                alt="Meowth"
+                width={120}
+                height={120}
+                unoptimized
+              />
+            </div>
             <div className="landing-pokemon-type">Normal</div>
             <div className="landing-pokemon-name">Meowth</div>
             <div className="landing-pokemon-desc">A tricky Pokemon that disrupts enemy strategies</div>
@@ -155,7 +224,7 @@ export default function Home() {
       </section>
 
       {/* News & Community Section */}
-      <section className="landing-news-section">
+      <section className="landing-news-section scroll-reveal">
         <h2 className="landing-section-title">Latest News</h2>
         <p className="landing-section-subtitle">Balance updates, new features, and community events</p>
         <NewsFeed limit={4} />
@@ -204,6 +273,9 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll Animations Controller */}
+      <ScrollAnimations />
     </div>
   );
 }
