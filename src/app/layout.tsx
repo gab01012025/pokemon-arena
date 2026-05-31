@@ -4,6 +4,7 @@ import "./globals.css";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastProvider";
 import { SkipLink } from "@/components/SkipLink";
+import { SoundProvider, SoundControls } from "@/components/SoundManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,11 +49,14 @@ export default function RootLayout({
           overflow: 'hidden',
         }} />
         <ErrorBoundary>
-          <ToastProvider />
-          <SkipLink />
-          <main id="main-content">
-            {children}
-          </main>
+          <SoundProvider>
+            <ToastProvider />
+            <SkipLink />
+            <main id="main-content">
+              {children}
+            </main>
+            <SoundControls />
+          </SoundProvider>
         </ErrorBoundary>
       </body>
     </html>

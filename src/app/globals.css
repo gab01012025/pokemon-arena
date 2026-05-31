@@ -11035,3 +11035,106 @@ input[type="checkbox"] {
 .landing-pokemon-card:hover::before {
   transform: rotate(180deg);
 }
+
+/* ===== Sound Controls ===== */
+.sound-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.sound-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(15, 20, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.sound-toggle-btn:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #e2e8f0;
+  transform: scale(1.1);
+}
+
+.sound-panel {
+  position: absolute;
+  bottom: 50px;
+  right: 0;
+  background: rgba(15, 20, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 200px;
+  backdrop-filter: blur(12px);
+  animation: sound-panel-in 0.2s ease;
+}
+
+@keyframes sound-panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sound-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sound-panel-row:last-child {
+  margin-bottom: 0;
+}
+
+.sound-panel-row label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  min-width: 40px;
+}
+
+.sound-switch {
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sound-switch-on {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.sound-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+}
+
+.sound-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: pointer;
+}

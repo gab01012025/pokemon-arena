@@ -19,9 +19,10 @@ export default function Home() {
           <div className="landing-nav-links">
             <Link href="/play" className="landing-nav-link">Play</Link>
             <Link href="/multiplayer" className="landing-nav-link">PvP Online</Link>
+            <Link href="/spectate" className="landing-nav-link">Spectate</Link>
+            <Link href="/clan-wars" className="landing-nav-link">Clan Wars</Link>
             <Link href="/ladders" className="landing-nav-link">Ladders</Link>
-            <Link href="/battle-pass" className="landing-nav-link">Battle Pass</Link>
-            <Link href="/pokedex" className="landing-nav-link">Pokedex</Link>
+            <Link href="/tutorial" className="landing-nav-link">Tutorial</Link>
           </div>
           <div className="landing-nav-auth">
             <Link href="/login" className="landing-btn-login">Login</Link>

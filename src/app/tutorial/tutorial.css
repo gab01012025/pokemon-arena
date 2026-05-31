@@ -1,0 +1,359 @@
+.tut-page {
+  min-height: 100vh;
+  background: #080a14;
+  color: #e2e8f0;
+}
+
+.tut-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(15, 20, 40, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.tut-nav-back {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tut-nav-back:hover { color: #e2e8f0; }
+
+.tut-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tut-progress-bar {
+  width: 120px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tut-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.tut-progress-text {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tut-skip-btn {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.tut-skip-btn:hover { color: #94a3b8; }
+
+.tut-content {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+/* Dots */
+.tut-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.tut-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+}
+
+.tut-dot-active {
+  border-color: #ef4444;
+  background: #ef4444;
+  transform: scale(1.3);
+}
+
+.tut-dot-done {
+  border-color: #22c55e;
+  background: #22c55e;
+}
+
+/* Step */
+.tut-step {
+  animation: tut-fadeIn 0.4s ease;
+}
+
+@keyframes tut-fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tut-step-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.tut-step-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tut-step-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tut-step-body {
+  background: rgba(15, 20, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.tut-step-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.tut-step-image img {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+  animation: tut-float 3s ease-in-out infinite;
+}
+
+@keyframes tut-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.tut-step-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* Tips */
+.tut-tips {
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.tut-tips-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.tut-tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tut-tip-item {
+  position: relative;
+  padding: 6px 0 6px 20px;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.tut-tip-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+/* Energy Grid */
+.tut-energy-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tut-energy-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.tut-energy-orb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.tut-energy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tut-energy-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.tut-energy-desc {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Status Grid */
+.tut-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tut-status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.tut-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tut-status-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.tut-status-desc {
+  font-size: 10px;
+  color: #64748b;
+  display: none;
+}
+
+/* Nav Buttons */
+.tut-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  gap: 12px;
+}
+
+.tut-btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tut-btn-prev {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.tut-btn-prev:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.tut-btn-prev:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.tut-btn-next {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  margin-left: auto;
+}
+
+.tut-btn-next:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.tut-btn-play {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  margin-left: auto;
+}
+
+.tut-btn-play:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+@media (max-width: 768px) {
+  .tut-step-title {
+    font-size: 22px;
+  }
+
+  .tut-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tut-step-body {
+    padding: 20px;
+  }
+}
