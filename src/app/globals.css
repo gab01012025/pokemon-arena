@@ -10231,21 +10231,44 @@ input[type="checkbox"] {
   padding: 100px 24px;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+}
+
+.landing-features::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
 }
 
 .landing-section-title {
-  font-size: clamp(24px, 5vw, 36px);
+  font-size: clamp(26px, 5vw, 40px);
   font-weight: 900;
   color: #ffffff;
   text-align: center;
   margin-bottom: 12px;
   letter-spacing: -0.5px;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+  position: relative;
+}
+
+.landing-section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+  margin: 12px auto 0;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .landing-section-subtitle {
   font-size: 16px;
-  color: #64748b;
+  color: #8892b0;
   text-align: center;
   margin-bottom: 48px;
 }
@@ -10257,63 +10280,87 @@ input[type="checkbox"] {
 }
 
 .landing-feature-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 12, 30, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.1);
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 36px 24px;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: block;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #FFD700, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .landing-feature-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 215, 0, 0.3);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(255, 215, 0, 0.08);
+  background: rgba(15, 18, 40, 0.9);
+  border-color: rgba(255, 215, 0, 0.4);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(255, 215, 0, 0.12), 0 0 30px rgba(255, 215, 0, 0.05);
   text-decoration: none;
 }
 
+.landing-feature-card:hover::before {
+  opacity: 1;
+}
+
 .landing-feature-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
-  margin-bottom: 20px;
+  margin: 0 auto 20px;
   color: white;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .landing-feature-icon-pvp {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
 }
 
 .landing-feature-icon-ai {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
 }
 
 .landing-feature-icon-team {
   background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
 }
 
 .landing-feature-icon-rank {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
 }
 
 .landing-feature-card h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #ffffff;
   margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
 }
 
 .landing-feature-card p {
   font-size: 14px;
-  color: #64748b;
+  color: #8892b0;
   line-height: 1.6;
 }
 
@@ -10322,6 +10369,19 @@ input[type="checkbox"] {
   padding: 80px 24px 100px;
   max-width: 1000px;
   margin: 0 auto;
+  position: relative;
+}
+
+.landing-how::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.03) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .landing-how-steps {
@@ -10330,47 +10390,61 @@ input[type="checkbox"] {
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .landing-step {
   flex: 1;
   min-width: 200px;
   text-align: center;
-  padding: 24px 16px;
+  padding: 28px 20px;
+  background: rgba(10, 12, 30, 0.5);
+  border: 1px solid rgba(255, 215, 0, 0.08);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.landing-step:hover {
+  border-color: rgba(255, 215, 0, 0.25);
+  background: rgba(15, 18, 40, 0.7);
+  transform: translateY(-4px);
 }
 
 .landing-step-number {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
-  border: 2px solid rgba(239, 68, 68, 0.3);
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.05) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.4);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: #ef4444;
+  color: #FFD700;
   margin: 0 auto 16px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
 }
 
 .landing-step h3 {
   font-size: 17px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .landing-step p {
   font-size: 14px;
-  color: #64748b;
+  color: #8892b0;
   line-height: 1.5;
 }
 
 .landing-step-arrow {
-  color: rgba(255, 255, 255, 0.15);
+  color: #FFD700;
   font-size: 28px;
-  margin-top: 40px;
+  margin-top: 50px;
+  opacity: 0.5;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 /* Starter Pokemon Showcase */
@@ -10378,12 +10452,13 @@ input[type="checkbox"] {
   padding: 80px 24px 100px;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
 }
 
 .landing-pokemon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .landing-pokemon-card {
@@ -10391,63 +10466,96 @@ input[type="checkbox"] {
   padding: 28px 20px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-pokemon-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.05) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .landing-pokemon-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 215, 0, 0.08);
+}
+
+.landing-pokemon-card:hover::after {
+  opacity: 1;
+}
+
+.landing-pokemon-sprite {
+  transition: transform 0.3s ease;
+}
+
+.landing-pokemon-card:hover .landing-pokemon-sprite {
+  transform: scale(1.1) translateY(-5px);
 }
 
 .landing-pokemon-fire {
-  background: linear-gradient(180deg, rgba(240, 128, 48, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
-  border-color: rgba(240, 128, 48, 0.2);
+  background: linear-gradient(180deg, rgba(240, 128, 48, 0.15) 0%, rgba(10, 12, 30, 0.8) 100%);
+  border-color: rgba(240, 128, 48, 0.25);
 }
+.landing-pokemon-fire:hover { border-color: rgba(240, 128, 48, 0.6); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px rgba(240, 128, 48, 0.15); }
 
 .landing-pokemon-water {
-  background: linear-gradient(180deg, rgba(104, 144, 240, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
-  border-color: rgba(104, 144, 240, 0.2);
+  background: linear-gradient(180deg, rgba(104, 144, 240, 0.15) 0%, rgba(10, 12, 30, 0.8) 100%);
+  border-color: rgba(104, 144, 240, 0.25);
 }
+.landing-pokemon-water:hover { border-color: rgba(104, 144, 240, 0.6); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px rgba(104, 144, 240, 0.15); }
 
 .landing-pokemon-grass {
-  background: linear-gradient(180deg, rgba(120, 200, 80, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
-  border-color: rgba(120, 200, 80, 0.2);
+  background: linear-gradient(180deg, rgba(120, 200, 80, 0.15) 0%, rgba(10, 12, 30, 0.8) 100%);
+  border-color: rgba(120, 200, 80, 0.25);
 }
+.landing-pokemon-grass:hover { border-color: rgba(120, 200, 80, 0.6); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px rgba(120, 200, 80, 0.15); }
 
 .landing-pokemon-electric {
-  background: linear-gradient(180deg, rgba(248, 208, 48, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
-  border-color: rgba(248, 208, 48, 0.2);
+  background: linear-gradient(180deg, rgba(248, 208, 48, 0.15) 0%, rgba(10, 12, 30, 0.8) 100%);
+  border-color: rgba(248, 208, 48, 0.25);
 }
+.landing-pokemon-electric:hover { border-color: rgba(248, 208, 48, 0.6); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 25px rgba(248, 208, 48, 0.15); }
 
 .landing-pokemon-normal {
-  background: linear-gradient(180deg, rgba(168, 168, 120, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(168, 168, 120, 0.12) 0%, rgba(10, 12, 30, 0.8) 100%);
   border-color: rgba(168, 168, 120, 0.2);
 }
+.landing-pokemon-normal:hover { border-color: rgba(168, 168, 120, 0.5); }
 
 .landing-pokemon-normal2 {
-  background: linear-gradient(180deg, rgba(168, 168, 120, 0.12) 0%, rgba(15, 20, 40, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(168, 168, 120, 0.12) 0%, rgba(10, 12, 30, 0.8) 100%);
   border-color: rgba(168, 168, 120, 0.2);
 }
+.landing-pokemon-normal2:hover { border-color: rgba(168, 168, 120, 0.5); }
 
 .landing-pokemon-type {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #94a3b8;
+  letter-spacing: 1.5px;
+  color: #FFD700;
   margin-bottom: 8px;
 }
 
 .landing-pokemon-name {
   font-size: 20px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .landing-pokemon-desc {
   font-size: 12px;
-  color: #64748b;
+  color: #8892b0;
   line-height: 1.4;
 }
 
@@ -10456,6 +10564,7 @@ input[type="checkbox"] {
   padding: 80px 24px;
   max-width: 1000px;
   margin: 0 auto;
+  position: relative;
 }
 
 .landing-community-grid {
@@ -10483,46 +10592,49 @@ input[type="checkbox"] {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 28px;
+  padding: 14px 32px;
   background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
   color: white;
   font-size: 15px;
   font-weight: 600;
-  border-radius: 10px;
+  border-radius: 50px;
   text-decoration: none;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.2);
 }
 
 .landing-discord-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(88, 101, 242, 0.4);
   color: white;
   text-decoration: none;
 }
 
 .landing-link-subtle {
-  color: #64748b;
+  color: #FFD700;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
 
 .landing-link-subtle:hover {
-  color: #e2e8f0;
+  color: #FFA500;
   text-decoration: none;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .landing-community-account .sidebar-box {
-  background: rgba(15, 20, 40, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 12, 30, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.1);
   border-radius: 16px;
 }
 
 /* Footer */
 .landing-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 215, 0, 0.1);
   padding: 40px 24px;
+  background: rgba(5, 5, 15, 0.5);
 }
 
 .landing-footer-inner {
@@ -10539,8 +10651,8 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 700;
+  color: #FFD700;
   font-size: 14px;
 }
 
@@ -10550,7 +10662,7 @@ input[type="checkbox"] {
 }
 
 .landing-footer-links a {
-  color: #475569;
+  color: #64748b;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
@@ -10558,13 +10670,13 @@ input[type="checkbox"] {
 }
 
 .landing-footer-links a:hover {
-  color: #e2e8f0;
+  color: #FFD700;
   text-decoration: none;
 }
 
 .landing-footer-copy {
   font-size: 12px;
-  color: #334155;
+  color: #475569;
 }
 
 /* News Section */
@@ -10584,18 +10696,19 @@ input[type="checkbox"] {
 .news-feed-item {
   display: block;
   padding: 20px 24px;
-  background: rgba(15, 20, 40, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(10, 12, 30, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.06);
   border-radius: 12px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .news-feed-item:hover {
-  background: rgba(20, 28, 58, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+  background: rgba(15, 18, 40, 0.9);
+  border-color: rgba(255, 215, 0, 0.25);
+  transform: translateY(-3px);
   text-decoration: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .news-feed-item-header {
@@ -10912,9 +11025,10 @@ input[type="checkbox"] {
 
 .landing-float-sprite {
   position: absolute;
-  opacity: 0.12;
-  filter: grayscale(0.4) brightness(1.3);
-  animation: spriteFloat 20s linear infinite;
+  opacity: 0.18;
+  filter: grayscale(0.2) brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 0.1));
+  animation: spriteFloat 25s linear infinite;
+  pointer-events: none;
 }
 
 @keyframes spriteFloat {
@@ -11472,65 +11586,69 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: center;
   gap: 0;
-  margin: 24px 0 32px;
+  margin: 32px 0 44px;
   position: relative;
 }
 
 .landing-hero-poke {
   position: relative;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .landing-hero-poke img {
-  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.15));
+}
+
+.landing-hero-poke:hover img {
+  filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 35px rgba(255, 215, 0, 0.4));
 }
 
 .landing-hero-poke-left {
-  transform: translateX(20px);
+  transform: translateX(25px);
   z-index: 1;
   animation: hero-poke-float-left 4s ease-in-out infinite;
 }
 
 .landing-hero-poke-center {
   z-index: 2;
-  transform: scale(1.1);
+  transform: scale(1.2);
   animation: hero-poke-float-center 3.5s ease-in-out infinite;
 }
 
 .landing-hero-poke-right {
-  transform: translateX(-20px);
+  transform: translateX(-25px);
   z-index: 1;
   animation: hero-poke-float-right 4s ease-in-out infinite;
 }
 
 @keyframes hero-poke-float-left {
-  0%, 100% { transform: translateX(20px) translateY(0); }
-  50% { transform: translateX(20px) translateY(-10px); }
+  0%, 100% { transform: translateX(25px) translateY(0) rotate(-2deg); }
+  50% { transform: translateX(25px) translateY(-14px) rotate(2deg); }
 }
 
 @keyframes hero-poke-float-center {
-  0%, 100% { transform: scale(1.1) translateY(0); }
-  50% { transform: scale(1.1) translateY(-12px); }
+  0%, 100% { transform: scale(1.2) translateY(0); }
+  50% { transform: scale(1.2) translateY(-16px); }
 }
 
 @keyframes hero-poke-float-right {
-  0%, 100% { transform: translateX(-20px) translateY(0); }
-  50% { transform: translateX(-20px) translateY(-10px); }
+  0%, 100% { transform: translateX(-25px) translateY(0) rotate(2deg); }
+  50% { transform: translateX(-25px) translateY(-14px) rotate(-2deg); }
 }
 
 @media (max-width: 768px) {
   .landing-hero-poke-left img,
   .landing-hero-poke-right img {
-    width: 90px !important;
-    height: 90px !important;
+    width: 100px !important;
+    height: 100px !important;
   }
 
   .landing-hero-poke-center img {
-    width: 110px !important;
-    height: 110px !important;
+    width: 130px !important;
+    height: 130px !important;
   }
 
   .landing-hero-pokemon {
-    margin: 16px 0 24px;
+    margin: 20px 0 28px;
   }
 }

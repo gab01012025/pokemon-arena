@@ -37,14 +37,16 @@ export default function Home() {
       <section className="landing-hero">
         <div className="landing-hero-bg" />
         <div className="landing-hero-particles">
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png" alt="" width={60} height={60} unoptimized style={{ left: '5%', top: '15%', animationDelay: '0s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png" alt="" width={70} height={70} unoptimized style={{ right: '8%', top: '25%', animationDelay: '-3s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/38.png" alt="" width={55} height={55} unoptimized style={{ left: '12%', bottom: '20%', animationDelay: '-6s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png" alt="" width={65} height={65} unoptimized style={{ right: '10%', bottom: '30%', animationDelay: '-9s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png" alt="" width={55} height={55} unoptimized style={{ left: '25%', top: '70%', animationDelay: '-4s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png" alt="" width={60} height={60} unoptimized style={{ right: '22%', top: '65%', animationDelay: '-7s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png" alt="" width={50} height={50} unoptimized style={{ left: '40%', top: '8%', animationDelay: '-2s' }} />
-          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png" alt="" width={50} height={50} unoptimized style={{ right: '35%', bottom: '10%', animationDelay: '-5s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png" alt="" width={80} height={80} unoptimized style={{ left: '3%', top: '12%', animationDelay: '0s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png" alt="" width={90} height={90} unoptimized style={{ right: '5%', top: '20%', animationDelay: '-3s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/38.png" alt="" width={70} height={70} unoptimized style={{ left: '10%', bottom: '18%', animationDelay: '-6s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png" alt="" width={85} height={85} unoptimized style={{ right: '8%', bottom: '25%', animationDelay: '-9s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png" alt="" width={75} height={75} unoptimized style={{ left: '22%', top: '72%', animationDelay: '-4s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png" alt="" width={80} height={80} unoptimized style={{ right: '20%', top: '68%', animationDelay: '-7s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png" alt="" width={65} height={65} unoptimized style={{ left: '42%', top: '6%', animationDelay: '-2s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png" alt="" width={65} height={65} unoptimized style={{ right: '32%', bottom: '8%', animationDelay: '-5s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/248.png" alt="" width={75} height={75} unoptimized style={{ left: '55%', top: '85%', animationDelay: '-11s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/376.png" alt="" width={70} height={70} unoptimized style={{ right: '45%', top: '4%', animationDelay: '-13s' }} />
         </div>
         <div className="landing-hero-content">
           <div className="landing-hero-badge">
@@ -63,8 +65,8 @@ export default function Home() {
               <Image
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
                 alt="Charizard"
-                width={140}
-                height={140}
+                width={180}
+                height={180}
                 unoptimized
               />
             </div>
@@ -72,8 +74,8 @@ export default function Home() {
               <Image
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"
                 alt="Mewtwo"
-                width={160}
-                height={160}
+                width={200}
+                height={200}
                 unoptimized
               />
             </div>
@@ -81,8 +83,8 @@ export default function Home() {
               <Image
                 src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png"
                 alt="Blastoise"
-                width={140}
-                height={140}
+                width={180}
+                height={180}
                 unoptimized
               />
             </div>
