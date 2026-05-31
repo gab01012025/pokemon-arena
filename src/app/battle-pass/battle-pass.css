@@ -1,0 +1,381 @@
+/* ==================== BATTLE PASS PAGE ==================== */
+.bp-page {
+  min-height: 100vh;
+  background: #080a14;
+  padding: 0 24px 60px;
+  color: #e2e8f0;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Header */
+.bp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 0;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bp-back {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.bp-back:hover {
+  color: #e2e8f0;
+  text-decoration: none;
+}
+
+.bp-header-info {
+  flex: 1;
+}
+
+.bp-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bp-season {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.bp-upgrade-btn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1a1a2e;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.25);
+}
+
+.bp-upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(251, 191, 36, 0.4);
+}
+
+/* Progress Section */
+.bp-progress-section {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+}
+
+.bp-level-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bp-level-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #1a1a2e;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.bp-xp-bar {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bp-xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.bp-xp-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+  border-radius: 6px 6px 0 0;
+}
+
+.bp-xp-text {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Tier Track */
+.bp-track {
+  max-width: 1100px;
+  margin: 0 auto 48px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.bp-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.bp-track::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 3px;
+}
+
+.bp-track::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.bp-track-scroll {
+  display: flex;
+  gap: 2px;
+  min-width: max-content;
+}
+
+.bp-tier {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.bp-tier.current {
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+}
+
+.bp-tier-level {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bp-tier.unlocked .bp-tier-level {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  color: #1a1a2e;
+  border-color: transparent;
+}
+
+.bp-tier-line {
+  width: 3px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+}
+
+.bp-tier-line.filled {
+  background: linear-gradient(180deg, #fbbf24, #d97706);
+}
+
+/* Reward cards */
+.bp-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 80px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.bp-reward.claimed {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.bp-reward.premium {
+  border-color: rgba(251, 191, 36, 0.15);
+  background: rgba(251, 191, 36, 0.03);
+}
+
+.bp-reward.premium.locked {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+}
+
+.bp-reward-icon {
+  font-size: 16px;
+  font-weight: 800;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+}
+
+.bp-reward.premium .bp-reward-icon {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.bp-reward.claimed .bp-reward-icon {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.bp-reward-label {
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  font-weight: 500;
+}
+
+.bp-lock-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  color: #1a1a2e;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* Quests Section */
+.bp-quests {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.bp-quests-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 14px;
+}
+
+.bp-quest {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(15, 20, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.bp-quest.completed {
+  opacity: 0.6;
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.bp-quest-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bp-quest-desc {
+  font-size: 13px;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.bp-quest-progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bp-quest-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.bp-quest.completed .bp-quest-progress-fill {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.bp-quest-progress-text {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.bp-quest-xp {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+.bp-quest.completed .bp-quest-xp {
+  color: #22c55e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bp-quests {
+    grid-template-columns: 1fr;
+  }
+
+  .bp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bp-level-display {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bp-xp-text {
+    text-align: center;
+  }
+}

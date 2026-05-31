@@ -11,15 +11,23 @@ const energyEmoji: Record<EnergyType, string> = {
   fire: 'F',
   water: 'W',
   grass: 'G',
-  electric: 'E',
+  lightning: 'L',
+  psychic: 'P',
+  fighting: 'K',
+  darkness: 'D',
+  metal: 'M',
   colorless: 'C',
 };
 
 const energyColors: Record<EnergyType, string> = {
-  fire: 'var(--type-fire)',
-  water: 'var(--type-water)',
-  grass: 'var(--type-grass)',
-  electric: 'var(--type-electric)',
+  fire: 'var(--type-fire, #F08030)',
+  water: 'var(--type-water, #6890F0)',
+  grass: 'var(--type-grass, #78C850)',
+  lightning: 'var(--type-electric, #F8D030)',
+  psychic: 'var(--type-psychic, #F85888)',
+  fighting: 'var(--type-fighting, #C03028)',
+  darkness: 'var(--type-dark, #705848)',
+  metal: 'var(--type-steel, #B8B8D0)',
   colorless: '#A8A878',
 };
 
@@ -72,7 +80,7 @@ interface EnergyCostProps {
 
 export function EnergyCost({ cost, canAfford = true }: EnergyCostProps) {
   const entries = Object.entries(cost).filter(([, value]) => value && value > 0);
-  
+
   if (entries.length === 0) {
     return <span style={{ color: '#888', fontSize: '12px' }}>Free</span>;
   }

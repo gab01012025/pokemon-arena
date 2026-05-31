@@ -110,9 +110,9 @@ export interface PokemonUnlockDef {
   description: string;
 }
 
-// Starter pool: Free from the start
+// Starter pool: Free from the start (base forms - they can evolve in battle)
 export const STARTER_POKEMON = [
-  'Pikachu', 'Charizard', 'Blastoise', 'Venusaur', 'Eevee',
+  'Pikachu', 'Charmander', 'Squirtle', 'Bulbasaur', 'Eevee', 'Meowth',
 ];
 
 // Level-based unlocks

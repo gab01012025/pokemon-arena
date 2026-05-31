@@ -1,19 +1,27 @@
-// ==================== ENERGY TYPES (Pokemon Style) ====================
-export type EnergyType = 'fire' | 'water' | 'grass' | 'electric' | 'colorless';
+// ==================== ENERGY TYPES (Pokemon TCG Pocket Style) ====================
+export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'colorless';
 
 export interface EnergyCost {
-  fire: number;
-  water: number;
-  grass: number;
-  electric: number;
-  colorless: number;
+  fire?: number;
+  water?: number;
+  grass?: number;
+  lightning?: number;
+  psychic?: number;
+  fighting?: number;
+  darkness?: number;
+  metal?: number;
+  colorless?: number;
 }
 
 export interface EnergyPool {
   fire: number;
   water: number;
   grass: number;
-  electric: number;
+  lightning: number;
+  psychic: number;
+  fighting: number;
+  darkness: number;
+  metal: number;
   colorless: number;
 }
 

@@ -42,7 +42,7 @@ export default function PlayerColumn({
         return (
           <div
             key={`p-${poke.id}-${idx}`}
-            className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''} ${anims[idx] || ''}`}
+            className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''} ${hasAction ? 'action-ready' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'item-target' && poke.hp > 0 && onItemTarget(idx)}
           >
             <div className="portrait-container">

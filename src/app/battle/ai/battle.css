@@ -1242,6 +1242,14 @@ html, body { background: #080a14 !important; }
   color: #66BB6A;
   box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
 }
+.action-count {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
 /* ==================== BOTTOM BAR ==================== */
 .bottom-bar {
@@ -2182,3 +2190,182 @@ html, body { background: #080a14 !important; }
   border: 1px solid rgba(255, 68, 68, 0.25);
   color: #ff6666;
 }
+
+/* ==================== ENHANCED BATTLE ATMOSPHERE ==================== */
+
+/* Action Ready state - card glows when move is queued */
+.character-card.player.action-ready {
+  border-left-color: rgba(0, 230, 118, 0.9);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    -4px 0 20px rgba(0, 230, 118, 0.15),
+    0 0 30px rgba(0, 230, 118, 0.08);
+}
+.character-card.player.action-ready::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #00E676, #00C853);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+  animation: action-ready-pulse 1.5s ease-in-out infinite;
+}
+@keyframes action-ready-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 230, 118, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 16px rgba(0, 230, 118, 0.7); transform: scale(1.1); }
+}
+
+/* Animated battlefield particles */
+.battle-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(100, 200, 255, 0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 60%, rgba(255, 200, 100, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 80%, rgba(100, 200, 255, 0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 30%, rgba(200, 100, 255, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 70%, rgba(100, 255, 200, 0.2) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 45%, rgba(100, 200, 255, 0.15) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 85% 55%, rgba(255, 150, 100, 0.15) 0%, transparent 100%);
+  animation: particles-drift 20s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes particles-drift {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+/* Arena floor glow effect */
+.battle-area::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  right: 5%;
+  height: 60%;
+  background:
+    radial-gradient(ellipse 100% 40% at center bottom, rgba(100, 160, 255, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 20% at center bottom, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Enhanced center VS display */
+.vs-display {
+  position: relative;
+  overflow: visible;
+}
+.vs-display::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(100, 160, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  animation: vs-ambient 4s ease-in-out infinite alternate;
+}
+@keyframes vs-ambient {
+  0% { width: 80px; height: 80px; opacity: 0.5; }
+  100% { width: 100px; height: 100px; opacity: 1; }
+}
+
+/* Queue slot improvements */
+.queue-slot {
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.queue-slot.filled {
+  animation: queue-filled 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes queue-filled {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Improved battle log entries */
+.log-entry {
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+  border-radius: 0 4px 4px 0;
+}
+.log-entry.damage { border-left-color: #FF3D71; background: rgba(255, 61, 113, 0.04); }
+.log-entry.heal { border-left-color: var(--accent-green); background: rgba(0, 230, 118, 0.04); }
+.log-entry.effect { border-left-color: var(--accent-cyan); background: rgba(0, 229, 255, 0.04); }
+.log-entry.critical { border-left-color: var(--accent-gold); background: rgba(255, 215, 0, 0.04); }
+.log-entry.status { border-left-color: #c77dff; background: rgba(199, 125, 255, 0.04); }
+
+/* Smooth turn transition on top bar */
+.turn-info {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Pokemon sprite entrance animation */
+@keyframes sprite-entrance {
+  0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.pokemon-sprite img {
+  animation: sprite-entrance 0.4s ease-out;
+}
+
+/* Better action button interaction */
+.action-btn {
+  position: relative;
+  overflow: hidden;
+}
+.action-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.action-btn:hover::after {
+  opacity: 1;
+}
+
+/* Energy generation visual feedback */
+@keyframes energy-gain {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.energy-item.gained {
+  animation: energy-gain 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Improved timer bar states */
+.timer-fill {
+  transition: width 0.5s linear, background 0.3s ease;
+}
+.timer-container.warning .timer-fill {
+  background: linear-gradient(90deg, #FF9800, #F44336);
+  animation: timer-warning 0.5s ease-in-out infinite;
+}
+@keyframes timer-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Skills panel scrollbar (for many moves) */
+.skills-panel::-webkit-scrollbar { width: 3px; }
+.skills-panel::-webkit-scrollbar-track { background: transparent; }
+.skills-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 2px; }

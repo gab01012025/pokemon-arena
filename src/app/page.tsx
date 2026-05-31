@@ -1,729 +1,209 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
 import { AccountBox } from '@/components/auth/AccountBox';
+import { NewsFeed } from '@/components/NewsFeed';
+import { DiscordInviteCard } from '@/components/DiscordWidget';
 
 export default function Home() {
   return (
-    <div className="page-wrapper">
-      <div className="main-container">
-        {/* Header Section */}
-        <div className="header-section">
-          {/* Left Navigation */}
-          <div className="header-left">
-            <div className="nav-buttons-top">
-              <Link href="/" className="nav-btn-top">Startpage</Link>
-              <Link href="/play" className="nav-btn-top">Start Playing</Link>
-              <Link href="/multiplayer" className="nav-btn-top">PvP Online</Link>
-              <Link href="/tutorial" className="nav-btn-top">Tutorial</Link>
-              <Link href="/ladders" className="nav-btn-top">Ladders</Link>
-              <Link href="/missions" className="nav-btn-top">Missões</Link>
-              <Link href="/unlock-pokemon" className="nav-btn-top">Desbloquear</Link>
-              <Link href="/my-clan" className="nav-btn-top">Meu Clã</Link>
-              <a href="https://discord.gg/pokemonarena" className="nav-btn-top discord-btn">
-                DISCORD
-              </a>
-            </div>
+    <div className="landing-page">
+      {/* Navigation */}
+      <nav className="landing-nav">
+        <div className="landing-nav-inner">
+          <div className="landing-logo">
+            <span className="landing-logo-icon">P</span>
+            <span className="landing-logo-text">Pokemon Arena</span>
           </div>
-          
-          {/* Banner */}
-          <div className="header-banner">
-            <h1>POKEMON ARENA</h1>
+          <div className="landing-nav-links">
+            <Link href="/play" className="landing-nav-link">Play</Link>
+            <Link href="/multiplayer" className="landing-nav-link">PvP Online</Link>
+            <Link href="/ladders" className="landing-nav-link">Ladders</Link>
+            <Link href="/battle-pass" className="landing-nav-link">Battle Pass</Link>
+            <Link href="/pokedex" className="landing-nav-link">Pokedex</Link>
+          </div>
+          <div className="landing-nav-auth">
+            <Link href="/login" className="landing-btn-login">Login</Link>
+            <Link href="/register" className="landing-btn-register">Register</Link>
           </div>
         </div>
+      </nav>
 
-        {/* Left Sidebar */}
-        <aside className="sidebar-left">
-          {/* Users Online */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Users Online</div>
-            <div className="sidebar-box-content">
-              <div className="users-online-count">
-                <span className="users-online-icon"></span>
-                <span className="users-online-number">226</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Patreon */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Patreon</div>
-            <div className="sidebar-box-content">
-              <a href="https://www.patreon.com" className="patreon-button">
-                Patreon
-              </a>
-              <p className="patreon-desc">Buy Characters on Patreon And Support the game!</p>
-            </div>
-          </div>
-
-          {/* Pokédex */}
-          <div className="sidebar-box pokedex-box">
-            <div className="sidebar-box-header" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(245,158,11,0.2))' }}>Pokédex</div>
-            <div className="sidebar-box-content">
-              <p>Explore todos os Pokémon!</p>
-              <Link href="/pokedex" className="pokedex-button">
-                Abrir Pokédex
-              </Link>
-              <p style={{ fontSize: '0.8rem', marginTop: '8px', color: '#888' }}>Dados da PokeAPI</p>
-            </div>
-          </div>
-
-          {/* Account */}
-          <AccountBox />
-
-          {/* Mission Videos */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Battle Guides</div>
-            <div className="sidebar-box-content">
-              <p className="video-section-title">Looking for team suggestions?<br />Check out the channels below:</p>
-              <div className="video-section">
-                <div className="video-link">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">PokeTuber (Youtube)</Link>
-                </div>
-                <div className="video-link">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">PokeGuides (Youtube)</Link>
-                </div>
-              </div>
-              <p className="video-section-title">Recent Battle Videos:</p>
-              <div className="video-link">
-                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                <Link href="#">Unlocking Mewtwo (S)</Link>
-              </div>
-              <div className="video-link">
-                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                <Link href="#">Unlocking Charizard (S)</Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Ladder Videos */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Ladder Videos</div>
-            <div className="sidebar-box-content">
-              <p className="video-section-title">Looking for teams to rank up in Ladder Game?<br />Check out the channels below:</p>
-              <div className="video-section">
-                <div className="video-link">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">PokeRanker (Youtube)</Link>
-                </div>
-                <div className="video-link">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">ArenaChamp (Youtube)</Link>
-                </div>
-              </div>
-              <p className="video-section-title">Recent Ladder Videos:</p>
-              <div className="video-link">
-                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                <Link href="#">Becoming a Pokemon Trainer | New Player Teams</Link>
-              </div>
-              <div className="video-link">
-                <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                <Link href="#">+26 STARTER TEAM</Link>
-              </div>
-            </div>
-          </div>
-
-          {/* News Archive */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">News Archive</div>
-            <div className="sidebar-box-content">
-              <div className="news-archive-list">
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Balance Update 1.3.9.5</Link>
-                </div>
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Balance Update 1.3.9 + Event Missions</Link>
-                </div>
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Balance Update 1.3.8</Link>
-                </div>
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Balance Update 1.3.7</Link>
-                </div>
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Balance 03/11/2025</Link>
-                </div>
-                <div className="news-archive-item">
-                  <img src="/images/pokemon-pikachu.jpg" alt="bullet" />
-                  <Link href="#">Major Update 1.3.6 + Ladder Reset</Link>
-                </div>
-              </div>
-              <div className="see-more">
-                <Link href="/news-archive">See more</Link>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* Center Content */}
-        <main className="center-content">
-          {/* Header */}
-          <div className="center-header">
-            <h1 className="site-title">Pokemon Arena</h1>
-            <p className="site-subtitle">Your #1 Pokemon Online Multiplayer Game</p>
-          </div>
-
-          {/* Banner */}
-          <div className="banner-container">
-            <img 
-              src="/images/pokemon-anime.jpg" 
-              alt="Pokemon Arena Banner" 
-              className="banner-image"
-            />
-          </div>
-
-
-
-          {/* News Post */}
-          <article className="news-post">
-            <div className="news-post-header">
-              <div className="news-post-title">
-                <img src="/images/pokemon-characters.webp" alt="icon" />
-                Balance Update 1.3.9.5
-              </div>
-              <div className="news-post-date">
-                Thursday, December 25th, 2025 at 16:01 by <Link href="/profile/Dark">Dark</Link>
-              </div>
-            </div>
-            <div className="news-post-content">
-              <p><strong>Merry Christmas everyone!</strong></p>
-              <p>We&apos;ve decided to bring you some news today:</p>
-              
-              <ul>
-                <li>We will be moving the end of this season to January 1st, 2026 at 23:59 (UTC+0).</li>
-                <li>As a result, Major Update 1.4.0 (New Characters) has also been postponed to January 2nd, 2026.</li>
-                <li>Top 10 Winstreaks will now only show players who played during the current Season (counting from December 20th).</li>
-                <li>Top 20 Highest Streak has been added.</li>
-              </ul>
-
-              <hr style={{ borderColor: 'rgba(255,255,255,0.08)', margin: '15px 0' }} />
-
-              <p>So for now, we didn&apos;t want to leave the game with no update, so we&apos;re bringing a new BU with 3 nerfs and 3 buffs to shake up the META!</p>
-
-              <p>PS: We still plan, in Major Update 1.4.0, to bring a small BU reverting all full stuns and new unecessary drain effects introduced in BU 1.3.7 and 1.3.8, and with that, restore the damage those characters lost while making few improvements.</p>
-
-              <p className="news-post-signature">~ Pokemon Arena Classic Staff</p>
-
-              <img 
-                src="/images/all-pokemon-1.webp" 
-                alt="Christmas Banner" 
-                className="news-post-image"
-              />
-              <p style={{ fontSize: '10px', color: '#888' }}>~Made by MrChans</p>
-
-              <p className="news-section-title">Balance:</p>
-              <p>
-                <strong>Nerfs:</strong>{' '}
-                <Link href="#" className="news-link-red">Mewtwo (S)</Link>,{' '}
-                <Link href="#" className="news-link-red">Rayquaza (S)</Link>,{' '}
-                <Link href="#" className="news-link-red">Garchomp (S)</Link>.
-              </p>
-              <p>
-                <strong>Boosts:</strong>{' '}
-                <Link href="#" className="news-link-green">Pikachu (S)</Link>,{' '}
-                <Link href="#" className="news-link-green">Charizard (S)</Link>.
-              </p>
-              <p>
-                <strong>Tweaks/Minor Reworks/Rollbacks:</strong>{' '}
-                <Link href="#" className="news-link-blue">Gengar</Link>.
-              </p>
-
-              {/* Character Stats Example */}
-              <div className="balance-section balance-nerf">
-                <div className="balance-title">Changes: Nerfs</div>
-                <div className="char-stats">
-                  <span className="char-stats-label">Wins:</span>
-                  <span className="char-stats-wins">3744 (59.90%)</span>
-                  <span className="char-stats-label">Matches Played:</span>
-                  <span className="char-stats-matches">6250 (4.20%)</span>
-                </div>
-                <div className="skill-change">
-                  <div className="skill-name">Psystrike</div>
-                  <div className="skill-desc">
-                    This skill no longer ignores stun.<br />
-                    This skill now grants 10 points of unpierceable damage reduction, instead of 30% unpierceable damage reduction.
-                  </div>
-                </div>
-              </div>
-
-              <div className="balance-section balance-boost">
-                <div className="balance-title">Changes: Boosts</div>
-                <div className="char-stats">
-                  <span className="char-stats-label">Wins:</span>
-                  <span className="char-stats-wins">497 (40.64%)</span>
-                  <span className="char-stats-label">Matches Played:</span>
-                  <span className="char-stats-matches">1223 (0.82%)</span>
-                </div>
-                <div className="skill-change">
-                  <div className="skill-name">Thunder</div>
-                  <div className="skill-desc">
-                    Now deals 5 affliction damage to Pikachu, down 5 from 10.
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="news-reactions">
-              <span className="reaction"><span className="reaction-emoji">Hot</span> 12</span>
-              <span className="reaction"><span className="reaction-emoji">Angry</span> 14</span>
-              <span className="reaction"><span className="reaction-emoji">Wow</span> 4</span>
-              <span className="reaction"><span className="reaction-emoji">Meh</span> 5</span>
-              <span className="reaction"><span className="reaction-emoji">Love</span> 3</span>
-              <span className="reaction"><span className="reaction-emoji">+</span></span>
-            </div>
-          </article>
-
-          {/* Footer Nav */}
-          <div className="footer-nav">
-            <Link href="/game-manual" className="footer-nav-item">
-              <img src="/images/pokemon-saga.jpg" alt="Game Manual" />
+      {/* Hero Section */}
+      <section className="landing-hero">
+        <div className="landing-hero-bg" />
+        <div className="landing-hero-content">
+          <h1 className="landing-hero-title">
+            POKEMON<br /><span className="landing-hero-accent">ARENA</span>
+          </h1>
+          <p className="landing-hero-subtitle">
+            Strategic turn-based battles. Build your team. Conquer the ladder.
+          </p>
+          <div className="landing-hero-actions">
+            <Link href="/play" className="landing-cta-primary">
+              Play Now
+            </Link>
+            <Link href="/register" className="landing-cta-secondary">
+              Create Account
             </Link>
           </div>
-        </main>
+          <div className="landing-hero-stats">
+            <div className="landing-stat">
+              <span className="landing-stat-value">3v3</span>
+              <span className="landing-stat-label">Team Battles</span>
+            </div>
+            <div className="landing-stat-divider" />
+            <div className="landing-stat">
+              <span className="landing-stat-value">150+</span>
+              <span className="landing-stat-label">Pokemon</span>
+            </div>
+            <div className="landing-stat-divider" />
+            <div className="landing-stat">
+              <span className="landing-stat-value">Real-time</span>
+              <span className="landing-stat-label">PvP Matches</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        {/* Right Sidebar */}
-        <aside className="sidebar-right">
-          {/* Random Screenshot */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Random Screenshot</div>
-            <div className="sidebar-box-content screenshot-box">
-              <Link href="#">
-                <img src="/images/pokemon-battle.webp" alt="Random Screenshot" />
+      {/* Features Section */}
+      <section className="landing-features">
+        <h2 className="landing-section-title">Choose Your Path</h2>
+        <p className="landing-section-subtitle">Multiple ways to prove your skills as a Pokemon trainer</p>
+        <div className="landing-features-grid">
+          <Link href="/multiplayer" className="landing-feature-card">
+            <div className="landing-feature-icon landing-feature-icon-pvp">VS</div>
+            <h3>PvP Battles</h3>
+            <p>Face real trainers in strategic 3v3 turn-based combat. Climb the ranked ladder and become Champion.</p>
+          </Link>
+          <Link href="/play" className="landing-feature-card">
+            <div className="landing-feature-icon landing-feature-icon-ai">AI</div>
+            <h3>AI Training</h3>
+            <p>Hone your skills against intelligent AI opponents. Perfect your team synergy and strategy.</p>
+          </Link>
+          <Link href="/characters" className="landing-feature-card">
+            <div className="landing-feature-icon landing-feature-icon-team">+</div>
+            <h3>Team Building</h3>
+            <p>Choose from 150+ Pokemon. Master energy types, abilities, and create unstoppable combinations.</p>
+          </Link>
+          <Link href="/ladders" className="landing-feature-card">
+            <div className="landing-feature-icon landing-feature-icon-rank">&#9733;</div>
+            <h3>Ranked Seasons</h3>
+            <p>Compete in seasonal ladders. Earn rewards, climb rankings, and cement your legacy.</p>
+          </Link>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="landing-how">
+        <h2 className="landing-section-title">How It Works</h2>
+        <div className="landing-how-steps">
+          <div className="landing-step">
+            <div className="landing-step-number">1</div>
+            <h3>Choose Your Team</h3>
+            <p>Select 3 Pokemon for your battle squad. Balance types and abilities for maximum synergy.</p>
+          </div>
+          <div className="landing-step-arrow">&rarr;</div>
+          <div className="landing-step">
+            <div className="landing-step-number">2</div>
+            <h3>Select Energy Types</h3>
+            <p>Pick up to 3 energy types that power your moves. Match them to your team composition.</p>
+          </div>
+          <div className="landing-step-arrow">&rarr;</div>
+          <div className="landing-step">
+            <div className="landing-step-number">3</div>
+            <h3>Battle &amp; Win</h3>
+            <p>Use abilities strategically each turn. Outplay your opponent to claim victory!</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Starter Pokemon Showcase */}
+      <section className="landing-showcase">
+        <h2 className="landing-section-title">Starter Pokemon</h2>
+        <p className="landing-section-subtitle">Begin your journey with these classic partners</p>
+        <div className="landing-pokemon-grid">
+          <div className="landing-pokemon-card landing-pokemon-fire">
+            <div className="landing-pokemon-type">Fire</div>
+            <div className="landing-pokemon-name">Charmander</div>
+            <div className="landing-pokemon-desc">A fierce fire-type with powerful offensive moves</div>
+          </div>
+          <div className="landing-pokemon-card landing-pokemon-water">
+            <div className="landing-pokemon-type">Water</div>
+            <div className="landing-pokemon-name">Squirtle</div>
+            <div className="landing-pokemon-desc">A sturdy water-type with strong defensive options</div>
+          </div>
+          <div className="landing-pokemon-card landing-pokemon-grass">
+            <div className="landing-pokemon-type">Grass</div>
+            <div className="landing-pokemon-name">Bulbasaur</div>
+            <div className="landing-pokemon-desc">A versatile grass-type with healing and poison</div>
+          </div>
+          <div className="landing-pokemon-card landing-pokemon-electric">
+            <div className="landing-pokemon-type">Electric</div>
+            <div className="landing-pokemon-name">Pikachu</div>
+            <div className="landing-pokemon-desc">A fast electric-type with paralyzing attacks</div>
+          </div>
+          <div className="landing-pokemon-card landing-pokemon-normal">
+            <div className="landing-pokemon-type">Normal</div>
+            <div className="landing-pokemon-name">Eevee</div>
+            <div className="landing-pokemon-desc">An adaptable Pokemon with diverse evolution potential</div>
+          </div>
+          <div className="landing-pokemon-card landing-pokemon-normal2">
+            <div className="landing-pokemon-type">Normal</div>
+            <div className="landing-pokemon-name">Meowth</div>
+            <div className="landing-pokemon-desc">A tricky Pokemon that disrupts enemy strategies</div>
+          </div>
+        </div>
+      </section>
+
+      {/* News & Community Section */}
+      <section className="landing-news-section">
+        <h2 className="landing-section-title">Latest News</h2>
+        <p className="landing-section-subtitle">Balance updates, new features, and community events</p>
+        <NewsFeed limit={4} />
+      </section>
+
+      {/* Community & Account Section */}
+      <section className="landing-community">
+        <div className="landing-community-grid">
+          <div className="landing-community-info">
+            <h2 className="landing-section-title" style={{ textAlign: 'left' }}>Join the Community</h2>
+            <p className="landing-community-text">
+              Connect with thousands of trainers worldwide. Join our Discord server for team discussions,
+              tournaments, and balance updates.
+            </p>
+            <DiscordInviteCard />
+            <div className="landing-community-links">
+              <a href="https://discord.gg/cnnM32wK" className="landing-discord-btn" target="_blank" rel="noopener noreferrer">
+                Join Discord
+              </a>
+              <Link href="/ladders" className="landing-link-subtle">
+                View Ladders &rarr;
               </Link>
             </div>
           </div>
-
-          {/* First Time Playing */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">First time playing?</div>
-            <div className="sidebar-box-content">
-              <div className="first-time-note">
-                <strong>Note:</strong> If this is your first time playing, be sure to check out the{' '}
-                <Link href="/the-basics">The Basics</Link> before you start battling.
-              </div>
-            </div>
+          <div className="landing-community-account">
+            <AccountBox />
           </div>
+        </div>
+      </section>
 
-          {/* Time to Season End */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Time to season end:</div>
-            <div className="sidebar-box-content">
-              <div className="season-timer">
-                <div className="season-timer-value">15 days, 9 hours, 52 minutes remaining</div>
-              </div>
-            </div>
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="landing-footer-inner">
+          <div className="landing-footer-brand">
+            <span className="landing-logo-icon">P</span>
+            <span>Pokemon Arena</span>
           </div>
-
-          {/* Pokemon Master */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Pokemon Master</div>
-            <div className="sidebar-box-content">
-              <div className="rikudou-item">
-                <img src="/images/ash-ketchum.webp" alt="Pokemon Master" className="rikudou-icon" />
-                <div className="rikudou-info">
-                  <div className="rikudou-name"><Link href="/profile/TaigiCiaAs">TaigiCiaAs</Link></div>
-                  <div className="rikudou-rank">1</div>
-                </div>
-              </div>
-            </div>
+          <div className="landing-footer-links">
+            <Link href="/tutorial">Tutorial</Link>
+            <Link href="/pokedex">Pokedex</Link>
+            <Link href="/ladders">Ladders</Link>
+            <a href="https://discord.gg/pokemonarena">Discord</a>
           </div>
-
-          {/* Elite Four + Champion */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Elite Four + Champion</div>
-            <div className="sidebar-box-content">
-              <div className="kage-list">
-                <div className="kage-row">
-                  <img src="/images/pokemon-poster.jpg" alt="Champion" className="kage-avatar" />
-                  <span className="kage-name">ransfordwest</span>
-                  <span className="kage-bar kage-bar-1">42</span>
-                </div>
-                <div className="kage-row">
-                  <img src="/images/bulbasaur.jpg" alt="Elite 1" className="kage-avatar" />
-                  <span className="kage-name">Cemito</span>
-                  <span className="kage-bar kage-bar-2">36</span>
-                </div>
-                <div className="kage-row">
-                  <img src="/images/pokemon-group-1.jpg" alt="Elite 2" className="kage-avatar" />
-                  <span className="kage-name">Trevor</span>
-                  <span className="kage-bar kage-bar-3">15</span>
-                </div>
-                <div className="kage-row">
-                  <img src="/images/pokemon-group-2.jpg" alt="Elite 3" className="kage-avatar" />
-                  <span className="kage-name">Kershark</span>
-                  <span className="kage-bar kage-bar-4">1</span>
-                </div>
-                <div className="kage-row">
-                  <img src="/images/pokemon-pikachu.jpg" alt="Elite 4" className="kage-avatar" />
-                  <span className="kage-name">tsogu</span>
-                  <span className="kage-bar kage-bar-5">25</span>
-                </div>
-              </div>
-            </div>
+          <div className="landing-footer-copy">
+            Version 1.0 &mdash; A fan-made Pokemon strategy game
           </div>
-
-          {/* Road To Champion */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Road To Champion</div>
-            <div className="sidebar-box-content">
-              <div className="top-list">
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-1">01</span>
-                  <span className="top-name"><Link href="/profile/Rafa">Rafa</Link></span>
-                  <span className="top-value">62</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-2">02</span>
-                  <span className="top-name"><Link href="/profile/HalfDead-">HalfDead-</Link></span>
-                  <span className="top-value">61</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-3">03</span>
-                  <span className="top-name"><Link href="/profile/Eight">Eight</Link></span>
-                  <span className="top-value">61</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">04</span>
-                  <span className="top-name"><Link href="/profile/Kries">Kries</Link></span>
-                  <span className="top-value">59</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">05</span>
-                  <span className="top-name"><Link href="/profile/MadoushiX">MadoushiX</Link></span>
-                  <span className="top-value">59</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">06</span>
-                  <span className="top-name"><Link href="/profile/ichi404">ichi404</Link></span>
-                  <span className="top-value">58</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">07</span>
-                  <span className="top-name"><Link href="/profile/Derlas">Derlas</Link></span>
-                  <span className="top-value">58</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">08</span>
-                  <span className="top-name"><Link href="/profile/slovak2202">slovak2202</Link></span>
-                  <span className="top-value">58</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">09</span>
-                  <span className="top-name"><Link href="/profile/brunox1">brunox1</Link></span>
-                  <span className="top-value">58</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">10</span>
-                  <span className="top-name"><Link href="/profile/RasenWHO">RasenWHO</Link></span>
-                  <span className="top-value">58</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Top 10 Clanladder */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Top 10 Clanladder</div>
-            <div className="sidebar-box-content">
-              <div className="top-list">
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-1">01</span>
-                  <span className="top-name"><Link href="/clan/team-valor">Team Valor</Link></span>
-                  <span className="top-value">251</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-2">02</span>
-                  <span className="top-name"><Link href="/clan/team-mystic">Team Mystic</Link></span>
-                  <span className="top-value">206</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-3">03</span>
-                  <span className="top-name"><Link href="/clan/team-instinct">Team Instinct</Link></span>
-                  <span className="top-value">188</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">04</span>
-                  <span className="top-name"><Link href="/clan/pokemon-masters">Pokemon Masters</Link></span>
-                  <span className="top-value">154</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">05</span>
-                  <span className="top-name"><Link href="/clan/pallet-town">Pallet Town</Link></span>
-                  <span className="top-value">151</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">06</span>
-                  <span className="top-name"><Link href="/clan/indigo-league">Indigo League</Link></span>
-                  <span className="top-value">126</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">07</span>
-                  <span className="top-name"><Link href="/clan/thunderbolts">Thunderbolts</Link></span>
-                  <span className="top-value">123</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">08</span>
-                  <span className="top-name"><Link href="/clan/elite-four">Elite Four</Link></span>
-                  <span className="top-value">121</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">09</span>
-                  <span className="top-name"><Link href="/clan/dragon-tamers">Dragon Tamers</Link></span>
-                  <span className="top-value">108</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">10</span>
-                  <span className="top-name"><Link href="/clan/ghost-squad">Ghost Squad</Link></span>
-                  <span className="top-value">97</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Top 10 Winstreak */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">
-              Top 10 Winstreak
-              <span className="help-icon" title="Shows the highest win streaks starting from December 20, 2025. Each new Season resets the start date for the Top Win Streak counter.">?</span>
-            </div>
-            <div className="sidebar-box-content">
-              <div className="top-list">
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-1">1.</span>
-                  <span className="top-name"><Link href="/profile/ace">ace</Link></span>
-                  <span className="top-value">+56 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-2">2.</span>
-                  <span className="top-name"><Link href="/profile/Konan">Konan</Link></span>
-                  <span className="top-value">+53 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-3">3.</span>
-                  <span className="top-name"><Link href="/profile/Kanabi">Kanabi</Link></span>
-                  <span className="top-value">+23 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">4.</span>
-                  <span className="top-name"><Link href="/profile/Sleke">Sleke</Link></span>
-                  <span className="top-value">+17 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">5.</span>
-                  <span className="top-name"><Link href="/profile/DonJuan">DonJuan</Link></span>
-                  <span className="top-value">+15 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">6.</span>
-                  <span className="top-name"><Link href="/profile/Johel_R05">Johel_R05</Link></span>
-                  <span className="top-value">+15 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">7.</span>
-                  <span className="top-name"><Link href="/profile/HashiramaSenju">HashiramaSenju</Link></span>
-                  <span className="top-value">+13 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">8.</span>
-                  <span className="top-name"><Link href="/profile/Erenn">Erenn</Link></span>
-                  <span className="top-value">+12 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">9.</span>
-                  <span className="top-name"><Link href="/profile/neptz">neptz</Link></span>
-                  <span className="top-value">+11 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">10.</span>
-                  <span className="top-name"><Link href="/profile/msdetox">msdetox</Link></span>
-                  <span className="top-value">+11 streak</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Top 10 Most Wins */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Top 10 Most Wins</div>
-            <div className="sidebar-box-content">
-              <div className="top-list">
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-1">1.</span>
-                  <span className="top-name"><Link href="/profile/GoodySan">GoodySan</Link></span>
-                  <span className="top-value">+7216 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-2">2.</span>
-                  <span className="top-name"><Link href="/profile/juicewrld999">juicewrld999</Link></span>
-                  <span className="top-value">+6575 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-3">3.</span>
-                  <span className="top-name"><Link href="/profile/rogerindopneu">rogerindopneu</Link></span>
-                  <span className="top-value">+6558 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">4.</span>
-                  <span className="top-name"><Link href="/profile/One_jb">One_jb</Link></span>
-                  <span className="top-value">+5745 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">5.</span>
-                  <span className="top-name"><Link href="/profile/gravidadeTAUBATE">gravidadeTAUBATE</Link></span>
-                  <span className="top-value">+4586 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">6.</span>
-                  <span className="top-name"><Link href="/profile/julio0612">julio0612</Link></span>
-                  <span className="top-value">+4188 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">7.</span>
-                  <span className="top-name"><Link href="/profile/nigh1234">nigh1234</Link></span>
-                  <span className="top-value">+4186 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">8.</span>
-                  <span className="top-name"><Link href="/profile/leohyuga25">leohyuga25</Link></span>
-                  <span className="top-value">+4140 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">9.</span>
-                  <span className="top-name"><Link href="/profile/sirrap">sirrap</Link></span>
-                  <span className="top-value">+4073 wins</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">10.</span>
-                  <span className="top-name"><Link href="/profile/Rafa">Rafa</Link></span>
-                  <span className="top-value">+3931 wins</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Top 20 HighestStreaks */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Top 20 HighestStreaks</div>
-            <div className="sidebar-box-content">
-              <div className="top-list">
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-1">1.</span>
-                  <span className="top-name"><Link href="/profile/Buffy">Buffy</Link></span>
-                  <span className="top-value">+80 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-2">2.</span>
-                  <span className="top-name"><Link href="/profile/-hoshigama-">-hoshigama-</Link></span>
-                  <span className="top-value">+76 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank top-rank-3">3.</span>
-                  <span className="top-name"><Link href="/profile/Cloudprince">Cloudprince</Link></span>
-                  <span className="top-value">+76 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">4.</span>
-                  <span className="top-name"><Link href="/profile/-GodEneru">-GodEneru</Link></span>
-                  <span className="top-value">+74 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">5.</span>
-                  <span className="top-name"><Link href="/profile/AkatsKonan">AkatsKonan</Link></span>
-                  <span className="top-value">+73 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">6.</span>
-                  <span className="top-name"><Link href="/profile/HalfDead-">HalfDead-</Link></span>
-                  <span className="top-value">+72 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">7.</span>
-                  <span className="top-name"><Link href="/profile/-Shark">-Shark</Link></span>
-                  <span className="top-value">+67 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">8.</span>
-                  <span className="top-name"><Link href="/profile/Demon">Demon</Link></span>
-                  <span className="top-value">+65 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">9.</span>
-                  <span className="top-name"><Link href="/profile/Gercsak">Gercsak</Link></span>
-                  <span className="top-value">+65 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">10.</span>
-                  <span className="top-name"><Link href="/profile/Dan">Dan</Link></span>
-                  <span className="top-value">+63 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">11.</span>
-                  <span className="top-name"><Link href="/profile/mrChans">mrChans</Link></span>
-                  <span className="top-value">+61 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">12.</span>
-                  <span className="top-name"><Link href="/profile/Sakura">Sakura</Link></span>
-                  <span className="top-value">+60 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">13.</span>
-                  <span className="top-name"><Link href="/profile/Rafa">Rafa</Link></span>
-                  <span className="top-value">+60 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">14.</span>
-                  <span className="top-name"><Link href="/profile/Myotismon">Myotismon</Link></span>
-                  <span className="top-value">+60 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">15.</span>
-                  <span className="top-name"><Link href="/profile/videogame33">videogame33</Link></span>
-                  <span className="top-value">+60 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">16.</span>
-                  <span className="top-name"><Link href="/profile/Sasuke">Sasuke</Link></span>
-                  <span className="top-value">+60 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">17.</span>
-                  <span className="top-name"><Link href="/profile/Bolts">Bolts</Link></span>
-                  <span className="top-value">+59 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">18.</span>
-                  <span className="top-name"><Link href="/profile/Douglasschanu">Douglasschanu</Link></span>
-                  <span className="top-value">+57 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">19.</span>
-                  <span className="top-name"><Link href="/profile/ace">ace</Link></span>
-                  <span className="top-value">+56 streak</span>
-                </div>
-                <div className="top-list-item">
-                  <span className="top-rank">20.</span>
-                  <span className="top-name"><Link href="/profile/Gojo">Gojo</Link></span>
-                  <span className="top-value">+56 streak</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Version Info */}
-          <div className="sidebar-box">
-            <div className="sidebar-box-header">Version Info</div>
-            <div className="sidebar-box-content">
-              <div className="version-info">Version OFFICIAL 1.0</div>
-            </div>
-          </div>
-        </aside>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }

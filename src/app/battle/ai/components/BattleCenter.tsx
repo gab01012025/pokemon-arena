@@ -39,6 +39,7 @@ export default function BattleCenter({
           </div>
         ))}
       </div>
+      <div className="action-count">{selectedActions.length}/3 Actions</div>
       {hoveredSkill && (
         <div className="skill-info-panel">
           <div className="skill-info-header">

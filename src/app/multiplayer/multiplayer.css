@@ -1019,7 +1019,28 @@
 .pokemon-battle-card.player-card { flex-direction: row; border-left: 2px solid rgba(100, 200, 120, 0.35); }
 .pokemon-battle-card.enemy-card { flex-direction: row-reverse; border-right: 2px solid rgba(100, 160, 255, 0.3); }
 .pokemon-battle-card.fainted { opacity: 0.3; filter: grayscale(0.85) brightness(0.7); pointer-events: none; animation: faint-out 0.8s ease-out forwards; }
-.pokemon-battle-card.has-action { border-color: rgba(76, 175, 80, 0.6); box-shadow: 0 0 15px rgba(76, 175, 80, 0.2); }
+.pokemon-battle-card.has-action {
+  border-color: rgba(76, 175, 80, 0.8);
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.25), inset 0 0 8px rgba(76, 175, 80, 0.05);
+  position: relative;
+}
+.pokemon-battle-card.has-action::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #00E676, #00C853);
+  border-radius: 50%;
+  z-index: 10;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+  animation: action-pip-pulse 1.5s ease-in-out infinite;
+}
+@keyframes action-pip-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(0, 230, 118, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 0 12px rgba(0, 230, 118, 0.7); transform: scale(1.1); }
+}
 
 .pokemon-battle-card.enemy-card.targetable {
   cursor: crosshair;

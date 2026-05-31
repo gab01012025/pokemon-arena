@@ -296,7 +296,7 @@ interface Energy {
   fire: number;
   water: number;
   grass: number;
-  electric: number;
+  lightning: number;
   colorless: number;
 }
 
@@ -362,7 +362,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
   const [enemyTeamState, setEnemyTeamState] = useState<BattlePokemonState[]>(initEnemyTeam);
   const [currentTurn, setCurrentTurn] = useState(1);
   const [isReady, setIsReady] = useState(false);
-  const [energy, setEnergy] = useState<Energy>({ fire: 1, water: 1, grass: 0, electric: 1, colorless: 1 });
+  const [energy, setEnergy] = useState<Energy>({ fire: 1, water: 1, grass: 0, lightning: 1, colorless: 1 });
   const [selectedMoves, setSelectedMoves] = useState<{[key: number]: number | null}>({0: null, 1: null, 2: null});
   const [selectedTargets, setSelectedTargets] = useState<{[key: number]: number | null}>({0: null, 1: null, 2: null});
   const [battleLog, setBattleLog] = useState<BattleMessage[]>([]);
@@ -442,7 +442,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
 
   // Calculate total energy cost of selected moves
   const getUsedEnergy = (): Energy => {
-    const used: Energy = { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 };
+    const used: Energy = { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 };
     Object.entries(selectedMoves).forEach(([idx, moveIdx]) => {
       if (moveIdx !== null) {
         const pokemonState = playerTeamState[parseInt(idx)];
@@ -452,7 +452,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
             used.fire += move.cost.fire || 0;
             used.water += move.cost.water || 0;
             used.grass += move.cost.grass || 0;
-            used.electric += move.cost.electric || 0;
+            used.lightning += move.cost.lightning || 0;
             used.colorless += move.cost.colorless || 0;
           }
         }
@@ -467,7 +467,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
       fire: energy.fire - used.fire,
       water: energy.water - used.water,
       grass: energy.grass - used.grass,
-      electric: energy.electric - used.electric,
+      lightning: energy.lightning - used.lightning,
       colorless: energy.colorless - used.colorless,
     };
   };
@@ -479,7 +479,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
     if ((move.cost.fire || 0) > remaining.fire + remaining.colorless) return false;
     if ((move.cost.water || 0) > remaining.water + remaining.colorless) return false;
     if ((move.cost.grass || 0) > remaining.grass + remaining.colorless) return false;
-    if ((move.cost.electric || 0) > remaining.electric + remaining.colorless) return false;
+    if ((move.cost.lightning || 0) > remaining.lightning + remaining.colorless) return false;
     return true;
   };
 
@@ -565,7 +565,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
 
     // Check if can afford
     const tempMoves = { ...selectedMoves, [pokemonIndex]: null };
-    const tempUsed: Energy = { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 };
+    const tempUsed: Energy = { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 };
     Object.entries(tempMoves).forEach(([idx, mIdx]) => {
       if (mIdx !== null) {
         const p = playerTeamState[parseInt(idx)];
@@ -575,7 +575,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
             tempUsed.fire += m.cost.fire || 0;
             tempUsed.water += m.cost.water || 0;
             tempUsed.grass += m.cost.grass || 0;
-            tempUsed.electric += m.cost.electric || 0;
+            tempUsed.lightning += m.cost.lightning || 0;
             tempUsed.colorless += m.cost.colorless || 0;
           }
         }
@@ -583,21 +583,21 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
     });
     
     const move = state.pokemon.moves[moveIndex];
-    const newCost = move.cost || { fire: 0, water: 0, grass: 0, electric: 0, colorless: 0 };
+    const newCost = move.cost || { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 };
     const totalNeeded = {
       fire: tempUsed.fire + (newCost.fire || 0),
       water: tempUsed.water + (newCost.water || 0),
       grass: tempUsed.grass + (newCost.grass || 0),
-      electric: tempUsed.electric + (newCost.electric || 0),
+      lightning: tempUsed.lightning + (newCost.lightning || 0),
       colorless: tempUsed.colorless + (newCost.colorless || 0),
     };
 
     // Check if affordable
-    if (totalNeeded.fire > energy.fire || 
+    if (totalNeeded.fire > energy.fire ||
         totalNeeded.water > energy.water ||
         totalNeeded.grass > energy.grass ||
-        totalNeeded.electric > energy.electric ||
-        totalNeeded.colorless > energy.colorless + (energy.fire - totalNeeded.fire) + (energy.water - totalNeeded.water) + (energy.grass - totalNeeded.grass) + (energy.electric - totalNeeded.electric)) {
+        totalNeeded.lightning > energy.lightning ||
+        totalNeeded.colorless > energy.colorless + (energy.fire - totalNeeded.fire) + (energy.water - totalNeeded.water) + (energy.grass - totalNeeded.grass) + (energy.lightning - totalNeeded.lightning)) {
       return; // Can't afford
     }
 
@@ -860,7 +860,7 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
           fire: aliveTypes.includes('fire') ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 2),
           water: aliveTypes.includes('water') ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 2),
           grass: aliveTypes.includes('grass') ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 2),
-          electric: aliveTypes.includes('electric') ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 2),
+          lightning: aliveTypes.includes('electric') ? 1 + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 2),
           colorless: 1 + Math.floor(Math.random() * 2),
         });
       }, 1500);
@@ -1144,13 +1144,13 @@ function BattleScreen({ team, user, onExit }: BattleScreenProps) {
                 Grass x{energy.grass}
               </span>
             )}
-            {energy.electric > 0 && (
-              <span 
-                className={`energy-icon electric ${showEnergyExchange ? 'exchangeable' : ''}`}
-                title="Electric - Click to exchange"
-                onClick={() => showEnergyExchange && handleEnergyExchange('electric')}
+            {energy.lightning > 0 && (
+              <span
+                className={`energy-icon lightning ${showEnergyExchange ? 'exchangeable' : ''}`}
+                title="Lightning - Click to exchange"
+                onClick={() => showEnergyExchange && handleEnergyExchange('lightning')}
               >
-                Elec x{energy.electric}
+                Light x{energy.lightning}
               </span>
             )}
             {energy.colorless > 0 && (

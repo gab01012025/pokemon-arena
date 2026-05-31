@@ -1,9 +1,15 @@
 import { Pokemon, EnergyCost, Move, PokemonType } from '@/types/game';
 
 // Helper para criar custo de energia
-const cost = (fire = 0, water = 0, grass = 0, electric = 0, colorless = 0): EnergyCost => ({
-  fire, water, grass, electric, colorless
-});
+const cost = (fire = 0, water = 0, grass = 0, lightning = 0, colorless = 0): Partial<EnergyCost> => {
+  const c: Partial<EnergyCost> = {};
+  if (fire) c.fire = fire;
+  if (water) c.water = water;
+  if (grass) c.grass = grass;
+  if (lightning) c.lightning = lightning;
+  if (colorless) c.colorless = colorless;
+  return c;
+};
 
 // Helper para criar move
 const createMove = (
@@ -91,11 +97,11 @@ export const pikachu: Pokemon = {
   ],
 };
 
-export const charizard: Pokemon = {
-  id: 'charizard',
-  name: 'Charizard',
-  description: 'A powerful Fire/Flying type that breathes intense flames. When angry, the flame at the tip of its tail burns fiercely.',
-  types: ['Fire', 'Flying'],
+export const charmander: Pokemon = {
+  id: 'charmander',
+  name: 'Charmander',
+  description: 'The flame on its tail indicates its life force. If it is healthy, the flame burns brightly.',
+  types: ['Fire'],
   generation: 'Gen1',
   category: 'Starter',
   hp: 100,
@@ -103,80 +109,78 @@ export const charizard: Pokemon = {
   isStarter: true,
   unlockCost: 0,
   moves: [
-    createMove(0, 'Flamethrower', 'Charizard scorches the target with a stream of fire, dealing 25 damage.', 'Fire', {
+    createMove(0, 'Ember', 'Charmander shoots small flames, dealing 20 damage.', 'Fire', {
       classes: ['Special', 'Ranged'],
       cost: cost(1),
+      damage: 20,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 20 }],
+    }),
+    createMove(1, 'Flamethrower', 'A powerful fire stream dealing 35 damage with burn chance.', 'Fire', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(2, 0, 0, 0, 1),
+      cooldown: 1,
+      damage: 35,
+      target: 'OneEnemy',
+      effects: [
+        { type: 'damage', value: 35 },
+        { type: 'burn', value: 10, duration: 2 },
+      ],
+    }),
+    createMove(2, 'Dragon Rage', 'Charmander unleashes draconic fury, dealing fixed 25 damage.', 'Dragon', {
+      classes: ['Special', 'Ranged'],
+      cost: cost(1, 0, 0, 0, 1),
       damage: 25,
       target: 'OneEnemy',
       effects: [{ type: 'damage', value: 25 }],
     }),
-    createMove(1, 'Fire Blast', 'A devastating fire attack that deals 50 damage. Has a 10% chance to burn. Requires Dragon Dance.', 'Fire', {
-      classes: ['Special', 'Ranged'],
-      cost: cost(2, 0, 0, 0, 1),
-      cooldown: 1,
-      damage: 50,
-      target: 'OneEnemy',
-      require: 'Dragon Dance',
-      effects: [
-        { type: 'damage', value: 50 },
-        { type: 'afflict', value: 10, duration: 3 },
-      ],
-    }),
-    createMove(2, 'Dragon Dance', 'Charizard mystically boosts itself, gaining 20% damage boost for 3 turns.', 'Dragon', {
-      classes: ['Status'],
-      cost: cost(0, 0, 0, 0, 1),
-      cooldown: 3,
-      duration: 3,
-      target: 'Self',
-      effects: [{ type: 'strengthen', value: 20, duration: 3 }],
-    }),
-    protect('Fly', 'Charizard', ['Physical']),
+    protect('Smokescreen', 'Charmander', ['Status']),
   ],
 };
 
-export const blastoise: Pokemon = {
-  id: 'blastoise',
-  name: 'Blastoise',
-  description: 'A powerful Water type with cannons on its shell. It can shoot water bullets with enough accuracy to strike empty cans from 160 feet.',
+export const squirtle: Pokemon = {
+  id: 'squirtle',
+  name: 'Squirtle',
+  description: 'When it retracts its long neck into its shell, it squirts out water with vigorous force.',
   types: ['Water'],
   generation: 'Gen1',
   category: 'Starter',
-  hp: 110,
+  hp: 100,
   traits: ['Kanto', 'Starter', 'WaterType'],
   isStarter: true,
   unlockCost: 0,
   moves: [
-    createMove(0, 'Water Gun', 'Blastoise sprays water at the target, dealing 20 damage.', 'Water', {
+    createMove(0, 'Water Gun', 'Squirtle sprays water at the target, dealing 20 damage.', 'Water', {
       classes: ['Special', 'Ranged'],
       cost: cost(0, 1),
       damage: 20,
       target: 'OneEnemy',
       effects: [{ type: 'damage', value: 20 }],
     }),
-    createMove(1, 'Hydro Pump', 'Blastoise blasts the target with a huge volume of water, dealing 55 damage.', 'Water', {
+    createMove(1, 'Bubble Beam', 'Squirtle fires bubbles at high speed, dealing 30 damage.', 'Water', {
       classes: ['Special', 'Ranged'],
-      cost: cost(0, 2, 0, 0, 1),
-      cooldown: 2,
-      damage: 55,
+      cost: cost(0, 2),
+      cooldown: 1,
+      damage: 30,
       target: 'OneEnemy',
-      effects: [{ type: 'damage', value: 55 }],
+      effects: [{ type: 'damage', value: 30 }],
     }),
-    createMove(2, 'Iron Defense', 'Blastoise hardens its body, gaining 25 damage reduction for 3 turns.', 'Steel', {
+    createMove(2, 'Withdraw', 'Squirtle retreats into its shell, gaining 20 damage reduction for 3 turns.', 'Water', {
       classes: ['Status'],
       cost: cost(0, 0, 0, 0, 1),
       cooldown: 3,
       duration: 3,
       target: 'Self',
-      effects: [{ type: 'reduce', value: 25, duration: 3 }],
+      effects: [{ type: 'reduce', value: 20, duration: 3 }],
     }),
-    protect('Withdraw', 'Blastoise', ['Status']),
+    protect('Rapid Spin', 'Squirtle', ['Physical']),
   ],
 };
 
-export const venusaur: Pokemon = {
-  id: 'venusaur',
-  name: 'Venusaur',
-  description: 'A Grass/Poison type with a flower on its back. The flower releases a soothing scent that calms battling Pokémon.',
+export const bulbasaur: Pokemon = {
+  id: 'bulbasaur',
+  name: 'Bulbasaur',
+  description: 'A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.',
   types: ['Grass', 'Poison'],
   generation: 'Gen1',
   category: 'Starter',
@@ -185,31 +189,69 @@ export const venusaur: Pokemon = {
   isStarter: true,
   unlockCost: 0,
   moves: [
-    createMove(0, 'Razor Leaf', 'Venusaur cuts the enemy with razor-sharp leaves, dealing 20 damage.', 'Grass', {
+    createMove(0, 'Vine Whip', 'Bulbasaur strikes with vines, dealing 20 damage.', 'Grass', {
       classes: ['Physical', 'Ranged'],
       cost: cost(0, 0, 1),
       damage: 20,
       target: 'OneEnemy',
       effects: [{ type: 'damage', value: 20 }],
     }),
-    createMove(1, 'Solar Beam', 'Venusaur gathers light and fires a beam, dealing 60 damage. Requires Growth.', 'Grass', {
-      classes: ['Special', 'Ranged'],
-      cost: cost(0, 0, 2, 0, 1),
-      cooldown: 2,
-      damage: 60,
+    createMove(1, 'Razor Leaf', 'Bulbasaur fires sharp leaves, dealing 30 damage.', 'Grass', {
+      classes: ['Physical', 'Ranged'],
+      cost: cost(0, 0, 2),
+      cooldown: 1,
+      damage: 30,
       target: 'OneEnemy',
-      require: 'Growth',
-      effects: [{ type: 'damage', value: 60 }],
+      effects: [{ type: 'damage', value: 30 }],
     }),
-    createMove(2, 'Growth', 'Venusaur raises its special attack, gaining 25% damage boost for 3 turns.', 'Normal', {
+    createMove(2, 'Leech Seed', 'Bulbasaur plants a seed that drains 10 HP per turn for 3 turns.', 'Grass', {
       classes: ['Status'],
+      cost: cost(0, 0, 1),
+      cooldown: 2,
+      duration: 3,
+      target: 'OneEnemy',
+      effects: [{ type: 'absorb', value: 10, duration: 3 }],
+    }),
+    protect('Growl', 'Bulbasaur', ['Status']),
+  ],
+};
+
+export const meowth: Pokemon = {
+  id: 'meowth',
+  name: 'Meowth',
+  description: 'It is nocturnal in nature. If it spots something shiny, its eyes glitter brightly.',
+  types: ['Normal'],
+  generation: 'Gen1',
+  category: 'Starter',
+  hp: 90,
+  traits: ['Kanto', 'Starter', 'NormalType'],
+  isStarter: true,
+  unlockCost: 0,
+  moves: [
+    createMove(0, 'Scratch', 'Meowth scratches with sharp claws, dealing 15 damage.', 'Normal', {
+      classes: ['Physical', 'Contact'],
+      cost: cost(0, 0, 0, 0, 1),
+      damage: 15,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 15 }],
+    }),
+    createMove(1, 'Pay Day', 'Meowth throws coins at the target, dealing 25 damage.', 'Normal', {
+      classes: ['Physical', 'Ranged'],
+      cost: cost(0, 0, 0, 0, 2),
+      cooldown: 1,
+      damage: 25,
+      target: 'OneEnemy',
+      effects: [{ type: 'damage', value: 25 }],
+    }),
+    createMove(2, 'Fake Out', 'Meowth fakes out the target, stunning for 1 turn. Only works first turn.', 'Normal', {
+      classes: ['Physical', 'Contact', 'Priority'],
       cost: cost(0, 0, 0, 0, 1),
       cooldown: 3,
-      duration: 3,
-      target: 'Self',
-      effects: [{ type: 'strengthen', value: 25, duration: 3 }],
+      damage: 15,
+      target: 'OneEnemy',
+      effects: [{ type: 'stun', duration: 1 }],
     }),
-    protect('Synthesis', 'Venusaur', ['Status']),
+    protect('Detect', 'Meowth', ['Status']),
   ],
 };
 
@@ -1151,9 +1193,11 @@ export const tyranitar: Pokemon = {
 
 export const allPokemon: Pokemon[] = [
   pikachu,
-  charizard,
-  blastoise,
-  venusaur,
+  charmander,
+  squirtle,
+  bulbasaur,
+  eevee,
+  meowth,
   gengar,
   alakazam,
   machamp,

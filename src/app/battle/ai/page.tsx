@@ -39,7 +39,7 @@ import {
 } from './components';
 
 // ==================== AI ENERGY HELPER ====================
-/** Pick up to 4 selectable energy types based on ALL types from alive pokemon, deduped */
+/** Pick up to 3 selectable energy types based on ALL types from alive pokemon, deduped */
 function getAiEnergyTypes(team: BattlePokemon[]): EnergyType[] {
   const energySet = new Set<EnergyType>();
   for (const p of team) {
@@ -50,8 +50,8 @@ function getAiEnergyTypes(team: BattlePokemon[]): EnergyType[] {
     }
   }
   const unique = Array.from(energySet);
-  // If fewer than 4, return what we have; if more, pick the first 4
-  return unique.slice(0, 4);
+  // If fewer than 3, return what we have; if more, pick the first 3
+  return unique.slice(0, 3);
 }
 
 // ==================== MAIN COMPONENT ====================
@@ -247,13 +247,13 @@ export default function AIBattlePage() {
   const toggleEnergyType = (type: EnergyType) => {
     setSelectedEnergyTypes(prev => {
       if (prev.includes(type)) return prev.filter(t => t !== type);
-      if (prev.length >= 4) return prev;
+      if (prev.length >= 3) return prev;
       return [...prev, type];
     });
   };
 
   const confirmEnergySelection = () => {
-    if (selectedEnergyTypes.length !== 4) return;
+    if (selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 3) return;
     const initialEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, 1);
     console.log('[ENERGY] Battle start — player initial energy:', JSON.stringify(initialEnergy));
     setEnergy(prev => {
@@ -261,7 +261,7 @@ export default function AIBattlePage() {
       console.log('[ENERGY] Player energy after init:', JSON.stringify(result));
       return result;
     });
-    // Initialize AI energy based on ALL opponent team types (dedup, max 4)
+    // Initialize AI energy based on ALL opponent team types (dedup, max 3)
     const aiTypes = getAiEnergyTypes(opponentTeam);
     const initialAiEnergy = generateTurnEnergy(opponentTeam, aiTypes, 1);
     console.log('[ENERGY] Battle start — AI initial energy:', JSON.stringify(initialAiEnergy));
