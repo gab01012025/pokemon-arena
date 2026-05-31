@@ -37,18 +37,14 @@ export default function Home() {
       <section className="landing-hero">
         <div className="landing-hero-bg" />
         <div className="landing-hero-particles">
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
-          <div className="landing-particle" />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png" alt="" width={60} height={60} unoptimized style={{ left: '5%', top: '15%', animationDelay: '0s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png" alt="" width={70} height={70} unoptimized style={{ right: '8%', top: '25%', animationDelay: '-3s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/38.png" alt="" width={55} height={55} unoptimized style={{ left: '12%', bottom: '20%', animationDelay: '-6s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png" alt="" width={65} height={65} unoptimized style={{ right: '10%', bottom: '30%', animationDelay: '-9s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png" alt="" width={55} height={55} unoptimized style={{ left: '25%', top: '70%', animationDelay: '-4s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png" alt="" width={60} height={60} unoptimized style={{ right: '22%', top: '65%', animationDelay: '-7s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png" alt="" width={50} height={50} unoptimized style={{ left: '40%', top: '8%', animationDelay: '-2s' }} />
+          <Image className="landing-float-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png" alt="" width={50} height={50} unoptimized style={{ right: '35%', bottom: '10%', animationDelay: '-5s' }} />
         </div>
         <div className="landing-hero-content">
           <div className="landing-hero-badge">
