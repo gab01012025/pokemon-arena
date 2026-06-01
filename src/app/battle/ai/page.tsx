@@ -197,7 +197,7 @@ export default function AIBattlePage() {
                 weakness: wr.weakness,
                 resistance: wr.resistance,
                 evoBar: 0,
-                maxEvoBar: 80,
+                maxEvoBar: 50,
               };
             });
             setPlayerTeam(battleTeam);
@@ -1510,22 +1510,31 @@ export default function AIBattlePage() {
     // Track turns
     setBattleTracker(prev => ({ ...prev, turnsPlayed: prev.turnsPlayed + 1 }));
 
-    setPlayerTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
-    setOpponentTeam(prev => prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) })));
+    // Use functional updaters to preserve evo bar values from executeAction
+    // Process cooldowns + status effects in a single pass
+    let playerDeadAfterStatus = false;
+    let opponentDeadAfterStatus = false;
 
-    // Process status effects (burn, poison, etc.) and check for deaths
-    const newPlayerState = processStatusEffects(playerTeamRef.current, addLog);
-    const newOpponentState = processStatusEffects(opponentTeamRef.current, addLog);
-    setPlayerTeam(newPlayerState);
-    setOpponentTeam(newOpponentState);
+    setPlayerTeam(prev => {
+      const withCooldowns = prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) }));
+      const afterStatus = processStatusEffects(withCooldowns, addLog);
+      playerDeadAfterStatus = afterStatus.filter(p => p.hp > 0).length === 0;
+      return afterStatus;
+    });
+    setOpponentTeam(prev => {
+      const withCooldowns = prev.map(p => ({ ...p, moves: p.moves.map(m => ({ ...m, currentCooldown: Math.max(0, m.currentCooldown - 1) })) }));
+      const afterStatus = processStatusEffects(withCooldowns, addLog);
+      opponentDeadAfterStatus = afterStatus.filter(p => p.hp > 0).length === 0;
+      return afterStatus;
+    });
 
     // Check if status effects killed all pokemon on either side
-    if (newOpponentState.filter(p => p.hp > 0).length === 0) {
+    if (opponentDeadAfterStatus) {
       handleBattleVictory();
       setPhase('victory');
       return;
     }
-    if (newPlayerState.filter(p => p.hp > 0).length === 0) {
+    if (playerDeadAfterStatus) {
       handleBattleDefeat();
       setPhase('defeat');
       return;
@@ -1758,7 +1767,6 @@ export default function AIBattlePage() {
           items={items}
           showItems={showItems}
           setShowItems={setShowItems}
-          battleLog={battleLog}
           evolvableList={getEvolvableList()}
           onEvolve={handleEvolveClick}
           onSurrender={() => { handleBattleDefeat(); setPhase('defeat'); }}

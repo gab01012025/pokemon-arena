@@ -47,7 +47,7 @@ export const createOpponentTeam = (): BattlePokemon[] => {
       weakness: wr.weakness,
       resistance: wr.resistance,
       evoBar: 0,
-      maxEvoBar: 100,
+      maxEvoBar: 50,
     };
   });
 };
@@ -88,7 +88,7 @@ export const createFallbackPlayerTeam = (): BattlePokemon[] => {
       canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'fire', amount: 2 }],
       weakness: wrFire.weakness, resistance: wrFire.resistance,
-      evoBar: 0, maxEvoBar: 80,
+      evoBar: 0, maxEvoBar: 50,
     },
     {
       id: 7, name: 'Squirtle', types: ['water'], hp: 100, maxHp: 100,
@@ -97,7 +97,7 @@ export const createFallbackPlayerTeam = (): BattlePokemon[] => {
       canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'water', amount: 2 }],
       weakness: wrWater.weakness, resistance: wrWater.resistance,
-      evoBar: 0, maxEvoBar: 80,
+      evoBar: 0, maxEvoBar: 50,
     },
     {
       id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, maxHp: 100,
@@ -106,7 +106,7 @@ export const createFallbackPlayerTeam = (): BattlePokemon[] => {
       canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'grass', amount: 2 }],
       weakness: wrGrass.weakness, resistance: wrGrass.resistance,
-      evoBar: 0, maxEvoBar: 80,
+      evoBar: 0, maxEvoBar: 50,
     },
   ];
 };

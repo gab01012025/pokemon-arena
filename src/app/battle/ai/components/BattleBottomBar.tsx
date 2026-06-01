@@ -1,13 +1,12 @@
 'use client';
 
-import { BattleItem, LogEntry, GamePhase } from '../types';
+import { BattleItem, GamePhase } from '../types';
 
 interface BattleBottomBarProps {
   phase: GamePhase;
   items: BattleItem[];
   showItems: boolean;
   setShowItems: (show: boolean) => void;
-  battleLog: LogEntry[];
   evolvableList: { idx: number; name: string }[];
   onEvolve: (idx: number) => void;
   onSurrender: () => void;
@@ -19,7 +18,6 @@ export default function BattleBottomBar({
   items,
   showItems,
   setShowItems,
-  battleLog,
   evolvableList,
   onEvolve,
   onSurrender,
@@ -40,15 +38,10 @@ export default function BattleBottomBar({
               onClick={() => onEvolve(e.idx)}
               disabled={phase !== 'player1-turn'}
             >
-              EVOLVE {e.name} ✨
+              EVOLVE {e.name}
             </button>
           ))}
         </div>
-      </div>
-      <div className="battle-log">
-        {battleLog.map(entry => (
-          <div key={entry.id} className={`log-entry ${entry.type}`}>{entry.text}</div>
-        ))}
       </div>
     </div>
   );

@@ -802,11 +802,10 @@ html, body { background: #080a14 !important; }
   flex-direction: row;
   border-left: 3px solid #4CAF50;
 }
-/* Enemy slot: just portrait, no skills */
+/* Enemy slot: skills left + portrait right (mirrored from player) */
 .arena-slot.enemy {
   flex-direction: row;
   border-right: 3px solid #e53935;
-  max-width: 180px;
 }
 .arena-slot.fainted {
   opacity: 0.25;
@@ -907,6 +906,22 @@ html, body { background: #080a14 !important; }
   font-weight: 700;
   color: #ef5350;
   border-radius: 6px;
+}
+/* Enemy skills — same grid but greyed out / non-interactive */
+.slot-skills.enemy-skills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  align-self: center;
+}
+.slot-skills.enemy-skills .skill-square {
+  cursor: default;
+  opacity: 0.55;
+}
+.slot-skills.enemy-skills .skill-square:hover {
+  transform: none;
+  border-color: #1e2340;
+  background: #0f1223;
 }
 
 /* ==================== SLOT BOTTOM (name + HP) ==================== */
@@ -1336,24 +1351,25 @@ html, body { background: #080a14 !important; }
 /* ==================== BOTTOM BAR ==================== */
 .bottom-bar {
   display: flex;
+  align-items: center;
+  justify-content: center;
   background: #0a0d1c;
   border-top: 1px solid #1e2340;
-  min-height: 70px;
-  max-height: 90px;
+  min-height: 44px;
+  max-height: 52px;
   position: relative;
+  padding: 4px 16px;
 }
 .bottom-left {
   display: flex;
-  flex-direction: column;
   gap: 6px;
-  padding: 8px 12px;
-  min-width: 200px;
-  border-right: 1px solid #1e2340;
+  align-items: center;
 }
 .action-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
 }
 .action-btn {
   font-family: var(--font-title);
@@ -1903,8 +1919,8 @@ html, body { background: #080a14 !important; }
 @media (max-width: 900px) {
   .battle-area { flex-direction: column; padding: 4px; gap: 4px; margin: 2px 4px; }
   .arena-column { flex-direction: row; flex-wrap: wrap; max-width: 100%; gap: 4px; }
-  .arena-slot.player { max-width: 260px; }
-  .arena-slot.enemy { max-width: 140px; }
+  .arena-slot.player { max-width: 280px; }
+  .arena-slot.enemy { max-width: 280px; }
   .slot-portrait { width: 72px; height: 72px; }
   .char-sprite { width: 72px; height: 72px; }
   .skill-square { width: 32px; height: 32px; }
@@ -1913,14 +1929,14 @@ html, body { background: #080a14 !important; }
   .energy-orb { width: 18px; height: 18px; font-size: 9px; }
   .center-area { flex-direction: row; min-width: auto; }
   .vs-display { font-size: 16px; padding: 6px 14px; }
-  .bottom-bar { min-height: 70px; }
+  .bottom-bar { min-height: 44px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .arena-slot.player { max-width: 220px; }
-  .arena-slot.enemy { max-width: 110px; }
+  .arena-slot.player { max-width: 240px; }
+  .arena-slot.enemy { max-width: 240px; }
   .slot-portrait { width: 56px; height: 56px; }
   .char-sprite { width: 56px; height: 56px; }
   .skill-square { width: 26px; height: 26px; }

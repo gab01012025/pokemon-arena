@@ -41,6 +41,22 @@ export default function EnemyColumn({
             }}
             style={{ cursor: poke.hp > 0 ? 'pointer' : 'default' }}
           >
+            {/* Skills side (left of portrait for enemies) */}
+            <div className="slot-skills enemy-skills">
+              {poke.moves.slice(0, 4).map(move => {
+                const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
+                return (
+                  <div
+                    key={move.id}
+                    className="skill-square disabled"
+                    title={move.name}
+                  >
+                    <EnergyIcon type={energyType} size={28} />
+                  </div>
+                );
+              })}
+            </div>
+
             {/* Portrait */}
             <div className="slot-portrait">
               {poke.statusEffects.length > 0 && (
