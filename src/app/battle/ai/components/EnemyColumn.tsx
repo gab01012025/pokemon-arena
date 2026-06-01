@@ -61,7 +61,7 @@ export default function EnemyColumn({
                 </div>
               )}
               <div className="pokemon-sprite">
-                <Image src={poke.sprite} alt={poke.name} width={76} height={76} unoptimized />
+                <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized />
               </div>
               <div className="pokemon-name-tag">{poke.name}</div>
               <div className="hp-text-overlay">{poke.hp}/{poke.maxHp}</div>
