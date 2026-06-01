@@ -687,21 +687,22 @@ html, body { background: #080a14 !important; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255, 215, 0, 0.15);
 }
 
-/* Enemy-only card (no skills panel, portrait takes full width) */
+/* Enemy-only card (no skills panel, compact portrait card) */
 .character-card.enemy-only {
-  flex-direction: column;
-  border-right: none;
-  border-top: 4px solid #e53935;
+  flex-direction: row-reverse;
+  border-right: 4px solid #e53935;
   border-left: none;
+  border-top: none;
+  max-width: 180px;
+  align-self: flex-end;
 }
 .character-card.enemy-only:hover {
-  border-top-color: #ef5350;
   border-color: #2a3058;
-  border-top-color: #ef5350;
+  border-right-color: #ef5350;
 }
 .character-card.enemy-only .enemy-portrait {
   width: 100%;
-  min-height: 160px;
+  min-height: 140px;
   border-right: none;
   border-left: none;
   border-bottom: none;
@@ -1677,6 +1678,7 @@ html, body { background: #080a14 !important; }
   .battle-area { flex-direction: column; padding: 6px; gap: 6px; margin: 4px 6px; }
   .character-column { flex-direction: row; max-width: 100%; gap: 6px; overflow-x: auto; }
   .character-card { min-width: 0; }
+  .character-card.enemy-only { max-width: 140px; align-self: auto; }
   .portrait-container { width: 90px; min-height: 110px; }
   .character-card.enemy-only .enemy-portrait { min-height: 100px; }
   .pokemon-sprite img { width: 70px; height: 70px; }
@@ -1697,6 +1699,7 @@ html, body { background: #080a14 !important; }
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
   .portrait-container { width: 70px; min-height: 90px; }
+  .character-card.enemy-only { max-width: 120px; }
   .character-card.enemy-only .enemy-portrait { min-height: 80px; }
   .pokemon-sprite img { width: 52px; height: 52px; }
   .pokemon-name-tag { font-size: 8px; }
