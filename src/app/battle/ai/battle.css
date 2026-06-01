@@ -96,17 +96,17 @@ html, body { background: #080a14 !important; }
 }
 .energy-select-title {
   font-family: var(--font-title);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  color: #fff;
+  color: #FFD700;
   letter-spacing: 3px;
   text-transform: uppercase;
 }
 .energy-select-subtitle {
   font-family: var(--font-main);
   font-size: 14px;
-  color: rgba(255,255,255,0.45);
-  margin-top: 4px;
+  color: #888;
+  margin-top: 6px;
   font-weight: 500;
 }
 
@@ -122,12 +122,12 @@ html, body { background: #080a14 !important; }
 /* Individual TCG Energy Card */
 .energy-tcg-card {
   aspect-ratio: 2.5 / 3.5;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.2s ease;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 .energy-tcg-card::before {
   content: '';
@@ -166,14 +166,14 @@ html, body { background: #080a14 !important; }
 }
 
 .energy-tcg-card:hover {
-  transform: translateY(-6px) scale(1.04);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
 .energy-tcg-card:hover::before {
   border-color: rgba(255,255,255,0.35);
 }
 .energy-tcg-card.selected {
-  transform: translateY(-6px) scale(1.04);
+  transform: translateY(-4px) scale(1.02);
 }
 .energy-tcg-card.selected::before {
   border-color: var(--accent-green);
@@ -242,7 +242,7 @@ html, body { background: #080a14 !important; }
   font-family: var(--font-main);
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255,255,255,0.7);
+  color: #aaa;
 }
 
 .energy-select-team {
@@ -269,10 +269,11 @@ html, body { background: #080a14 !important; }
 .energy-select-hint {
   font-family: var(--font-main);
   font-size: 13px;
-  color: rgba(255,255,255,0.8);
-  background: rgba(255,255,255,0.06);
-  border-radius: 8px;
-  padding: 6px 14px;
+  color: #ccc;
+  background: #0f1223;
+  border: 1px solid #1e2340;
+  border-radius: 6px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -320,8 +321,8 @@ html, body { background: #080a14 !important; }
 .trainer-select-card {
   padding: 18px 12px 14px;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
-  background: rgba(14, 18, 40, 0.9);
+  border: 2px solid #1e2340;
+  background: #0f1223;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -335,12 +336,12 @@ html, body { background: #080a14 !important; }
 }
 .trainer-select-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(20, 28, 56, 0.95);
+  border-color: #2a3058;
+  background: #141830;
 }
 .trainer-select-card.selected {
   border-color: #4CAF50;
-  background: rgba(10, 30, 20, 0.95);
+  background: #0a1e14;
 }
 .trainer-select-card .checkmark {
   position: absolute;
@@ -624,20 +625,24 @@ html, body { background: #080a14 !important; }
   flex: 1;
   display: flex;
   align-items: stretch;
-  padding: 12px 20px;
-  gap: 14px;
+  padding: 12px 16px;
+  gap: 12px;
   min-height: 0;
   position: relative;
+  margin: 8px 12px;
+  background: rgba(8, 10, 22, 0.6);
+  border: 2px solid #1e2340;
+  border-radius: 8px;
 }
 
 /* Character Column */
 .character-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   justify-content: center;
-  max-width: 380px;
+  max-width: 400px;
 }
 
 /* Character Card */
@@ -682,10 +687,30 @@ html, body { background: #080a14 !important; }
   box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255, 215, 0, 0.15);
 }
 
+/* Enemy-only card (no skills panel, portrait takes full width) */
+.character-card.enemy-only {
+  flex-direction: column;
+  border-right: none;
+  border-top: 4px solid #e53935;
+  border-left: none;
+}
+.character-card.enemy-only:hover {
+  border-top-color: #ef5350;
+  border-color: #2a3058;
+  border-top-color: #ef5350;
+}
+.character-card.enemy-only .enemy-portrait {
+  width: 100%;
+  min-height: 160px;
+  border-right: none;
+  border-left: none;
+  border-bottom: none;
+}
+
 /* Portrait Container */
 .portrait-container {
-  width: 140px;
-  min-height: 155px;
+  width: 150px;
+  min-height: 165px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -706,15 +731,15 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 0 0;
+  padding: 8px 0 4px;
 }
 .pokemon-sprite.flipped { transform: scaleX(-1); }
 .pokemon-sprite img {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
 }
 .pokemon-name-tag {
   position: absolute;
@@ -723,12 +748,12 @@ html, body { background: #080a14 !important; }
   right: 0;
   text-align: center;
   font-family: var(--font-main);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  padding: 3px 0;
-  background: rgba(0,0,0,0.65);
+  padding: 4px 0;
+  background: rgba(0,0,0,0.7);
   letter-spacing: 0.5px;
 }
 
@@ -776,22 +801,19 @@ html, body { background: #080a14 !important; }
   border-radius: 4px;
   line-height: 1.2;
   white-space: nowrap;
-  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   gap: 2px;
 }
 .wr-badge.weakness {
-  background: rgba(255, 50, 50, 0.8);
+  background: #c03030;
   color: #fff;
-  border: 1px solid rgba(255,100,100,0.6);
-  box-shadow: 0 1px 4px rgba(255,50,50,0.3);
+  border: 1px solid #e05050;
 }
 .wr-badge.resistance {
-  background: rgba(50, 120, 255, 0.8);
+  background: #3060c0;
   color: #fff;
-  border: 1px solid rgba(100,160,255,0.6);
-  box-shadow: 0 1px 4px rgba(50,120,255,0.3);
+  border: 1px solid #5080e0;
 }
 
 .hp-text-overlay {
@@ -825,10 +847,9 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.65);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: #0a0a14;
+  border: 1px solid #1e2340;
   animation: status-glow 2.5s ease-in-out infinite;
-  box-shadow: 0 0 4px rgba(0,0,0,0.4);
 }
 @keyframes status-glow {
   0%, 100% { opacity: 1; filter: brightness(1); }
@@ -933,14 +954,23 @@ html, body { background: #080a14 !important; }
 
 /* Skill Info Tooltip */
 .skill-info-panel {
-  background: rgba(12, 15, 30, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f1223;
+  border: 2px solid #1e2340;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  padding: 12px;
-  min-width: 230px;
-  max-width: 290px;
-  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  padding: 14px 16px;
+  min-width: 280px;
+  max-width: 340px;
+  z-index: 30;
+  animation: tooltip-in 0.15s ease;
+}
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 .skill-info-header {
   display: flex;
@@ -994,7 +1024,7 @@ html, body { background: #080a14 !important; }
   font-weight: 600;
   margin-bottom: 6px;
   padding: 4px 8px;
-  background: rgba(255,255,255,0.04);
+  background: #0a0d1c;
   border-radius: 6px;
 }
 .dmg-base { color: rgba(255,255,255,0.6); }
@@ -1142,8 +1172,8 @@ html, body { background: #080a14 !important; }
   position: absolute;
   bottom: 140px;
   left: 16px;
-  background: rgba(12, 15, 30, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0c0f1e;
+  border: 1px solid #1e2340;
   border-radius: 10px;
   padding: 0;
   display: flex;
@@ -1159,7 +1189,7 @@ html, body { background: #080a14 !important; }
   align-items: center;
   gap: 8px;
   padding: 10px 12px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid #1e2340;
   position: relative;
 }
 .items-panel-title {
@@ -1175,7 +1205,7 @@ html, body { background: #080a14 !important; }
   font-size: 9px;
   font-weight: 700;
   color: #FF3D71;
-  background: rgba(255,61,113,0.12);
+  background: #1e1018;
   padding: 3px 8px;
   border-radius: 4px;
 }
@@ -1189,7 +1219,7 @@ html, body { background: #080a14 !important; }
 }
 .items-panel-scroll::-webkit-scrollbar { width: 4px; }
 .items-panel-scroll::-webkit-scrollbar-track { background: transparent; }
-.items-panel-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.items-panel-scroll::-webkit-scrollbar-thumb { background: #1e2340; border-radius: 2px; }
 .item-category {
   display: flex;
   flex-direction: column;
@@ -1213,7 +1243,7 @@ html, body { background: #080a14 !important; }
   cursor: pointer;
   transition: background 0.15s;
 }
-.item-row:hover { background: rgba(255,255,255,0.08); }
+.item-row:hover { background: #141830; }
 .item-row.disabled { opacity: 0.3; cursor: default; }
 .item-icon { font-size: 20px; }
 .item-info { flex: 1; }
@@ -1242,7 +1272,7 @@ html, body { background: #080a14 !important; }
 }
 .battle-log::-webkit-scrollbar { width: 4px; }
 .battle-log::-webkit-scrollbar-track { background: transparent; }
-.battle-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.battle-log::-webkit-scrollbar-thumb { background: #1e2340; border-radius: 2px; }
 .log-entry {
   font-size: 11px;
   padding: 3px 0;
@@ -1407,8 +1437,8 @@ html, body { background: #080a14 !important; }
   to { opacity: 1; }
 }
 .modal {
-  background: rgba(12, 16, 36, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0c1024;
+  border: 1px solid #1e2340;
   border-radius: 16px;
   padding: 40px 48px;
   text-align: center;
@@ -1467,12 +1497,12 @@ html, body { background: #080a14 !important; }
   background: #66BB6A;
 }
 .change-team-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #141830;
+  border: 1px solid #1e2340;
 }
 .change-team-btn:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.12);
+  background: #1c2248;
 }
 .result-buttons {
   display: flex;
@@ -1552,8 +1582,8 @@ html, body { background: #080a14 !important; }
   justify-content: center;
 }
 .evolution-choice-option {
-  background: rgba(30, 38, 55, 0.95);
-  border: 2px solid rgba(100, 200, 255, 0.3);
+  background: #1e2637;
+  border: 2px solid #2a4060;
   border-radius: 12px;
   padding: 16px 12px;
   display: flex;
@@ -1567,7 +1597,7 @@ html, body { background: #080a14 !important; }
 }
 .evolution-choice-option:hover:not(.disabled) {
   border-color: #64c8ff;
-  background: rgba(40, 60, 90, 0.95);
+  background: #283c5a;
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(100, 200, 255, 0.25);
 }
@@ -1601,7 +1631,7 @@ html, body { background: #080a14 !important; }
   font-size: 9px;
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(100, 200, 255, 0.15);
+  background: #142030;
   color: #a0d0ff;
   text-transform: uppercase;
   font-family: var(--font-title);
@@ -1629,8 +1659,8 @@ html, body { background: #080a14 !important; }
   font-size: 10px;
   font-weight: 700;
   padding: 8px 24px;
-  background: rgba(255, 61, 113, 0.2);
-  border: 1px solid rgba(255, 61, 113, 0.4);
+  background: #2a1018;
+  border: 1px solid #3a1520;
   border-radius: 8px;
   color: #FF3D71;
   cursor: pointer;
@@ -1638,17 +1668,18 @@ html, body { background: #080a14 !important; }
   letter-spacing: 1px;
 }
 .cancel-evolve-btn:hover {
-  background: rgba(200, 60, 60, 0.5);
+  background: #3a1820;
   color: #fff;
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
-  .battle-area { flex-direction: column; padding: 6px; gap: 6px; }
+  .battle-area { flex-direction: column; padding: 6px; gap: 6px; margin: 4px 6px; }
   .character-column { flex-direction: row; max-width: 100%; gap: 6px; overflow-x: auto; }
   .character-card { min-width: 0; }
-  .portrait-container { width: 80px; min-height: 100px; }
-  .pokemon-sprite img { width: 60px; height: 60px; }
+  .portrait-container { width: 90px; min-height: 110px; }
+  .character-card.enemy-only .enemy-portrait { min-height: 100px; }
+  .pokemon-sprite img { width: 70px; height: 70px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
   .energy-pool { gap: 3px; }
   .energy-orb { width: 18px; height: 18px; font-size: 9px; }
@@ -1665,17 +1696,18 @@ html, body { background: #080a14 !important; }
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .portrait-container { width: 60px; min-height: 80px; }
-  .pokemon-sprite img { width: 44px; height: 44px; }
-  .pokemon-name-tag { font-size: 6px; }
+  .portrait-container { width: 70px; min-height: 90px; }
+  .character-card.enemy-only .enemy-portrait { min-height: 80px; }
+  .pokemon-sprite img { width: 52px; height: 52px; }
+  .pokemon-name-tag { font-size: 8px; }
   .skills-panel { gap: 2px; padding: 3px 4px; }
   .skill-slot { height: 24px; padding: 0 6px 0 4px; }
   .skill-abbrev { font-size: 9px; }
   .skill-power { font-size: 10px; }
   .skill-cost-icons svg { width: 10px; height: 10px; }
   .bottom-left { min-width: 120px; }
-  .hp-bar-inner { height: 5px; }
-  .hp-text-overlay { font-size: 6px; }
+  .hp-bar-inner { height: 6px; }
+  .hp-text-overlay { font-size: 7px; }
   .status-badge { width: 16px; height: 16px; font-size: 10px; }
   .wr-badge { font-size: 6px; padding: 1px 3px; }
   .result-title { font-size: 22px; letter-spacing: 2px; }
@@ -1812,18 +1844,18 @@ html, body { background: #080a14 !important; }
   border-radius: 12px;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(255, 165, 0, 0.2);
-  border: 1px solid rgba(255, 165, 0, 0.4);
+  background: #1e1808;
+  border: 1px solid #3a2a08;
   color: #ffcc00;
 }
 .win-streak-badge.hot {
-  background: rgba(255, 100, 0, 0.25);
-  border-color: rgba(255, 100, 0, 0.5);
+  background: #1e1208;
+  border-color: #3a2008;
   color: #ff8800;
 }
 .win-streak-badge.on-fire {
-  background: rgba(255, 50, 0, 0.3);
-  border-color: rgba(255, 50, 0, 0.6);
+  background: #1e0e08;
+  border-color: #3a1408;
   color: #ff4400;
 }
 
@@ -1836,8 +1868,8 @@ html, body { background: #080a14 !important; }
   border-radius: 12px;
   font-size: 10px;
   font-weight: 700;
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: #14120a;
+  border: 1px solid #2a2410;
   color: #ffd700;
 }
 
@@ -1849,9 +1881,9 @@ html, body { background: #080a14 !important; }
 .battle-stats-panel {
   margin: 14px 0;
   padding: 14px;
-  background: rgba(0, 0, 0, 0.3);
+  background: #080a14;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid #1e2340;
 }
 .stats-title {
   font-family: var(--font-title);
@@ -1873,9 +1905,9 @@ html, body { background: #080a14 !important; }
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: #0f1223;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid #1e2340;
 }
 .stat-label {
   font-size: 10px;
@@ -1891,9 +1923,9 @@ html, body { background: #080a14 !important; }
 .mvp-banner {
   margin-top: 12px;
   padding: 10px 14px;
-  background: rgba(255, 215, 0, 0.06);
+  background: #14120a;
   border-radius: 8px;
-  border: 1px solid rgba(255, 215, 0, 0.15);
+  border: 1px solid #2a2410;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1930,8 +1962,8 @@ html, body { background: #080a14 !important; }
   letter-spacing: 1px;
 }
 .victory-streak {
-  background: rgba(255, 165, 0, 0.15);
-  border: 1px solid rgba(255, 165, 0, 0.3);
+  background: #1e1808;
+  border: 1px solid #2a2008;
   color: #ff9900;
 }
 .victory-streak .streak-bonus {
@@ -1939,8 +1971,8 @@ html, body { background: #080a14 !important; }
   font-size: 10px;
 }
 .defeat-streak {
-  background: rgba(255, 68, 68, 0.15);
-  border: 1px solid rgba(255, 68, 68, 0.25);
+  background: #1e0e0e;
+  border: 1px solid #2a1414;
   color: #ff6666;
 }
 
@@ -1965,4 +1997,4 @@ html, body { background: #080a14 !important; }
 /* Skills panel scrollbar */
 .skills-panel::-webkit-scrollbar { width: 3px; }
 .skills-panel::-webkit-scrollbar-track { background: transparent; }
-.skills-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
+.skills-panel::-webkit-scrollbar-thumb { background: #1e2340; border-radius: 2px; }

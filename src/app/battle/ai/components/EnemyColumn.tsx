@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { BattlePokemon, GamePhase } from '../types';
-import { TYPE_COLORS, STATUS_ICONS, TYPE_TO_ENERGY } from '../data';
+import { STATUS_ICONS, TYPE_TO_ENERGY } from '../data';
 import { getHpClass } from '../engine';
 import EnergyIcon from './EnergyIcon';
 
@@ -28,29 +28,10 @@ export default function EnemyColumn({
         return (
           <div
             key={`e-${poke.id}-${idx}`}
-            className={`character-card enemy ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${anims[idx] || ''}`}
+            className={`character-card enemy enemy-only ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'targeting' && poke.hp > 0 && onTargetSelect(idx)}
           >
-            <div className="skills-panel">
-              {poke.moves.slice(0, 4).map(move => {
-                const colors = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
-                const displayName = move.name;
-                return (
-                  <div key={move.id} className="skill-slot disabled" style={{ background: colors.bg, borderColor: colors.border }}>
-                    <div className="skill-cost-icons">
-                      {move.cost.map((c, ci) => (
-                        Array.from({ length: c.amount }).map((_, ai) => (
-                          <EnergyIcon key={`${ci}-${ai}`} type={c.type} size={14} />
-                        ))
-                      ))}
-                    </div>
-                    <span className="skill-abbrev" style={{ color: colors.text }}>{displayName}</span>
-                    {move.power > 0 && <span className="skill-power" style={{ color: colors.text }}>{move.power}</span>}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="portrait-container">
+            <div className="portrait-container enemy-portrait">
               {poke.statusEffects.length > 0 && (
                 <div className="status-icons">
                   {poke.statusEffects.map((se, si) => (
