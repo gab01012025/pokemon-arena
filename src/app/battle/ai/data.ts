@@ -751,32 +751,34 @@ export const AI_TRAINER_NAMES = [
 ];
 
 // ==================== ITEMS ====================
+const ITEM_SPRITE = (name: string) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${name}.png`;
+
 export const DEFAULT_ITEMS: BattleItem[] = [
   // === HEALING ===
-  { id: 'potion', name: 'Potion', description: 'Heals 30 HP', icon: '🧪', uses: 2, maxUses: 2, category: 'healing' },
-  { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: '💊', uses: 1, maxUses: 1, category: 'healing' },
-  { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: '💉', uses: 1, maxUses: 1, category: 'healing' },
-  { id: 'max-potion', name: 'Max Potion', description: 'Fully heals HP', icon: '🩸', uses: 1, maxUses: 1, category: 'healing' },
-  { id: 'full-restore', name: 'Full Restore', description: 'Fully heals HP + removes status', icon: '💖', uses: 1, maxUses: 1, category: 'healing' },
+  { id: 'potion', name: 'Potion', description: 'Heals 30 HP', icon: ITEM_SPRITE('potion'), uses: 2, maxUses: 2, category: 'healing' },
+  { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: ITEM_SPRITE('super-potion'), uses: 1, maxUses: 1, category: 'healing' },
+  { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 1, maxUses: 1, category: 'healing' },
+  { id: 'max-potion', name: 'Max Potion', description: 'Fully heals HP', icon: ITEM_SPRITE('max-potion'), uses: 1, maxUses: 1, category: 'healing' },
+  { id: 'full-restore', name: 'Full Restore', description: 'Fully heals HP + removes status', icon: ITEM_SPRITE('full-restore'), uses: 1, maxUses: 1, category: 'healing' },
   // === STATUS ===
-  { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: '🩹', uses: 2, maxUses: 2, category: 'status' },
-  { id: 'antidote', name: 'Antidote', description: 'Removes Poison', icon: '🟢', uses: 3, maxUses: 3, category: 'status' },
-  { id: 'burn-heal', name: 'Burn Heal', description: 'Removes Burn', icon: '🔴', uses: 3, maxUses: 3, category: 'status' },
-  { id: 'paralyze-heal', name: 'Paralyze Heal', description: 'Removes Paralyze', icon: '🟡', uses: 3, maxUses: 3, category: 'status' },
-  { id: 'awakening', name: 'Awakening', description: 'Removes Sleep', icon: '🔵', uses: 3, maxUses: 3, category: 'status' },
-  { id: 'ice-heal', name: 'Ice Heal', description: 'Removes Freeze', icon: '🧊', uses: 3, maxUses: 3, category: 'status' },
+  { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 2, maxUses: 2, category: 'status' },
+  { id: 'antidote', name: 'Antidote', description: 'Removes Poison', icon: ITEM_SPRITE('antidote'), uses: 3, maxUses: 3, category: 'status' },
+  { id: 'burn-heal', name: 'Burn Heal', description: 'Removes Burn', icon: ITEM_SPRITE('burn-heal'), uses: 3, maxUses: 3, category: 'status' },
+  { id: 'paralyze-heal', name: 'Paralyze Heal', description: 'Removes Paralyze', icon: ITEM_SPRITE('paralyze-heal'), uses: 3, maxUses: 3, category: 'status' },
+  { id: 'awakening', name: 'Awakening', description: 'Removes Sleep', icon: ITEM_SPRITE('awakening'), uses: 3, maxUses: 3, category: 'status' },
+  { id: 'ice-heal', name: 'Ice Heal', description: 'Removes Freeze', icon: ITEM_SPRITE('ice-heal'), uses: 3, maxUses: 3, category: 'status' },
   // === REVIVE ===
-  { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: '✨', uses: 1, maxUses: 1, category: 'revive' },
-  { id: 'max-revive', name: 'Max Revive', description: 'Revives with 100% HP', icon: '🌟', uses: 1, maxUses: 1, category: 'revive' },
+  { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
+  { id: 'max-revive', name: 'Max Revive', description: 'Revives with 100% HP', icon: ITEM_SPRITE('max-revive'), uses: 1, maxUses: 1, category: 'revive' },
   // === BOOST ===
-  { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: '⚔️', uses: 1, maxUses: 1, category: 'boost' },
-  { id: 'x-defense', name: 'X Defense', description: '-20 damage taken for 3 turns', icon: '🛡️', uses: 1, maxUses: 1, category: 'boost' },
-  { id: 'x-speed', name: 'X Speed', description: '+1 action priority for 3 turns', icon: '💨', uses: 1, maxUses: 1, category: 'boost' },
-  { id: 'x-special', name: 'X Special', description: '+30% special damage for 3 turns', icon: '🔮', uses: 1, maxUses: 1, category: 'boost' },
+  { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 1, maxUses: 1, category: 'boost' },
+  { id: 'x-defense', name: 'X Defense', description: '-20 damage taken for 3 turns', icon: ITEM_SPRITE('x-defense'), uses: 1, maxUses: 1, category: 'boost' },
+  { id: 'x-speed', name: 'X Speed', description: '+1 action priority for 3 turns', icon: ITEM_SPRITE('x-speed'), uses: 1, maxUses: 1, category: 'boost' },
+  { id: 'x-special', name: 'X Special', description: '+30% special damage for 3 turns', icon: ITEM_SPRITE('x-sp-atk'), uses: 1, maxUses: 1, category: 'boost' },
   // === ENERGY ===
-  { id: 'energy-boost', name: 'Energy Boost', description: '+1 Colorless energy', icon: '⭐', uses: 1, maxUses: 1, category: 'energy' },
-  { id: 'rare-candy', name: 'Rare Candy', description: 'Evolve without energy cost', icon: '🍬', uses: 1, maxUses: 1, category: 'energy' },
+  { id: 'energy-boost', name: 'Energy Boost', description: '+1 Colorless energy', icon: ITEM_SPRITE('pp-up'), uses: 1, maxUses: 1, category: 'energy' },
+  { id: 'rare-candy', name: 'Rare Candy', description: 'Evolve without energy cost', icon: ITEM_SPRITE('rare-candy'), uses: 1, maxUses: 1, category: 'energy' },
   // === SPECIAL ===
-  { id: 'poke-doll', name: 'Poké Doll', description: 'Invulnerable for 1 turn', icon: '🧸', uses: 1, maxUses: 1, category: 'special' },
-  { id: 'switch', name: 'Switch', description: 'Clears all negative status', icon: '🔄', uses: 1, maxUses: 1, category: 'special' },
+  { id: 'poke-doll', name: 'Poke Doll', description: 'Invulnerable for 1 turn', icon: ITEM_SPRITE('poke-doll'), uses: 1, maxUses: 1, category: 'special' },
+  { id: 'switch', name: 'Switch', description: 'Clears all negative status', icon: ITEM_SPRITE('poke-ball'), uses: 1, maxUses: 1, category: 'special' },
 ];

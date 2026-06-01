@@ -104,7 +104,7 @@ export default function BattleOverlays({
                       className={`item-row ${item.uses <= 0 || usedItemThisTurn ? 'disabled' : ''}`}
                       onClick={() => item.uses > 0 && !usedItemThisTurn && onUseItem(item)}
                     >
-                      <span className="item-icon">{item.icon}</span>
+                      <span className="item-icon"><img src={item.icon} alt={item.name} width={24} height={24} /></span>
                       <div className="item-info">
                         <div className="item-name">{item.name}</div>
                         <div className="item-desc">{item.description}</div>
