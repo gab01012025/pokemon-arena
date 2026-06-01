@@ -247,13 +247,13 @@ export default function AIBattlePage() {
   const toggleEnergyType = (type: EnergyType) => {
     setSelectedEnergyTypes(prev => {
       if (prev.includes(type)) return prev.filter(t => t !== type);
-      if (prev.length >= 3) return prev;
+      if (prev.length >= 4) return prev;
       return [...prev, type];
     });
   };
 
   const confirmEnergySelection = () => {
-    if (selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 3) return;
+    if (selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 4) return;
     const initialEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, 1);
     console.log('[ENERGY] Battle start — player initial energy:', JSON.stringify(initialEnergy));
     setEnergy(prev => {

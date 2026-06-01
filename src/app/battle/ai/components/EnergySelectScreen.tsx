@@ -36,7 +36,7 @@ export default function EnergySelectScreen({
     <div className="energy-select-screen">
       <div className="energy-select-header">
         <div className="energy-select-title">SELECT YOUR ENERGY TYPES</div>
-        <div className="energy-select-subtitle">Choose 1-3 energy types for your deck (fewer = more consistent)</div>
+        <div className="energy-select-subtitle">Choose 1-4 energy types for your deck (fewer = more consistent)</div>
       </div>
 
       {/* Team overview with energy needs per pokemon */}
@@ -85,7 +85,7 @@ export default function EnergySelectScreen({
         {ALL_SELECTABLE_ENERGY_TYPES.map(type => {
           const isSelected = selectedEnergyTypes.includes(type);
           const isNeeded = neededEnergies.includes(type);
-          const isDisabled = selectedEnergyTypes.length >= 3 && !isSelected;
+          const isDisabled = selectedEnergyTypes.length >= 4 && !isSelected;
           return (
             <div
               key={type}
@@ -116,18 +116,18 @@ export default function EnergySelectScreen({
           ))
         )}
         <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
-          ({selectedEnergyTypes.length}/3)
+          ({selectedEnergyTypes.length}/4)
         </span>
       </div>
 
       <button
         className="energy-confirm-btn"
         onClick={onConfirm}
-        disabled={selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 3}
+        disabled={selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 4}
       >
         {selectedEnergyTypes.length === 0
-          ? 'SELECT 1-3 ENERGY TYPES'
-          : selectedEnergyTypes.length <= 3
+          ? 'SELECT 1-4 ENERGY TYPES'
+          : selectedEnergyTypes.length <= 4
           ? 'START BATTLE'
           : 'TOO MANY SELECTED'}
       </button>

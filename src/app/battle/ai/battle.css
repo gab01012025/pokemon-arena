@@ -639,10 +639,10 @@ html, body { background: #080a14 !important; }
 .arena-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   justify-content: center;
-  max-width: 220px;
+  max-width: 320px;
   padding: 4px;
 }
 .player-column {
@@ -655,23 +655,26 @@ html, body { background: #080a14 !important; }
 /* ==================== ARENA SLOT ==================== */
 .arena-slot {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
   position: relative;
-  padding: 8px 6px 6px;
+  padding: 6px;
   border-radius: 8px;
   transition: all 0.15s ease;
   width: 100%;
-  max-width: 180px;
-  background: transparent;
+  background: #0c0f1e;
+  border: 1px solid #1a1e38;
+  gap: 4px;
 }
+/* Player slot: portrait left, skills right, bottom below both */
 .arena-slot.player {
+  flex-direction: row;
   border-left: 3px solid #4CAF50;
-  background: linear-gradient(135deg, rgba(76,175,80,0.06) 0%, transparent 60%);
 }
+/* Enemy slot: just portrait, no skills */
 .arena-slot.enemy {
+  flex-direction: row;
   border-right: 3px solid #e53935;
-  background: linear-gradient(225deg, rgba(229,57,53,0.06) 0%, transparent 60%);
+  max-width: 180px;
 }
 .arena-slot.fainted {
   opacity: 0.25;
@@ -680,31 +683,101 @@ html, body { background: #080a14 !important; }
 }
 .arena-slot.targetable {
   cursor: crosshair;
-  background: rgba(255, 215, 0, 0.08);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
 }
 .arena-slot.targetable:hover {
-  background: rgba(255, 215, 0, 0.14);
+  background: #10142a;
 }
 
-/* ==================== SPRITE AREA ==================== */
-.char-sprite-area {
+/* ==================== PORTRAIT ==================== */
+.slot-portrait {
+  position: relative;
   width: 96px;
   height: 96px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  background: linear-gradient(180deg, #0a0e1f 0%, #0d1225 100%);
+  border-radius: 6px;
+  overflow: hidden;
 }
 .char-sprite {
   width: 96px;
   height: 96px;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 .char-sprite.flipped {
   transform: scaleX(-1);
+}
+
+/* ==================== SKILLS GRID (player only) ==================== */
+.slot-skills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  align-self: center;
+}
+.skill-square {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #1e2340;
+  background: #0f1223;
+  transition: all 0.12s ease;
+  position: relative;
+  overflow: hidden;
+}
+.skill-square:hover:not(.disabled) {
+  border-color: #3a4070;
+  transform: scale(1.05);
+  background: #1a2040;
+}
+.skill-square.disabled {
+  opacity: 0.3;
+  cursor: default;
+  filter: grayscale(0.6);
+}
+.skill-square.selected {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  transform: scale(1.05);
+}
+.skill-square.on-cooldown {
+  opacity: 0.4;
+  cursor: default;
+}
+.skill-square.on-cooldown::after {
+  content: attr(data-cd);
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ef5350;
+  border-radius: 6px;
+}
+
+/* ==================== SLOT BOTTOM (name + HP) ==================== */
+.slot-bottom {
+  width: 100%;
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 /* ==================== NAMEPLATE ==================== */
@@ -716,26 +789,21 @@ html, body { background: #080a14 !important; }
   text-align: center;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  padding: 2px 8px;
-  margin-top: 2px;
-  background: rgba(0,0,0,0.5);
-  border-radius: 4px;
-  width: 100%;
-  max-width: 140px;
+  padding: 2px 6px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 3px;
 }
 
 /* ==================== HP SECTION ==================== */
 .char-hp-section {
   width: 100%;
-  max-width: 140px;
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 3px;
 }
 .char-hp-bar {
   flex: 1;
-  height: 8px;
+  height: 10px;
   background: #1a1a2e;
   border-radius: 4px;
   overflow: hidden;
@@ -752,19 +820,22 @@ html, body { background: #080a14 !important; }
 .hp-fill.low { background: linear-gradient(180deg, #EF5350 0%, #F44336 100%); }
 .char-hp-text {
   font-family: var(--font-title);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  color: #aaa;
+  color: #ccc;
   white-space: nowrap;
-  min-width: 36px;
+  min-width: 40px;
   text-align: right;
 }
 
 /* ==================== W/R BADGES ==================== */
 .char-wr-badges {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
   display: flex;
-  gap: 3px;
-  margin-top: 2px;
+  gap: 2px;
+  z-index: 3;
 }
 .wr-badge {
   font-size: 7px;
@@ -793,7 +864,7 @@ html, body { background: #080a14 !important; }
 .slot-status-icons {
   position: absolute;
   top: 2px;
-  left: 6px;
+  left: 2px;
   display: flex;
   gap: 2px;
   flex-wrap: wrap;
@@ -828,61 +899,6 @@ html, body { background: #080a14 !important; }
 .status-badge.freeze { border-color: #98D8D8; color: #98D8D8; }
 .status-badge.confuse { border-color: #F85888; color: #F85888; }
 .status-badge.stun { border-color: #FFD700; color: #FFD700; }
-
-/* ==================== SKILL ICONS ROW ==================== */
-.char-skills-row {
-  display: flex;
-  gap: 4px;
-  margin-top: 4px;
-  justify-content: center;
-}
-.skill-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: 2px solid #1e2340;
-  background: #0f1223;
-  transition: all 0.12s ease;
-  position: relative;
-  overflow: hidden;
-}
-.skill-icon:hover:not(.disabled) {
-  border-color: #3a4070;
-  transform: scale(1.1);
-  background: #1a2040;
-}
-.skill-icon.disabled {
-  opacity: 0.3;
-  cursor: default;
-  filter: grayscale(0.6);
-}
-.skill-icon.selected {
-  border-color: #4CAF50 !important;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
-  transform: scale(1.1);
-}
-.skill-icon.on-cooldown {
-  opacity: 0.4;
-  cursor: default;
-}
-.skill-icon.on-cooldown::after {
-  content: attr(data-cd);
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-title);
-  font-size: 10px;
-  font-weight: 700;
-  color: #ef5350;
-  border-radius: 50%;
-}
 
 /* Skill Info Tooltip */
 .skill-info-panel {
@@ -1608,28 +1624,29 @@ html, body { background: #080a14 !important; }
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
   .battle-area { flex-direction: column; padding: 4px; gap: 4px; margin: 2px 4px; }
-  .arena-column { flex-direction: row; max-width: 100%; gap: 4px; }
-  .arena-slot { max-width: 140px; }
-  .char-sprite-area { width: 72px; height: 72px; }
+  .arena-column { flex-direction: row; flex-wrap: wrap; max-width: 100%; gap: 4px; }
+  .arena-slot.player { max-width: 260px; }
+  .arena-slot.enemy { max-width: 140px; }
+  .slot-portrait { width: 72px; height: 72px; }
   .char-sprite { width: 72px; height: 72px; }
+  .skill-square { width: 32px; height: 32px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
   .energy-pool { gap: 3px; }
   .energy-orb { width: 18px; height: 18px; font-size: 9px; }
   .center-area { flex-direction: row; min-width: auto; }
   .vs-display { font-size: 16px; padding: 6px 14px; }
   .bottom-bar { min-height: 70px; }
-  .skill-icon { width: 28px; height: 28px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .arena-slot { max-width: 110px; padding: 4px; }
-  .char-sprite-area { width: 56px; height: 56px; }
+  .arena-slot.player { max-width: 220px; }
+  .arena-slot.enemy { max-width: 110px; }
+  .slot-portrait { width: 56px; height: 56px; }
   .char-sprite { width: 56px; height: 56px; }
+  .skill-square { width: 26px; height: 26px; }
   .char-nameplate { font-size: 9px; }
-  .char-hp-section { max-width: 100px; }
-  .skill-icon { width: 24px; height: 24px; }
   .bottom-left { min-width: 120px; }
   .status-badge { min-width: 20px; height: 14px; font-size: 6px; }
   .wr-badge { font-size: 6px; padding: 1px 3px; }

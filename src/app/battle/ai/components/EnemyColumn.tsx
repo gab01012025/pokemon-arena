@@ -31,48 +31,46 @@ export default function EnemyColumn({
             className={`arena-slot enemy ${poke.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && poke.hp > 0 ? 'targetable' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'targeting' && poke.hp > 0 && onTargetSelect(idx)}
           >
-            {/* Status effects */}
-            {poke.statusEffects.length > 0 && (
-              <div className="slot-status-icons">
-                {poke.statusEffects.map((se, si) => (
-                  <div key={si} className={`status-badge ${se.type}`} title={`${se.type} (${se.duration}t)`}>
-                    {STATUS_ICONS[se.type]}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Sprite area */}
-            <div className="char-sprite-area">
+            {/* Portrait */}
+            <div className="slot-portrait">
+              {/* Status effects */}
+              {poke.statusEffects.length > 0 && (
+                <div className="slot-status-icons">
+                  {poke.statusEffects.map((se, si) => (
+                    <div key={si} className={`status-badge ${se.type}`} title={`${se.type} (${se.duration}t)`}>
+                      {STATUS_ICONS[se.type]}
+                    </div>
+                  ))}
+                </div>
+              )}
               <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="char-sprite" />
+              {/* W/R badges */}
+              {(poke.weakness || poke.resistance) && (
+                <div className="char-wr-badges">
+                  {poke.weakness && (
+                    <span className="wr-badge weakness" title={`Weak to ${poke.weakness} (+20 dmg)`}>
+                      <EnergyIcon type={TYPE_TO_ENERGY[poke.weakness]} size={10} /> x2
+                    </span>
+                  )}
+                  {poke.resistance && (
+                    <span className="wr-badge resistance" title={`Resists ${poke.resistance} (-20 dmg)`}>
+                      <EnergyIcon type={TYPE_TO_ENERGY[poke.resistance]} size={10} /> -20
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Nameplate */}
-            <div className="char-nameplate">{poke.name}</div>
-
-            {/* HP Bar */}
-            <div className="char-hp-section">
-              <div className="char-hp-bar">
-                <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+            {/* Bottom: name + HP */}
+            <div className="slot-bottom">
+              <div className="char-nameplate">{poke.name}</div>
+              <div className="char-hp-section">
+                <div className="char-hp-bar">
+                  <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+                </div>
+                <span className="char-hp-text">{poke.hp}/{poke.maxHp}</span>
               </div>
-              <span className="char-hp-text">{poke.hp}/{poke.maxHp}</span>
             </div>
-
-            {/* W/R badges */}
-            {(poke.weakness || poke.resistance) && (
-              <div className="char-wr-badges">
-                {poke.weakness && (
-                  <span className="wr-badge weakness" title={`Weak to ${poke.weakness} (+20 dmg)`}>
-                    <EnergyIcon type={TYPE_TO_ENERGY[poke.weakness]} size={10} /> x2
-                  </span>
-                )}
-                {poke.resistance && (
-                  <span className="wr-badge resistance" title={`Resists ${poke.resistance} (-20 dmg)`}>
-                    <EnergyIcon type={TYPE_TO_ENERGY[poke.resistance]} size={10} /> -20
-                  </span>
-                )}
-              </div>
-            )}
           </div>
         );
       })}

@@ -1,10 +1,9 @@
 /* ==================== MOBILE OPTIMIZATIONS ==================== */
 
-/* Touch-friendly tap targets (minimum 44x44px) */
 @media (max-width: 768px) {
-  .skill-icon {
-    width: 36px;
-    height: 36px;
+  .skill-square {
+    width: 34px;
+    height: 34px;
   }
 
   .action-btn {
@@ -19,12 +18,10 @@
     font-size: 14px;
   }
 
-  /* Optimize for mobile viewport */
   .battle-container {
     height: 100dvh;
   }
 
-  /* Battle area frame */
   .battle-area {
     flex-direction: column;
     gap: 4px;
@@ -34,17 +31,23 @@
 
   .arena-column {
     flex-direction: row;
+    flex-wrap: wrap;
     max-width: 100%;
     gap: 4px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
   }
 
   .arena-column .arena-slot {
-    scroll-snap-align: start;
     flex-shrink: 0;
-    max-width: 140px;
+  }
+
+  .arena-slot.player {
+    max-width: 240px;
+  }
+
+  .arena-slot.enemy {
+    max-width: 120px;
   }
 
   .arena-column::-webkit-scrollbar {
@@ -60,8 +63,7 @@
     border-radius: 2px;
   }
 
-  /* Smaller sprites on mobile */
-  .char-sprite-area {
+  .slot-portrait {
     width: 72px;
     height: 72px;
   }
@@ -75,32 +77,17 @@
     font-size: 10px;
   }
 
-  .char-hp-section {
-    max-width: 120px;
+  .skill-square {
+    width: 30px;
+    height: 30px;
   }
 
-  .char-hp-text {
-    font-size: 8px;
-  }
-
-  /* Skill icons on mobile */
-  .char-skills-row {
-    gap: 3px;
-  }
-
-  .skill-icon {
-    width: 28px;
-    height: 28px;
-  }
-
-  /* Optimize energy display */
   .energy-pool {
     flex-wrap: wrap;
     justify-content: center;
     max-width: 100%;
   }
 
-  /* Compact top bar */
   .top-bar {
     padding: 6px 10px;
     min-height: 56px;
@@ -124,14 +111,12 @@
     font-size: 9px;
   }
 
-  /* Badges on mobile */
   .win-streak-badge,
   .daily-challenge-badge {
     font-size: 9px;
     padding: 1px 6px;
   }
 
-  /* Bottom bar */
   .bottom-bar {
     min-height: 70px;
     max-height: 100px;
@@ -158,14 +143,12 @@
     max-height: 60px;
   }
 
-  /* Energy selection on mobile */
   .energy-tcg-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     max-width: 100%;
   }
 
-  /* Modal optimizations */
   .modal {
     padding: 24px 20px;
     min-width: 280px;
@@ -221,7 +204,6 @@
     padding: 14px 20px;
   }
 
-  /* Items panel on mobile */
   .items-panel {
     bottom: 80px;
     left: 6px;
@@ -231,7 +213,6 @@
     overflow-y: auto;
   }
 
-  /* Targeting indicator */
   .targeting-indicator {
     top: 56px;
     padding: 8px 16px;
@@ -241,27 +222,23 @@
     font-size: 9px;
   }
 
-  /* VS display */
   .vs-display {
     font-size: 16px;
     letter-spacing: 2px;
     padding: 6px 14px;
   }
 
-  /* Center area horizontal on mobile */
   .center-area {
     flex-direction: row;
     min-width: auto;
     gap: 8px;
   }
 
-  /* Queue slots smaller */
   .queue-slot {
     width: 28px;
     height: 28px;
   }
 
-  /* Skill info tooltip on mobile */
   .skill-info-panel {
     bottom: 80px;
     min-width: 240px;
@@ -269,17 +246,15 @@
     font-size: 12px;
   }
 
-  /* Streak badges */
   .streak-badge {
     font-size: 11px;
     padding: 4px 10px;
   }
 
-  /* Status badges */
   .status-badge {
-    width: 16px;
-    height: 16px;
-    font-size: 9px;
+    min-width: 18px;
+    height: 14px;
+    font-size: 6px;
   }
 
   .wr-badge {
@@ -288,7 +263,7 @@
   }
 }
 
-/* Extra small devices (phones in portrait) */
+/* Extra small devices */
 @media (max-width: 480px) {
   .energy-select-title {
     font-size: 16px;
@@ -308,19 +283,22 @@
     padding: 12px 24px;
   }
 
-  .arena-slot {
-    max-width: 110px;
-    padding: 4px;
+  .arena-slot.player {
+    max-width: 200px;
   }
 
-  .char-sprite-area {
-    width: 56px;
-    height: 56px;
+  .arena-slot.enemy {
+    max-width: 100px;
+  }
+
+  .slot-portrait {
+    width: 52px;
+    height: 52px;
   }
 
   .char-sprite {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
   }
 
   .char-nameplate {
@@ -328,11 +306,7 @@
     padding: 1px 4px;
   }
 
-  .char-hp-section {
-    max-width: 100px;
-  }
-
-  .skill-icon {
+  .skill-square {
     width: 24px;
     height: 24px;
   }
@@ -360,7 +334,7 @@
   }
 }
 
-/* Landscape orientation optimization */
+/* Landscape */
 @media (max-width: 900px) and (orientation: landscape) {
   .battle-area {
     flex-direction: row;
@@ -369,7 +343,7 @@
 
   .arena-column {
     flex-direction: column;
-    max-width: 180px;
+    max-width: 260px;
   }
 
   .bottom-bar {

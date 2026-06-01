@@ -2,7 +2,7 @@ import {
   PokemonType, EnergyType, StatusType,
   EnergyState, Move, BattlePokemon, SelectedAction, LogEntry, StatusEffect,
 } from './types';
-import { ALL_ENERGY_TYPES, EMPTY_ENERGY } from './data';
+import { ALL_ENERGY_TYPES, ALL_SELECTABLE_ENERGY_TYPES, EMPTY_ENERGY } from './data';
 import {
   rollCriticalHit,
   STAB_MULTIPLIER as _STAB, CRITICAL_HIT_MULTIPLIER,
@@ -37,9 +37,17 @@ export const generateTurnEnergy = (
   const energyCount = turn === 1 ? 1 : aliveCount;
 
   for (let i = 0; i < energyCount; i++) {
-    const availableTypes = [...selectedEnergyTypes, 'colorless'] as EnergyType[];
-    const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
-    energy[type]++;
+    // Each energy generated is either one of the selected types, or a random type from all 8
+    const roll = Math.random();
+    if (roll < 0.75 && selectedEnergyTypes.length > 0) {
+      // 75% chance: one of the player's selected types
+      const type = selectedEnergyTypes[Math.floor(Math.random() * selectedEnergyTypes.length)];
+      energy[type]++;
+    } else {
+      // 25% chance: random energy from all 8 selectable types
+      const type = ALL_SELECTABLE_ENERGY_TYPES[Math.floor(Math.random() * ALL_SELECTABLE_ENERGY_TYPES.length)];
+      energy[type]++;
+    }
   }
   return energy;
 };
