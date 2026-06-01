@@ -32,7 +32,7 @@ export default function PlayerColumn({
   anims = [],
 }: PlayerColumnProps) {
   return (
-    <div className="character-column">
+    <div className="arena-column player-column">
       {playerTeam.map((poke, idx) => {
         const hasAction = selectedActions.some(a => a.pokemonIndex === idx);
         const selectedMove = selectedActions.find(a => a.pokemonIndex === idx)?.move;
@@ -42,67 +42,67 @@ export default function PlayerColumn({
         return (
           <div
             key={`p-${poke.id}-${idx}`}
-            className={`character-card player ${poke.hp <= 0 ? 'fainted' : ''} ${hasAction ? 'action-ready' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''} ${anims[idx] || ''}`}
+            className={`arena-slot player ${poke.hp <= 0 ? 'fainted' : ''} ${hasAction ? 'action-ready' : ''} ${hasBurn ? 'burning' : ''} ${hasPoison ? 'poisoned' : ''} ${hasFrozen ? 'frozen' : ''} ${phase === 'item-target' && poke.hp > 0 ? 'targetable' : ''} ${anims[idx] || ''}`}
             onClick={() => phase === 'item-target' && poke.hp > 0 && onItemTarget(idx)}
           >
-            <div className="portrait-container">
-              {poke.statusEffects.length > 0 && (
-                <div className="status-icons">
-                  {poke.statusEffects.map((se, si) => (
-                    <div key={si} className={`status-badge ${se.type}`} title={`${se.type} (${se.duration}t)`}>
-                      {STATUS_ICONS[se.type]}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="pokemon-sprite flipped">
-                <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized />
+            {/* Status effects */}
+            {poke.statusEffects.length > 0 && (
+              <div className="slot-status-icons">
+                {poke.statusEffects.map((se, si) => (
+                  <div key={si} className={`status-badge ${se.type}`} title={`${se.type} (${se.duration}t)`}>
+                    {STATUS_ICONS[se.type]}
+                  </div>
+                ))}
               </div>
-              <div className="pokemon-name-tag">{poke.name}</div>
-              <div className="hp-text-overlay">{poke.hp}/{poke.maxHp}</div>
-              <div className="hp-bar-overlay">
-                <div className="hp-bar-inner">
-                  <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
-                </div>
-              </div>
-              {(poke.weakness || poke.resistance) && (
-                <div className="wr-badges">
-                  {poke.weakness && (
-                    <span className="wr-badge weakness" title={`Weak to ${poke.weakness} (+20 dmg)`}>
-                      <EnergyIcon type={TYPE_TO_ENERGY[poke.weakness]} size={12} /> ×2
-                    </span>
-                  )}
-                  {poke.resistance && (
-                    <span className="wr-badge resistance" title={`Resists ${poke.resistance} (-20 dmg)`}>
-                      <EnergyIcon type={TYPE_TO_ENERGY[poke.resistance]} size={12} /> -20
-                    </span>
-                  )}
-                </div>
-              )}
+            )}
+
+            {/* Sprite area */}
+            <div className="char-sprite-area">
+              <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="char-sprite flipped" />
             </div>
-            <div className="skills-panel">
+
+            {/* Nameplate */}
+            <div className="char-nameplate">{poke.name}</div>
+
+            {/* HP Bar */}
+            <div className="char-hp-section">
+              <div className="char-hp-bar">
+                <div className={`hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+              </div>
+              <span className="char-hp-text">{poke.hp}/{poke.maxHp}</span>
+            </div>
+
+            {/* W/R badges */}
+            {(poke.weakness || poke.resistance) && (
+              <div className="char-wr-badges">
+                {poke.weakness && (
+                  <span className="wr-badge weakness" title={`Weak to ${poke.weakness} (+20 dmg)`}>
+                    <EnergyIcon type={TYPE_TO_ENERGY[poke.weakness]} size={10} /> x2
+                  </span>
+                )}
+                {poke.resistance && (
+                  <span className="wr-badge resistance" title={`Resists ${poke.resistance} (-20 dmg)`}>
+                    <EnergyIcon type={TYPE_TO_ENERGY[poke.resistance]} size={10} /> -20
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Skill icons row */}
+            <div className="char-skills-row">
               {poke.moves.slice(0, 4).map(move => {
-                const colors = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
-                const displayName = move.name;
+                const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
                 return (
                   <div
                     key={move.id}
-                    className={`skill-slot ${!canUseMove(move, idx) ? 'disabled' : ''} ${hasAction && selectedMove?.id === move.id ? 'selected' : ''} ${move.currentCooldown > 0 ? 'on-cooldown' : ''}`}
+                    className={`skill-icon ${!canUseMove(move, idx) ? 'disabled' : ''} ${hasAction && selectedMove?.id === move.id ? 'selected' : ''} ${move.currentCooldown > 0 ? 'on-cooldown' : ''}`}
                     data-cd={move.currentCooldown > 0 ? move.currentCooldown : undefined}
-                    style={{ background: colors.bg, borderColor: colors.border }}
                     onClick={(e) => { e.stopPropagation(); if (poke.hp > 0) { if (hasAction) { onRemoveAction(idx); } else { onSkillClick(idx, move); } } }}
                     onMouseEnter={() => onHoverSkill(move, poke.name)}
                     onMouseLeave={onLeaveSkill}
+                    title={move.name}
                   >
-                    <div className="skill-cost-icons">
-                      {move.cost.map((c, ci) => (
-                        Array.from({ length: c.amount }).map((_, ai) => (
-                          <EnergyIcon key={`${ci}-${ai}`} type={c.type} size={14} />
-                        ))
-                      ))}
-                    </div>
-                    <span className="skill-abbrev" style={{ color: colors.text }}>{displayName}</span>
-                    {move.power > 0 && <span className="skill-power" style={{ color: colors.text }}>{move.power}</span>}
+                    <EnergyIcon type={energyType} size={22} />
                   </div>
                 );
               })}

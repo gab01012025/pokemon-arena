@@ -70,13 +70,13 @@ export const getWeaknessResistance = (types: PokemonType[]): { weakness?: Pokemo
 
 // ==================== STATUS EFFECT ICONS ====================
 export const STATUS_ICONS: Record<StatusType, string> = {
-  burn: '🔥', poison: '☠️', paralyze: '⚡', sleep: '💤',
-  freeze: '❄️', confuse: '💫', stun: '✨', invulnerable: '🛡️',
-  counter: '⚔️', reflect: '🪞', taunt: '🎯', silence: '🔇',
-  weaken: '⬇️', strengthen: '⬆️', 'reduce-damage': '🛡️', 'increase-damage': '💥',
-  'remove-energy': '🔻', 'steal-energy': '💰', 'drain-hp': '🩸', 'heal-over-time': '💚',
-  'cooldown-increase': '⏳', 'cooldown-reduce': '⚡', 'cannot-be-healed': '🚫',
-  endure: '💪', expose: '👁️', bleed: '🩹',
+  burn: 'BRN', poison: 'PSN', paralyze: 'PAR', sleep: 'SLP',
+  freeze: 'FRZ', confuse: 'CNF', stun: 'STN', invulnerable: 'INV',
+  counter: 'CTR', reflect: 'RFL', taunt: 'TNT', silence: 'SIL',
+  weaken: 'WKN', strengthen: 'STR', 'reduce-damage': 'DEF', 'increase-damage': 'DMG',
+  'remove-energy': 'RMV', 'steal-energy': 'STL', 'drain-hp': 'DRN', 'heal-over-time': 'HOT',
+  'cooldown-increase': 'CDI', 'cooldown-reduce': 'CDR', 'cannot-be-healed': 'NBH',
+  endure: 'END', expose: 'EXP', bleed: 'BLD',
 };
 
 // ==================== TYPE COLORS & ABBREVIATIONS ====================
@@ -461,45 +461,7 @@ export const KANTO_POKEMON: KantoPokemonData[] = [
   { id: 147, name: 'Dratini', types: ['dragon'], hp: 170, canEvolve: true, evolvesTo: { id: 148, name: 'Dragonair', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
 ];
 
-export const AI_POKEMON_POOL: KantoPokemonData[] = [
-  // === EXISTING STRONG POKEMON ===
-  { id: 59, name: 'Arcanine', types: ['fire'], hp: 260, canEvolve: false },
-  { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 265, canEvolve: false },
-  { id: 45, name: 'Vileplume', types: ['grass', 'poison'], hp: 245, canEvolve: false },
-  { id: 65, name: 'Alakazam', types: ['psychic'], hp: 220, canEvolve: false },
-  { id: 68, name: 'Machamp', types: ['fighting'], hp: 260, canEvolve: false },
-  { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 230, canEvolve: false },
-  { id: 76, name: 'Golem', types: ['rock', 'ground'], hp: 255, canEvolve: false },
-  { id: 131, name: 'Lapras', types: ['water', 'ice'], hp: 270, canEvolve: false },
-  { id: 143, name: 'Snorlax', types: ['normal'], hp: 320, canEvolve: false },
-  { id: 103, name: 'Exeggutor', types: ['grass', 'psychic'], hp: 260, canEvolve: false },
-  { id: 112, name: 'Rhydon', types: ['ground', 'rock'], hp: 265, canEvolve: false },
-  { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 275, canEvolve: false },
-  { id: 38, name: 'Ninetales', types: ['fire'], hp: 243, canEvolve: false },
-  { id: 62, name: 'Poliwrath', types: ['water', 'fighting'], hp: 260, canEvolve: false },
-  { id: 34, name: 'Nidoking', types: ['poison', 'ground'], hp: 251, canEvolve: false },
-  { id: 121, name: 'Starmie', types: ['water', 'psychic'], hp: 230, canEvolve: false },
-  { id: 135, name: 'Jolteon', types: ['electric'], hp: 235, canEvolve: false },
-  { id: 136, name: 'Flareon', types: ['fire'], hp: 235, canEvolve: false },
-  { id: 134, name: 'Vaporeon', types: ['water'], hp: 270, canEvolve: false },
-  { id: 123, name: 'Scyther', types: ['bug', 'flying'], hp: 240, canEvolve: false },
-  // === NEW STRONG POKEMON ===
-  { id: 142, name: 'Aerodactyl', types: ['rock', 'flying'], hp: 255, canEvolve: false },
-  { id: 128, name: 'Tauros', types: ['normal'], hp: 260, canEvolve: false },
-  { id: 115, name: 'Kangaskhan', types: ['normal'], hp: 275, canEvolve: false },
-  { id: 127, name: 'Pinsir', types: ['bug'], hp: 245, canEvolve: false },
-  { id: 125, name: 'Electabuzz', types: ['electric'], hp: 240, canEvolve: false },
-  { id: 126, name: 'Magmar', types: ['fire'], hp: 240, canEvolve: false },
-  { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 260, canEvolve: false },
-  { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 250, canEvolve: false },
-  { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 230, canEvolve: false },
-  { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 235, canEvolve: false },
-  // === LEGENDARIES ===
-  { id: 144, name: 'Articuno', types: ['ice', 'flying'], hp: 290, canEvolve: false },
-  { id: 145, name: 'Zapdos', types: ['electric', 'flying'], hp: 290, canEvolve: false },
-  { id: 146, name: 'Moltres', types: ['fire', 'flying'], hp: 290, canEvolve: false },
-  { id: 151, name: 'Mew', types: ['psychic'], hp: 280, canEvolve: false },
-];
+export const AI_POKEMON_POOL: KantoPokemonData[] = KANTO_POKEMON;
 
 export const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
   // === Bulbasaur line ===

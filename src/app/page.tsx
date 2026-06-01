@@ -62,6 +62,7 @@ export default function Home() {
                 </p>
                 <div className="home-welcome-actions">
                   <Link href="/play" className="home-btn-play">Start Playing</Link>
+                  <Link href="/multiplayer" className="home-btn-register" style={{ background: '#e53935', borderColor: '#ff5252' }}>PvP Battle</Link>
                   <Link href="/register" className="home-btn-register">Create Account</Link>
                   <Link href="/the-basics" className="home-btn-tutorial">Learn the Basics</Link>
                 </div>

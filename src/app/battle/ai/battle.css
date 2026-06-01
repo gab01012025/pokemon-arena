@@ -635,172 +635,143 @@ html, body { background: #080a14 !important; }
   border-radius: 6px;
 }
 
-/* Character Column */
-.character-column {
+/* ==================== ARENA COLUMNS ==================== */
+.arena-column {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
-  justify-content: flex-start;
-  padding-top: 8px;
-  max-width: 380px;
+  justify-content: center;
+  max-width: 220px;
+  padding: 4px;
+}
+.player-column {
+  align-items: flex-start;
+}
+.enemy-column {
+  align-items: flex-end;
 }
 
-/* Character Card */
-.character-card {
-  display: flex;
-  gap: 0;
-  background: #0f1223;
-  border: 2px solid #1e2340;
-  border-radius: 8px;
-  padding: 0;
-  transition: all 0.15s ease;
-  position: relative;
-  align-items: stretch;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  overflow: hidden;
-}
-.character-card.player {
-  flex-direction: row;
-  border-left: 4px solid #4CAF50;
-}
-.character-card.player:hover {
-  border-color: #2a3058;
-  border-left-color: #66BB6A;
-}
-.character-card.enemy {
-  flex-direction: row-reverse;
-  border-right: 4px solid #e53935;
-}
-.character-card.enemy:hover {
-  border-color: #2a3058;
-  border-right-color: #ef5350;
-}
-.character-card.fainted {
-  opacity: 0.3;
-  filter: grayscale(0.85) brightness(0.7);
-  pointer-events: none;
-  box-shadow: none;
-}
-.character-card.targetable {
-  cursor: crosshair;
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255, 215, 0, 0.15);
-}
-
-/* Enemy-only card (no skills panel, compact portrait card) */
-.character-card.enemy-only {
-  flex-direction: row-reverse;
-  border-right: 4px solid #e53935;
-  border-left: none;
-  border-top: none;
-  max-width: 160px;
-  align-self: flex-end;
-}
-.character-card.enemy-only:hover {
-  border-color: #2a3058;
-  border-right-color: #ef5350;
-}
-.character-card.enemy-only .enemy-portrait {
-  width: 100%;
-  min-height: 120px;
-  border-right: none;
-  border-left: none;
-  border-bottom: none;
-}
-
-/* Portrait Container */
-.portrait-container {
-  width: 130px;
-  min-height: 140px;
-  overflow: hidden;
-  position: relative;
-  flex-shrink: 0;
-  background: linear-gradient(180deg, #0a0e1f 0%, #0d1225 100%);
-  border-right: 1px solid #1e2340;
+/* ==================== ARENA SLOT ==================== */
+.arena-slot {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-}
-.character-card.enemy .portrait-container {
-  border-right: none;
-  border-left: 1px solid #1e2340;
-}
-.pokemon-sprite {
+  position: relative;
+  padding: 8px 6px 6px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
   width: 100%;
-  height: auto;
+  max-width: 180px;
+  background: transparent;
+}
+.arena-slot.player {
+  border-left: 3px solid #4CAF50;
+  background: linear-gradient(135deg, rgba(76,175,80,0.06) 0%, transparent 60%);
+}
+.arena-slot.enemy {
+  border-right: 3px solid #e53935;
+  background: linear-gradient(225deg, rgba(229,57,53,0.06) 0%, transparent 60%);
+}
+.arena-slot.fainted {
+  opacity: 0.25;
+  filter: grayscale(0.9) brightness(0.6);
+  pointer-events: none;
+}
+.arena-slot.targetable {
+  cursor: crosshair;
+  background: rgba(255, 215, 0, 0.08);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.15);
+}
+.arena-slot.targetable:hover {
+  background: rgba(255, 215, 0, 0.14);
+}
+
+/* ==================== SPRITE AREA ==================== */
+.char-sprite-area {
+  width: 96px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 0 4px;
+  position: relative;
 }
-.pokemon-sprite.flipped { transform: scaleX(-1); }
-.pokemon-sprite img {
-  width: 90px;
-  height: 90px;
+.char-sprite {
+  width: 96px;
+  height: 96px;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
 }
-.pokemon-name-tag {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  text-align: center;
+.char-sprite.flipped {
+  transform: scaleX(-1);
+}
+
+/* ==================== NAMEPLATE ==================== */
+.char-nameplate {
   font-family: var(--font-main);
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  padding: 3px 0;
-  background: rgba(0,0,0,0.7);
+  text-align: center;
   letter-spacing: 0.5px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  padding: 2px 8px;
+  margin-top: 2px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 140px;
 }
 
-/* HP Bar */
-.hp-bar-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 3px 6px 4px;
-  background: rgba(0,0,0,0.75);
-}
-.hp-bar-inner {
+/* ==================== HP SECTION ==================== */
+.char-hp-section {
   width: 100%;
+  max-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+.char-hp-bar {
+  flex: 1;
   height: 8px;
   background: #1a1a2e;
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
   border: 1px solid #2a2a4e;
 }
 .hp-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 .hp-fill.high { background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%); }
 .hp-fill.medium { background: linear-gradient(180deg, #FFB74D 0%, #FF9800 100%); }
 .hp-fill.low { background: linear-gradient(180deg, #EF5350 0%, #F44336 100%); }
+.char-hp-text {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  color: #aaa;
+  white-space: nowrap;
+  min-width: 36px;
+  text-align: right;
+}
 
-/* Weakness / Resistance badges (TCG Pocket) */
-.wr-badges {
-  position: absolute;
-  bottom: 17px;
-  left: 4px;
+/* ==================== W/R BADGES ==================== */
+.char-wr-badges {
   display: flex;
   gap: 3px;
-  z-index: 3;
+  margin-top: 2px;
 }
 .wr-badge {
   font-size: 7px;
   font-family: var(--font-title);
   font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 4px;
+  padding: 1px 4px;
+  border-radius: 3px;
   line-height: 1.2;
   white-space: nowrap;
   display: flex;
@@ -818,34 +789,27 @@ html, body { background: #080a14 !important; }
   border: 1px solid #5080e0;
 }
 
-.hp-text-overlay {
+/* ==================== STATUS EFFECTS ==================== */
+.slot-status-icons {
   position: absolute;
-  bottom: 14px;
-  right: 6px;
-  font-family: var(--font-title);
-  font-size: 10px;
-  font-weight: 700;
-  color: #e0e0e0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-  z-index: 2;
-  letter-spacing: 0.5px;
-}
-
-/* Status Effects on card */
-.status-icons {
-  position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 2px;
+  left: 6px;
   display: flex;
-  gap: 3px;
+  gap: 2px;
   flex-wrap: wrap;
-  max-width: 70px;
+  max-width: 60px;
+  z-index: 5;
 }
 .status-badge {
-  font-size: 12px;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
+  font-family: var(--font-title);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  width: auto;
+  min-width: 22px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -865,93 +829,59 @@ html, body { background: #080a14 !important; }
 .status-badge.confuse { border-color: #F85888; color: #F85888; }
 .status-badge.stun { border-color: #FFD700; color: #FFD700; }
 
-/* ==================== SKILLS PANEL ==================== */
-.skills-panel {
+/* ==================== SKILL ICONS ROW ==================== */
+.char-skills-row {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  padding: 6px 8px;
+  gap: 4px;
+  margin-top: 4px;
   justify-content: center;
-  background: #0b0e1e;
 }
-.skill-slot {
+.skill-icon {
+  width: 32px;
   height: 32px;
-  border-radius: 4px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   cursor: pointer;
-  border: 1px solid #1e2340;
+  border: 2px solid #1e2340;
+  background: #0f1223;
   transition: all 0.12s ease;
   position: relative;
   overflow: hidden;
-  padding: 0 8px 0 6px;
-  background: #141830;
 }
-.skill-slot:hover:not(.disabled) {
-  background: #1c2248;
-  border-color: #2e3568;
+.skill-icon:hover:not(.disabled) {
+  border-color: #3a4070;
+  transform: scale(1.1);
+  background: #1a2040;
 }
-.skill-slot:active:not(.disabled) {
-  background: #181e40;
-}
-.skill-slot.disabled {
+.skill-icon.disabled {
   opacity: 0.3;
   cursor: default;
   filter: grayscale(0.6);
 }
-.skill-slot.selected {
+.skill-icon.selected {
   border-color: #4CAF50 !important;
-  background: #1a2838 !important;
-  box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  transform: scale(1.1);
 }
-.skill-slot.on-cooldown::after {
+.skill-icon.on-cooldown {
+  opacity: 0.4;
+  cursor: default;
+}
+.skill-icon.on-cooldown::after {
   content: attr(data-cd);
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #ef5350;
-  border-radius: 4px;
-}
-
-/* Energy cost mini-icons on the left of each move */
-.skill-cost-icons {
-  display: flex;
-  gap: 2px;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.skill-abbrev {
-  font-family: var(--font-main);
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.2px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-  text-align: left;
-  line-height: 1.2;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Power number on the right of each move (like TCG damage) */
-.skill-power {
-  font-family: var(--font-title);
-  font-weight: 800;
-  font-size: 15px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-  flex-shrink: 0;
-  min-width: 24px;
-  text-align: right;
+  border-radius: 50%;
 }
 
 /* Skill Info Tooltip */
@@ -1416,12 +1346,12 @@ html, body { background: #080a14 !important; }
   100% { filter: brightness(1) saturate(1); transform: scale(1); }
 }
 
-.character-card.attacking { animation: attack-anim 0.5s ease; }
-.character-card.enemy.attacking { animation: attack-anim-enemy 0.5s ease; }
-.character-card.damaged { animation: damage-flash 0.5s ease; }
-.character-card.healed { animation: heal-glow 0.8s ease; }
-.character-card.critical { animation: critical-shake 0.5s ease; }
-.character-card.evolving .portrait-container { animation: evolution-glow 2s ease; }
+.arena-slot.attacking { animation: attack-anim 0.5s ease; }
+.arena-slot.enemy.attacking { animation: attack-anim-enemy 0.5s ease; }
+.arena-slot.damaged { animation: damage-flash 0.5s ease; }
+.arena-slot.healed { animation: heal-glow 0.8s ease; }
+.arena-slot.critical { animation: critical-shake 0.5s ease; }
+.arena-slot.evolving .char-sprite-area { animation: evolution-glow 2s ease; }
 
 /* ==================== VICTORY / DEFEAT OVERLAYS ==================== */
 .overlay {
@@ -1677,43 +1607,31 @@ html, body { background: #080a14 !important; }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
-  .battle-area { flex-direction: column; padding: 6px; gap: 6px; margin: 4px 6px; }
-  .character-column { flex-direction: row; max-width: 100%; gap: 6px; overflow-x: auto; }
-  .character-card { min-width: 0; }
-  .character-card.enemy-only { max-width: 140px; align-self: auto; }
-  .portrait-container { width: 90px; min-height: 110px; }
-  .character-card.enemy-only .enemy-portrait { min-height: 100px; }
-  .pokemon-sprite img { width: 70px; height: 70px; }
+  .battle-area { flex-direction: column; padding: 4px; gap: 4px; margin: 2px 4px; }
+  .arena-column { flex-direction: row; max-width: 100%; gap: 4px; }
+  .arena-slot { max-width: 140px; }
+  .char-sprite-area { width: 72px; height: 72px; }
+  .char-sprite { width: 72px; height: 72px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
   .energy-pool { gap: 3px; }
   .energy-orb { width: 18px; height: 18px; font-size: 9px; }
   .center-area { flex-direction: row; min-width: auto; }
   .vs-display { font-size: 16px; padding: 6px 14px; }
   .bottom-bar { min-height: 70px; }
-  .skill-slot { height: 28px; }
-  .skill-abbrev { font-size: 10px; }
-  .skill-power { font-size: 12px; }
-  .skill-cost-icons svg { width: 12px; height: 12px; }
-  .skills-panel { padding: 4px 6px; gap: 3px; }
+  .skill-icon { width: 28px; height: 28px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .portrait-container { width: 70px; min-height: 90px; }
-  .character-card.enemy-only { max-width: 120px; }
-  .character-card.enemy-only .enemy-portrait { min-height: 80px; }
-  .pokemon-sprite img { width: 52px; height: 52px; }
-  .pokemon-name-tag { font-size: 8px; }
-  .skills-panel { gap: 2px; padding: 3px 4px; }
-  .skill-slot { height: 24px; padding: 0 6px 0 4px; }
-  .skill-abbrev { font-size: 9px; }
-  .skill-power { font-size: 10px; }
-  .skill-cost-icons svg { width: 10px; height: 10px; }
+  .arena-slot { max-width: 110px; padding: 4px; }
+  .char-sprite-area { width: 56px; height: 56px; }
+  .char-sprite { width: 56px; height: 56px; }
+  .char-nameplate { font-size: 9px; }
+  .char-hp-section { max-width: 100px; }
+  .skill-icon { width: 24px; height: 24px; }
   .bottom-left { min-width: 120px; }
-  .hp-bar-inner { height: 6px; }
-  .hp-text-overlay { font-size: 7px; }
-  .status-badge { width: 16px; height: 16px; font-size: 10px; }
+  .status-badge { min-width: 20px; height: 14px; font-size: 6px; }
   .wr-badge { font-size: 6px; padding: 1px 3px; }
   .result-title { font-size: 22px; letter-spacing: 2px; }
   .modal { padding: 24px 20px; min-width: 280px; }
@@ -1775,13 +1693,13 @@ html, body { background: #080a14 !important; }
   0%, 100% { box-shadow: inset 0 0 0 rgba(100, 200, 255, 0); filter: brightness(1); }
   50% { box-shadow: inset 0 0 25px rgba(100, 200, 255, 0.5); filter: brightness(1.1); }
 }
-.character-card.burning {
+.arena-slot.burning {
   animation: status-flash-burn 2s ease-in-out infinite;
 }
-.character-card.poisoned {
+.arena-slot.poisoned {
   animation: status-flash-poison 2s ease-in-out infinite;
 }
-.character-card.frozen {
+.arena-slot.frozen {
   animation: status-flash-freeze 2.5s ease-in-out infinite;
   filter: saturate(0.7) brightness(1.1);
 }
@@ -1801,7 +1719,7 @@ html, body { background: #080a14 !important; }
   50% { opacity: 0.5; transform: translateY(5px) scale(0.95); filter: grayscale(0.5); }
   100% { opacity: 0.35; transform: translateY(8px) scale(0.92); filter: grayscale(1); }
 }
-.character-card.fainted {
+.arena-slot.fainted {
   animation: faint-out 0.8s ease-out forwards;
 }
 
@@ -1982,9 +1900,9 @@ html, body { background: #080a14 !important; }
 }
 
 /* ==================== ACTION READY STATE ==================== */
-.character-card.player.action-ready {
-  border-left-color: #4CAF50;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.5), -2px 0 8px rgba(76, 175, 80, 0.15);
+.arena-slot.player.action-ready {
+  border-left-color: #66BB6A;
+  box-shadow: -2px 0 8px rgba(76, 175, 80, 0.2);
 }
 
 /* ==================== LOG ENTRY BORDERS ==================== */
@@ -1999,7 +1917,3 @@ html, body { background: #080a14 !important; }
 .log-entry.critical { border-left-color: var(--accent-gold); }
 .log-entry.status { border-left-color: #c77dff; }
 
-/* Skills panel scrollbar */
-.skills-panel::-webkit-scrollbar { width: 3px; }
-.skills-panel::-webkit-scrollbar-track { background: transparent; }
-.skills-panel::-webkit-scrollbar-thumb { background: #1e2340; border-radius: 2px; }

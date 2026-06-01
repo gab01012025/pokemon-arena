@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { BattleItem, Move, GamePhase, EvolutionOption } from '../types';
 import { getSpriteById } from '../data';
 import EnergyIcon from './EnergyIcon';
@@ -76,6 +77,7 @@ export default function BattleOverlays({
   onRematch,
   onChangeTeam,
 }: BattleOverlaysProps) {
+  const router = useRouter();
   // Calculate MVP pokemon
   const mvpEntry = Object.entries(battleTracker.pokemonDamage).sort((a, b) => b[1] - a[1])[0];
   const mvpName = mvpEntry ? mvpEntry[0] : '';
@@ -256,8 +258,9 @@ export default function BattleOverlays({
               </div>
 
               <div className="result-buttons">
-                <button className="result-btn rematch-btn" onClick={onRematch}>⚔️ QUICK REMATCH</button>
-                <button className="result-btn change-team-btn" onClick={onChangeTeam}>🔄 CHANGE TEAM</button>
+                <button className="result-btn rematch-btn" onClick={onRematch}>QUICK REMATCH</button>
+                <button className="result-btn change-team-btn" onClick={onChangeTeam}>CHANGE TEAM</button>
+                <button className="result-btn pvp-btn" onClick={() => router.push('/multiplayer')} style={{ background: '#e53935' }}>PvP BATTLE</button>
               </div>
             </div>
           </div>
@@ -308,8 +311,9 @@ export default function BattleOverlays({
               </div>
 
               <div className="result-buttons">
-                <button className="result-btn rematch-btn" onClick={onRematch}>⚔️ TRY AGAIN</button>
-                <button className="result-btn change-team-btn" onClick={onChangeTeam}>🔄 CHANGE TEAM</button>
+                <button className="result-btn rematch-btn" onClick={onRematch}>TRY AGAIN</button>
+                <button className="result-btn change-team-btn" onClick={onChangeTeam}>CHANGE TEAM</button>
+                <button className="result-btn pvp-btn" onClick={() => router.push('/multiplayer')} style={{ background: '#e53935' }}>PvP BATTLE</button>
               </div>
             </div>
           </div>
