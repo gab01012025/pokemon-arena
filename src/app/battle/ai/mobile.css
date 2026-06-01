@@ -1,86 +1,37 @@
-/* ==================== MOBILE OPTIMIZATIONS ==================== */
+/* ==================== MOBILE OPTIMIZATIONS (Naruto-Arena layout) ==================== */
 
 @media (max-width: 768px) {
-  .skill-square {
-    width: 34px;
-    height: 34px;
-  }
-
-  .action-btn {
-    min-height: 44px;
-    padding: 12px 16px;
-    font-size: 12px;
-  }
-
-  .energy-orb {
-    min-width: 32px;
-    min-height: 32px;
-    font-size: 14px;
-  }
-
   .battle-container {
     height: 100dvh;
   }
 
-  .battle-area {
-    flex-direction: column;
-    gap: 4px;
-    padding: 4px;
+  /* Naruto-Arena layout mobile */
+  .na-battle-area {
+    padding: 4px 4px;
+    gap: 3px;
     margin: 2px 4px;
   }
-
-  .arena-column {
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-width: 100%;
+  .na-battle-row {
     gap: 4px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
-
-  .arena-column .arena-slot {
-    flex-shrink: 0;
+  .na-portrait {
+    width: 80px;
+    padding: 3px;
   }
-
-  .arena-slot.player {
-    max-width: 240px;
+  .na-sprite {
+    width: 56px;
+    height: 56px;
   }
-
-  .arena-slot.enemy {
-    max-width: 120px;
+  .na-skill-box {
+    width: 34px;
+    height: 34px;
   }
-
-  .arena-column::-webkit-scrollbar {
-    height: 3px;
+  .na-skill-strip {
+    padding: 2px 4px;
+    gap: 3px;
   }
-
-  .arena-column::-webkit-scrollbar-track {
-    background: #0a0d1c;
-  }
-
-  .arena-column::-webkit-scrollbar-thumb {
-    background: #1e2340;
-    border-radius: 2px;
-  }
-
-  .slot-portrait {
-    width: 72px;
-    height: 72px;
-  }
-
-  .char-sprite {
-    width: 72px;
-    height: 72px;
-  }
-
-  .char-nameplate {
-    font-size: 10px;
-  }
-
-  .skill-square {
-    width: 30px;
-    height: 30px;
-  }
+  .na-name { font-size: 9px; }
+  .na-hp-text { font-size: 8px; }
 
   .energy-pool {
     flex-wrap: wrap;
@@ -117,31 +68,24 @@
     padding: 1px 6px;
   }
 
-  .bottom-bar {
-    min-height: 70px;
-    max-height: 100px;
+  /* Bottom bar mobile */
+  .na-bottom-bar {
+    min-height: 50px;
   }
-
-  .bottom-bar.collapsed {
-    max-height: 40px;
-    overflow: hidden;
+  .na-bottom-left {
+    min-width: 100px;
+    padding: 4px 6px;
   }
-
-  .bottom-left {
-    min-width: 130px;
-    padding: 6px;
+  .na-surrender-btn {
+    font-size: 9px;
+    padding: 5px 8px;
   }
-
-  .action-buttons {
-    flex-wrap: wrap;
-    gap: 3px;
+  .na-item-btn {
+    font-size: 8px;
+    padding: 4px 6px;
   }
-
-  .battle-log {
-    font-size: 10px;
-    padding: 6px;
-    max-height: 60px;
-  }
+  .na-skill-info-name { font-size: 12px; }
+  .na-skill-info-desc { font-size: 10px; }
 
   .energy-tcg-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -205,7 +149,7 @@
   }
 
   .items-panel {
-    bottom: 80px;
+    bottom: 60px;
     left: 6px;
     right: 6px;
     min-width: auto;
@@ -220,35 +164,6 @@
 
   .targeting-text {
     font-size: 9px;
-  }
-
-  .vs-display {
-    font-size: 16px;
-    letter-spacing: 2px;
-    padding: 6px 14px;
-  }
-
-  .center-area {
-    flex-direction: row;
-    min-width: auto;
-    gap: 8px;
-  }
-
-  .queue-slot {
-    width: 28px;
-    height: 28px;
-  }
-
-  .skill-info-panel {
-    bottom: 80px;
-    min-width: 240px;
-    max-width: 90vw;
-    font-size: 12px;
-  }
-
-  .streak-badge {
-    font-size: 11px;
-    padding: 4px 10px;
   }
 
   .status-badge {
@@ -283,41 +198,18 @@
     padding: 12px 24px;
   }
 
-  .arena-slot.player {
-    max-width: 200px;
+  .na-portrait {
+    width: 64px;
+    padding: 2px;
   }
-
-  .arena-slot.enemy {
-    max-width: 100px;
+  .na-sprite {
+    width: 44px;
+    height: 44px;
   }
-
-  .slot-portrait {
-    width: 52px;
-    height: 52px;
-  }
-
-  .char-sprite {
-    width: 52px;
-    height: 52px;
-  }
-
-  .char-nameplate {
-    font-size: 9px;
-    padding: 1px 4px;
-  }
-
-  .skill-square {
-    width: 24px;
-    height: 24px;
-  }
-
-  .action-btn {
-    font-size: 10px;
-    padding: 8px 12px;
-  }
-
-  .log-entry {
-    font-size: 10px;
+  .na-name { font-size: 8px; }
+  .na-skill-box {
+    width: 28px;
+    height: 28px;
   }
 
   .top-bar {
@@ -334,34 +226,12 @@
   }
 }
 
-/* Landscape */
-@media (max-width: 900px) and (orientation: landscape) {
-  .battle-area {
-    flex-direction: row;
-    margin: 4px 8px;
-  }
-
-  .arena-column {
-    flex-direction: column;
-    max-width: 260px;
-  }
-
-  .bottom-bar {
-    min-height: 70px;
-  }
-}
-
 /* Prevent text selection on mobile */
 @media (max-width: 768px) {
   .battle-container * {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .battle-log {
-    -webkit-user-select: text;
-    user-select: text;
   }
 }
 
