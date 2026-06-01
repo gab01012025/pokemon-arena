@@ -80,7 +80,7 @@ export default function EnergySelectScreen({
         </div>
       )}
 
-      {/* TCG Energy Card Grid */}
+      {/* TCG Energy Card Grid — real Pokemon TCG card style */}
       <div className="energy-tcg-grid">
         {ALL_SELECTABLE_ENERGY_TYPES.map(type => {
           const isSelected = selectedEnergyTypes.includes(type);
@@ -90,13 +90,13 @@ export default function EnergySelectScreen({
             <div
               key={type}
               className={`energy-tcg-card ${type} ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-              onClick={() => toggleEnergyType(type)}
+              onClick={() => !isDisabled ? toggleEnergyType(type) : undefined}
             >
               <div className="energy-tcg-card-inner">
                 {isSelected && <span className="energy-tcg-check">&#10003;</span>}
                 {isNeeded && !isSelected && <span className="energy-tcg-rec">REC</span>}
                 <div className="energy-tcg-symbol">
-                  <EnergyIcon type={type} size={56} />
+                  <EnergyIcon type={type} size={72} />
                 </div>
                 <span className="energy-tcg-name">{ENERGY_NAMES[type]}</span>
               </div>

@@ -201,129 +201,164 @@ html, body { background: #080a14 !important; }
   font-weight: 500;
 }
 
-/* ---- TCG Energy Card Grid ---- */
+/* ---- TCG Energy Card Grid (Real Pokemon TCG style) ---- */
 .energy-tcg-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  max-width: 560px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 640px;
   width: 100%;
 }
 
-/* Individual TCG Energy Card */
+/* Individual TCG Energy Card — real Pokemon TCG card style */
 .energy-tcg-card {
-  aspect-ratio: 2.5 / 3.5;
-  border-radius: 10px;
+  aspect-ratio: 63 / 88;
+  border-radius: 8px;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  /* Golden outer border like real TCG cards */
+  border: 3px solid #c8a830;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.15);
 }
+/* Inner yellow border frame */
 .energy-tcg-card::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  border: 3px solid rgba(255,255,255,0.1);
+  inset: 2px;
+  border-radius: 5px;
+  border: 2px solid #e8d060;
   z-index: 2;
   pointer-events: none;
   transition: border-color 0.3s ease;
 }
+/* Subtle card texture overlay */
+.energy-tcg-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(255,255,255,0.06) 0%, transparent 40%),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0px, transparent 2px,
+      rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px
+    );
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 5px;
+}
 .energy-tcg-card-inner {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 1;
-  padding: 12px;
-}
-/* Glass-shimmer highlight on top half */
-.energy-tcg-card-inner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%);
-  border-radius: 12px 12px 50% 50%;
-  pointer-events: none;
+  padding: 10px 8px;
 }
 
 .energy-tcg-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6), 0 0 20px rgba(255,215,0,0.25);
+  border-color: #f0d860;
 }
 .energy-tcg-card:hover::before {
-  border-color: rgba(255,255,255,0.35);
+  border-color: #f8e888;
 }
 .energy-tcg-card.selected {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-6px) scale(1.04);
+  border-color: #50e850;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 16px rgba(80,232,80,0.35);
 }
 .energy-tcg-card.selected::before {
-  border-color: var(--accent-green);
+  border-color: #70ff70;
 }
 .energy-tcg-card.disabled {
-  opacity: 0.25;
+  opacity: 0.2;
   cursor: not-allowed;
   transform: none !important;
+  filter: grayscale(0.5);
 }
 
 .energy-tcg-symbol {
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
-  z-index: 2;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
+  z-index: 3;
 }
 .energy-tcg-name {
   font-family: var(--font-title);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  color: rgba(255,255,255,0.9);
-  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.95);
+  letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-  z-index: 2;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.6);
+  z-index: 3;
 }
 .energy-tcg-check {
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 8px;
-  font-size: 14px;
+  width: 20px;
+  height: 20px;
+  background: #50e850;
+  color: #000;
+  font-size: 12px;
   font-weight: 900;
-  color: var(--accent-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
   z-index: 5;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 .energy-tcg-rec {
   position: absolute;
-  top: 5px;
+  top: 6px;
   left: 6px;
   font-family: var(--font-title);
   font-size: 7px;
   font-weight: 800;
-  color: var(--accent-gold);
-  background: rgba(0,0,0,0.5);
-  padding: 2px 5px;
-  border-radius: 4px;
+  color: #FFD700;
+  background: rgba(0,0,0,0.65);
+  padding: 2px 6px;
+  border-radius: 3px;
   letter-spacing: 1px;
   z-index: 5;
+  border: 1px solid rgba(255,215,0,0.3);
   animation: pulse-badge 1.5s ease-in-out infinite;
 }
 
-/* Type-colored backgrounds for TCG cards */
-.energy-tcg-card.grass     { background: linear-gradient(160deg, #5a9e38 0%, #3d7a22 40%, #2d5e18 100%); }
-.energy-tcg-card.fire      { background: linear-gradient(160deg, #e86520 0%, #c04818 40%, #8e3010 100%); }
-.energy-tcg-card.water     { background: linear-gradient(160deg, #5880d8 0%, #3860c0 40%, #284890 100%); }
-.energy-tcg-card.lightning { background: linear-gradient(160deg, #e8c020 0%, #c8a010 40%, #988008 100%); }
-.energy-tcg-card.psychic   { background: linear-gradient(160deg, #e04878 0%, #b03058 40%, #882040 100%); }
-.energy-tcg-card.fighting  { background: linear-gradient(160deg, #b02818 0%, #882010 40%, #601808 100%); }
-.energy-tcg-card.darkness  { background: linear-gradient(160deg, #605040 0%, #483828 40%, #302018 100%); }
-.energy-tcg-card.metal     { background: linear-gradient(160deg, #b0b0c8 0%, #8888a8 40%, #686888 100%); }
-.energy-tcg-card.colorless { background: linear-gradient(160deg, #b0b0a8 0%, #888880 40%, #686860 100%); }
+/* Real Pokemon TCG energy card backgrounds */
+.energy-tcg-card.grass {
+  background: radial-gradient(ellipse at 50% 40%, #8cc63f 0%, #5a9e38 35%, #3a7a20 70%, #2a5e14 100%);
+}
+.energy-tcg-card.fire {
+  background: radial-gradient(ellipse at 50% 40%, #ff7b3a 0%, #e85520 35%, #c03a10 70%, #8a2808 100%);
+}
+.energy-tcg-card.water {
+  background: radial-gradient(ellipse at 50% 40%, #7aa8f8 0%, #5888e0 35%, #3868c0 70%, #1c4890 100%);
+}
+.energy-tcg-card.lightning {
+  background: radial-gradient(ellipse at 50% 40%, #ffe050 0%, #f0c830 35%, #d0a818 70%, #a08008 100%);
+}
+.energy-tcg-card.psychic {
+  background: radial-gradient(ellipse at 50% 40%, #f070a0 0%, #d84878 35%, #b83060 70%, #882040 100%);
+}
+.energy-tcg-card.fighting {
+  background: radial-gradient(ellipse at 50% 40%, #d04830 0%, #b03020 35%, #882010 70%, #601008 100%);
+}
+.energy-tcg-card.darkness {
+  background: radial-gradient(ellipse at 50% 40%, #786858 0%, #5a4838 35%, #403020 70%, #281c10 100%);
+}
+.energy-tcg-card.metal {
+  background: radial-gradient(ellipse at 50% 40%, #d0d0e0 0%, #a8a8c0 35%, #8888a0 70%, #606878 100%);
+}
 
 /* Selected energy summary row */
 .energy-select-summary {
