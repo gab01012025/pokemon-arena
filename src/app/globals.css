@@ -9916,1025 +9916,235 @@ input[type="checkbox"] {
   background: rgba(255, 215, 0, 0.5);
 }
 
-/* ===== LANDING PAGE ===== */
-/* Clean gaming portal design inspired by pirate-arena.net, budokai-arena.com, naruto-arena.site */
 
-.landing-page {
-  width: 100%;
-  min-height: 100vh;
-  background: #0d1117;
-  overflow-x: hidden;
-  color: #e6edf3;
-  font-family: 'Inter', 'Roboto', system-ui, -apple-system, sans-serif;
-}
+/* ===== HOME PAGE SPECIFIC STYLES ===== */
 
-/* ===== NAVIGATION ===== */
-.landing-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: #161b22;
-  border-bottom: 1px solid #30363d;
-  height: 60px;
-}
-
-.landing-nav-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  padding: 0 24px;
-}
-
-.landing-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.landing-logo-icon {
-  width: 36px;
-  height: 36px;
-  background: #e6b800;
-  color: #0d1117;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 18px;
-}
-
-.landing-logo-text {
-  font-weight: 700;
-  font-size: 16px;
-  color: #ffffff;
-  letter-spacing: -0.3px;
-}
-
-.landing-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.landing-nav-link {
-  color: #8b949e;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  transition: color 0.15s ease, background 0.15s ease;
-}
-
-.landing-nav-link:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
-  text-decoration: none;
-}
-
-.landing-nav-auth {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.landing-btn-login {
-  color: #e6edf3;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 6px 16px;
-  transition: color 0.15s ease;
-}
-
-.landing-btn-login:hover {
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.landing-btn-register {
-  background: #e6b800;
-  color: #0d1117;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-  padding: 8px 20px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.landing-btn-register:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(230, 184, 0, 0.25);
-  text-decoration: none;
-  color: #0d1117;
-}
-
-@media (max-width: 768px) {
-  .landing-nav-links {
-    display: none;
-  }
-  .landing-nav-auth .landing-btn-login {
-    display: none;
-  }
-}
-
-/* ===== HERO SECTION ===== */
-.landing-hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px 60px;
-  overflow: hidden;
-}
-
-.landing-hero-bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(230, 184, 0, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(230, 55, 48, 0.04) 0%, transparent 50%),
-    linear-gradient(180deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
-  z-index: 0;
-}
-
-.landing-hero-particles {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.landing-float-sprite {
-  position: absolute;
-  opacity: 0.08;
-  filter: grayscale(0.5) brightness(1.5);
-  animation: spriteFloat 30s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes spriteFloat {
-  0% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-15px) rotate(2deg); }
-  50% { transform: translateY(0) rotate(0deg); }
-  75% { transform: translateY(15px) rotate(-2deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
-.landing-hero-content {
-  position: relative;
-  z-index: 2;
+/* Welcome Banner */
+.home-welcome {
   text-align: center;
-  max-width: 800px;
 }
 
-.landing-hero-badge {
-  margin-bottom: 20px;
+.home-welcome-hero {
+  padding: 10px 0;
 }
 
-.landing-hero-title {
-  font-size: clamp(48px, 8vw, 80px);
-  font-weight: 900;
-  line-height: 0.9;
-  letter-spacing: -2px;
-  color: #ffffff;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-
-.landing-hero-accent {
-  display: block;
-  color: #e6b800;
-}
-
-.landing-hero-subtitle {
-  font-size: 18px;
-  color: #8b949e;
-  font-weight: 400;
-  max-width: 500px;
-  margin: 0 auto 32px;
-  line-height: 1.5;
-}
-
-/* Hero Pokemon */
-.landing-hero-pokemon {
+.home-welcome-pokemon {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
-  margin: 0 0 40px;
-  position: relative;
-}
-
-.landing-hero-poke {
-  position: relative;
-  transition: transform 0.3s ease;
-}
-
-.landing-hero-poke img {
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
-}
-
-.landing-hero-poke:hover {
-  transform: translateY(-8px);
-}
-
-.landing-hero-poke-left {
-  transform: translateX(20px);
-  z-index: 1;
-}
-
-.landing-hero-poke-center {
-  z-index: 2;
-  transform: scale(1.15);
-}
-
-.landing-hero-poke-center:hover {
-  transform: scale(1.15) translateY(-8px);
-}
-
-.landing-hero-poke-right {
-  transform: translateX(-20px);
-  z-index: 1;
-}
-
-/* Hero Actions */
-.landing-hero-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 40px;
-}
-
-.landing-cta-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 36px;
-  background: #e6b800;
-  color: #0d1117;
-  font-size: 14px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  position: relative;
-}
-
-.landing-cta-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(230, 184, 0, 0.3);
-  text-decoration: none;
-  color: #0d1117;
-}
-
-.landing-cta-glow {
-  display: none;
-}
-
-.landing-cta-secondary {
-  display: inline-flex;
-  align-items: center;
-  padding: 14px 36px;
-  background: transparent;
-  color: #e6edf3;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-
-.landing-cta-secondary:hover {
-  transform: translateY(-2px);
-  border-color: #e6b800;
-  background: rgba(230, 184, 0, 0.05);
-  text-decoration: none;
-  color: #e6edf3;
-}
-
-/* Hero Stats */
-.landing-hero-stats {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-}
-
-.landing-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.landing-stat-value {
-  font-size: 22px;
-  font-weight: 800;
-  color: #e6b800;
-}
-
-.landing-stat-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #8b949e;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.landing-stat-divider {
-  width: 1px;
-  height: 32px;
-  background: #30363d;
-}
-
-/* ===== SECTIONS COMMON ===== */
-.landing-section-title {
-  font-size: clamp(24px, 4vw, 32px);
-  font-weight: 800;
-  color: #ffffff;
-  text-align: center;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: -0.5px;
-}
-
-.landing-section-subtitle {
-  font-size: 15px;
-  color: #8b949e;
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-/* ===== FEATURES SECTION ===== */
-.landing-features {
-  padding: 80px 24px;
-  max-width: 1100px;
-  margin: 0 auto;
-  border-top: 1px solid #21262d;
-}
-
-.landing-features-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.landing-feature-card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  padding: 28px 24px;
-  text-decoration: none;
-  display: block;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.landing-feature-card:hover {
-  transform: translateY(-2px);
-  border-color: #e6b800;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  text-decoration: none;
-}
-
-.landing-feature-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 800;
   margin-bottom: 16px;
+}
+
+.home-welcome-pokemon img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.home-welcome-pokemon img:nth-child(1) {
+  transform: translateX(10px);
+  z-index: 1;
+}
+
+.home-welcome-pokemon img:nth-child(2) {
+  z-index: 2;
+  transform: scale(1.1);
+}
+
+.home-welcome-pokemon img:nth-child(3) {
+  transform: translateX(-10px);
+  z-index: 1;
+}
+
+.home-welcome-text {
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-welcome-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.home-btn-play {
+  display: inline-block;
+  padding: 10px 24px;
+  background: var(--header-blue, #3b82f6);
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.home-btn-play:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  text-decoration: none;
   color: white;
 }
 
-.landing-feature-icon-pvp {
-  background: #da3633;
-}
-
-.landing-feature-icon-ai {
-  background: #8b5cf6;
-}
-
-.landing-feature-icon-team {
-  background: #238636;
-}
-
-.landing-feature-icon-rank {
-  background: #e6b800;
-  color: #0d1117;
-}
-
-.landing-feature-card h3 {
-  font-size: 16px;
+.home-btn-register {
+  display: inline-block;
+  padding: 10px 24px;
+  background: #22c55e;
+  color: white;
   font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 8px;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
 }
 
-.landing-feature-card p {
-  font-size: 14px;
-  color: #8b949e;
-  line-height: 1.5;
+.home-btn-register:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  text-decoration: none;
+  color: white;
 }
 
-@media (max-width: 640px) {
-  .landing-features-grid {
-    grid-template-columns: 1fr;
-  }
+.home-btn-tutorial {
+  display: inline-block;
+  padding: 10px 24px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s ease;
 }
 
-/* ===== HOW IT WORKS ===== */
-.landing-how {
-  padding: 80px 24px;
-  max-width: 900px;
-  margin: 0 auto;
+.home-btn-tutorial:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  text-decoration: none;
 }
 
-.landing-how-steps {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
+/* Featured Pokemon Grid */
+.home-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.landing-step {
-  flex: 1;
-  text-align: center;
-  padding: 24px 16px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.landing-step:hover {
-  border-color: #e6b800;
-  transform: translateY(-2px);
-}
-
-.landing-step-number {
-  width: 40px;
-  height: 40px;
-  background: #e6b800;
-  color: #0d1117;
-  border-radius: 50%;
+.home-pokemon-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 800;
-  margin: 0 auto 14px;
-}
-
-.landing-step h3 {
-  font-size: 15px;
-  font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 8px;
-}
-
-.landing-step p {
-  font-size: 13px;
-  color: #8b949e;
-  line-height: 1.5;
-}
-
-.landing-step-arrow {
-  color: #30363d;
-  font-size: 24px;
-  margin-top: 40px;
-  font-weight: 300;
-}
-
-@media (max-width: 768px) {
-  .landing-how-steps {
-    flex-direction: column;
-  }
-  .landing-step-arrow {
-    transform: rotate(90deg);
-    margin: 0 auto;
-  }
-}
-
-/* ===== STARTER POKEMON SHOWCASE ===== */
-.landing-showcase {
-  padding: 80px 24px;
-  max-width: 1100px;
-  margin: 0 auto;
-  border-top: 1px solid #21262d;
-}
-
-.landing-pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-}
-
-.landing-pokemon-card {
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
-  padding: 24px 16px;
-  text-align: center;
-  border: 1px solid #30363d;
-  background: #161b22;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.landing-pokemon-card:hover {
-  transform: translateY(-4px);
-  border-color: #e6b800;
+.home-pokemon-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  text-decoration: none;
 }
 
-.landing-pokemon-sprite {
-  margin-bottom: 12px;
+.home-pokemon-card img {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
-.landing-pokemon-sprite img {
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-  transition: transform 0.2s ease;
-}
-
-.landing-pokemon-card:hover .landing-pokemon-sprite img {
-  transform: scale(1.08);
-}
-
-.landing-pokemon-fire { border-color: rgba(240, 128, 48, 0.3); }
-.landing-pokemon-fire:hover { border-color: #f08030; }
-.landing-pokemon-water { border-color: rgba(104, 144, 240, 0.3); }
-.landing-pokemon-water:hover { border-color: #6890f0; }
-.landing-pokemon-grass { border-color: rgba(120, 200, 80, 0.3); }
-.landing-pokemon-grass:hover { border-color: #78c850; }
-.landing-pokemon-electric { border-color: rgba(248, 208, 48, 0.3); }
-.landing-pokemon-electric:hover { border-color: #f8d030; }
-.landing-pokemon-normal { border-color: #30363d; }
-.landing-pokemon-normal:hover { border-color: #8b949e; }
-.landing-pokemon-normal2 { border-color: #30363d; }
-.landing-pokemon-normal2:hover { border-color: #8b949e; }
-
-.landing-pokemon-type {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #8b949e;
-  margin-bottom: 4px;
-}
-
-.landing-pokemon-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 6px;
-}
-
-.landing-pokemon-desc {
-  font-size: 12px;
-  color: #8b949e;
-  line-height: 1.4;
-}
-
-/* ===== NEWS SECTION ===== */
-.landing-news-section {
-  padding: 80px 24px;
-  max-width: 900px;
-  margin: 0 auto;
-  border-top: 1px solid #21262d;
-}
-
-.news-feed {
+.home-pokemon-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+}
+
+.home-pokemon-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.home-pokemon-type {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* How to Play */
+.home-howto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.home-howto-step {
+  display: flex;
+  align-items: flex-start;
   gap: 12px;
 }
 
-.news-feed-item {
-  display: block;
-  padding: 20px 24px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-
-.news-feed-item:hover {
-  transform: translateY(-2px);
-  border-color: #e6b800;
-  text-decoration: none;
-}
-
-.news-feed-item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.news-feed-category-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 4px;
-  border: 1px solid;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.news-feed-date {
-  font-size: 12px;
-  color: #8b949e;
-}
-
-.news-feed-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #e6edf3;
-  margin-bottom: 6px;
-}
-
-.news-feed-excerpt {
-  font-size: 14px;
-  color: #8b949e;
-  line-height: 1.5;
-}
-
-.news-feed-author {
-  font-size: 12px;
-  color: #8b949e;
-  margin-top: 8px;
-}
-
-/* ===== COMMUNITY SECTION ===== */
-.landing-community {
-  padding: 80px 24px;
-  max-width: 1000px;
-  margin: 0 auto;
-  border-top: 1px solid #21262d;
-}
-
-.landing-community-grid {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 40px;
-  align-items: start;
-}
-
-.landing-community-text {
-  font-size: 15px;
-  color: #8b949e;
-  line-height: 1.7;
-  margin-bottom: 24px;
-}
-
-.landing-community-links {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.landing-discord-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: #5865F2;
+.home-howto-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--header-blue, #3b82f6);
   color: white;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.landing-discord-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(88, 101, 242, 0.3);
-  color: white;
-  text-decoration: none;
-}
-
-.landing-link-subtle {
-  color: #8b949e;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.landing-link-subtle:hover {
-  color: #e6b800;
-  text-decoration: none;
-}
-
-.landing-community-account .sidebar-box {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-  .landing-community-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ===== FOOTER ===== */
-.landing-footer {
-  border-top: 1px solid #21262d;
-  padding: 32px 24px;
-  background: #0d1117;
-}
-
-.landing-footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.landing-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  color: #8b949e;
-  font-size: 14px;
-}
-
-.landing-footer-links {
-  display: flex;
-  gap: 20px;
-}
-
-.landing-footer-links a {
-  color: #8b949e;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.landing-footer-links a:hover {
-  color: #e6b800;
-  text-decoration: none;
-}
-
-.landing-footer-copy {
-  font-size: 12px;
-  color: #484f58;
-}
-
-/* ===== SCROLL REVEAL ===== */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.scroll-reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.scroll-reveal-item {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.scroll-reveal-item.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ===== ONLINE COUNTER ===== */
-.online-counter {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #8b949e;
-}
-
-.online-counter-dot {
-  width: 8px;
-  height: 8px;
-  background: #3fb950;
   border-radius: 50%;
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.online-counter-number {
-  font-weight: 700;
-  color: #e6edf3;
-}
-
-/* ===== DISCORD WIDGET ===== */
-.discord-invite-card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-/* ===== MOBILE NAV ===== */
-.mobile-nav-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: #e6edf3;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 8px;
-}
-
-@media (max-width: 768px) {
-  .mobile-nav-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.mobile-nav-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 9998;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.mobile-nav-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-
-.mobile-nav-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 280px;
-  background: #161b22;
-  border-left: 1px solid #30363d;
-  z-index: 9999;
-  transform: translateX(100%);
-  transition: transform 0.25s ease;
-  padding: 24px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.mobile-nav-drawer.open {
-  transform: translateX(0);
-}
-
-.mobile-nav-close {
-  align-self: flex-end;
-  background: none;
-  border: none;
-  color: #8b949e;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 4px;
-  margin-bottom: 24px;
-}
-
-.mobile-nav-links {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.mobile-nav-links a {
+.home-howto-step strong {
+  color: #e2e8f0;
+  font-size: 13px;
   display: block;
-  padding: 12px 16px;
-  color: #e6edf3;
-  font-size: 15px;
-  font-weight: 500;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+  margin-bottom: 2px;
 }
 
-.mobile-nav-links a:hover {
-  background: rgba(255, 255, 255, 0.05);
-  text-decoration: none;
+.home-howto-step p {
+  color: #888;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.mobile-nav-footer {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mobile-nav-footer a {
-  display: block;
-  text-align: center;
-  padding: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: 6px;
-}
-
-.mobile-nav-login {
-  color: #e6edf3;
-  border: 1px solid #30363d;
-}
-
-.mobile-nav-register {
-  background: #e6b800;
-  color: #0d1117;
-}
-
-/* ===== RESPONSIVE ===== */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  .landing-hero {
-    min-height: 90vh;
-    padding: 80px 20px 40px;
+  .home-featured-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .landing-hero-title {
-    font-size: clamp(40px, 12vw, 56px);
-  }
-
-  .landing-hero-subtitle {
-    font-size: 15px;
-  }
-
-  .landing-hero-actions {
+  .home-welcome-actions {
     flex-direction: column;
-    gap: 12px;
   }
 
-  .landing-cta-primary,
-  .landing-cta-secondary {
+  .home-btn-play,
+  .home-btn-register,
+  .home-btn-tutorial {
     width: 100%;
-    justify-content: center;
+    text-align: center;
   }
+}
 
-  .landing-hero-stats {
-    gap: 20px;
-  }
-
-  .landing-stat-value {
-    font-size: 18px;
-  }
-
-  .landing-hero-poke-left img,
-  .landing-hero-poke-right img {
-    width: 100px !important;
-    height: 100px !important;
-  }
-
-  .landing-hero-poke-center img {
-    width: 120px !important;
-    height: 120px !important;
-  }
-
-  .landing-hero-pokemon {
-    margin: 0 0 28px;
-  }
-
-  .landing-features,
-  .landing-how,
-  .landing-showcase,
-  .landing-news-section,
-  .landing-community {
-    padding: 60px 20px;
+@media (max-width: 480px) {
+  .home-featured-grid {
+    grid-template-columns: 1fr;
   }
 }
