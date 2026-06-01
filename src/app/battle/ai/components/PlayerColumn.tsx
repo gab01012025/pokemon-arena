@@ -39,6 +39,7 @@ export default function PlayerColumn({
         const hasBurn = poke.statusEffects.some(e => e.type === 'burn');
         const hasPoison = poke.statusEffects.some(e => e.type === 'poison');
         const hasFrozen = poke.statusEffects.some(e => e.type === 'freeze');
+        const evoPercent = poke.maxEvoBar > 0 ? Math.min((poke.evoBar / poke.maxEvoBar) * 100, 100) : 0;
         return (
           <div
             key={`p-${poke.id}-${idx}`}
@@ -47,7 +48,6 @@ export default function PlayerColumn({
           >
             {/* Portrait side */}
             <div className="slot-portrait">
-              {/* Status effects */}
               {poke.statusEffects.length > 0 && (
                 <div className="slot-status-icons">
                   {poke.statusEffects.map((se, si) => (
@@ -58,7 +58,6 @@ export default function PlayerColumn({
                 </div>
               )}
               <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="char-sprite flipped" />
-              {/* W/R badges */}
               {(poke.weakness || poke.resistance) && (
                 <div className="char-wr-badges">
                   {poke.weakness && (
@@ -95,7 +94,7 @@ export default function PlayerColumn({
               })}
             </div>
 
-            {/* Bottom: name + HP */}
+            {/* Bottom: name + HP + Evo bar */}
             <div className="slot-bottom">
               <div className="char-nameplate">{poke.name}</div>
               <div className="char-hp-section">
@@ -104,6 +103,15 @@ export default function PlayerColumn({
                 </div>
                 <span className="char-hp-text">{poke.hp}/{poke.maxHp}</span>
               </div>
+              {/* Evolution bar (purple) */}
+              {poke.hp > 0 && (
+                <div className="char-evo-section">
+                  <div className="char-evo-bar">
+                    <div className={`evo-fill ${evoPercent >= 100 ? 'full' : ''}`} style={{ width: `${evoPercent}%` }} />
+                  </div>
+                  <span className="char-evo-label">EVO</span>
+                </div>
+              )}
             </div>
           </div>
         );

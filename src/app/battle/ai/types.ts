@@ -18,7 +18,7 @@ export type StatusType =
   | 'cooldown-increase' | 'cooldown-reduce' | 'cannot-be-healed'
   | 'endure' | 'expose' | 'bleed';
 
-export type GamePhase = 'loading' | 'trainer-select' | 'energy-select' | 'player1-turn' | 'player2-turn' | 'targeting' | 'executing' |
+export type GamePhase = 'loading' | 'trainer-select' | 'energy-select' | 'searching' | 'player1-turn' | 'player2-turn' | 'targeting' | 'executing' |
   'item-target' | 'victory' | 'defeat';
 
 // ==================== INTERFACES ====================
@@ -88,6 +88,8 @@ export interface BattlePokemon {
   evolutionOptions?: EvolutionOption[];  // Branching evolution (e.g. Eevee)
   weakness?: PokemonType;    // TCG Pocket: +20 flat damage from this type
   resistance?: PokemonType;  // TCG Pocket: -20 flat damage from this type
+  evoBar: number;            // Current evolution bar progress
+  maxEvoBar: number;         // Max evolution bar (varies per Pokemon)
 }
 
 export interface SelectedAction {

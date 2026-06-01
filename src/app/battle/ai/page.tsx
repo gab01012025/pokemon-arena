@@ -109,6 +109,9 @@ export default function AIBattlePage() {
   const [playerAnims, setPlayerAnims] = useState<string[]>(['', '', '']);
   const [enemyAnims, setEnemyAnims] = useState<string[]>(['', '', '']);
 
+  // Enemy skills viewing
+  const [viewingEnemySkills, setViewingEnemySkills] = useState<BattlePokemon | null>(null);
+
   // Battle Stats Tracking
   const [battleTracker, setBattleTracker] = useState({
     totalDamageDealt: 0,
@@ -181,8 +184,8 @@ export default function AIBattlePage() {
                 id: p.id,
                 name: p.name,
                 types: kantoData?.types || [primaryType] as PokemonType[],
-                hp: kantoData?.hp || 200,
-                maxHp: kantoData?.hp || 200,
+                hp: 100,
+                maxHp: 100,
                 attack: 80, defense: 70, spAtk: 85, spDef: 75, speed: 60,
                 sprite: getSprite(p.name),
                 moves,
@@ -193,6 +196,8 @@ export default function AIBattlePage() {
                 evolutionOptions: kantoData?.evolutionOptions,
                 weakness: wr.weakness,
                 resistance: wr.resistance,
+                evoBar: 0,
+                maxEvoBar: 80,
               };
             });
             setPlayerTeam(battleTeam);
@@ -254,23 +259,16 @@ export default function AIBattlePage() {
 
   const confirmEnergySelection = () => {
     if (selectedEnergyTypes.length < 1 || selectedEnergyTypes.length > 4) return;
+    // Show pokeball searching animation
+    setPhase('searching');
+  };
+
+  const startBattleAfterSearch = useCallback(() => {
     const initialEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, 1);
-    console.log('[ENERGY] Battle start — player initial energy:', JSON.stringify(initialEnergy));
-    setEnergy(prev => {
-      const result = addEnergy(prev, initialEnergy);
-      console.log('[ENERGY] Player energy after init:', JSON.stringify(result));
-      return result;
-    });
-    // Initialize AI energy based on ALL opponent team types (dedup, max 3)
+    setEnergy(prev => addEnergy(prev, initialEnergy));
     const aiTypes = getAiEnergyTypes(opponentTeam);
     const initialAiEnergy = generateTurnEnergy(opponentTeam, aiTypes, 1);
-    console.log('[ENERGY] Battle start — AI initial energy:', JSON.stringify(initialAiEnergy));
-    setAiEnergy(prev => {
-      const result = addEnergy(prev, initialAiEnergy);
-      console.log('[ENERGY] AI energy after init:', JSON.stringify(result));
-      return result;
-    });
-    // Apply onBattleStart passives (Oak +5HP, Red +1 each selected energy)
+    setAiEnergy(prev => addEnergy(prev, initialAiEnergy));
     if (playerTrainer?.onBattleStart) {
       playerTrainer.onBattleStart({
         playerTeam,
@@ -283,11 +281,11 @@ export default function AIBattlePage() {
         addLog,
       });
     }
-
     setPhase('player1-turn');
     addLog('Battle Start! Player 1 turn!', 'info');
     addLog('Turn 1 - Gained 1 energy!', 'info');
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerTeam, opponentTeam, selectedEnergyTypes, playerTrainer]);
 
   // ==================== MOVE SELECTION ====================
   const canUseMove = (move: Move, pIdx: number): boolean => {
@@ -1007,6 +1005,22 @@ export default function AIBattlePage() {
           return newTracker;
         });
 
+        // Evolution bar: attacker gains +15, defender gains +10
+        if (finalDamage > 0) {
+          setAtkTeam(prev => prev.map((p, i) => {
+            if (i !== action.pokemonIndex || p.hp <= 0) return p;
+            const newEvo = Math.min(p.evoBar + 15, p.maxEvoBar);
+            return { ...p, evoBar: newEvo };
+          }));
+          if (newHp > 0) {
+            setDefTeam(prev => prev.map((p, i) => {
+              if (i !== tIdx || p.hp <= 0) return p;
+              const newEvo = Math.min(p.evoBar + 10, p.maxEvoBar);
+              return { ...p, evoBar: newEvo };
+            }));
+          }
+        }
+
         // Counter: reflect damage back (skipped if exposed)
         const counterEffect = def.statusEffects.find(e => e.type === 'counter');
         if (counterEffect && finalDamage > 0 && !isExposed) {
@@ -1552,6 +1566,56 @@ export default function AIBattlePage() {
     const energyGained = newTurn === 1 ? 1 : aliveCount;
     addLog(`Turn ${newTurn}! Gained ${energyGained} energy!`, 'info');
 
+    // Check evolution bars for player team
+    setPlayerTeam(prev => prev.map((p, idx) => {
+      if (p.hp <= 0 || p.evoBar < p.maxEvoBar) return p;
+      // Bar is full!
+      if (p.canEvolve && (p.evolvesTo || p.evolutionOptions)) {
+        // Auto-trigger evolution (single evolution only; branching handled separately)
+        if (p.evolvesTo && !p.evolutionOptions) {
+          const evoData = EVOLUTION_DATA[p.evolvesTo.id];
+          if (evoData) {
+            addLog(`${p.name}'s evolution bar is full! Evolving into ${p.evolvesTo.name}!`, 'effect');
+            const newMoves = getPokemonMoves(evoData.id, evoData.types[0]);
+            const wr = getWeaknessResistance(evoData.types);
+            return {
+              ...p,
+              id: evoData.id,
+              name: evoData.name,
+              types: evoData.types,
+              sprite: getSpriteById(evoData.id),
+              maxHp: 100,
+              hp: Math.min(p.hp + 20, 100), // Heal 20 on evolution
+              attack: p.attack + (p.evolvesTo.statBonus || 0),
+              defense: p.defense + Math.floor((p.evolvesTo.statBonus || 0) / 2),
+              spAtk: p.spAtk + (p.evolvesTo.statBonus || 0),
+              spDef: p.spDef + Math.floor((p.evolvesTo.statBonus || 0) / 2),
+              speed: p.speed + Math.floor((p.evolvesTo.statBonus || 0) / 2),
+              moves: newMoves.length > 0 ? newMoves : p.moves,
+              canEvolve: evoData.canEvolve,
+              evolvesTo: evoData.evolvesTo,
+              evolutionEnergyCost: evoData.evolutionEnergyCost,
+              evolutionOptions: evoData.evolutionOptions,
+              weakness: wr.weakness,
+              resistance: wr.resistance,
+              evoBar: 0,
+              maxEvoBar: p.maxEvoBar + 20, // Each evolution requires more
+            };
+          }
+        } else if (p.evolutionOptions) {
+          // Branching evolution - trigger choice UI
+          setEvolveChoiceIdx(idx);
+        }
+        return p; // Don't change until choice is made
+      } else {
+        // Final form or can't evolve: gain random energy + reset bar
+        const randomType = ALL_SELECTABLE_ENERGY_TYPES[Math.floor(Math.random() * ALL_SELECTABLE_ENERGY_TYPES.length)];
+        addLog(`${p.name}'s evolution bar is full! Gained 1 ${randomType} energy!`, 'effect');
+        setEnergy(prev => ({ ...prev, [randomType]: prev[randomType] + 1 }));
+        return { ...p, evoBar: 0 };
+      }
+    }));
+
     setSelectedActions([]);
     setUsedItemThisTurn(false);
     setTurn(newTurn);
@@ -1601,6 +1665,11 @@ export default function AIBattlePage() {
   // ==================== RENDER: LOADING ====================
   if (phase === 'loading' || !playerTeam.length) {
     return <LoadingScreen />;
+  }
+
+  // ==================== RENDER: SEARCHING FOR OPPONENT ====================
+  if (phase === 'searching') {
+    return <LoadingScreen isSearching onSearchComplete={startBattleAfterSearch} />;
   }
 
   // ==================== RENDER: TRAINER SELECTION ====================
@@ -1679,6 +1748,7 @@ export default function AIBattlePage() {
             opponentTeam={opponentTeam}
             phase={phase}
             onTargetSelect={handleTargetSelect}
+            onViewSkills={(poke) => setViewingEnemySkills(poke)}
             anims={enemyAnims}
           />
         </div>
@@ -1695,6 +1765,59 @@ export default function AIBattlePage() {
           usedItemThisTurn={usedItemThisTurn}
         />
       </div>
+
+      {/* Enemy Skills Modal */}
+      {viewingEnemySkills && (
+        <div className="enemy-skills-overlay" onClick={() => setViewingEnemySkills(null)}>
+          <div className="enemy-skills-panel" onClick={e => e.stopPropagation()}>
+            <div className="enemy-skills-header">
+              <img src={viewingEnemySkills.sprite} alt={viewingEnemySkills.name} width={48} height={48} style={{ imageRendering: 'pixelated' }} />
+              <div>
+                <div className="enemy-skills-name">{viewingEnemySkills.name}</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                  {viewingEnemySkills.types.join(' / ')} &middot; HP: {viewingEnemySkills.hp}/{viewingEnemySkills.maxHp}
+                </div>
+              </div>
+            </div>
+            {viewingEnemySkills.moves.map(move => {
+              const moveColor = TYPE_COLORS[move.type] || TYPE_COLORS.normal;
+              return (
+                <div key={move.id} className="enemy-skill-card">
+                  <div className="enemy-skill-card-header">
+                    <span className="enemy-skill-name">{move.name}</span>
+                    <span className="enemy-skill-type" style={{ background: moveColor.bg, color: moveColor.text }}>
+                      {move.type.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="enemy-skill-desc">{move.description}</div>
+                  <div className="enemy-skill-stats">
+                    <span>PWR: {move.power || '-'}</span>
+                    <span>ACC: {move.accuracy}%</span>
+                    <span>CD: {move.cooldown > 0 ? `${move.cooldown}t` : '-'}</span>
+                    <span>TGT: {move.targetType === 'self' ? 'Self' : move.targetType === 'all-enemies' ? 'All' : 'Single'}</span>
+                  </div>
+                  {move.cost.length > 0 && (
+                    <div className="enemy-skill-cost" style={{ marginTop: 6 }}>
+                      <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Cost:</span>
+                      {move.cost.map((c, i) => (
+                        <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
+                          {c.amount}x {c.type}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {move.statusEffect && (
+                    <div style={{ fontSize: 10, color: '#AB47BC', marginTop: 4 }}>
+                      {STATUS_ICONS[move.statusEffect.type]} {move.statusEffect.type} ({move.statusEffect.chance}% · {move.statusEffect.duration}t)
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <button className="enemy-skills-close" onClick={() => setViewingEnemySkills(null)}>CLOSE</button>
+          </div>
+        </div>
+      )}
 
       <BattleOverlays
         phase={phase}

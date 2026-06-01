@@ -52,6 +52,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'overview' | 'team' | 'history' | 'achievements'>('overview');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -116,6 +118,29 @@ export default function ProfilePage() {
 
   const rank = getRankTier(profile.ladderPoints);
 
+  // Site rank: Admin, Moderator, Member
+  const getSiteRank = () => {
+    // Could be fetched from API in the future
+    if (profile.username === 'Admin' || profile.username === 'admin') return { name: 'Admin', color: '#E74C3C' };
+    if (profile.level >= 50) return { name: 'Moderator', color: '#9B59B6' };
+    return { name: 'Member', color: '#2ECC71' };
+  };
+  const siteRank = getSiteRank();
+
+  const handleResetAccount = async () => {
+    setResetting(true);
+    try {
+      const res = await fetch('/api/trainer/reset', { method: 'POST' });
+      if (res.ok) {
+        localStorage.clear();
+        router.push('/login');
+      }
+    } catch {
+      setResetting(false);
+      setShowResetConfirm(false);
+    }
+  };
+
   return (
     <div className="profile-page">
       {/* Header com Info Principal */}
@@ -149,6 +174,9 @@ export default function ProfilePage() {
             <span className="rank-icon">{rank.icon}</span>
             <span className="rank-name">{rank.name}</span>
             <span className="rank-points">({profile.ladderPoints} LP)</span>
+          </div>
+          <div className="site-rank-badge" style={{ color: siteRank.color, borderColor: siteRank.color }}>
+            {siteRank.name}
           </div>
 
           <div className="exp-bar">
@@ -529,9 +557,43 @@ export default function ProfilePage() {
           Voltar ao Jogo
         </Link>
         <Link href="/settings" className="btn btn-secondary">
-          Configurações
+          Configuracoes
         </Link>
+        <button
+          className="btn btn-danger"
+          onClick={() => setShowResetConfirm(true)}
+          style={{ background: '#c0392b', border: '1px solid #e74c3c', color: '#fff', cursor: 'pointer', padding: '10px 20px', borderRadius: 8, fontFamily: 'inherit', fontSize: 14 }}
+        >
+          Resetar Conta
+        </button>
       </div>
+
+      {/* Reset Account Modal */}
+      {showResetConfirm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#0c0f1e', border: '2px solid #e74c3c', borderRadius: 12, padding: 30, maxWidth: 400, textAlign: 'center' }}>
+            <h3 style={{ color: '#e74c3c', marginBottom: 12, fontFamily: 'Orbitron, sans-serif' }}>RESETAR CONTA</h3>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 20, fontSize: 14 }}>
+              Isso vai zerar todas as suas estatisticas, nivel, LP, vitorias e derrotas. Esta acao nao pode ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                style={{ padding: '10px 24px', background: '#1e2340', border: '1px solid #2a2f55', borderRadius: 8, color: '#fff', cursor: 'pointer', fontSize: 14 }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleResetAccount}
+                disabled={resetting}
+                style={{ padding: '10px 24px', background: '#e74c3c', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontSize: 14 }}
+              >
+                {resetting ? 'Resetando...' : 'Confirmar Reset'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

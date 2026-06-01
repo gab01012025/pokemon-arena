@@ -408,147 +408,149 @@ export const getPokemonMoves = (pokemonId: number, primaryType: PokemonType): Mo
 };
 
 // ==================== KANTO POKEMON ====================
+// All Pokemon have 100 HP as per game design. Evolution bar (evoBarMax) controls evolution speed.
 export const KANTO_POKEMON: KantoPokemonData[] = [
   // === STARTERS ===
-  { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 195, canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 35, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  { id: 4, name: 'Charmander', types: ['fire'], hp: 190, canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 38, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 7, name: 'Squirtle', types: ['water'], hp: 198, canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 31, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 4, name: 'Charmander', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 7, name: 'Squirtle', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
   // === ICONIC ===
-  { id: 25, name: 'Pikachu', types: ['electric'], hp: 165, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 65, statBonus: 15 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
-  { id: 133, name: 'Eevee', types: ['normal'], hp: 180, canEvolve: true, evolutionOptions: [
-    { id: 134, name: 'Vaporeon', types: ['water'], hpBonus: 60, statBonus: 15, energyCost: [{ type: 'water', amount: 2 }] },
-    { id: 135, name: 'Jolteon', types: ['electric'], hpBonus: 40, statBonus: 15, energyCost: [{ type: 'lightning', amount: 2 }] },
-    { id: 136, name: 'Flareon', types: ['fire'], hpBonus: 40, statBonus: 15, energyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 25, name: 'Pikachu', types: ['electric'], hp: 100, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 133, name: 'Eevee', types: ['normal'], hp: 100, canEvolve: true, evolutionOptions: [
+    { id: 134, name: 'Vaporeon', types: ['water'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'water', amount: 2 }] },
+    { id: 135, name: 'Jolteon', types: ['electric'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'lightning', amount: 2 }] },
+    { id: 136, name: 'Flareon', types: ['fire'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'fire', amount: 2 }] },
   ] },
-  { id: 52, name: 'Meowth', types: ['normal'], hp: 175, canEvolve: true, evolvesTo: { id: 53, name: 'Persian', hpBonus: 40, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 52, name: 'Meowth', types: ['normal'], hp: 100, canEvolve: true, evolvesTo: { id: 53, name: 'Persian', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === EARLY ROUTES ===
-  { id: 10, name: 'Caterpie', types: ['bug'], hp: 150, canEvolve: true, evolvesTo: { id: 11, name: 'Metapod', hpBonus: 20, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
-  { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 150, canEvolve: true, evolvesTo: { id: 14, name: 'Kakuna', hpBonus: 20, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
-  { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 175, canEvolve: true, evolvesTo: { id: 17, name: 'Pidgeotto', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
-  { id: 19, name: 'Rattata', types: ['normal'], hp: 160, canEvolve: true, evolvesTo: { id: 20, name: 'Raticate', hpBonus: 45, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
-  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 170, canEvolve: true, evolvesTo: { id: 22, name: 'Fearow', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 10, name: 'Caterpie', types: ['bug'], hp: 100, canEvolve: true, evolvesTo: { id: 11, name: 'Metapod', hpBonus: 0, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
+  { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 14, name: 'Kakuna', hpBonus: 0, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
+  { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 17, name: 'Pidgeotto', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 19, name: 'Rattata', types: ['normal'], hp: 100, canEvolve: true, evolvesTo: { id: 20, name: 'Raticate', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 22, name: 'Fearow', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === NIDORAN LINES ===
-  { id: 29, name: 'NidoranF', types: ['poison'], hp: 180, canEvolve: true, evolvesTo: { id: 30, name: 'Nidorina', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
-  { id: 32, name: 'NidoranM', types: ['poison'], hp: 176, canEvolve: true, evolvesTo: { id: 33, name: 'Nidorino', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 29, name: 'NidoranF', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 30, name: 'Nidorina', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 32, name: 'NidoranM', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 33, name: 'Nidorino', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
   // === FAIRY ===
-  { id: 35, name: 'Clefairy', types: ['fairy'], hp: 185, canEvolve: true, evolvesTo: { id: 36, name: 'Clefable', hpBonus: 50, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 39, name: 'Jigglypuff', types: ['normal', 'fairy'], hp: 195, canEvolve: true, evolvesTo: { id: 40, name: 'Wigglytuff', hpBonus: 45, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 35, name: 'Clefairy', types: ['fairy'], hp: 100, canEvolve: true, evolvesTo: { id: 36, name: 'Clefable', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 39, name: 'Jigglypuff', types: ['normal', 'fairy'], hp: 100, canEvolve: true, evolvesTo: { id: 40, name: 'Wigglytuff', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === FIRE ===
-  { id: 37, name: 'Vulpix', types: ['fire'], hp: 170, canEvolve: true, evolvesTo: { id: 38, name: 'Ninetales', hpBonus: 45, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 58, name: 'Growlithe', types: ['fire'], hp: 180, canEvolve: true, evolvesTo: { id: 59, name: 'Arcanine', hpBonus: 50, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 77, name: 'Ponyta', types: ['fire'], hp: 178, canEvolve: true, evolvesTo: { id: 78, name: 'Rapidash', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 37, name: 'Vulpix', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 38, name: 'Ninetales', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 58, name: 'Growlithe', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 59, name: 'Arcanine', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 77, name: 'Ponyta', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 78, name: 'Rapidash', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
   // === GRASS/POISON ===
-  { id: 43, name: 'Oddish', types: ['grass', 'poison'], hp: 178, canEvolve: true, evolvesTo: { id: 44, name: 'Gloom', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 43, name: 'Oddish', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 44, name: 'Gloom', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
   // === WATER ===
-  { id: 60, name: 'Poliwag', types: ['water'], hp: 175, canEvolve: true, evolvesTo: { id: 61, name: 'Poliwhirl', hpBonus: 35, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
-  { id: 79, name: 'Slowpoke', types: ['water', 'psychic'], hp: 190, canEvolve: true, evolvesTo: { id: 80, name: 'Slowbro', hpBonus: 45, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 116, name: 'Horsea', types: ['water'], hp: 160, canEvolve: true, evolvesTo: { id: 117, name: 'Seadra', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
-  { id: 129, name: 'Magikarp', types: ['water'], hp: 120, canEvolve: true, evolvesTo: { id: 130, name: 'Gyarados', hpBonus: 110, statBonus: 25 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  { id: 60, name: 'Poliwag', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 61, name: 'Poliwhirl', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 79, name: 'Slowpoke', types: ['water', 'psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 80, name: 'Slowbro', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 116, name: 'Horsea', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 117, name: 'Seadra', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 129, name: 'Magikarp', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 130, name: 'Gyarados', hpBonus: 0, statBonus: 25 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
   // === PSYCHIC/GHOST ===
-  { id: 63, name: 'Abra', types: ['psychic'], hp: 155, canEvolve: true, evolvesTo: { id: 64, name: 'Kadabra', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 92, name: 'Gastly', types: ['ghost', 'poison'], hp: 160, canEvolve: true, evolvesTo: { id: 93, name: 'Haunter', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 63, name: 'Abra', types: ['psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 64, name: 'Kadabra', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 92, name: 'Gastly', types: ['ghost', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 93, name: 'Haunter', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
   // === FIGHTING/ROCK/GROUND ===
-  { id: 66, name: 'Machop', types: ['fighting'], hp: 185, canEvolve: true, evolvesTo: { id: 67, name: 'Machoke', hpBonus: 35, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
-  { id: 74, name: 'Geodude', types: ['rock', 'ground'], hp: 175, canEvolve: true, evolvesTo: { id: 75, name: 'Graveler', hpBonus: 30, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
-  { id: 104, name: 'Cubone', types: ['ground'], hp: 178, canEvolve: true, evolvesTo: { id: 105, name: 'Marowak', hpBonus: 38, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 66, name: 'Machop', types: ['fighting'], hp: 100, canEvolve: true, evolvesTo: { id: 67, name: 'Machoke', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 74, name: 'Geodude', types: ['rock', 'ground'], hp: 100, canEvolve: true, evolvesTo: { id: 75, name: 'Graveler', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 104, name: 'Cubone', types: ['ground'], hp: 100, canEvolve: true, evolvesTo: { id: 105, name: 'Marowak', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
   // === ELECTRIC/STEEL ===
-  { id: 81, name: 'Magnemite', types: ['electric', 'steel'], hp: 155, canEvolve: true, evolvesTo: { id: 82, name: 'Magneton', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
-  { id: 100, name: 'Voltorb', types: ['electric'], hp: 160, canEvolve: true, evolvesTo: { id: 101, name: 'Electrode', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 81, name: 'Magnemite', types: ['electric', 'steel'], hp: 100, canEvolve: true, evolvesTo: { id: 82, name: 'Magneton', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 100, name: 'Voltorb', types: ['electric'], hp: 100, canEvolve: true, evolvesTo: { id: 101, name: 'Electrode', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
   // === POISON ===
-  { id: 23, name: 'Ekans', types: ['poison'], hp: 165, canEvolve: true, evolvesTo: { id: 24, name: 'Arbok', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
-  { id: 109, name: 'Koffing', types: ['poison'], hp: 170, canEvolve: true, evolvesTo: { id: 110, name: 'Weezing', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 23, name: 'Ekans', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 24, name: 'Arbok', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 109, name: 'Koffing', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 110, name: 'Weezing', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
   // === DRAGON ===
-  { id: 147, name: 'Dratini', types: ['dragon'], hp: 170, canEvolve: true, evolvesTo: { id: 148, name: 'Dragonair', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 147, name: 'Dratini', types: ['dragon'], hp: 100, canEvolve: true, evolvesTo: { id: 148, name: 'Dragonair', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
 ];
 
 export const AI_POKEMON_POOL: KantoPokemonData[] = KANTO_POKEMON;
 
 export const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
+  // All evolved forms also have 100 HP
   // === Bulbasaur line ===
-  2: { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 230, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
-  3: { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 270, canEvolve: false },
+  2: { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  3: { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 100, canEvolve: false },
   // === Charmander line ===
-  5: { id: 5, name: 'Charmeleon', types: ['fire'], hp: 228, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 38, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
-  6: { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 266, canEvolve: false },
+  5: { id: 5, name: 'Charmeleon', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
+  6: { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 100, canEvolve: false },
   // === Squirtle line ===
-  8: { id: 8, name: 'Wartortle', types: ['water'], hp: 229, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 39, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
-  9: { id: 9, name: 'Blastoise', types: ['water'], hp: 268, canEvolve: false },
+  8: { id: 8, name: 'Wartortle', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  9: { id: 9, name: 'Blastoise', types: ['water'], hp: 100, canEvolve: false },
   // === Caterpie line ===
-  11: { id: 11, name: 'Metapod', types: ['bug'], hp: 170, canEvolve: true, evolvesTo: { id: 12, name: 'Butterfree', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  12: { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 230, canEvolve: false },
+  11: { id: 11, name: 'Metapod', types: ['bug'], hp: 100, canEvolve: true, evolvesTo: { id: 12, name: 'Butterfree', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  12: { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 100, canEvolve: false },
   // === Weedle line ===
-  14: { id: 14, name: 'Kakuna', types: ['bug', 'poison'], hp: 170, canEvolve: true, evolvesTo: { id: 15, name: 'Beedrill', hpBonus: 40, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  15: { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 235, canEvolve: false },
+  14: { id: 14, name: 'Kakuna', types: ['bug', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 15, name: 'Beedrill', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  15: { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 100, canEvolve: false },
   // === Pidgey line ===
-  17: { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 215, canEvolve: true, evolvesTo: { id: 18, name: 'Pidgeot', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
-  18: { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 250, canEvolve: false },
+  17: { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 18, name: 'Pidgeot', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
+  18: { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 100, canEvolve: false },
   // === Rattata line ===
-  20: { id: 20, name: 'Raticate', types: ['normal'], hp: 240, canEvolve: false },
+  20: { id: 20, name: 'Raticate', types: ['normal'], hp: 100, canEvolve: false },
   // === Spearow line ===
-  22: { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 245, canEvolve: false },
+  22: { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 100, canEvolve: false },
   // === Ekans line ===
-  24: { id: 24, name: 'Arbok', types: ['poison'], hp: 230, canEvolve: false },
+  24: { id: 24, name: 'Arbok', types: ['poison'], hp: 100, canEvolve: false },
   // === Pikachu line ===
-  26: { id: 26, name: 'Raichu', types: ['electric'], hp: 230, canEvolve: false },
+  26: { id: 26, name: 'Raichu', types: ['electric'], hp: 100, canEvolve: false },
   // === Sandshrew line ===
-  28: { id: 28, name: 'Sandslash', types: ['ground'], hp: 245, canEvolve: false },
+  28: { id: 28, name: 'Sandslash', types: ['ground'], hp: 100, canEvolve: false },
   // === NidoranF line ===
-  30: { id: 30, name: 'Nidorina', types: ['poison'], hp: 220, canEvolve: true, evolvesTo: { id: 31, name: 'Nidoqueen', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
-  31: { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 260, canEvolve: false },
+  30: { id: 30, name: 'Nidorina', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 31, name: 'Nidoqueen', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
+  31: { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 100, canEvolve: false },
   // === NidoranM line ===
-  33: { id: 33, name: 'Nidorino', types: ['poison'], hp: 216, canEvolve: true, evolvesTo: { id: 34, name: 'Nidoking', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
-  34: { id: 34, name: 'Nidoking', types: ['poison', 'ground'], hp: 251, canEvolve: false },
+  33: { id: 33, name: 'Nidorino', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 34, name: 'Nidoking', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
+  34: { id: 34, name: 'Nidoking', types: ['poison', 'ground'], hp: 100, canEvolve: false },
   // === Clefairy line ===
-  36: { id: 36, name: 'Clefable', types: ['fairy'], hp: 255, canEvolve: false },
+  36: { id: 36, name: 'Clefable', types: ['fairy'], hp: 100, canEvolve: false },
   // === Vulpix line ===
-  38: { id: 38, name: 'Ninetales', types: ['fire'], hp: 243, canEvolve: false },
+  38: { id: 38, name: 'Ninetales', types: ['fire'], hp: 100, canEvolve: false },
   // === Jigglypuff line ===
-  40: { id: 40, name: 'Wigglytuff', types: ['normal', 'fairy'], hp: 260, canEvolve: false },
+  40: { id: 40, name: 'Wigglytuff', types: ['normal', 'fairy'], hp: 100, canEvolve: false },
   // === Oddish line ===
-  44: { id: 44, name: 'Gloom', types: ['grass', 'poison'], hp: 218, canEvolve: true, evolvesTo: { id: 45, name: 'Vileplume', hpBonus: 35, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
-  45: { id: 45, name: 'Vileplume', types: ['grass', 'poison'], hp: 255, canEvolve: false },
+  44: { id: 44, name: 'Gloom', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 45, name: 'Vileplume', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  45: { id: 45, name: 'Vileplume', types: ['grass', 'poison'], hp: 100, canEvolve: false },
   // === Meowth line ===
-  53: { id: 53, name: 'Persian', types: ['normal'], hp: 240, canEvolve: false },
+  53: { id: 53, name: 'Persian', types: ['normal'], hp: 100, canEvolve: false },
   // === Growlithe line ===
-  59: { id: 59, name: 'Arcanine', types: ['fire'], hp: 260, canEvolve: false },
+  59: { id: 59, name: 'Arcanine', types: ['fire'], hp: 100, canEvolve: false },
   // === Poliwag line ===
-  61: { id: 61, name: 'Poliwhirl', types: ['water'], hp: 220, canEvolve: true, evolvesTo: { id: 62, name: 'Poliwrath', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
-  62: { id: 62, name: 'Poliwrath', types: ['water', 'fighting'], hp: 260, canEvolve: false },
+  61: { id: 61, name: 'Poliwhirl', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 62, name: 'Poliwrath', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  62: { id: 62, name: 'Poliwrath', types: ['water', 'fighting'], hp: 100, canEvolve: false },
   // === Abra line ===
-  64: { id: 64, name: 'Kadabra', types: ['psychic'], hp: 210, canEvolve: true, evolvesTo: { id: 65, name: 'Alakazam', hpBonus: 35, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  65: { id: 65, name: 'Alakazam', types: ['psychic'], hp: 250, canEvolve: false },
+  64: { id: 64, name: 'Kadabra', types: ['psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 65, name: 'Alakazam', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
+  65: { id: 65, name: 'Alakazam', types: ['psychic'], hp: 100, canEvolve: false },
   // === Machop line ===
-  67: { id: 67, name: 'Machoke', types: ['fighting'], hp: 240, canEvolve: true, evolvesTo: { id: 68, name: 'Machamp', hpBonus: 40, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
-  68: { id: 68, name: 'Machamp', types: ['fighting'], hp: 280, canEvolve: false },
+  67: { id: 67, name: 'Machoke', types: ['fighting'], hp: 100, canEvolve: true, evolvesTo: { id: 68, name: 'Machamp', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
+  68: { id: 68, name: 'Machamp', types: ['fighting'], hp: 100, canEvolve: false },
   // === Geodude line ===
-  75: { id: 75, name: 'Graveler', types: ['rock', 'ground'], hp: 225, canEvolve: true, evolvesTo: { id: 76, name: 'Golem', hpBonus: 35, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
-  76: { id: 76, name: 'Golem', types: ['rock', 'ground'], hp: 265, canEvolve: false },
+  75: { id: 75, name: 'Graveler', types: ['rock', 'ground'], hp: 100, canEvolve: true, evolvesTo: { id: 76, name: 'Golem', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
+  76: { id: 76, name: 'Golem', types: ['rock', 'ground'], hp: 100, canEvolve: false },
   // === Ponyta line ===
-  78: { id: 78, name: 'Rapidash', types: ['fire'], hp: 240, canEvolve: false },
+  78: { id: 78, name: 'Rapidash', types: ['fire'], hp: 100, canEvolve: false },
   // === Slowpoke line ===
-  80: { id: 80, name: 'Slowbro', types: ['water', 'psychic'], hp: 255, canEvolve: false },
+  80: { id: 80, name: 'Slowbro', types: ['water', 'psychic'], hp: 100, canEvolve: false },
   // === Magnemite line ===
-  82: { id: 82, name: 'Magneton', types: ['electric', 'steel'], hp: 220, canEvolve: false },
+  82: { id: 82, name: 'Magneton', types: ['electric', 'steel'], hp: 100, canEvolve: false },
   // === Gastly line ===
-  93: { id: 93, name: 'Haunter', types: ['ghost', 'poison'], hp: 210, canEvolve: true, evolvesTo: { id: 94, name: 'Gengar', hpBonus: 35, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  94: { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 250, canEvolve: false },
+  93: { id: 93, name: 'Haunter', types: ['ghost', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 94, name: 'Gengar', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
+  94: { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 100, canEvolve: false },
   // === Voltorb line ===
-  101: { id: 101, name: 'Electrode', types: ['electric'], hp: 225, canEvolve: false },
+  101: { id: 101, name: 'Electrode', types: ['electric'], hp: 100, canEvolve: false },
   // === Cubone line ===
-  105: { id: 105, name: 'Marowak', types: ['ground'], hp: 230, canEvolve: false },
+  105: { id: 105, name: 'Marowak', types: ['ground'], hp: 100, canEvolve: false },
   // === Koffing line ===
-  110: { id: 110, name: 'Weezing', types: ['poison'], hp: 235, canEvolve: false },
+  110: { id: 110, name: 'Weezing', types: ['poison'], hp: 100, canEvolve: false },
   // === Horsea line ===
-  117: { id: 117, name: 'Seadra', types: ['water'], hp: 225, canEvolve: false },
+  117: { id: 117, name: 'Seadra', types: ['water'], hp: 100, canEvolve: false },
   // === Magikarp line ===
-  130: { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 265, canEvolve: false },
+  130: { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 100, canEvolve: false },
   // === Eevee evolutions ===
-  134: { id: 134, name: 'Vaporeon', types: ['water'], hp: 270, canEvolve: false },
-  135: { id: 135, name: 'Jolteon', types: ['electric'], hp: 235, canEvolve: false },
-  136: { id: 136, name: 'Flareon', types: ['fire'], hp: 235, canEvolve: false },
+  134: { id: 134, name: 'Vaporeon', types: ['water'], hp: 100, canEvolve: false },
+  135: { id: 135, name: 'Jolteon', types: ['electric'], hp: 100, canEvolve: false },
+  136: { id: 136, name: 'Flareon', types: ['fire'], hp: 100, canEvolve: false },
   // === Dratini line ===
-  148: { id: 148, name: 'Dragonair', types: ['dragon'], hp: 220, canEvolve: true, evolvesTo: { id: 149, name: 'Dragonite', hpBonus: 45, statBonus: 18 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
-  149: { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 275, canEvolve: false },
+  148: { id: 148, name: 'Dragonair', types: ['dragon'], hp: 100, canEvolve: true, evolvesTo: { id: 149, name: 'Dragonite', hpBonus: 0, statBonus: 18 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
+  149: { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 100, canEvolve: false },
 };
 
 // ==================== TRAINERS ====================

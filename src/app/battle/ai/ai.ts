@@ -33,8 +33,8 @@ export const createOpponentTeam = (): BattlePokemon[] => {
       id: p.id,
       name: p.name,
       types: p.types,
-      hp: p.hp,
-      maxHp: p.hp,
+      hp: 100,
+      maxHp: 100,
       attack: 45 + Math.floor(Math.random() * 15),
       defense: 40 + Math.floor(Math.random() * 15),
       spAtk: 45 + Math.floor(Math.random() * 15),
@@ -46,6 +46,8 @@ export const createOpponentTeam = (): BattlePokemon[] => {
       canEvolve: false,
       weakness: wr.weakness,
       resistance: wr.resistance,
+      evoBar: 0,
+      maxEvoBar: 100,
     };
   });
 };
@@ -80,28 +82,31 @@ export const createFallbackPlayerTeam = (): BattlePokemon[] => {
   const wrGrass = getWeaknessResistance(['grass', 'poison']);
   return [
     {
-      id: 4, name: 'Charmander', types: ['fire'], hp: 190, maxHp: 190,
+      id: 4, name: 'Charmander', types: ['fire'], hp: 100, maxHp: 100,
       attack: 52, defense: 43, spAtk: 60, spDef: 50, speed: 65,
       sprite: getSpriteById(4), moves: getDefaultMoves('fire'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 38, statBonus: 10 },
+      canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'fire', amount: 2 }],
       weakness: wrFire.weakness, resistance: wrFire.resistance,
+      evoBar: 0, maxEvoBar: 80,
     },
     {
-      id: 7, name: 'Squirtle', types: ['water'], hp: 198, maxHp: 198,
+      id: 7, name: 'Squirtle', types: ['water'], hp: 100, maxHp: 100,
       attack: 48, defense: 65, spAtk: 50, spDef: 64, speed: 43,
       sprite: getSpriteById(7), moves: getDefaultMoves('water'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 31, statBonus: 10 },
+      canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'water', amount: 2 }],
       weakness: wrWater.weakness, resistance: wrWater.resistance,
+      evoBar: 0, maxEvoBar: 80,
     },
     {
-      id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 195, maxHp: 195,
+      id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, maxHp: 100,
       attack: 49, defense: 49, spAtk: 65, spDef: 65, speed: 45,
       sprite: getSpriteById(1), moves: getDefaultMoves('grass'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 35, statBonus: 10 },
+      canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 0, statBonus: 10 },
       evolutionEnergyCost: [{ type: 'grass', amount: 2 }],
       weakness: wrGrass.weakness, resistance: wrGrass.resistance,
+      evoBar: 0, maxEvoBar: 80,
     },
   ];
 };

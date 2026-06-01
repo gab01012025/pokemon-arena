@@ -77,6 +77,97 @@ html, body { background: #080a14 !important; }
   letter-spacing: 2px;
 }
 
+/* Pokeball Search Animation */
+.pokeball-search {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 10px;
+  position: relative;
+  animation: pokeball-bounce 0.6s ease-in-out infinite;
+}
+.pokeball-search.open {
+  animation: pokeball-open 0.5s ease-out forwards;
+}
+.pokeball-top {
+  width: 80px;
+  height: 40px;
+  background: #ff1a1a;
+  border-radius: 80px 80px 0 0;
+  border: 4px solid #333;
+  border-bottom: none;
+  position: relative;
+}
+.pokeball-bottom {
+  width: 80px;
+  height: 40px;
+  background: #fff;
+  border-radius: 0 0 80px 80px;
+  border: 4px solid #333;
+  border-top: none;
+}
+.pokeball-center {
+  width: 80px;
+  height: 8px;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+.pokeball-button {
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  border: 4px solid #333;
+  position: absolute;
+  top: -7px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+@keyframes pokeball-bounce {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-15px) rotate(5deg); }
+}
+@keyframes pokeball-open {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(1.3); filter: brightness(2); }
+  100% { transform: scale(0.8); opacity: 0.5; }
+}
+.search-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: flash-burst 0.6s ease-out forwards;
+}
+@keyframes flash-burst {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+.search-waves {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+.search-wave {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,215,0,0.6);
+  animation: wave-pulse 1.2s ease-in-out infinite;
+}
+@keyframes wave-pulse {
+  0%, 100% { transform: scale(0.5); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
 /* ==================== ENERGY SELECTION SCREEN ==================== */
 .energy-select-screen {
   width: 100vw;
@@ -486,6 +577,12 @@ html, body { background: #080a14 !important; }
   opacity: 0.7;
   font-weight: 600;
 }
+.trainer-passive-mini {
+  font-size: 9px;
+  color: rgba(255,215,0,0.5);
+  font-style: italic;
+  font-family: var(--font-main);
+}
 .trainer-passive {
   font-size: 10px;
   opacity: 0.5;
@@ -683,11 +780,19 @@ html, body { background: #080a14 !important; }
 }
 .arena-slot.targetable {
   cursor: crosshair;
-  border-color: rgba(255, 215, 0, 0.5);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  animation: target-flash 0.8s ease-in-out infinite;
+}
+@keyframes target-flash {
+  0%, 100% { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 8px rgba(255, 215, 0, 0.15); }
+  50% { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.1); }
 }
 .arena-slot.targetable:hover {
   background: #10142a;
+  border-color: #FFD700;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+  animation: none;
 }
 
 /* ==================== PORTRAIT ==================== */
@@ -826,6 +931,144 @@ html, body { background: #080a14 !important; }
   white-space: nowrap;
   min-width: 40px;
   text-align: right;
+}
+
+/* ==================== EVOLUTION BAR (PURPLE) ==================== */
+.char-evo-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.char-evo-bar {
+  flex: 1;
+  height: 6px;
+  background: #1a1030;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid #2a1a4e;
+}
+.evo-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(180deg, #AB47BC 0%, #8E24AA 100%);
+}
+.evo-fill.full {
+  background: linear-gradient(180deg, #CE93D8 0%, #AB47BC 100%);
+  animation: evo-ready-pulse 1s ease-in-out infinite;
+}
+@keyframes evo-ready-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(171, 71, 188, 0.4); }
+  50% { box-shadow: 0 0 10px rgba(171, 71, 188, 0.8); }
+}
+.char-evo-label {
+  font-family: var(--font-title);
+  font-size: 7px;
+  font-weight: 700;
+  color: #AB47BC;
+  letter-spacing: 0.5px;
+}
+
+/* ==================== ENEMY SKILLS MODAL ==================== */
+.enemy-skills-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.enemy-skills-panel {
+  background: #0c0f1e;
+  border: 2px solid #e53935;
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 320px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.enemy-skills-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #1e2340;
+}
+.enemy-skills-name {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.enemy-skill-card {
+  background: #0a0d1c;
+  border: 1px solid #1e2340;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.enemy-skill-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.enemy-skill-name {
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.enemy-skill-type {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+.enemy-skill-desc {
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.enemy-skill-stats {
+  display: flex;
+  gap: 12px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+}
+.enemy-skill-cost {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.enemy-skills-close {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: #1e2340;
+  border: 1px solid #2a2f55;
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+.enemy-skills-close:hover {
+  background: #2a2f55;
 }
 
 /* ==================== W/R BADGES ==================== */

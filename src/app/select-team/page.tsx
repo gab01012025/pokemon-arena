@@ -273,49 +273,59 @@ export default function SelectTeamPage() {
                     </button>
                   </div>
 
-                  {/* Pokemon Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+                  {/* Facepick Grid - Arena Style */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(68px, 1fr))', gap: '4px', marginBottom: '20px' }}>
                     {starters.map(pokemon => {
                       const isSelected = selectedTeam.find(p => p.id === pokemon.id);
                       const isDisabled = !isSelected && selectedTeam.length >= 3;
+                      const typeColor = getTypeColor(pokemon.types);
+                      const selIdx = selectedTeam.findIndex(p => p.id === pokemon.id);
 
                       return (
                         <div
                           key={pokemon.id}
                           style={{
-                            background: isSelected ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.03)',
-                            border: isSelected ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                            borderRadius: '8px', padding: '10px', cursor: isDisabled ? 'not-allowed' : 'pointer',
-                            opacity: isDisabled ? 0.4 : 1, textAlign: 'center', transition: 'all 0.2s',
+                            width: '100%',
+                            aspectRatio: '1',
+                            position: 'relative',
+                            background: isSelected ? `${typeColor}22` : '#0c0f1e',
+                            border: isSelected ? `3px solid ${typeColor}` : '2px solid #1e2340',
+                            borderRadius: '6px',
+                            cursor: isDisabled ? 'not-allowed' : 'pointer',
+                            opacity: isDisabled ? 0.35 : 1,
+                            transition: 'all 0.15s',
+                            overflow: 'hidden',
                           }}
                           onClick={() => !isDisabled && togglePokemon(pokemon)}
                           onMouseEnter={() => setPreviewPokemon(pokemon)}
                           onMouseLeave={() => setPreviewPokemon(null)}
+                          title={`${pokemon.name} (${pokemon.types})`}
                         >
+                          <img src={getImage(pokemon.name)} alt={pokemon.name}
+                            style={{
+                              width: '100%', height: '100%', objectFit: 'contain',
+                              imageRendering: 'pixelated', padding: '4px',
+                            }} />
                           {isSelected && (
                             <div style={{
-                              fontSize: '10px', fontWeight: 700, color: '#f87171', marginBottom: '4px',
+                              position: 'absolute', top: 2, right: 2,
+                              width: 18, height: 18, borderRadius: '50%',
+                              background: typeColor, color: '#fff',
+                              fontSize: '10px', fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              boxShadow: `0 0 6px ${typeColor}`,
                             }}>
-                              #{selectedTeam.findIndex(p => p.id === pokemon.id) + 1}
+                              {selIdx + 1}
                             </div>
                           )}
-                          <img src={getImage(pokemon.name)} alt={pokemon.name}
-                            style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px', marginBottom: '6px' }} />
-                          <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#e2e8f0', marginBottom: '4px' }}>
-                            {pokemon.name}
-                          </h4>
-                          <div style={{ display: 'flex', gap: '3px', justifyContent: 'center', marginBottom: '4px' }}>
-                            {pokemon.types.split(',').filter(t => t).map((type, i) => (
-                              <span key={i} style={{
-                                fontSize: '9px', fontWeight: 600, padding: '1px 6px', borderRadius: '3px',
-                                background: TYPE_COLORS[type?.toLowerCase() || 'normal'] || '#777', color: '#fff',
-                              }}>
-                                {type}
-                              </span>
-                            ))}
-                          </div>
-                          <div style={{ fontSize: '10px', color: '#94a3b8' }}>
-                            HP {pokemon.health}
+                          <div style={{
+                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                            background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
+                            padding: '2px 4px', textAlign: 'center',
+                          }}>
+                            <span style={{ fontSize: '8px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>
+                              {pokemon.name.length > 10 ? pokemon.name.slice(0, 9) + '.' : pokemon.name}
+                            </span>
                           </div>
                         </div>
                       );
