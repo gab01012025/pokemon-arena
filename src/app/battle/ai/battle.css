@@ -2332,6 +2332,87 @@ html, body { background: #080a14 !important; }
   color: #ff6666;
 }
 
+/* ==================== ACTION FEEDBACK — Player chose a move ==================== */
+.na-action-badge {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(10, 26, 16, 0.95);
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  padding: 2px 6px;
+  z-index: 10;
+  white-space: nowrap;
+  animation: badge-in 0.25s ease-out;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+@keyframes badge-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px) scale(0.9); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+.na-action-check {
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+.na-action-move {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  color: #66BB6A;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.na-action-target {
+  font-family: var(--font-main);
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Enemy portrait when being targeted */
+.na-portrait.being-targeted {
+  border-color: #e53935 !important;
+  box-shadow: 0 0 12px rgba(229, 57, 53, 0.4), inset 0 0 8px rgba(229, 57, 53, 0.15);
+  animation: being-targeted-pulse 1.2s ease-in-out infinite;
+}
+@keyframes being-targeted-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(229, 57, 53, 0.25), inset 0 0 6px rgba(229, 57, 53, 0.1); }
+  50% { box-shadow: 0 0 18px rgba(229, 57, 53, 0.5), inset 0 0 12px rgba(229, 57, 53, 0.2); }
+}
+
+/* Target indicator on enemy showing who is attacking */
+.na-target-indicator {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 10;
+  animation: badge-in 0.25s ease-out;
+}
+.na-target-tag {
+  font-family: var(--font-title);
+  font-size: 7px;
+  font-weight: 700;
+  color: #ef5350;
+  background: rgba(30, 10, 10, 0.95);
+  border: 1px solid #e53935;
+  border-radius: 3px;
+  padding: 1px 5px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(229, 57, 53, 0.25);
+}
+
 /* ==================== ACTION READY STATE ==================== */
 .arena-slot.player.action-ready {
   border-left-color: #66BB6A;

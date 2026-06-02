@@ -1726,10 +1726,14 @@ export default function AIBattlePage() {
             const enemy = opponentTeam[rowIdx];
             if (!poke || !enemy) return null;
 
-            const hasAction = selectedActions.some(a => a.pokemonIndex === rowIdx);
-            const selectedMove = selectedActions.find(a => a.pokemonIndex === rowIdx)?.move;
+            const playerAction = selectedActions.find(a => a.pokemonIndex === rowIdx);
+            const hasAction = !!playerAction;
+            const selectedMove = playerAction?.move;
+            const targetIdx = playerAction?.targetIndex;
             const pEvoPercent = poke.maxEvoBar > 0 ? Math.min((poke.evoBar / poke.maxEvoBar) * 100, 100) : 0;
             const eEvoPercent = enemy.maxEvoBar > 0 ? Math.min((enemy.evoBar / enemy.maxEvoBar) * 100, 100) : 0;
+            // Who is targeting this enemy?
+            const attackersOnThisEnemy = selectedActions.filter(a => a.targetIndex === rowIdx && a.move.targetType !== 'self');
 
             return (
               <div key={rowIdx} className="na-battle-row">
@@ -1749,6 +1753,16 @@ export default function AIBattlePage() {
                   )}
                   <Image src={poke.sprite} alt={poke.name} width={80} height={80} unoptimized className="na-sprite flipped" />
                   {poke.hp <= 0 && <div className="na-fainted-x">X</div>}
+                  {/* Action chosen badge */}
+                  {hasAction && selectedMove && (
+                    <div className="na-action-badge">
+                      <span className="na-action-check">&#10003;</span>
+                      <span className="na-action-move">{selectedMove.name}</span>
+                      {targetIdx !== undefined && opponentTeam[targetIdx] && (
+                        <span className="na-action-target">&rarr; {opponentTeam[targetIdx].name}</span>
+                      )}
+                    </div>
+                  )}
                   <div className="na-portrait-info">
                     <span className="na-name">{poke.name}</span>
                     <div className="na-hp-bar">
@@ -1794,7 +1808,7 @@ export default function AIBattlePage() {
 
                 {/* === Enemy portrait === */}
                 <div
-                  className={`na-portrait enemy ${enemy.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && enemy.hp > 0 ? 'targetable' : ''} ${enemyAnims[rowIdx] || ''}`}
+                  className={`na-portrait enemy ${enemy.hp <= 0 ? 'fainted' : ''} ${phase === 'targeting' && enemy.hp > 0 ? 'targetable' : ''} ${attackersOnThisEnemy.length > 0 ? 'being-targeted' : ''} ${enemyAnims[rowIdx] || ''}`}
                   onClick={() => {
                     if (phase === 'targeting' && enemy.hp > 0) {
                       handleTargetSelect(rowIdx);
@@ -1815,6 +1829,16 @@ export default function AIBattlePage() {
                   )}
                   <Image src={enemy.sprite} alt={enemy.name} width={80} height={80} unoptimized className="na-sprite" />
                   {enemy.hp <= 0 && <div className="na-fainted-x">X</div>}
+                  {/* Target indicator: shows who is attacking this enemy */}
+                  {attackersOnThisEnemy.length > 0 && (
+                    <div className="na-target-indicator">
+                      {attackersOnThisEnemy.map((a, ai) => (
+                        <span key={ai} className="na-target-tag">
+                          {playerTeam[a.pokemonIndex]?.name} &rarr; {a.move.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="na-portrait-info">
                     <span className="na-name">{enemy.name}</span>
                     <div className="na-hp-bar">
