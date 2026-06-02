@@ -1,11 +1,11 @@
-/* ==================== MOBILE OPTIMIZATIONS (Naruto-Arena layout) ==================== */
+/* ==================== MOBILE OPTIMIZATIONS (Arena layout) ==================== */
 
 @media (max-width: 768px) {
   .battle-container {
     height: 100dvh;
   }
 
-  /* Naruto-Arena layout mobile */
+  /* Arena layout mobile */
   .na-battle-area {
     padding: 4px 4px;
     gap: 3px;
@@ -15,23 +15,25 @@
     gap: 4px;
   }
   .na-portrait {
-    width: 80px;
+    width: 88px;
     padding: 3px;
   }
   .na-sprite {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
   }
   .na-skill-box {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
   }
   .na-skill-strip {
-    padding: 2px 4px;
+    padding: 3px 4px;
     gap: 3px;
+    min-height: 46px;
   }
   .na-name { font-size: 9px; }
   .na-hp-text { font-size: 8px; }
+  .na-hp-bar { height: 8px; }
 
   .energy-pool {
     flex-wrap: wrap;
@@ -70,10 +72,10 @@
 
   /* Bottom bar mobile */
   .na-bottom-bar {
-    min-height: 50px;
+    min-height: 56px;
   }
   .na-bottom-left {
-    min-width: 100px;
+    min-width: 90px;
     padding: 4px 6px;
   }
   .na-surrender-btn {
@@ -84,8 +86,18 @@
     font-size: 8px;
     padding: 4px 6px;
   }
+  .na-skill-info { gap: 8px; padding: 4px 8px; }
+  .na-skill-info-sprite { width: 40px; height: 40px; }
+  .na-skill-info-sprite img { width: 36px; height: 36px; }
   .na-skill-info-name { font-size: 12px; }
   .na-skill-info-desc { font-size: 10px; }
+  .na-skill-info-cost-label { font-size: 8px; }
+
+  /* Action badges mobile */
+  .na-action-badge { padding: 1px 4px; }
+  .na-action-move { font-size: 7px; }
+  .na-action-target { font-size: 7px; }
+  .na-target-tag { font-size: 6px; padding: 1px 3px; }
 
   .energy-tcg-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -199,18 +211,19 @@
   }
 
   .na-portrait {
-    width: 64px;
+    width: 68px;
     padding: 2px;
   }
   .na-sprite {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
   .na-name { font-size: 8px; }
   .na-skill-box {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
   }
+  .na-skill-strip { min-height: 38px; }
 
   .top-bar {
     padding: 4px 8px;
@@ -224,6 +237,9 @@
   .player-name {
     font-size: 10px;
   }
+
+  .na-skill-info-sprite { width: 32px; height: 32px; }
+  .na-skill-info-sprite img { width: 28px; height: 28px; }
 }
 
 /* Prevent text selection on mobile */

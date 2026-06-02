@@ -781,18 +781,19 @@ html, body { background: #080a14 !important; }
 
 /* ==================== PORTRAIT (player & enemy) ==================== */
 .na-portrait {
-  width: 110px;
+  width: 130px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   position: relative;
-  padding: 4px;
-  border-radius: 6px;
-  background: #0c0f1e;
+  padding: 6px 4px 4px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #111428 0%, #0c0f1e 100%);
   border: 2px solid #1a1e38;
   transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 .na-portrait.player {
   border-left: 3px solid #4CAF50;
@@ -824,11 +825,11 @@ html, body { background: #080a14 !important; }
   animation: none;
 }
 .na-sprite {
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
 }
 .na-sprite.flipped {
   transform: scaleX(-1);
@@ -885,11 +886,12 @@ html, body { background: #080a14 !important; }
 }
 .na-hp-bar {
   width: 100%;
-  height: 8px;
+  height: 10px;
   background: #1a1a2e;
-  border-radius: 4px;
+  border-radius: 5px;
   overflow: hidden;
   border: 1px solid #2a2a4e;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
 }
 .na-hp-fill {
   height: 100%;
@@ -934,76 +936,79 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: linear-gradient(180deg, #12162a 0%, #0e1120 100%);
-  border: 2px solid #2a1a18;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(180deg, #e8e4dc 0%, #d4cfc4 100%);
+  border: 2px solid #b8b0a0;
   border-radius: 6px;
-  min-height: 48px;
+  min-height: 58px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.3);
 }
 .na-skill-box {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid #2a2040;
-  background: #0f1223;
+  border: 2px solid #8a8070;
+  background: linear-gradient(180deg, #f5f0e8 0%, #ddd8cc 100%);
   transition: all 0.12s ease;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 .na-skill-box:hover:not(.disabled) {
-  border-color: #5a50a0;
-  transform: scale(1.08);
-  background: #1a1840;
-  box-shadow: 0 0 8px rgba(100, 80, 180, 0.3);
+  border-color: #6060c0;
+  transform: scale(1.1);
+  background: linear-gradient(180deg, #e0e8ff 0%, #c8d0f0 100%);
+  box-shadow: 0 2px 10px rgba(100, 100, 200, 0.4);
 }
 .na-skill-box.disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: default;
-  filter: grayscale(0.6);
+  filter: grayscale(0.8);
+  background: linear-gradient(180deg, #c0bdb5 0%, #a8a498 100%);
 }
 .na-skill-box.selected {
   border-color: #4CAF50 !important;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-  transform: scale(1.08);
-  background: #0a1a10;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
+  transform: scale(1.1);
+  background: linear-gradient(180deg, #d0f0d0 0%, #a8e0a8 100%);
 }
 .na-skill-box.on-cd {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
 }
 .na-skill-box.on-cd::after {
   content: attr(data-cd);
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: #ef5350;
   border-radius: 6px;
 }
 
-/* ==================== BOTTOM BAR (Naruto-Arena style) ==================== */
+/* ==================== BOTTOM BAR (Arena style) ==================== */
 .na-bottom-bar {
   display: flex;
   align-items: stretch;
-  background: #0a0d1c;
-  border-top: 1px solid #1e2340;
-  min-height: 60px;
+  background: linear-gradient(180deg, #0e1228 0%, #0a0d1c 100%);
+  border-top: 2px solid #1e2340;
+  min-height: 72px;
 }
 .na-bottom-left {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-right: 1px solid #1e2340;
   min-width: 130px;
   justify-content: center;
@@ -1056,21 +1061,44 @@ html, body { background: #080a14 !important; }
 .na-evolve-btn:hover { background: #142038; }
 .na-evolve-btn:disabled { opacity: 0.3; cursor: default; }
 
-/* Skill info panel (bottom center, shows on hover) */
+/* Skill info panel (bottom center, arena style with sprite) */
 .na-skill-info {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  align-items: center;
   padding: 6px 14px;
-  gap: 3px;
+  gap: 12px;
   min-height: 60px;
+}
+.na-skill-info-sprite {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  border: 2px solid #1e2340;
+  background: #080a14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.na-skill-info-sprite img {
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+.na-skill-info-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 .na-skill-info-empty {
   font-family: var(--font-main);
   font-size: 12px;
   color: rgba(255,255,255,0.2);
   text-align: center;
+  width: 100%;
 }
 .na-skill-info-header {
   display: flex;
@@ -1080,7 +1108,7 @@ html, body { background: #080a14 !important; }
 }
 .na-skill-info-name {
   font-family: var(--font-title);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.5px;
@@ -1111,16 +1139,25 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 2px;
+}
+.na-skill-info-cost-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
 }
 .na-cost-badge {
   display: inline-flex;
-  gap: 2px;
+  gap: 3px;
 }
 .na-cost-free {
   font-family: var(--font-title);
   font-size: 9px;
   color: #4CAF50;
   letter-spacing: 1px;
+  font-weight: 700;
 }
 .na-skill-info-status {
   font-family: var(--font-main);
@@ -2041,31 +2078,35 @@ html, body { background: #080a14 !important; }
   color: #fff;
 }
 
-/* ==================== RESPONSIVE (Naruto-Arena layout) ==================== */
+/* ==================== RESPONSIVE (Arena layout) ==================== */
 @media (max-width: 900px) {
   .na-battle-area { padding: 4px 6px; gap: 4px; margin: 2px 4px; }
-  .na-portrait { width: 90px; }
-  .na-sprite { width: 64px; height: 64px; }
-  .na-skill-box { width: 36px; height: 36px; }
+  .na-portrait { width: 100px; }
+  .na-sprite { width: 72px; height: 72px; }
+  .na-skill-box { width: 42px; height: 42px; }
+  .na-skill-strip { padding: 4px 8px; gap: 4px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
   .energy-pool { gap: 3px; }
-  .na-bottom-bar { min-height: 50px; }
+  .na-bottom-bar { min-height: 60px; }
   .na-bottom-left { min-width: 100px; }
+  .na-skill-info-sprite { width: 44px; height: 44px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .na-portrait { width: 72px; padding: 2px; }
-  .na-sprite { width: 52px; height: 52px; }
+  .na-portrait { width: 80px; padding: 3px; }
+  .na-sprite { width: 56px; height: 56px; }
   .na-name { font-size: 8px; }
-  .na-skill-box { width: 30px; height: 30px; }
-  .na-skill-strip { padding: 2px 4px; gap: 3px; }
+  .na-skill-box { width: 34px; height: 34px; }
+  .na-skill-strip { padding: 3px 4px; gap: 3px; }
   .na-bottom-left { min-width: 80px; padding: 4px 6px; }
   .na-surrender-btn { font-size: 8px; padding: 4px 8px; }
   .na-item-btn { font-size: 8px; padding: 3px 6px; }
   .na-skill-info-name { font-size: 11px; }
   .na-skill-info-desc { font-size: 10px; }
+  .na-skill-info-sprite { width: 36px; height: 36px; }
+  .na-skill-info-sprite img { width: 32px; height: 32px; }
   .result-title { font-size: 22px; letter-spacing: 2px; }
   .modal { padding: 24px 20px; min-width: 280px; }
 }
@@ -2330,6 +2371,162 @@ html, body { background: #080a14 !important; }
   background: #1e0e0e;
   border: 1px solid #2a1414;
   color: #ff6666;
+}
+
+/* ==================== EXCHANGE ENERGY BUTTON ==================== */
+.exchange-energy-btn {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border: 1px solid #2a4060;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #1a2a40 0%, #0e1828 100%);
+  color: #64b5f6;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.15s ease;
+  margin-left: 4px;
+}
+.exchange-energy-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #243850 0%, #1a2838 100%);
+  border-color: #4080c0;
+  box-shadow: 0 0 8px rgba(100, 180, 255, 0.2);
+}
+.exchange-energy-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ==================== EXCHANGE ENERGY MODAL ==================== */
+.exchange-modal {
+  background: #0c1024;
+  border: 2px solid #2a4060;
+  border-radius: 16px;
+  padding: 24px 28px;
+  text-align: center;
+  min-width: 340px;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+.exchange-title {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 800;
+  color: #64b5f6;
+  letter-spacing: 3px;
+  margin-bottom: 4px;
+}
+.exchange-subtitle {
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+}
+.exchange-sections {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+.exchange-section {
+  flex: 1;
+}
+.exchange-section-label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.exchange-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.exchange-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #1e2340;
+  background: #0a0d1c;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 52px;
+}
+.exchange-option:hover:not(.disabled) {
+  border-color: #4080c0;
+  background: #141830;
+}
+.exchange-option.selected {
+  border-color: #4CAF50;
+  background: #0a1a10;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+.exchange-option.disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+.exchange-option-count {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+}
+.exchange-arrow-divider {
+  font-size: 28px;
+  color: #64b5f6;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.exchange-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.exchange-confirm-btn {
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  background: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.15s ease;
+}
+.exchange-confirm-btn:hover:not(:disabled) {
+  background: #66BB6A;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+.exchange-confirm-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.exchange-cancel-btn {
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 10px 28px;
+  border: 1px solid #1e2340;
+  border-radius: 6px;
+  background: #141830;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.15s ease;
+}
+.exchange-cancel-btn:hover {
+  background: #1c2248;
 }
 
 /* ==================== ACTION FEEDBACK — Player chose a move ==================== */

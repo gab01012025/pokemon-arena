@@ -63,7 +63,7 @@ export default function AIBattlePage() {
   const [selectedActions, setSelectedActions] = useState<SelectedAction[]>([]);
   const [selectingPokemon, setSelectingPokemon] = useState<number | null>(null);
   const [selectingMove, setSelectingMove] = useState<Move | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string; pokemonTypes?: PokemonType[] } | null>(null);
+  const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string; pokemonTypes?: PokemonType[]; sprite?: string } | null>(null);
   const [battleLog, setBattleLog] = useState<LogEntry[]>([]);
   const [timer, setTimer] = useState(100);
   const [battleBackground, setBattleBackground] = useState('');
@@ -109,6 +109,12 @@ export default function AIBattlePage() {
 
   // Enemy skills viewing
   const [viewingEnemySkills, setViewingEnemySkills] = useState<BattlePokemon | null>(null);
+
+  // Exchange Energy
+  const [showExchangeEnergy, setShowExchangeEnergy] = useState(false);
+  const [exchangeFrom, setExchangeFrom] = useState<EnergyType | null>(null);
+  const [exchangeTo, setExchangeTo] = useState<EnergyType | null>(null);
+  const [usedExchangeThisTurn, setUsedExchangeThisTurn] = useState(false);
 
   // Battle Stats Tracking
   const [battleTracker, setBattleTracker] = useState({
@@ -330,6 +336,23 @@ export default function AIBattlePage() {
 
   const removeAction = (pIdx: number) => {
     setSelectedActions(prev => prev.filter(a => a.pokemonIndex !== pIdx));
+  };
+
+  // ==================== EXCHANGE ENERGY ====================
+  const handleExchangeEnergy = () => {
+    if (!exchangeFrom || !exchangeTo || exchangeFrom === exchangeTo) return;
+    if (energy[exchangeFrom] < 2) return;
+    if (usedExchangeThisTurn) return;
+    setEnergy(prev => ({
+      ...prev,
+      [exchangeFrom]: prev[exchangeFrom] - 2,
+      [exchangeTo]: prev[exchangeTo] + 1,
+    }));
+    addLog(`Exchanged 2 ${exchangeFrom} energy for 1 ${exchangeTo} energy!`, 'effect');
+    setUsedExchangeThisTurn(true);
+    setShowExchangeEnergy(false);
+    setExchangeFrom(null);
+    setExchangeTo(null);
   };
 
   // ==================== ITEMS ====================
@@ -1613,6 +1636,7 @@ export default function AIBattlePage() {
 
     setSelectedActions([]);
     setUsedItemThisTurn(false);
+    setUsedExchangeThisTurn(false);
     setTurn(newTurn);
     setPhase('player1-turn');
   };
@@ -1639,6 +1663,7 @@ export default function AIBattlePage() {
     setTimer(100);
     setSelectedActions([]);
     setUsedItemThisTurn(false);
+    setUsedExchangeThisTurn(false);
     setBattleLog([]);
     setItems(DEFAULT_ITEMS.map(i => ({ ...i })));
     setShowItems(false);
@@ -1717,6 +1742,8 @@ export default function AIBattlePage() {
           winStreak={winStreak}
           isDailyChallenge={isDailyChallenge}
           dailyChallengeCompleted={dailyChallengeCompleted}
+          onExchangeEnergy={() => setShowExchangeEnergy(true)}
+          canExchange={phase === 'player1-turn' && !usedExchangeThisTurn && getTotalEnergy(energy) >= 2}
         />
 
         {/* BATTLE AREA — Naruto-Arena style: 3 rows, each = player | skills | enemy */}
@@ -1751,7 +1778,7 @@ export default function AIBattlePage() {
                       ))}
                     </div>
                   )}
-                  <Image src={poke.sprite} alt={poke.name} width={80} height={80} unoptimized className="na-sprite flipped" />
+                  <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="na-sprite flipped" />
                   {poke.hp <= 0 && <div className="na-fainted-x">X</div>}
                   {/* Action chosen badge */}
                   {hasAction && selectedMove && (
@@ -1796,11 +1823,11 @@ export default function AIBattlePage() {
                             else { handleSkillClick(rowIdx, move); }
                           }
                         }}
-                        onMouseEnter={() => setHoveredSkill({ move, pokemonName: poke.name, pokemonTypes: poke.types })}
+                        onMouseEnter={() => setHoveredSkill({ move, pokemonName: poke.name, pokemonTypes: poke.types, sprite: poke.sprite })}
                         onMouseLeave={() => setHoveredSkill(null)}
                         title={move.name}
                       >
-                        <EnergyIcon type={energyType} size={30} />
+                        <EnergyIcon type={energyType} size={36} />
                       </div>
                     );
                   })}
@@ -1827,7 +1854,7 @@ export default function AIBattlePage() {
                       ))}
                     </div>
                   )}
-                  <Image src={enemy.sprite} alt={enemy.name} width={80} height={80} unoptimized className="na-sprite" />
+                  <Image src={enemy.sprite} alt={enemy.name} width={96} height={96} unoptimized className="na-sprite" />
                   {enemy.hp <= 0 && <div className="na-fainted-x">X</div>}
                   {/* Target indicator: shows who is attacking this enemy */}
                   {attackersOnThisEnemy.length > 0 && (
@@ -1875,31 +1902,39 @@ export default function AIBattlePage() {
             ))}
           </div>
 
-          {/* Skill info panel — shows on hover */}
+          {/* Skill info panel — shows on hover (arena style with character sprite) */}
           <div className="na-skill-info">
             {skillInfoMove ? (
               <>
-                <div className="na-skill-info-header">
-                  <span className="na-skill-info-name">{skillInfoMove.name}</span>
-                  <span className="na-skill-info-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
-                    {skillInfoMove.type.toUpperCase()}
-                  </span>
-                  {skillInfoMove.power > 0 && <span className="na-skill-info-pwr">PWR: {skillInfoMove.power}</span>}
-                  <span className="na-skill-info-acc">ACC: {skillInfoMove.accuracy}%</span>
-                  {skillInfoMove.cooldown > 0 && <span className="na-skill-info-cd">CD: {skillInfoMove.cooldown}t</span>}
-                </div>
-                <div className="na-skill-info-desc">{skillInfoMove.description}</div>
-                <div className="na-skill-info-cost">
-                  {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
-                    <span key={i} className="na-cost-badge">
-                      {Array.from({ length: c.amount }).map((_, ai) => <EnergyIcon key={ai} type={c.type} size={16} />)}
+                {hoveredSkill?.sprite && (
+                  <div className="na-skill-info-sprite">
+                    <Image src={hoveredSkill.sprite} alt={hoveredSkill.pokemonName} width={52} height={52} unoptimized />
+                  </div>
+                )}
+                <div className="na-skill-info-content">
+                  <div className="na-skill-info-header">
+                    <span className="na-skill-info-name">{skillInfoMove.name}</span>
+                    <span className="na-skill-info-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
+                      {skillInfoMove.type.toUpperCase()}
                     </span>
-                  )) : <span className="na-cost-free">FREE</span>}
-                  {skillInfoMove.statusEffect && (
-                    <span className="na-skill-info-status">
-                      {STATUS_ICONS[skillInfoMove.statusEffect.type]} {skillInfoMove.statusEffect.type} ({skillInfoMove.statusEffect.chance}%)
-                    </span>
-                  )}
+                    {skillInfoMove.power > 0 && <span className="na-skill-info-pwr">PWR: {skillInfoMove.power}</span>}
+                    <span className="na-skill-info-acc">ACC: {skillInfoMove.accuracy}%</span>
+                    {skillInfoMove.cooldown > 0 && <span className="na-skill-info-cd">CD: {skillInfoMove.cooldown}t</span>}
+                  </div>
+                  <div className="na-skill-info-desc">{skillInfoMove.description}</div>
+                  <div className="na-skill-info-cost">
+                    <span className="na-skill-info-cost-label">COST:</span>
+                    {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
+                      <span key={i} className="na-cost-badge">
+                        {Array.from({ length: c.amount }).map((_, ai) => <EnergyIcon key={ai} type={c.type} size={18} />)}
+                      </span>
+                    )) : <span className="na-cost-free">FREE</span>}
+                    {skillInfoMove.statusEffect && (
+                      <span className="na-skill-info-status">
+                        {STATUS_ICONS[skillInfoMove.statusEffect.type]} {skillInfoMove.statusEffect.type} ({skillInfoMove.statusEffect.chance}%)
+                      </span>
+                    )}
+                  </div>
                 </div>
               </>
             ) : (
@@ -1942,6 +1977,63 @@ export default function AIBattlePage() {
               );
             })}
             <button className="enemy-skills-close" onClick={() => setViewingEnemySkills(null)}>CLOSE</button>
+          </div>
+        </div>
+      )}
+
+      {/* Exchange Energy Modal */}
+      {showExchangeEnergy && (
+        <div className="overlay" onClick={() => { setShowExchangeEnergy(false); setExchangeFrom(null); setExchangeTo(null); }}>
+          <div className="exchange-modal" onClick={e => e.stopPropagation()}>
+            <div className="exchange-title">EXCHANGE ENERGY</div>
+            <div className="exchange-subtitle">Trade 2 energy of one type for 1 of another</div>
+            <div className="exchange-sections">
+              <div className="exchange-section">
+                <div className="exchange-section-label">GIVE (2)</div>
+                <div className="exchange-grid">
+                  {selectedEnergyTypes.map(type => (
+                    <button
+                      key={type}
+                      className={`exchange-option ${exchangeFrom === type ? 'selected' : ''} ${energy[type] < 2 ? 'disabled' : ''}`}
+                      onClick={() => energy[type] >= 2 && setExchangeFrom(type)}
+                      disabled={energy[type] < 2}
+                    >
+                      <EnergyIcon type={type} size={32} />
+                      <span className="exchange-option-count">x{energy[type]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="exchange-arrow-divider">&rarr;</div>
+              <div className="exchange-section">
+                <div className="exchange-section-label">RECEIVE (1)</div>
+                <div className="exchange-grid">
+                  {selectedEnergyTypes.map(type => (
+                    <button
+                      key={type}
+                      className={`exchange-option ${exchangeTo === type ? 'selected' : ''} ${exchangeFrom === type ? 'disabled' : ''}`}
+                      onClick={() => exchangeFrom !== type && setExchangeTo(type)}
+                      disabled={exchangeFrom === type}
+                    >
+                      <EnergyIcon type={type} size={32} />
+                      <span className="exchange-option-count">x{energy[type]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="exchange-actions">
+              <button
+                className="exchange-confirm-btn"
+                onClick={handleExchangeEnergy}
+                disabled={!exchangeFrom || !exchangeTo || exchangeFrom === exchangeTo}
+              >
+                EXCHANGE
+              </button>
+              <button className="exchange-cancel-btn" onClick={() => { setShowExchangeEnergy(false); setExchangeFrom(null); setExchangeTo(null); }}>
+                CANCEL
+              </button>
+            </div>
           </div>
         </div>
       )}

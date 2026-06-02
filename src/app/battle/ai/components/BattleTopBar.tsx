@@ -48,6 +48,8 @@ interface BattleTopBarProps {
   winStreak: number;
   isDailyChallenge: boolean;
   dailyChallengeCompleted: boolean;
+  onExchangeEnergy?: () => void;
+  canExchange?: boolean;
 }
 
 export default function BattleTopBar({
@@ -67,6 +69,8 @@ export default function BattleTopBar({
   winStreak,
   isDailyChallenge,
   dailyChallengeCompleted,
+  onExchangeEnergy,
+  canExchange,
 }: BattleTopBarProps) {
   const trainerSprite = playerTrainer ? TRAINER_SPRITES[playerTrainer.name] : null;
   const opponentSprite = AI_TRAINER_SPRITES[Math.abs(opponentName.charCodeAt(0)) % AI_TRAINER_SPRITES.length];
@@ -117,6 +121,11 @@ export default function BattleTopBar({
             <span className="total-label">T</span>
             <span className="energy-count">x{getTotalEnergy(energy)}</span>
           </div>
+          {onExchangeEnergy && (
+            <button className="exchange-energy-btn" onClick={onExchangeEnergy} disabled={!canExchange}>
+              EXCHANGE
+            </button>
+          )}
         </div>
       </div>
 
