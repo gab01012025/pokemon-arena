@@ -752,107 +752,198 @@ html, body { background: #080a14 !important; }
   letter-spacing: 0.5px;
 }
 
-/* ==================== BATTLE AREA ==================== */
-/* ==================== NARUTO-ARENA BATTLE LAYOUT ==================== */
-/* 3 rows: each row = player portrait | horizontal skill strip | enemy portrait */
+/* ==================== INFO PANEL (top center, naruto-unison style) ==================== */
+.na-info-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 16px;
+  min-height: 52px;
+  background: #0c0f1e;
+  border-bottom: 1px solid #1e2340;
+  border-top: 1px solid #1a1a2e;
+}
+.na-info-sprite {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #080a14;
+}
+.na-info-sprite img { image-rendering: pixelated; object-fit: contain; }
+.na-info-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.na-info-row1 { display: flex; align-items: center; gap: 8px; }
+.na-info-name {
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+.na-info-type {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.na-info-desc {
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.3;
+}
+.na-info-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  flex-wrap: wrap;
+}
+.na-info-cost-row { display: inline-flex; align-items: center; gap: 4px; }
+.na-cost-badge { display: inline-flex; gap: 2px; }
+.na-cost-free { color: #4CAF50; font-weight: 700; }
+.na-info-status { color: #AB47BC; }
+.na-info-empty {
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: rgba(255,255,255,0.15);
+  text-align: center;
+  width: 100%;
+}
 
+/* ==================== BATTLE AREA ==================== */
 .na-battle-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 6px 10px;
   min-height: 0;
   position: relative;
-  margin: 4px 8px;
-  background: rgba(8, 10, 22, 0.55);
-  border: 1px solid #1e2340;
-  border-radius: 6px;
 }
 
-/* Each battle row: player | skills | enemy in one horizontal line */
 .na-battle-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 0;
+  margin-bottom: 2px;
 }
 
-/* ==================== PORTRAIT (player & enemy) ==================== */
+/* ==================== CHARACTER PORTRAIT ==================== */
 .na-portrait {
-  width: 130px;
+  width: auto;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   position: relative;
-  padding: 6px 4px 4px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #111428 0%, #0c0f1e 100%);
-  border: 2px solid #1a1e38;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  padding: 2px;
+  transition: all 0.2s ease;
 }
-.na-portrait.player {
-  border-left: 3px solid #4CAF50;
-}
-.na-portrait.enemy {
-  border-right: 3px solid #e53935;
-}
-.na-portrait.fainted {
-  opacity: 0.3;
-  filter: grayscale(0.8) brightness(0.5);
-}
-.na-portrait.action-ready {
-  border-color: #4CAF50;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
-}
-.na-portrait.targetable {
-  cursor: crosshair;
-  border-color: rgba(255, 215, 0, 0.8);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-  animation: na-target-flash 0.8s ease-in-out infinite;
-}
-@keyframes na-target-flash {
-  0%, 100% { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 8px rgba(255, 215, 0, 0.15); }
-  50% { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-}
-.na-portrait.targetable:hover {
-  border-color: #FFD700;
-  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
-  animation: none;
-}
-.na-sprite {
-  width: 96px;
-  height: 96px;
+.na-charicon {
+  width: 75px;
+  height: 75px;
+  border: 2px solid #111;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
 }
-.na-sprite.flipped {
-  transform: scaleX(-1);
+.na-charicon.flipped { transform: scaleX(-1); }
+
+/* Dead = just grayscale like naruto-unison */
+.na-portrait.dead .na-charicon { filter: grayscale(0.8); }
+.na-portrait.dead { opacity: 0.6; }
+
+/* Action ready = green border on portrait icon */
+.na-portrait.action-ready .na-charicon {
+  border-color: #0a0;
+  box-shadow: 0 0 6px rgba(0, 170, 0, 0.4);
 }
-.na-fainted-x {
+
+/* Highlighted = green background (targeting, naruto-unison style) */
+.na-portrait.highlighted {
+  background-color: rgba(0, 255, 0, 0.15);
+  cursor: crosshair;
+}
+.na-portrait.highlighted .na-charicon {
+  border-color: rgb(19, 112, 19);
+  opacity: 0.85;
+}
+/* Nohighlight = red (can't target) */
+.na-portrait.nohighlight {
+  background-color: rgba(170, 0, 0, 0.15);
+}
+.na-portrait.nohighlight .na-charicon {
+  border-color: rgb(119, 1, 1);
+}
+
+/* Being targeted = red glow */
+.na-portrait.being-targeted .na-charicon {
+  border-color: #e53935;
+  box-shadow: 0 0 10px rgba(229, 57, 53, 0.5);
+}
+
+/* Character name below */
+.na-charname {
+  font-family: var(--font-main);
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  text-align: center;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Health bar (naruto-unison style: 8px, green, #111 border) */
+.na-charhealth {
+  width: 75px;
+  height: 8px;
+  background: #111;
+  border: 2px solid #111;
+  position: relative;
+  margin-top: 1px;
+}
+.na-charhealth > div:first-child {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -60%);
-  font-family: var(--font-title);
-  font-size: 48px;
-  font-weight: 900;
-  color: #e53935;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-  z-index: 5;
-  pointer-events: none;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background-color: #0a0;
+  transition: width 0.8s ease;
 }
+.na-healthtext {
+  position: absolute;
+  top: -1px;
+  right: 2px;
+  font-family: var(--font-title);
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  z-index: 2;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Status row */
 .na-status-row {
   display: flex;
   gap: 2px;
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 0;
+  left: 0;
   z-index: 5;
 }
 .na-status {
@@ -860,65 +951,21 @@ html, body { background: #080a14 !important; }
   line-height: 1;
   padding: 1px 2px;
   border-radius: 2px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
 }
 
-/* Portrait info (name + HP + evo bar) */
-.na-portrait-info {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.na-name {
-  font-family: var(--font-main);
-  font-size: 10px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  letter-spacing: 0.3px;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.na-hp-bar {
-  width: 100%;
-  height: 10px;
-  background: #1a1a2e;
-  border-radius: 5px;
-  overflow: hidden;
-  border: 1px solid #2a2a4e;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
-}
-.na-hp-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.na-hp-fill.high { background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%); }
-.na-hp-fill.medium { background: linear-gradient(180deg, #FFB74D 0%, #FF9800 100%); }
-.na-hp-fill.low { background: linear-gradient(180deg, #EF5350 0%, #F44336 100%); }
-.na-hp-text {
-  font-family: var(--font-title);
-  font-size: 9px;
-  font-weight: 700;
-  color: #aaa;
-}
+/* Evo bar */
 .na-evo-bar {
-  width: 100%;
-  height: 5px;
+  width: 75px;
+  height: 4px;
   background: #1a1030;
-  border-radius: 3px;
   overflow: hidden;
   border: 1px solid #2a1a4e;
+  margin-top: 1px;
 }
 .na-evo-fill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.6s ease;
   background: linear-gradient(180deg, #AB47BC 0%, #8E24AA 100%);
 }
 .na-evo-fill.full {
@@ -930,104 +977,107 @@ html, body { background: #080a14 !important; }
   50% { box-shadow: 0 0 10px rgba(171, 71, 188, 0.8); }
 }
 
-/* ==================== HORIZONTAL SKILL STRIP ==================== */
-.na-skill-strip {
-  flex: 1;
-  display: flex;
+/* ==================== SKILL STRIP (charmoves) ==================== */
+.na-charmoves {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
-  background: linear-gradient(180deg, #e8e4dc 0%, #d4cfc4 100%);
-  border: 2px solid #b8b0a0;
-  border-radius: 6px;
-  min-height: 58px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.3);
+  vertical-align: top;
+  padding: 0 4px;
 }
-.na-skill-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 6px;
+
+/* Individual skill box */
+.na-charmove {
+  width: 62px;
+  height: 62px;
+  border: 2px solid #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  border: 2px solid #8a8070;
-  background: linear-gradient(180deg, #f5f0e8 0%, #ddd8cc 100%);
-  transition: all 0.12s ease;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: filter 0.2s, border-color 0.15s;
+  cursor: pointer;
+  background: #1a1e38;
 }
-.na-skill-box:hover:not(.disabled) {
-  border-color: #6060c0;
-  transform: scale(1.1);
-  background: linear-gradient(180deg, #e0e8ff 0%, #c8d0f0 100%);
-  box-shadow: 0 2px 10px rgba(100, 100, 200, 0.4);
+/* Player skills = white border */
+.player-moves .na-charmove { border-color: #fff; }
+/* Enemy skills = black border */
+.enemy-moves .na-charmove { border-color: #000 !important; }
+.na-charmove.enemy { border-color: #000 !important; }
+
+/* Clickable hover = blue border (naruto-unison style) */
+.na-charmove.click:hover {
+  border-color: #0099ff !important;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.4);
 }
-.na-skill-box.disabled {
-  opacity: 0.35;
-  cursor: default;
+
+/* Selected = red outline (naruto-unison style) */
+.na-charmove.selected {
+  outline: 2px solid #ff0000 !important;
+  outline-offset: 1px;
+  filter: none;
+}
+
+/* Disabled / can't afford / stunned */
+.na-charmove.noclick {
   filter: grayscale(0.8);
-  background: linear-gradient(180deg, #c0bdb5 0%, #a8a498 100%);
-}
-.na-skill-box.selected {
-  border-color: #4CAF50 !important;
-  box-shadow: 0 0 12px rgba(76, 175, 80, 0.6);
-  transform: scale(1.1);
-  background: linear-gradient(180deg, #d0f0d0 0%, #a8e0a8 100%);
-}
-.na-skill-box.on-cd {
-  opacity: 0.4;
+  border-color: #000 !important;
   cursor: default;
 }
-.na-skill-box.on-cd::after {
+
+/* On cooldown */
+.na-charmove.oncd {
+  filter: grayscale(0.8);
+  border-color: #000 !important;
+  cursor: default;
+  position: relative;
+}
+.na-charmove.oncd::after {
   content: attr(data-cd);
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: #ef5350;
-  border-radius: 6px;
 }
 
-/* ==================== BOTTOM BAR (Arena style) ==================== */
+/* ==================== BOTTOM BAR ==================== */
 .na-bottom-bar {
   display: flex;
-  align-items: stretch;
-  background: linear-gradient(180deg, #0e1228 0%, #0a0d1c 100%);
+  align-items: center;
+  background: #0a0d1c;
   border-top: 2px solid #1e2340;
-  min-height: 72px;
+  min-height: 48px;
+  padding: 4px 8px;
+  gap: 10px;
 }
 .na-bottom-left {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
-  border-right: 1px solid #1e2340;
-  min-width: 130px;
-  justify-content: center;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
 }
 .na-surrender-btn {
   font-family: var(--font-title);
   font-size: 10px;
   font-weight: 700;
   padding: 6px 12px;
-  border: 1px solid #3a1520;
-  border-radius: 4px;
-  background: #1a0a10;
+  border: none;
+  border-radius: 0;
+  background: none;
   color: #ef5350;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.12s ease;
+  opacity: 0.6;
+  transition: opacity 0.15s;
 }
-.na-surrender-btn:hover { background: #2a1018; }
+.na-surrender-btn:hover { opacity: 1; }
 .na-item-btn {
   font-family: var(--font-title);
   font-size: 9px;
@@ -1056,116 +1106,89 @@ html, body { background: #080a14 !important; }
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.12s ease;
 }
 .na-evolve-btn:hover { background: #142038; }
 .na-evolve-btn:disabled { opacity: 0.3; cursor: default; }
 
-/* Skill info panel (bottom center, arena style with sprite) */
-.na-skill-info {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 6px 14px;
-  gap: 12px;
-  min-height: 60px;
-}
-.na-skill-info-sprite {
-  flex-shrink: 0;
-  width: 52px;
-  height: 52px;
-  border-radius: 6px;
-  border: 2px solid #1e2340;
-  background: #080a14;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.na-skill-info-sprite img {
-  image-rendering: pixelated;
-  object-fit: contain;
-}
-.na-skill-info-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.na-skill-info-empty {
-  font-family: var(--font-main);
-  font-size: 12px;
-  color: rgba(255,255,255,0.2);
-  text-align: center;
-  width: 100%;
-}
-.na-skill-info-header {
+/* Inline exchange energy */
+.na-exchange-inline {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  padding: 0 8px;
+  border-left: 1px solid #1e2340;
+  border-right: 1px solid #1e2340;
 }
-.na-skill-info-name {
-  font-family: var(--font-title);
-  font-size: 14px;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.5px;
-}
-.na-skill-info-type {
-  font-family: var(--font-title);
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 3px;
-  letter-spacing: 1px;
-}
-.na-skill-info-pwr,
-.na-skill-info-acc,
-.na-skill-info-cd {
-  font-family: var(--font-title);
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.5);
-}
-.na-skill-info-desc {
-  font-family: var(--font-main);
-  font-size: 11px;
-  color: rgba(255,255,255,0.65);
-  line-height: 1.3;
-}
-.na-skill-info-cost {
+.na-exchange-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-.na-skill-info-cost-label {
-  font-family: var(--font-title);
-  font-size: 9px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 1px;
-}
-.na-cost-badge {
-  display: inline-flex;
   gap: 3px;
 }
-.na-cost-free {
+.na-exchange-count {
   font-family: var(--font-title);
-  font-size: 9px;
-  color: #4CAF50;
-  letter-spacing: 1px;
+  font-size: 11px;
   font-weight: 700;
+  color: #fff;
+  min-width: 14px;
+  text-align: center;
 }
-.na-skill-info-status {
-  font-family: var(--font-main);
-  font-size: 10px;
-  color: #AB47BC;
+.na-exchange-minus {
+  font-size: 14px;
+  font-weight: 700;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.na-exchange-minus:hover:not(:disabled) { color: #0099ff; }
+.na-exchange-minus:disabled { opacity: 0.2; cursor: default; }
+.na-exchange-used {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
 }
 
-/* Animation classes (applied briefly to portraits) */
+/* Action queue */
+.na-action-queue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.na-queue-slot {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0d1c;
+  transition: all 0.2s ease;
+}
+.na-queue-slot.filled {
+  border-color: #fff;
+  background: #1a2e1f;
+}
+.na-queue-empty {
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+}
+.na-queue-label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  margin-left: 4px;
+}
+
+/* Animation classes */
 .na-portrait.attacking { animation: na-attack 0.5s ease; }
 .na-portrait.enemy.attacking { animation: na-attack-enemy 0.5s ease; }
 .na-portrait.damaged { animation: na-damage 0.5s ease; }
@@ -1178,7 +1201,7 @@ html, body { background: #080a14 !important; }
 @keyframes na-heal { 0% { box-shadow: none; } 50% { box-shadow: 0 0 15px rgba(76, 175, 80, 0.6); } 100% { box-shadow: none; } }
 @keyframes na-critical { 0% { transform: scale(1); } 20% { transform: scale(1.1); } 40% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
-/* Status effect visual cues on portraits */
+/* Status effect visual cues */
 .na-portrait.burning { box-shadow: inset 0 0 12px rgba(255, 80, 30, 0.4); }
 .na-portrait.poisoned { box-shadow: inset 0 0 12px rgba(160, 50, 200, 0.4); }
 .na-portrait.frozen { box-shadow: inset 0 0 12px rgba(100, 180, 255, 0.4); }
@@ -2078,35 +2101,38 @@ html, body { background: #080a14 !important; }
   color: #fff;
 }
 
-/* ==================== RESPONSIVE (Arena layout) ==================== */
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 900px) {
-  .na-battle-area { padding: 4px 6px; gap: 4px; margin: 2px 4px; }
-  .na-portrait { width: 100px; }
-  .na-sprite { width: 72px; height: 72px; }
-  .na-skill-box { width: 42px; height: 42px; }
-  .na-skill-strip { padding: 4px 8px; gap: 4px; }
-  .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 56px; }
+  .na-battle-area { padding: 4px 6px; gap: 3px; }
+  .na-charicon { width: 60px; height: 60px; }
+  .na-charmove { width: 48px; height: 48px; }
+  .na-charhealth { width: 60px; }
+  .na-evo-bar { width: 60px; }
+  .na-charmoves { gap: 4px; }
+  .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 50px; }
   .energy-pool { gap: 3px; }
-  .na-bottom-bar { min-height: 60px; }
-  .na-bottom-left { min-width: 100px; }
-  .na-skill-info-sprite { width: 44px; height: 44px; }
+  .na-info-panel { padding: 4px 10px; min-height: 44px; }
+  .na-info-sprite { width: 40px; height: 40px; }
+  .na-info-name { font-size: 12px; }
+  .na-exchange-inline { gap: 4px; padding: 0 4px; }
 }
 
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .na-portrait { width: 80px; padding: 3px; }
-  .na-sprite { width: 56px; height: 56px; }
-  .na-name { font-size: 8px; }
-  .na-skill-box { width: 34px; height: 34px; }
-  .na-skill-strip { padding: 3px 4px; gap: 3px; }
-  .na-bottom-left { min-width: 80px; padding: 4px 6px; }
-  .na-surrender-btn { font-size: 8px; padding: 4px 8px; }
-  .na-item-btn { font-size: 8px; padding: 3px 6px; }
-  .na-skill-info-name { font-size: 11px; }
-  .na-skill-info-desc { font-size: 10px; }
-  .na-skill-info-sprite { width: 36px; height: 36px; }
-  .na-skill-info-sprite img { width: 32px; height: 32px; }
+  .na-charicon { width: 48px; height: 48px; }
+  .na-charmove { width: 38px; height: 38px; }
+  .na-charhealth { width: 48px; height: 6px; }
+  .na-evo-bar { width: 48px; }
+  .na-charname { font-size: 8px; max-width: 52px; }
+  .na-charmoves { gap: 3px; padding: 0 2px; }
+  .na-info-panel { padding: 3px 8px; min-height: 38px; }
+  .na-info-name { font-size: 11px; }
+  .na-info-desc { font-size: 10px; }
+  .na-info-sprite { width: 32px; height: 32px; }
+  .na-exchange-inline { display: none; }
+  .na-action-queue { gap: 2px; }
+  .na-queue-slot { width: 26px; height: 26px; }
   .result-title { font-size: 22px; letter-spacing: 2px; }
   .modal { padding: 24px 20px; min-width: 280px; }
 }
