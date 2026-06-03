@@ -939,61 +939,60 @@ html, body { background: #080a14 !important; }
   width: 100%;
 }
 
-/* ==================== BATTLE AREA — NARUTO-ARENA LAYOUT ==================== */
+/* ==================== BATTLE AREA — NARUTO-ARENA EXACT LAYOUT ==================== */
+/* Structure: [Player Column] [Center Sprite] [Enemy Column]
+   Each column: 3 character rows stacked vertically
+   Each row: [Portrait][Skill][Skill][Skill][Skill] in one horizontal line
+   HP bar below the full row */
+
 .na-battle-area {
   flex: 1;
   display: flex;
-  align-items: stretch;
-  justify-content: center;
-  padding: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
   min-height: 0;
   position: relative;
   overflow: hidden;
-  gap: 0;
 }
 
 /* === Player Column (left) === */
 .na-column-player {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
-  align-items: flex-start;
   z-index: 2;
-  flex-shrink: 0;
 }
 
 /* === Enemy Column (right) === */
 .na-column-enemy {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
-  align-items: flex-end;
   z-index: 2;
-  flex-shrink: 0;
 }
 
-/* === Center Sprite (decorative large Pokemon) === */
+/* === Center Sprite (large, prominent) === */
 .na-center-sprite {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
-  min-width: 80px;
-  max-width: 280px;
+  min-width: 60px;
 }
 .na-big-sprite {
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 6px 30px rgba(0,0,0,0.7));
-  opacity: 0.55;
+  filter: drop-shadow(0 8px 40px rgba(0,0,0,0.8));
+  opacity: 0.5;
   transition: opacity 0.3s ease;
   max-width: 100%;
   max-height: 100%;
 }
-.na-center-sprite:hover .na-big-sprite { opacity: 0.85; }
+.na-center-sprite:hover .na-big-sprite { opacity: 0.8; }
 
 /* ==================== CHARACTER SLOT ==================== */
 .na-char-slot {
@@ -1003,49 +1002,35 @@ html, body { background: #080a14 !important; }
 .na-char-slot.dead { opacity: 0.4; }
 .na-char-slot.dead .na-charicon { filter: grayscale(0.9); }
 
-/* Character row: portrait + skill frame inline */
+/* Character row: portrait + 4 skills in ONE HORIZONTAL LINE */
 .na-char-row {
   display: flex;
   align-items: stretch;
-  gap: 3px;
-}
-.na-char-row.enemy-row {
-  flex-direction: row; /* skills left, portrait right for enemy */
-}
-
-/* Portrait column: portrait + HP bar stacked vertically */
-.na-portrait-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 2px;
-  flex-shrink: 0;
+}
+/* Enemy row: skills first, then portrait (mirrored) */
+.na-char-row.enemy-row {
+  flex-direction: row;
 }
 
 /* ==================== PORTRAIT ==================== */
 .na-portrait {
   flex-shrink: 0;
   position: relative;
-  transition: background-color 0.2s ease;
   cursor: default;
 }
 .na-charicon {
-  width: 68px;
-  height: 68px;
+  width: 72px;
+  height: 72px;
   border: 2px solid #333;
   image-rendering: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.5);
+  display: block;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .na-charicon.flipped { transform: scaleX(-1); }
-
-/* Enemy portrait same size now (has skills too) */
-.enemy-portrait .na-charicon {
-  width: 68px;
-  height: 68px;
-}
 
 /* Targeting states */
 .na-portrait.highlighted {
@@ -1100,24 +1085,25 @@ html, body { background: #080a14 !important; }
   background: rgba(0,0,0,0.7);
 }
 
-/* ==================== SKILL FRAME — 2x2 grid like naruto-arena ==================== */
+/* ==================== SKILL FRAME — 4 skills in SINGLE HORIZONTAL ROW ==================== */
 .na-skill-frame {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: stretch;
   gap: 2px;
-  padding: 3px;
+  padding: 2px;
   border: 3px solid #8b0000;
   background: rgba(10, 5, 5, 0.7);
 }
 .na-skill-frame.enemy-skills {
-  border-color: #333;
+  border-color: #444;
   background: rgba(5, 5, 10, 0.7);
 }
 
-/* Individual skill box — type-colored background */
+/* Individual skill box — type-colored, fits the row height */
 .na-charmove {
-  width: 62px;
-  height: 52px;
+  width: 56px;
+  height: auto;
+  min-height: 68px;
   border: 2px solid #555;
   display: flex;
   flex-direction: column;
@@ -1127,27 +1113,12 @@ html, body { background: #080a14 !important; }
   transition: filter 0.15s, border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
   background: #1a1a2e;
-  gap: 2px;
   overflow: hidden;
-}
-.na-move-name {
-  font-family: var(--font-main);
-  font-size: 8px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  text-align: center;
-  line-height: 1.1;
-  z-index: 1;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 0 2px;
 }
 /* Enemy moves are not clickable */
 .na-charmove.enemy-move {
   cursor: default;
+  width: 56px;
 }
 
 /* Hover = blue border (player only) */
@@ -1204,9 +1175,10 @@ html, body { background: #080a14 !important; }
   color: #ef5350;
 }
 
-/* ==================== HP BAR (under portrait) ==================== */
+/* ==================== HP BAR (full width under character row) ==================== */
 .na-hp-under {
   width: 100%;
+  margin-top: 2px;
 }
 .na-charhealth {
   width: 100%;
@@ -1224,7 +1196,7 @@ html, body { background: #080a14 !important; }
   transition: width 0.8s ease;
 }
 .na-hp-fill.high {
-  background: linear-gradient(180deg, #2d2 0%, #0a0 100%);
+  background: linear-gradient(180deg, #4d4 0%, #0c0 100%);
 }
 .na-hp-fill.medium {
   background: linear-gradient(180deg, #f0c030 0%, #d0a010 100%);
@@ -2305,16 +2277,18 @@ html, body { background: #080a14 !important; }
 }
 
 /* ==================== RESPONSIVE ==================== */
+@media (max-width: 1100px) {
+  .na-charmove { width: 48px; min-height: 60px; }
+  .na-charicon { width: 62px; height: 62px; }
+}
 @media (max-width: 900px) {
   .na-battle-area { padding: 4px 6px; }
-  .na-charicon { width: 56px; height: 56px; }
-  .enemy-portrait .na-charicon { width: 56px; height: 56px; }
-  .na-charmove { width: 52px; height: 44px; }
-  .na-move-name { font-size: 7px; }
+  .na-charicon { width: 52px; height: 52px; }
+  .na-charmove { width: 40px; min-height: 52px; }
   .na-charhealth { height: 12px; }
   .na-hp-overlay { font-size: 8px; }
+  .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 50px; }
-  .energy-pool { gap: 3px; }
   .na-info-panel { padding: 4px 10px; min-height: 44px; }
   .na-info-sprite { width: 40px; height: 40px; }
   .na-info-name { font-size: 12px; }
@@ -2324,13 +2298,11 @@ html, body { background: #080a14 !important; }
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .na-charicon { width: 44px; height: 44px; }
-  .enemy-portrait .na-charicon { width: 44px; height: 44px; }
-  .na-charmove { width: 42px; height: 36px; }
-  .na-move-name { font-size: 6px; }
+  .na-charicon { width: 42px; height: 42px; }
+  .na-charmove { width: 34px; min-height: 42px; }
   .na-charhealth { height: 10px; }
   .na-hp-overlay { font-size: 7px; }
-  .na-skill-frame { padding: 2px; gap: 1px; border-width: 2px; }
+  .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
   .na-info-panel { padding: 3px 8px; min-height: 38px; }
   .na-info-name { font-size: 11px; }
   .na-info-desc { font-size: 10px; }

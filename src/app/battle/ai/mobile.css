@@ -6,26 +6,26 @@
   /* Battle area stacks vertically on mobile */
   .na-battle-area {
     flex-direction: column;
-    padding: 4px 4px;
-    gap: 4px;
+    padding: 2px 4px;
+    gap: 2px;
+    justify-content: center;
   }
   .na-column-player,
   .na-column-enemy {
     width: 100%;
-    gap: 4px;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
+    gap: 2px;
   }
-  .na-center-sprite { display: none; } /* hide large sprite on mobile */
+  .na-center-sprite { display: none; }
 
-  .na-charicon { width: 40px; height: 40px; }
-  .enemy-portrait .na-charicon { width: 40px; height: 40px; }
-  .na-charmove { width: 34px; height: 30px; }
-  .na-move-name { font-size: 5px; }
+  .na-charicon { width: 38px; height: 38px; }
+  .na-charmove { width: 30px; min-height: 38px; }
   .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
   .na-charhealth { height: 10px; }
   .na-hp-overlay { font-size: 7px; }
+  .na-hp-under { margin-top: 1px; }
+  .na-char-row { gap: 1px; }
+  .na-column-player .na-char-slot,
+  .na-column-enemy .na-char-slot { gap: 1px; }
 
   /* Top bar mobile */
   .top-bar { padding: 4px 8px; min-height: 42px; flex-wrap: wrap; }
@@ -93,11 +93,11 @@
   .energy-tcg-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .energy-confirm-btn { font-size: 10px; padding: 12px 24px; }
 
-  .na-charicon { width: 34px; height: 34px; }
-  .enemy-portrait .na-charicon { width: 34px; height: 34px; }
-  .na-charmove { width: 28px; height: 26px; }
-  .na-move-name { font-size: 4px; }
+  .na-charicon { width: 32px; height: 32px; }
+  .na-charmove { width: 26px; min-height: 32px; }
   .na-skill-frame { border-width: 1px; padding: 1px; }
+  .na-charhealth { height: 8px; }
+  .na-hp-overlay { font-size: 6px; }
 
   .top-bar { padding: 3px 6px; min-height: 38px; }
   .player-info { min-width: 60px; }
