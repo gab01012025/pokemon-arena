@@ -1,10 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { EnergyType, EnergyState, Trainer, GamePhase } from '../types';
+import { Trainer, GamePhase } from '../types';
 import { RankInfo } from '@/lib/ranks';
-import { getTotalEnergy } from '../engine';
-import EnergyIcon from './EnergyIcon';
 
 const TRAINER_SPRITES: Record<string, string> = {
   'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock.png',
@@ -21,7 +19,6 @@ const TRAINER_SPRITES: Record<string, string> = {
   'Red': 'https://play.pokemonshowdown.com/sprites/trainers/red.png',
 };
 
-// Random AI trainer sprites
 const AI_TRAINER_SPRITES = [
   'https://play.pokemonshowdown.com/sprites/trainers/youngster.png',
   'https://play.pokemonshowdown.com/sprites/trainers/lass.png',
@@ -42,14 +39,7 @@ interface BattleTopBarProps {
   turn: number;
   timer: number;
   phase: GamePhase;
-  energy: EnergyState;
-  selectedEnergyTypes: EnergyType[];
-  onEndTurn: () => void;
   winStreak: number;
-  isDailyChallenge: boolean;
-  dailyChallengeCompleted: boolean;
-  onExchangeEnergy?: () => void;
-  canExchange?: boolean;
 }
 
 export default function BattleTopBar({
@@ -63,14 +53,7 @@ export default function BattleTopBar({
   turn,
   timer,
   phase,
-  energy,
-  selectedEnergyTypes,
-  onEndTurn,
   winStreak,
-  isDailyChallenge,
-  dailyChallengeCompleted,
-  onExchangeEnergy,
-  canExchange,
 }: BattleTopBarProps) {
   const trainerSprite = playerTrainer ? TRAINER_SPRITES[playerTrainer.name] : null;
   const opponentSprite = AI_TRAINER_SPRITES[Math.abs(opponentName.charCodeAt(0)) % AI_TRAINER_SPRITES.length];
@@ -102,30 +85,13 @@ export default function BattleTopBar({
 
       <div className="center-controls">
         <div className="turn-info">TURN {turn}</div>
-        <button className="ready-btn" onClick={onEndTurn} disabled={phase !== 'player1-turn'}>
-          {phase === 'player1-turn' ? 'END TURN' : phase === 'executing' ? 'EXECUTING...' : phase === 'player2-turn' ? 'OPPONENT TURN' : 'WAIT...'}
-        </button>
+        <div className="phase-label">
+          {phase === 'player1-turn' ? 'YOUR TURN' : phase === 'executing' ? 'EXECUTING...' : phase === 'player2-turn' ? 'OPPONENT TURN' : 'WAITING...'}
+        </div>
         <div className="timer-container">
           <div className="timer-bar">
             <div className="timer-fill" style={{ width: `${timer}%` }} />
           </div>
-        </div>
-        <div className="energy-pool">
-          {selectedEnergyTypes.map(type => (
-              <div key={type} className={`energy-item ${energy[type] === 0 ? 'empty' : ''}`}>
-                <EnergyIcon type={type} size={22} />
-                <span className="energy-count">x{energy[type]}</span>
-              </div>
-          ))}
-          <div className="energy-total">
-            <span className="total-label">T</span>
-            <span className="energy-count">x{getTotalEnergy(energy)}</span>
-          </div>
-          {onExchangeEnergy && (
-            <button className="exchange-energy-btn" onClick={onExchangeEnergy} disabled={!canExchange}>
-              EXCHANGE
-            </button>
-          )}
         </div>
       </div>
 

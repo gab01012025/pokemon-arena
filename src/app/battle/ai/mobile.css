@@ -5,17 +5,41 @@
     height: 100dvh;
   }
 
+  /* 2-column layout goes vertical on mobile */
   .na-battle-area {
-    padding: 3px 4px;
-    gap: 2px;
+    flex-direction: column;
+    padding: 4px;
+    gap: 4px;
   }
-  .na-battle-row { gap: 0; }
-  .na-charicon { width: 52px; height: 52px; }
-  .na-charmove { width: 40px; height: 40px; }
-  .na-charhealth { width: 52px; height: 6px; }
-  .na-evo-bar { width: 52px; height: 3px; }
-  .na-charname { font-size: 8px; max-width: 56px; }
-  .na-charmoves { gap: 3px; padding: 0 2px; }
+  .na-column-player,
+  .na-column-enemy {
+    max-width: 100%;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .na-column-center {
+    flex-direction: row;
+    min-width: auto;
+    max-width: 100%;
+    width: 100%;
+    gap: 8px;
+    padding: 4px 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    order: -1; /* center column on top on mobile */
+  }
+  .na-column-enemy .na-charname { text-align: center; }
+
+  .na-char-slot { flex-shrink: 0; }
+  .na-char-inline { gap: 1px; }
+  .na-charicon { width: 48px; height: 48px; }
+  .na-charmove { width: 36px; height: 36px; }
+  .na-charmoves { gap: 2px; }
+  .na-charname { font-size: 8px; }
   .na-healthtext { font-size: 6px; }
 
   .na-info-panel { padding: 3px 8px; min-height: 40px; gap: 8px; }
@@ -24,22 +48,17 @@
   .na-info-desc { font-size: 10px; }
   .na-info-stats { font-size: 9px; gap: 6px; }
 
-  .energy-pool {
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 100%;
-  }
-
   .top-bar {
-    padding: 6px 10px;
-    min-height: 50px;
+    padding: 4px 8px;
+    min-height: 42px;
     flex-wrap: wrap;
   }
-
-  .player-info { min-width: 100px; }
-  .player-avatar { width: 36px; height: 36px; }
-  .player-name { font-size: 11px; }
-  .player-rank { font-size: 9px; }
+  .player-info { min-width: 90px; }
+  .player-avatar { width: 32px; height: 32px; }
+  .player-name { font-size: 10px; }
+  .player-rank { font-size: 8px; }
+  .turn-info { font-size: 10px; letter-spacing: 2px; }
+  .phase-label { font-size: 8px; }
 
   .win-streak-badge,
   .daily-challenge-badge {
@@ -48,14 +67,15 @@
   }
 
   /* Bottom bar mobile */
-  .na-bottom-bar { min-height: 40px; padding: 3px 6px; gap: 6px; }
+  .na-bottom-bar { min-height: 36px; padding: 3px 6px; gap: 6px; }
   .na-surrender-btn { font-size: 8px; padding: 4px 8px; }
   .na-item-btn { font-size: 7px; padding: 3px 6px; }
-  .na-exchange-inline { gap: 4px; padding: 0 4px; }
-  .na-exchange-count { font-size: 9px; }
-  .na-action-queue { gap: 2px; }
-  .na-queue-slot { width: 26px; height: 26px; }
+
+  /* Center column mobile */
+  .ready-btn { font-size: 10px; padding: 6px 16px; max-width: 100px; }
+  .na-queue-slot { width: 24px; height: 24px; }
   .na-queue-label { font-size: 8px; }
+  .na-exchange-btn { font-size: 8px; padding: 3px 8px; }
 
   /* Action badges mobile */
   .na-action-badge { padding: 1px 4px; }
@@ -92,7 +112,7 @@
   .items-panel { bottom: 50px; left: 6px; right: 6px; min-width: auto; max-height: 60vh; overflow-y: auto; }
   .targeting-indicator { top: 56px; padding: 8px 16px; }
   .targeting-text { font-size: 9px; }
-  .status-badge { min-width: 18px; height: 14px; font-size: 6px; }
+  .status-badge { font-size: 8px; }
   .wr-badge { font-size: 6px; padding: 1px 3px; }
 }
 
@@ -103,18 +123,14 @@
   .energy-tcg-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .energy-confirm-btn { font-size: 10px; padding: 12px 24px; }
 
-  .na-charicon { width: 42px; height: 42px; }
-  .na-charmove { width: 32px; height: 32px; }
-  .na-charhealth { width: 42px; height: 5px; }
-  .na-evo-bar { width: 42px; }
-  .na-charname { font-size: 7px; max-width: 44px; }
-  .na-charmoves { gap: 2px; }
+  .na-charicon { width: 40px; height: 40px; }
+  .na-charmove { width: 30px; height: 30px; }
+  .na-charname { font-size: 7px; }
+  .na-charmoves { gap: 1px; }
 
-  .na-exchange-inline { display: none; }
-
-  .top-bar { padding: 4px 8px; min-height: 46px; }
-  .player-info { min-width: 80px; }
-  .player-name { font-size: 10px; }
+  .top-bar { padding: 3px 6px; min-height: 38px; }
+  .player-info { min-width: 70px; }
+  .player-name { font-size: 9px; }
 
   .na-info-panel { padding: 2px 6px; min-height: 34px; }
   .na-info-sprite { width: 28px; height: 28px; }

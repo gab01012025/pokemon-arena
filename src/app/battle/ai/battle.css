@@ -628,14 +628,14 @@ html, body { background: #080a14 !important; }
   white-space: nowrap;
 }
 
-/* Center Controls */
+/* Center Controls (top bar) */
 .center-controls {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
-  max-width: 400px;
+  max-width: 300px;
 }
 .turn-info {
   font-family: var(--font-title);
@@ -645,19 +645,30 @@ html, body { background: #080a14 !important; }
   letter-spacing: 3px;
   text-transform: uppercase;
 }
+.phase-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+/* READY button (now in center column of battle area) */
 .ready-btn {
   font-family: var(--font-title);
   font-size: 11px;
   font-weight: 700;
-  padding: 10px 32px;
+  padding: 10px 28px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #4CAF50;
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
   letter-spacing: 2px;
   text-transform: uppercase;
+  width: 100%;
+  max-width: 140px;
 }
 .ready-btn:hover:not(:disabled) {
   background: #66BB6A;
@@ -820,36 +831,75 @@ html, body { background: #080a14 !important; }
   width: 100%;
 }
 
-/* ==================== BATTLE AREA ==================== */
+/* ==================== BATTLE AREA — 2-COLUMN LAYOUT ==================== */
 .na-battle-area {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 10px;
+  gap: 0;
+  padding: 8px 12px;
   min-height: 0;
   position: relative;
 }
 
-.na-battle-row {
+/* Columns */
+.na-column {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.na-column-player {
+  align-items: flex-start;
+  flex: 1;
+  max-width: 340px;
+}
+.na-column-enemy {
+  align-items: flex-end;
+  flex: 1;
+  max-width: 340px;
+}
+.na-column-center {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0;
-  margin-bottom: 2px;
+  justify-content: center;
+  gap: 10px;
+  min-width: 120px;
+  max-width: 160px;
+  padding: 10px 8px;
+}
+
+/* Character slot */
+.na-char-slot {
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+.na-char-slot.dead { opacity: 0.5; }
+.na-char-slot.dead .na-charicon { filter: grayscale(0.8); }
+.na-char-slot.action-ready .na-charicon {
+  border-color: #0a0;
+  box-shadow: 0 0 6px rgba(0, 170, 0, 0.4);
+}
+.na-char-slot.being-targeted .na-charicon {
+  border-color: #e53935;
+  box-shadow: 0 0 10px rgba(229, 57, 53, 0.5);
+}
+
+/* Character inline row: portrait + skills side by side */
+.na-char-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* ==================== CHARACTER PORTRAIT ==================== */
 .na-portrait {
-  width: auto;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
   position: relative;
   padding: 2px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
+  cursor: default;
 }
 .na-charicon {
   width: 75px;
@@ -858,20 +908,11 @@ html, body { background: #080a14 !important; }
   image-rendering: auto;
   object-fit: contain;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 .na-charicon.flipped { transform: scaleX(-1); }
 
-/* Dead = just grayscale like naruto-unison */
-.na-portrait.dead .na-charicon { filter: grayscale(0.8); }
-.na-portrait.dead { opacity: 0.6; }
-
-/* Action ready = green border on portrait icon */
-.na-portrait.action-ready .na-charicon {
-  border-color: #0a0;
-  box-shadow: 0 0 6px rgba(0, 170, 0, 0.4);
-}
-
-/* Highlighted = green background (targeting, naruto-unison style) */
+/* Targeting states */
 .na-portrait.highlighted {
   background-color: rgba(0, 255, 0, 0.15);
   cursor: crosshair;
@@ -880,7 +921,6 @@ html, body { background: #080a14 !important; }
   border-color: rgb(19, 112, 19);
   opacity: 0.85;
 }
-/* Nohighlight = red (can't target) */
 .na-portrait.nohighlight {
   background-color: rgba(170, 0, 0, 0.15);
 }
@@ -888,29 +928,40 @@ html, body { background: #080a14 !important; }
   border-color: rgb(119, 1, 1);
 }
 
-/* Being targeted = red glow */
-.na-portrait.being-targeted .na-charicon {
-  border-color: #e53935;
-  box-shadow: 0 0 10px rgba(229, 57, 53, 0.5);
+/* Status icons above character */
+.na-status-icons {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.status-badge {
+  font-size: 10px;
+  line-height: 1;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.6);
 }
 
-/* Character name below */
+/* Character name */
 .na-charname {
+  display: block;
   font-family: var(--font-main);
   font-size: 10px;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-  text-align: center;
-  max-width: 80px;
+  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.na-column-enemy .na-charname {
+  text-align: right;
+}
 
-/* Health bar (naruto-unison style: 8px, green, #111 border) */
+/* Health bar — spans full width of portrait+skills */
 .na-charhealth {
-  width: 75px;
+  width: 100%;
   height: 8px;
   background: #111;
   border: 2px solid #111;
@@ -937,26 +988,9 @@ html, body { background: #080a14 !important; }
   text-shadow: 0 1px 2px #000;
 }
 
-/* Status row */
-.na-status-row {
-  display: flex;
-  gap: 2px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
-}
-.na-status {
-  font-size: 10px;
-  line-height: 1;
-  padding: 1px 2px;
-  border-radius: 2px;
-  background: rgba(0,0,0,0.6);
-}
-
 /* Evo bar */
 .na-evo-bar {
-  width: 75px;
+  width: 100%;
   height: 4px;
   background: #1a1030;
   overflow: hidden;
@@ -981,15 +1015,13 @@ html, body { background: #080a14 !important; }
 .na-charmoves {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  vertical-align: top;
-  padding: 0 4px;
+  gap: 3px;
 }
 
-/* Individual skill box */
+/* Individual skill box — naruto-unison style */
 .na-charmove {
-  width: 62px;
-  height: 62px;
+  width: 56px;
+  height: 56px;
   border: 2px solid #fff;
   display: flex;
   align-items: center;
@@ -999,26 +1031,24 @@ html, body { background: #080a14 !important; }
   cursor: pointer;
   background: #1a1e38;
 }
-/* Player skills = white border */
-.player-moves .na-charmove { border-color: #fff; }
 /* Enemy skills = black border */
 .enemy-moves .na-charmove { border-color: #000 !important; }
 .na-charmove.enemy { border-color: #000 !important; }
 
-/* Clickable hover = blue border (naruto-unison style) */
+/* Hover = blue border */
 .na-charmove.click:hover {
   border-color: #0099ff !important;
   box-shadow: 0 0 8px rgba(0, 153, 255, 0.4);
 }
 
-/* Selected = red outline (naruto-unison style) */
+/* Selected = red outline */
 .na-charmove.selected {
   outline: 2px solid #ff0000 !important;
   outline-offset: 1px;
   filter: none;
 }
 
-/* Disabled / can't afford / stunned */
+/* Disabled */
 .na-charmove.noclick {
   filter: grayscale(0.8);
   border-color: #000 !important;
@@ -1041,26 +1071,84 @@ html, body { background: #080a14 !important; }
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   color: #ef5350;
+}
+
+/* ==================== CENTER COLUMN ==================== */
+.na-center-energy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+.na-action-queue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.na-queue-slot {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0d1c;
+  transition: all 0.2s ease;
+}
+.na-queue-slot.filled {
+  border-color: #fff;
+  background: #1a2e1f;
+}
+.na-queue-empty {
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+}
+.na-queue-label {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  margin-left: 2px;
+}
+.na-exchange-btn {
+  font-family: var(--font-title);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border: 1px solid #1e2340;
+  background: #0a0d1c;
+  color: #42A5F5;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+.na-exchange-btn:hover { background: #142038; border-color: #42A5F5; }
+.na-exchange-used {
+  font-family: var(--font-title);
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
 }
 
 /* ==================== BOTTOM BAR ==================== */
 .na-bottom-bar {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: #0a0d1c;
   border-top: 2px solid #1e2340;
-  min-height: 48px;
+  min-height: 40px;
   padding: 4px 8px;
   gap: 10px;
-}
-.na-bottom-left {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-shrink: 0;
 }
 .na-surrender-btn {
   font-family: var(--font-title);
@@ -1110,90 +1198,12 @@ html, body { background: #080a14 !important; }
 .na-evolve-btn:hover { background: #142038; }
 .na-evolve-btn:disabled { opacity: 0.3; cursor: default; }
 
-/* Inline exchange energy */
-.na-exchange-inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 8px;
-  border-left: 1px solid #1e2340;
-  border-right: 1px solid #1e2340;
-}
-.na-exchange-row {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.na-exchange-count {
-  font-family: var(--font-title);
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  min-width: 14px;
-  text-align: center;
-}
-.na-exchange-minus {
-  font-size: 14px;
-  font-weight: 700;
-  color: #888;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-  transition: color 0.15s;
-}
-.na-exchange-minus:hover:not(:disabled) { color: #0099ff; }
-.na-exchange-minus:disabled { opacity: 0.2; cursor: default; }
-.na-exchange-used {
-  font-family: var(--font-title);
-  font-size: 8px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.3);
-  letter-spacing: 1px;
-}
-
-/* Action queue */
-.na-action-queue {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-.na-queue-slot {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0a0d1c;
-  transition: all 0.2s ease;
-}
-.na-queue-slot.filled {
-  border-color: #fff;
-  background: #1a2e1f;
-}
-.na-queue-empty {
-  font-family: var(--font-title);
-  font-size: 12px;
-  font-weight: 700;
-  color: #333;
-}
-.na-queue-label {
-  font-family: var(--font-title);
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.35);
-  margin-left: 4px;
-}
-
 /* Animation classes */
-.na-portrait.attacking { animation: na-attack 0.5s ease; }
-.na-portrait.enemy.attacking { animation: na-attack-enemy 0.5s ease; }
-.na-portrait.damaged { animation: na-damage 0.5s ease; }
-.na-portrait.healed { animation: na-heal 0.8s ease; }
-.na-portrait.critical { animation: na-critical 0.5s ease; }
+.na-char-slot.attacking { animation: na-attack 0.5s ease; }
+.na-column-enemy .na-char-slot.attacking { animation: na-attack-enemy 0.5s ease; }
+.na-char-slot.damaged { animation: na-damage 0.5s ease; }
+.na-char-slot.healed { animation: na-heal 0.8s ease; }
+.na-char-slot.critical { animation: na-critical 0.5s ease; }
 
 @keyframes na-attack { 0% { transform: translateX(0); } 30% { transform: translateX(20px); } 100% { transform: translateX(0); } }
 @keyframes na-attack-enemy { 0% { transform: translateX(0); } 30% { transform: translateX(-20px); } 100% { transform: translateX(0); } }
@@ -1202,9 +1212,9 @@ html, body { background: #080a14 !important; }
 @keyframes na-critical { 0% { transform: scale(1); } 20% { transform: scale(1.1); } 40% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
 /* Status effect visual cues */
-.na-portrait.burning { box-shadow: inset 0 0 12px rgba(255, 80, 30, 0.4); }
-.na-portrait.poisoned { box-shadow: inset 0 0 12px rgba(160, 50, 200, 0.4); }
-.na-portrait.frozen { box-shadow: inset 0 0 12px rgba(100, 180, 255, 0.4); }
+.na-char-slot.burning { box-shadow: inset 0 0 12px rgba(255, 80, 30, 0.4); }
+.na-char-slot.poisoned { box-shadow: inset 0 0 12px rgba(160, 50, 200, 0.4); }
+.na-char-slot.frozen { box-shadow: inset 0 0 12px rgba(100, 180, 255, 0.4); }
 
 /* ==================== ENEMY SKILLS MODAL ==================== */
 .enemy-skills-overlay {
