@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Trainer } from '../types';
+import { TRAINER_ITEMS } from '../data';
 
 // Modern trainer artwork - Pokémon Showdown default (latest gen) trainer sprites
 const TRAINER_SPRITES: Record<string, string> = {
@@ -94,6 +95,20 @@ export default function TrainerSelectScreen({
               <div className="trainer-passive">{trainer.passive}</div>
               <div className="trainer-passive-desc">⚡ {trainer.passiveDesc}</div>
               <div className="trainer-passive-desc2">🔥 {trainer.passiveDesc2}</div>
+              {/* Trainer items */}
+              {TRAINER_ITEMS[trainer.name] && (
+                <div className="trainer-items-section">
+                  <div className="trainer-items-label">ITEMS</div>
+                  <div className="trainer-items-row">
+                    {TRAINER_ITEMS[trainer.name].map((item, i) => (
+                      <div key={i} className="trainer-item-icon" title={`${item.name} x${item.maxUses} - ${item.description}`}>
+                        <Image src={item.icon} alt={item.name} width={22} height={22} unoptimized />
+                        {item.maxUses > 1 && <span className="trainer-item-count">x{item.maxUses}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
