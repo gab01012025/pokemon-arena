@@ -19,6 +19,8 @@
   .na-charicon { width: 50px; height: 50px; }
   .enemy-portrait .na-charicon { width: 60px; height: 60px; }
   .na-charmove { width: 40px; height: 40px; }
+  .na-move-abbrev { font-size: 8px; }
+  .na-move-energy { display: none; } /* hide energy icon on mobile to save space */
   .na-skill-frame { padding: 2px; gap: 1px; border-width: 2px; }
   .na-hp-text { font-size: 8px; min-width: 36px; }
   .na-charhealth { height: 8px; }
@@ -92,6 +94,7 @@
   .na-charicon { width: 42px; height: 42px; }
   .enemy-portrait .na-charicon { width: 50px; height: 50px; }
   .na-charmove { width: 32px; height: 32px; }
+  .na-move-abbrev { font-size: 6px; }
   .na-skill-frame { border-width: 2px; }
 
   .top-bar { padding: 3px 6px; min-height: 38px; }

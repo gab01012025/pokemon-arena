@@ -168,6 +168,22 @@ html, body { background: #080a14 !important; }
   50% { transform: scale(1.2); opacity: 1; }
 }
 
+/* Pokeball Image (real sprite from PokeAPI) */
+.pokeball-img-container {
+  margin: 0 auto 16px;
+  animation: pokeball-bounce 0.6s ease-in-out infinite;
+}
+.pokeball-img-container.found {
+  animation: pokeball-open 0.5s ease-out forwards;
+}
+.pokeball-img {
+  image-rendering: auto;
+  filter: drop-shadow(0 2px 8px rgba(255,26,26,0.3));
+}
+.pokeball-img.spinning {
+  animation: pokeball-spin 1s ease-in-out infinite;
+}
+
 /* ==================== ENERGY SELECTION SCREEN ==================== */
 .energy-select-screen {
   width: 100vw;
@@ -519,7 +535,9 @@ html, body { background: #080a14 !important; }
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   font-family: var(--font-main);
   user-select: none;
   color: #e0e0e0;
@@ -555,6 +573,7 @@ html, body { background: #080a14 !important; }
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ==================== TOP HUD BAR ==================== */
@@ -868,6 +887,7 @@ html, body { background: #080a14 !important; }
   padding: 10px 20px;
   min-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
 /* === Player Column (left) === */
@@ -1009,25 +1029,45 @@ html, body { background: #080a14 !important; }
   background: rgba(10, 5, 5, 0.6);
 }
 
-/* Individual skill box */
+/* Individual skill box — type-colored background with move abbreviation */
 .na-charmove {
   width: 54px;
   height: 54px;
   border: 2px solid #444;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: filter 0.2s, border-color 0.15s;
+  transition: filter 0.2s, border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
   background: #1a1a2e;
+  gap: 1px;
+  overflow: hidden;
+}
+.na-move-abbrev {
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  line-height: 1;
+  z-index: 1;
+}
+.na-move-energy {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  z-index: 2;
+  line-height: 0;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
 }
 
 /* Hover = blue border */
 .na-charmove.click:hover {
   border-color: #0099ff !important;
-  box-shadow: 0 0 8px rgba(0, 153, 255, 0.4);
-  background: #1a2040;
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
+  filter: brightness(1.2);
 }
 
 /* Queued = ? overlay (naruto-arena style) */
@@ -2180,6 +2220,7 @@ html, body { background: #080a14 !important; }
   .na-battle-area { padding: 4px 6px; gap: 3px; }
   .na-charicon { width: 60px; height: 60px; }
   .na-charmove { width: 48px; height: 48px; }
+  .na-move-abbrev { font-size: 8px; }
   .na-charhealth { width: 60px; }
   .na-evo-bar { width: 60px; }
   .na-charmoves { gap: 4px; }
@@ -2196,6 +2237,8 @@ html, body { background: #080a14 !important; }
   .player-name { font-size: 10px; }
   .na-charicon { width: 48px; height: 48px; }
   .na-charmove { width: 38px; height: 38px; }
+  .na-move-abbrev { font-size: 7px; }
+  .na-move-energy { bottom: 1px; right: 1px; }
   .na-charhealth { width: 48px; height: 6px; }
   .na-evo-bar { width: 48px; }
   .na-charname { font-size: 8px; max-width: 52px; }

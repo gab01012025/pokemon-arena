@@ -18,7 +18,7 @@ import {
   ENERGY_ICONS, ENERGY_NAMES, TYPE_TO_ENERGY, STATUS_ICONS,
   TYPE_COLORS, MOVE_ABBREV, BATTLE_BACKGROUNDS,
   getDefaultMoves, getPokemonMoves, KANTO_POKEMON, EVOLUTION_DATA,
-  TRAINERS, AI_TRAINER_NAMES, DEFAULT_ITEMS,
+  TRAINERS, AI_TRAINER_NAMES, DEFAULT_ITEMS, TRAINER_ITEMS,
   getWeaknessResistance,
 } from './data';
 import {
@@ -268,6 +268,13 @@ export default function AIBattlePage() {
   };
 
   const startBattleAfterSearch = useCallback(() => {
+    // Load trainer-specific items
+    if (playerTrainer) {
+      const trainerItems = TRAINER_ITEMS[playerTrainer.name];
+      if (trainerItems) {
+        setItems(trainerItems.map(i => ({ ...i })));
+      }
+    }
     const initialEnergy = generateTurnEnergy(playerTeam, selectedEnergyTypes, 1);
     setEnergy(prev => addEnergy(prev, initialEnergy));
     const aiTypes = getAiEnergyTypes(opponentTeam);
@@ -1777,14 +1784,17 @@ export default function AIBattlePage() {
                     <div className="na-skill-frame">
                       {poke.moves.slice(0, 4).map(move => {
                         const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
+                        const moveTypeColor = TYPE_COLORS[move.type] || TYPE_COLORS['normal'];
                         const canUse = canUseMove(move, idx);
                         const isQueued = hasAction && selectedMoveForPoke?.id === move.id;
                         const onCd = move.currentCooldown > 0;
+                        const abbrev = MOVE_ABBREV[move.name] || move.name.slice(0, 3).toUpperCase();
                         return (
                           <div
                             key={move.id}
                             className={`na-charmove ${canUse ? 'click' : 'noclick'} ${isQueued ? 'queued' : ''} ${onCd ? 'oncd' : ''}`}
                             data-cd={onCd ? move.currentCooldown : undefined}
+                            style={{ background: moveTypeColor.bg, borderColor: moveTypeColor.border }}
                             onClick={(e) => {
                               e.stopPropagation();
                               if (poke.hp > 0) {
@@ -1796,7 +1806,8 @@ export default function AIBattlePage() {
                             onMouseLeave={() => setHoveredSkill(null)}
                             title={move.name}
                           >
-                            <EnergyIcon type={energyType} size={32} />
+                            <span className="na-move-abbrev" style={{ color: moveTypeColor.text }}>{abbrev}</span>
+                            <span className="na-move-energy"><EnergyIcon type={energyType} size={14} /></span>
                             {isQueued && <span className="na-queued-marker">?</span>}
                           </div>
                         );

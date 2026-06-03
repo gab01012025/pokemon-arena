@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+
+const POKEBALL_IMG = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png';
 
 interface LoadingScreenProps {
   isSearching?: boolean;
@@ -10,7 +13,7 @@ interface LoadingScreenProps {
 export default function LoadingScreen({ isSearching = false, onSearchComplete }: LoadingScreenProps) {
   const [searchText, setSearchText] = useState('Searching for opponent');
   const [dots, setDots] = useState('');
-  const [pokeballOpen, setPokeballOpen] = useState(false);
+  const [found, setFound] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
@@ -25,13 +28,13 @@ export default function LoadingScreen({ isSearching = false, onSearchComplete }:
     if (!isSearching) return;
     const timer = setTimeout(() => {
       setSearchText('Opponent found!');
-      setPokeballOpen(true);
+      setFound(true);
     }, 2500);
     return () => clearTimeout(timer);
   }, [isSearching]);
 
   useEffect(() => {
-    if (!pokeballOpen) return;
+    if (!found) return;
     const cdInterval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -43,26 +46,19 @@ export default function LoadingScreen({ isSearching = false, onSearchComplete }:
       });
     }, 800);
     return () => clearInterval(cdInterval);
-  }, [pokeballOpen, onSearchComplete]);
+  }, [found, onSearchComplete]);
 
   if (isSearching) {
     return (
       <div className="loading-screen">
         <div className="loading-content">
-          <div className={`pokeball-search ${pokeballOpen ? 'open' : ''}`}>
-            <div className="pokeball-top" />
-            <div className="pokeball-center">
-              <div className="pokeball-button" />
-            </div>
-            <div className="pokeball-bottom" />
+          <div className={`pokeball-img-container ${found ? 'found' : ''}`}>
+            <Image src={POKEBALL_IMG} alt="Pokeball" width={80} height={80} unoptimized className="pokeball-img" />
           </div>
-          {pokeballOpen && (
-            <div className="search-flash" />
-          )}
           <p className="loading-text" style={{ fontSize: 14, marginTop: 20 }}>
-            {pokeballOpen ? `Entering battle in ${countdown}...` : `${searchText}${dots}`}
+            {found ? `Entering battle in ${countdown}...` : `${searchText}${dots}`}
           </p>
-          {!pokeballOpen && (
+          {!found && (
             <div className="search-waves">
               <div className="search-wave" />
               <div className="search-wave" style={{ animationDelay: '0.3s' }} />
@@ -77,7 +73,9 @@ export default function LoadingScreen({ isSearching = false, onSearchComplete }:
   return (
     <div className="loading-screen">
       <div className="loading-content">
-        <div className="pokeball-loader" />
+        <div className="pokeball-img-container">
+          <Image src={POKEBALL_IMG} alt="Pokeball" width={60} height={60} unoptimized className="pokeball-img spinning" />
+        </div>
         <p className="loading-text">Loading...</p>
       </div>
     </div>
