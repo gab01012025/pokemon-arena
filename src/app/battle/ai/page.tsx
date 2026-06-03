@@ -1771,7 +1771,7 @@ export default function AIBattlePage() {
                       className={`na-portrait ${phase === 'item-target' && poke.hp > 0 ? 'highlighted' : ''}`}
                       onClick={() => phase === 'item-target' && poke.hp > 0 && applyItemToTarget(idx)}
                     >
-                      <Image src={poke.sprite} alt={poke.name} width={72} height={72} unoptimized className="na-charicon flipped" />
+                      <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="na-charicon flipped" />
                       {poke.statusEffects.length > 0 && (
                         <div className="na-status-icons">
                           {poke.statusEffects.map((se, si) => (
@@ -1878,7 +1878,7 @@ export default function AIBattlePage() {
                       }}
                       style={{ cursor: enemy.hp > 0 ? 'pointer' : 'default' }}
                     >
-                      <Image src={enemy.sprite} alt={enemy.name} width={72} height={72} unoptimized className="na-charicon" />
+                      <Image src={enemy.sprite} alt={enemy.name} width={96} height={96} unoptimized className="na-charicon" />
                       {enemy.statusEffects.length > 0 && (
                         <div className="na-status-icons">
                           {enemy.statusEffects.map((se, si) => (

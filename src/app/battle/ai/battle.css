@@ -612,7 +612,7 @@ html, body { background: #080a14 !important; }
   background-position: center;
   background-repeat: no-repeat;
   z-index: 0;
-  filter: brightness(0.4) saturate(1.1);
+  filter: brightness(0.65) saturate(1.2);
 }
 .battle-background::after {
   content: '';
@@ -620,11 +620,11 @@ html, body { background: #080a14 !important; }
   inset: 0;
   background:
     linear-gradient(180deg,
-      rgba(8,10,20,0.85) 0%,
-      rgba(8,10,20,0.4) 30%,
-      rgba(8,10,20,0.3) 50%,
-      rgba(8,10,20,0.4) 70%,
-      rgba(8,10,20,0.85) 100%
+      rgba(8,10,20,0.7) 0%,
+      rgba(8,10,20,0.15) 25%,
+      rgba(8,10,20,0.1) 50%,
+      rgba(8,10,20,0.15) 75%,
+      rgba(8,10,20,0.7) 100%
     );
 }
 .battle-content {
@@ -939,60 +939,58 @@ html, body { background: #080a14 !important; }
   width: 100%;
 }
 
-/* ==================== BATTLE AREA — NARUTO-ARENA EXACT LAYOUT ==================== */
-/* Structure: [Player Column] [Center Sprite] [Enemy Column]
-   Each column: 3 character rows stacked vertically
-   Each row: [Portrait][Skill][Skill][Skill][Skill] in one horizontal line
-   HP bar below the full row */
+/* ==================== BATTLE AREA — NARUTO-ARENA EXACT COPY ==================== */
 
 .na-battle-area {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  padding: 4px 0;
   min-height: 0;
   position: relative;
   overflow: hidden;
 }
 
-/* === Player Column (left) === */
+/* === Player Column (left, flush to edge) === */
 .na-column-player {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
   z-index: 2;
+  padding-left: 6px;
 }
 
-/* === Enemy Column (right) === */
+/* === Enemy Column (right, flush to edge) === */
 .na-column-enemy {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   justify-content: center;
   z-index: 2;
+  padding-right: 6px;
 }
 
-/* === Center Sprite (large, prominent) === */
+/* === Center Sprite === */
 .na-center-sprite {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
-  min-width: 60px;
+  min-width: 40px;
 }
 .na-big-sprite {
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 8px 40px rgba(0,0,0,0.8));
-  opacity: 0.5;
+  filter: drop-shadow(0 8px 40px rgba(0,0,0,0.7));
+  opacity: 0.45;
   transition: opacity 0.3s ease;
   max-width: 100%;
   max-height: 100%;
 }
-.na-center-sprite:hover .na-big-sprite { opacity: 0.8; }
+.na-center-sprite:hover .na-big-sprite { opacity: 0.75; }
 
 /* ==================== CHARACTER SLOT ==================== */
 .na-char-slot {
@@ -1002,40 +1000,36 @@ html, body { background: #080a14 !important; }
 .na-char-slot.dead { opacity: 0.4; }
 .na-char-slot.dead .na-charicon { filter: grayscale(0.9); }
 
-/* Character row: portrait + 4 skills in ONE HORIZONTAL LINE */
+/* Character row: [Portrait] [Skill] [Skill] [Skill] [Skill] — single horizontal line */
 .na-char-row {
   display: flex;
   align-items: stretch;
-  gap: 2px;
+  gap: 0;
 }
-/* Enemy row: skills first, then portrait (mirrored) */
 .na-char-row.enemy-row {
   flex-direction: row;
 }
 
-/* ==================== PORTRAIT ==================== */
+/* ==================== PORTRAIT (large, square) ==================== */
 .na-portrait {
   flex-shrink: 0;
   position: relative;
   cursor: default;
 }
 .na-charicon {
-  width: 72px;
-  height: 72px;
-  border: 2px solid #333;
+  width: 96px;
+  height: 96px;
+  border: 2px solid #444;
   image-rendering: auto;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.4);
   display: block;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .na-charicon.flipped { transform: scaleX(-1); }
 
 /* Targeting states */
-.na-portrait.highlighted {
-  cursor: crosshair;
-}
+.na-portrait.highlighted { cursor: crosshair; }
 .na-portrait.highlighted .na-charicon {
   border-color: #0a0;
   box-shadow: 0 0 12px rgba(0, 255, 0, 0.4);
@@ -1049,7 +1043,7 @@ html, body { background: #080a14 !important; }
   box-shadow: 0 0 14px rgba(229, 57, 53, 0.6);
 }
 
-/* Target count badge on enemy */
+/* Target count badge */
 .na-target-count {
   position: absolute;
   top: -4px;
@@ -1073,38 +1067,35 @@ html, body { background: #080a14 !important; }
   display: flex;
   gap: 2px;
   position: absolute;
-  top: -2px;
-  left: 0;
+  bottom: 2px;
+  left: 2px;
   z-index: 5;
 }
 .status-badge {
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1;
   padding: 1px 3px;
   border-radius: 2px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.75);
 }
 
-/* ==================== SKILL FRAME — 4 skills in SINGLE HORIZONTAL ROW ==================== */
+/* ==================== SKILL FRAME — 4 skills, horizontal row, orange/cream border ==================== */
 .na-skill-frame {
   display: flex;
   align-items: stretch;
   gap: 2px;
-  padding: 2px;
-  border: 3px solid #8b0000;
-  background: rgba(10, 5, 5, 0.7);
+  padding: 3px;
+  border: 3px solid #c06000;
+  background: rgba(0, 0, 0, 0.5);
 }
 .na-skill-frame.enemy-skills {
-  border-color: #444;
-  background: rgba(5, 5, 10, 0.7);
+  border-color: #555;
+  background: rgba(0, 0, 0, 0.5);
 }
 
-/* Individual skill box — type-colored, fits the row height */
+/* Individual skill box — wide landscape rectangle with type color */
 .na-charmove {
-  width: 56px;
-  height: auto;
-  min-height: 68px;
-  border: 2px solid #555;
+  width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1113,22 +1104,21 @@ html, body { background: #080a14 !important; }
   transition: filter 0.15s, border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
   background: #1a1a2e;
+  border: 2px solid #666;
   overflow: hidden;
 }
-/* Enemy moves are not clickable */
 .na-charmove.enemy-move {
   cursor: default;
-  width: 56px;
 }
 
-/* Hover = blue border (player only) */
+/* Hover = blue glow */
 .na-charmove.click:hover {
-  border-color: #0099ff !important;
-  box-shadow: 0 0 10px rgba(0, 153, 255, 0.5);
-  filter: brightness(1.15);
+  border-color: #0af !important;
+  box-shadow: 0 0 12px rgba(0, 170, 255, 0.5);
+  filter: brightness(1.2);
 }
 
-/* Queued = ? overlay (naruto-arena style) */
+/* Queued = ? overlay */
 .na-charmove.queued {
   border-color: #ff4444 !important;
 }
@@ -1138,25 +1128,25 @@ html, body { background: #080a14 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   font-family: var(--font-title);
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 800;
   color: #fff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.9);
   z-index: 3;
 }
 
 /* Disabled / can't afford */
 .na-charmove.noclick {
-  filter: grayscale(0.8) brightness(0.5);
+  filter: grayscale(0.8) brightness(0.45);
   border-color: #222 !important;
   cursor: default;
 }
 
 /* On cooldown */
 .na-charmove.oncd {
-  filter: grayscale(0.8) brightness(0.5);
+  filter: grayscale(0.8) brightness(0.45);
   border-color: #222 !important;
   cursor: default;
   position: relative;
@@ -1165,12 +1155,12 @@ html, body { background: #080a14 !important; }
   content: attr(data-cd);
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: #ef5350;
 }
@@ -1182,9 +1172,9 @@ html, body { background: #080a14 !important; }
 }
 .na-charhealth {
   width: 100%;
-  height: 14px;
+  height: 16px;
   background: #300;
-  border: 1px solid #444;
+  border: 1px solid #555;
   position: relative;
   overflow: hidden;
 }
@@ -1196,7 +1186,7 @@ html, body { background: #080a14 !important; }
   transition: width 0.8s ease;
 }
 .na-hp-fill.high {
-  background: linear-gradient(180deg, #4d4 0%, #0c0 100%);
+  background: linear-gradient(180deg, #5e5 0%, #0c0 100%);
 }
 .na-hp-fill.medium {
   background: linear-gradient(180deg, #f0c030 0%, #d0a010 100%);
@@ -1211,10 +1201,10 @@ html, body { background: #080a14 !important; }
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   color: #fff;
-  text-shadow: 0 1px 2px #000, 0 0 4px #000;
+  text-shadow: 0 1px 3px #000, 0 0 6px #000;
   z-index: 2;
 }
 
@@ -2277,30 +2267,28 @@ html, body { background: #080a14 !important; }
 }
 
 /* ==================== RESPONSIVE ==================== */
-@media (max-width: 1100px) {
-  .na-charmove { width: 48px; min-height: 60px; }
-  .na-charicon { width: 62px; height: 62px; }
+@media (max-width: 1200px) {
+  .na-charicon { width: 80px; height: 80px; }
+  .na-charmove { width: 66px; }
 }
 @media (max-width: 900px) {
-  .na-battle-area { padding: 4px 6px; }
-  .na-charicon { width: 52px; height: 52px; }
-  .na-charmove { width: 40px; min-height: 52px; }
-  .na-charhealth { height: 12px; }
+  .na-charicon { width: 64px; height: 64px; }
+  .na-charmove { width: 52px; }
+  .na-charhealth { height: 13px; }
   .na-hp-overlay { font-size: 8px; }
-  .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
+  .na-skill-frame { padding: 2px; gap: 1px; border-width: 2px; }
   .top-bar { flex-wrap: wrap; gap: 6px; padding: 6px 10px; min-height: 50px; }
   .na-info-panel { padding: 4px 10px; min-height: 44px; }
   .na-info-sprite { width: 40px; height: 40px; }
   .na-info-name { font-size: 12px; }
   .na-exchange-inline { gap: 4px; padding: 0 4px; }
 }
-
 @media (max-width: 600px) {
   .player-info { min-width: 80px; }
   .player-name { font-size: 10px; }
-  .na-charicon { width: 42px; height: 42px; }
-  .na-charmove { width: 34px; min-height: 42px; }
-  .na-charhealth { height: 10px; }
+  .na-charicon { width: 48px; height: 48px; }
+  .na-charmove { width: 38px; }
+  .na-charhealth { height: 11px; }
   .na-hp-overlay { font-size: 7px; }
   .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
   .na-info-panel { padding: 3px 8px; min-height: 38px; }

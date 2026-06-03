@@ -3,10 +3,10 @@
 @media (max-width: 768px) {
   .battle-container { height: 100dvh; }
 
-  /* Battle area stacks vertically on mobile */
+  /* Battle area stacks vertically */
   .na-battle-area {
     flex-direction: column;
-    padding: 2px 4px;
+    padding: 2px 2px;
     gap: 2px;
     justify-content: center;
   }
@@ -14,18 +14,17 @@
   .na-column-enemy {
     width: 100%;
     gap: 2px;
+    padding: 0 2px;
   }
   .na-center-sprite { display: none; }
 
-  .na-charicon { width: 38px; height: 38px; }
-  .na-charmove { width: 30px; min-height: 38px; }
+  .na-charicon { width: 40px; height: 40px; }
+  .na-charmove { width: 32px; }
   .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
   .na-charhealth { height: 10px; }
   .na-hp-overlay { font-size: 7px; }
   .na-hp-under { margin-top: 1px; }
   .na-char-row { gap: 1px; }
-  .na-column-player .na-char-slot,
-  .na-column-enemy .na-char-slot { gap: 1px; }
 
   /* Top bar mobile */
   .top-bar { padding: 4px 8px; min-height: 42px; flex-wrap: wrap; }
@@ -38,7 +37,6 @@
   .energy-inline-count { font-size: 9px; }
   .energy-inline-total { font-size: 9px; }
   .exchange-chakra-btn { font-size: 8px; }
-
   .win-streak-badge { font-size: 9px; padding: 1px 6px; }
 
   /* Bottom bar mobile */
@@ -58,17 +56,11 @@
   .na-surrender-btn { font-size: 8px; padding: 4px 8px; }
   .na-item-btn { font-size: 7px; padding: 3px 6px; }
 
-  /* Action badges */
   .na-action-badge { padding: 1px 4px; }
   .na-action-move { font-size: 7px; }
   .na-target-tag { font-size: 6px; padding: 1px 3px; }
 
-  .energy-tcg-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    max-width: 100%;
-  }
-
+  .energy-tcg-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 100%; }
   .modal { padding: 24px 20px; min-width: 280px; max-width: 90vw; }
   .result-modal { min-width: 300px; max-width: 95vw; padding: 20px 16px; }
   .result-title { font-size: 20px; }
@@ -93,8 +85,8 @@
   .energy-tcg-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .energy-confirm-btn { font-size: 10px; padding: 12px 24px; }
 
-  .na-charicon { width: 32px; height: 32px; }
-  .na-charmove { width: 26px; min-height: 32px; }
+  .na-charicon { width: 34px; height: 34px; }
+  .na-charmove { width: 26px; }
   .na-skill-frame { border-width: 1px; padding: 1px; }
   .na-charhealth { height: 8px; }
   .na-hp-overlay { font-size: 6px; }
