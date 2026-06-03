@@ -1736,89 +1736,54 @@ export default function AIBattlePage() {
           turn={turn}
           timer={timer}
           phase={phase}
+          energy={energy}
+          selectedEnergyTypes={selectedEnergyTypes}
+          onEndTurn={handleEndTurn}
           winStreak={winStreak}
+          onExchangeEnergy={() => setShowExchangeEnergy(true)}
+          canExchange={!usedExchangeThisTurn && phase === 'player1-turn'}
         />
 
-        {/* SKILL INFO PANEL — Top center, shows on hover (like naruto-unison #top article) */}
-        <div className="na-info-panel">
-          {skillInfoMove ? (
-            <>
-              {hoveredSkill?.sprite && (
-                <div className="na-info-sprite">
-                  <Image src={hoveredSkill.sprite} alt={hoveredSkill.pokemonName} width={56} height={56} unoptimized />
-                </div>
-              )}
-              <div className="na-info-content">
-                <div className="na-info-row1">
-                  <span className="na-info-name">{skillInfoMove.name}</span>
-                  <span className="na-info-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
-                    {skillInfoMove.type.toUpperCase()}
-                  </span>
-                </div>
-                <div className="na-info-desc">{skillInfoMove.description}</div>
-                <div className="na-info-stats">
-                  {skillInfoMove.power > 0 && <span>PWR: {skillInfoMove.power}</span>}
-                  <span>ACC: {skillInfoMove.accuracy}%</span>
-                  {skillInfoMove.cooldown > 0 && <span>CD: {skillInfoMove.cooldown}t</span>}
-                  <span className="na-info-cost-row">
-                    COST: {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
-                      <span key={i} className="na-cost-badge">
-                        {Array.from({ length: c.amount }).map((_, ai) => <EnergyIcon key={ai} type={c.type} size={16} />)}
-                      </span>
-                    )) : <span className="na-cost-free">FREE</span>}
-                  </span>
-                  {skillInfoMove.statusEffect && (
-                    <span className="na-info-status">
-                      {STATUS_ICONS[skillInfoMove.statusEffect.type]} {skillInfoMove.statusEffect.type} ({skillInfoMove.statusEffect.chance}%)
-                    </span>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="na-info-empty">Hover a skill to see details</div>
-          )}
-        </div>
-
-        {/* BATTLE AREA — 2-column layout: player left | center controls | enemy right */}
+        {/* ===== BATTLE AREA — naruto-arena layout: player left | center sprite | enemy right ===== */}
         <div className="na-battle-area">
           {/* === PLAYER COLUMN (left) === */}
-          <div className="na-column na-column-player">
+          <div className="na-column-player">
             {[0, 1, 2].map(idx => {
               const poke = playerTeam[idx];
               if (!poke) return null;
               const playerAction = selectedActions.find(a => a.pokemonIndex === idx);
               const hasAction = !!playerAction;
               const selectedMoveForPoke = playerAction?.move;
-              const targetIdx = playerAction?.targetIndex;
               const pEvoPercent = poke.maxEvoBar > 0 ? Math.min((poke.evoBar / poke.maxEvoBar) * 100, 100) : 0;
 
               return (
-                <div key={idx} className={`na-char-slot ${poke.hp <= 0 ? 'dead' : ''} ${hasAction ? 'action-ready' : ''} ${playerAnims[idx] || ''}`}>
-                  {poke.statusEffects.length > 0 && (
-                    <div className="na-status-icons">
-                      {poke.statusEffects.map((se, si) => (
-                        <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="na-char-inline">
+                <div key={idx} className={`na-char-slot ${poke.hp <= 0 ? 'dead' : ''} ${playerAnims[idx] || ''}`}>
+                  <div className="na-char-row">
+                    {/* Portrait */}
                     <div
                       className={`na-portrait ${phase === 'item-target' && poke.hp > 0 ? 'highlighted' : ''}`}
                       onClick={() => phase === 'item-target' && poke.hp > 0 && applyItemToTarget(idx)}
                     >
-                      <Image src={poke.sprite} alt={poke.name} width={75} height={75} unoptimized className="na-charicon flipped" />
+                      <Image src={poke.sprite} alt={poke.name} width={70} height={70} unoptimized className="na-charicon flipped" />
+                      {poke.statusEffects.length > 0 && (
+                        <div className="na-status-icons">
+                          {poke.statusEffects.map((se, si) => (
+                            <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="na-charmoves">
+                    {/* Skill frame (red border like naruto-arena) */}
+                    <div className="na-skill-frame">
                       {poke.moves.slice(0, 4).map(move => {
                         const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
                         const canUse = canUseMove(move, idx);
-                        const isSelected = hasAction && selectedMoveForPoke?.id === move.id;
+                        const isQueued = hasAction && selectedMoveForPoke?.id === move.id;
                         const onCd = move.currentCooldown > 0;
                         return (
                           <div
                             key={move.id}
-                            className={`na-charmove ${canUse ? 'click' : 'noclick'} ${isSelected ? 'selected' : ''} ${onCd ? 'oncd' : ''}`}
+                            className={`na-charmove ${canUse ? 'click' : 'noclick'} ${isQueued ? 'queued' : ''} ${onCd ? 'oncd' : ''}`}
                             data-cd={onCd ? move.currentCooldown : undefined}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1831,29 +1796,24 @@ export default function AIBattlePage() {
                             onMouseLeave={() => setHoveredSkill(null)}
                             title={move.name}
                           >
-                            <EnergyIcon type={energyType} size={34} />
+                            <EnergyIcon type={energyType} size={32} />
+                            {isQueued && <span className="na-queued-marker">?</span>}
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                  <div className="na-charhealth">
-                    <div style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
-                    <span className="na-healthtext">{poke.hp}</span>
+                  {/* HP bar spanning full row width */}
+                  <div className="na-hp-row">
+                    <div className="na-charhealth">
+                      <div style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
+                    </div>
+                    <span className="na-hp-text">{poke.hp}/{poke.maxHp}</span>
                   </div>
-                  <span className="na-charname">{poke.name}</span>
-                  {poke.hp > 0 && (
+                  {/* Evo bar */}
+                  {poke.hp > 0 && poke.maxEvoBar > 0 && (
                     <div className="na-evo-bar">
                       <div className={`na-evo-fill ${pEvoPercent >= 100 ? 'full' : ''}`} style={{ width: `${pEvoPercent}%` }} />
-                    </div>
-                  )}
-                  {hasAction && selectedMoveForPoke && (
-                    <div className="na-action-badge">
-                      <span className="na-action-check">&#10003;</span>
-                      <span className="na-action-move">{selectedMoveForPoke.name}</span>
-                      {targetIdx !== undefined && opponentTeam[targetIdx] && (
-                        <span className="na-action-target">&rarr; {opponentTeam[targetIdx].name}</span>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1861,51 +1821,17 @@ export default function AIBattlePage() {
             })}
           </div>
 
-          {/* === CENTER COLUMN — Energy, Queue, Ready === */}
-          <div className="na-column na-column-center">
-            <div className="na-center-energy">
-              {selectedEnergyTypes.map(type => (
-                <div key={type} className={`energy-item ${energy[type] === 0 ? 'empty' : ''}`}>
-                  <EnergyIcon type={type} size={22} />
-                  <span className="energy-count">x{energy[type]}</span>
-                </div>
-              ))}
-              <div className="energy-total">
-                <span className="total-label">T</span>
-                <span className="energy-count">x{getTotalEnergy(energy)}</span>
-              </div>
-            </div>
-
-            <div className="na-action-queue">
-              {[0, 1, 2].map(idx => {
-                const action = selectedActions.find(a => a.pokemonIndex === idx);
-                return (
-                  <div key={idx} className={`na-queue-slot ${action ? 'filled' : ''}`}>
-                    {action ? (
-                      <EnergyIcon type={action.move.cost.length > 0 ? action.move.cost[0].type : 'colorless'} size={20} />
-                    ) : (
-                      <span className="na-queue-empty">?</span>
-                    )}
-                  </div>
-                );
-              })}
-              <span className="na-queue-label">{selectedActions.length}/3</span>
-            </div>
-
-            <button className="ready-btn" onClick={handleEndTurn} disabled={phase !== 'player1-turn'}>
-              {phase === 'player1-turn' ? 'READY' : phase === 'executing' ? 'EXECUTING...' : phase === 'player2-turn' ? 'OPPONENT' : 'WAIT'}
-            </button>
-
-            {!usedExchangeThisTurn && phase === 'player1-turn' && (
-              <button className="na-exchange-btn" onClick={() => setShowExchangeEnergy(true)}>
-                EXCHANGE
-              </button>
-            )}
-            {usedExchangeThisTurn && <span className="na-exchange-used">EXCHANGED</span>}
+          {/* === CENTER — Large Pokemon sprite (decorative) === */}
+          <div className="na-center-sprite">
+            {hoveredSkill?.sprite ? (
+              <Image src={hoveredSkill.sprite} alt={hoveredSkill.pokemonName} width={200} height={200} unoptimized className="na-big-sprite" />
+            ) : playerTeam[0]?.hp > 0 ? (
+              <Image src={playerTeam[0].sprite} alt={playerTeam[0].name} width={200} height={200} unoptimized className="na-big-sprite" />
+            ) : null}
           </div>
 
-          {/* === ENEMY COLUMN (right) — skills then portrait === */}
-          <div className="na-column na-column-enemy">
+          {/* === ENEMY COLUMN (right) — portrait only, no skills visible === */}
+          <div className="na-column-enemy">
             {[0, 1, 2].map(idx => {
               const enemy = opponentTeam[idx];
               if (!enemy) return null;
@@ -1913,54 +1839,39 @@ export default function AIBattlePage() {
               const attackersOnThis = selectedActions.filter(a => a.targetIndex === idx && a.move.targetType !== 'self');
 
               return (
-                <div key={idx} className={`na-char-slot ${enemy.hp <= 0 ? 'dead' : ''} ${attackersOnThis.length > 0 ? 'being-targeted' : ''} ${enemyAnims[idx] || ''}`}>
-                  {enemy.statusEffects.length > 0 && (
-                    <div className="na-status-icons">
-                      {enemy.statusEffects.map((se, si) => (
-                        <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="na-char-inline">
-                    <div className="na-charmoves enemy-moves">
-                      {[...enemy.moves.slice(0, 4)].reverse().map(move => {
-                        const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
-                        return (
-                          <div key={move.id} className="na-charmove noclick enemy" title={move.name}>
-                            <EnergyIcon type={energyType} size={34} />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div
-                      className={`na-portrait ${phase === 'targeting' && enemy.hp > 0 ? 'highlighted' : ''} ${phase === 'targeting' && enemy.hp <= 0 ? 'nohighlight' : ''}`}
-                      onClick={() => {
-                        if (phase === 'targeting' && enemy.hp > 0) {
-                          handleTargetSelect(idx);
-                        } else if (enemy.hp > 0) {
-                          setViewingEnemySkills(enemy);
-                        }
-                      }}
-                      style={{ cursor: enemy.hp > 0 ? 'pointer' : 'default' }}
-                    >
-                      <Image src={enemy.sprite} alt={enemy.name} width={75} height={75} unoptimized className="na-charicon" />
+                <div key={idx} className={`na-char-slot enemy-slot ${enemy.hp <= 0 ? 'dead' : ''} ${attackersOnThis.length > 0 ? 'being-targeted' : ''} ${enemyAnims[idx] || ''}`}>
+                  <div
+                    className={`na-portrait enemy-portrait ${phase === 'targeting' && enemy.hp > 0 ? 'highlighted' : ''} ${phase === 'targeting' && enemy.hp <= 0 ? 'nohighlight' : ''}`}
+                    onClick={() => {
+                      if (phase === 'targeting' && enemy.hp > 0) {
+                        handleTargetSelect(idx);
+                      } else if (enemy.hp > 0) {
+                        setViewingEnemySkills(enemy);
+                      }
+                    }}
+                    style={{ cursor: enemy.hp > 0 ? 'pointer' : 'default' }}
+                  >
+                    <Image src={enemy.sprite} alt={enemy.name} width={85} height={85} unoptimized className="na-charicon" />
+                    {enemy.statusEffects.length > 0 && (
+                      <div className="na-status-icons">
+                        {enemy.statusEffects.map((se, si) => (
+                          <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
+                        ))}
+                      </div>
+                    )}
+                    {attackersOnThis.length > 0 && (
+                      <div className="na-target-count">{attackersOnThis.length}</div>
+                    )}
+                  </div>
+                  <div className="na-hp-row enemy-hp">
+                    <span className="na-hp-text">{enemy.hp}/{enemy.maxHp}</span>
+                    <div className="na-charhealth">
+                      <div style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
                     </div>
                   </div>
-                  <div className="na-charhealth">
-                    <div style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
-                    <span className="na-healthtext">{enemy.hp}</span>
-                  </div>
-                  <span className="na-charname">{enemy.name}</span>
-                  {enemy.hp > 0 && (
+                  {enemy.hp > 0 && enemy.maxEvoBar > 0 && (
                     <div className="na-evo-bar">
                       <div className={`na-evo-fill ${eEvoPercent >= 100 ? 'full' : ''}`} style={{ width: `${eEvoPercent}%` }} />
-                    </div>
-                  )}
-                  {attackersOnThis.length > 0 && (
-                    <div className="na-target-indicator">
-                      {attackersOnThis.map((a, ai) => (
-                        <span key={ai} className="na-target-tag">{playerTeam[a.pokemonIndex]?.name}</span>
-                      ))}
                     </div>
                   )}
                 </div>
@@ -1969,21 +1880,49 @@ export default function AIBattlePage() {
           </div>
         </div>
 
-        {/* BOTTOM BAR — Forfeit, Items, Evolve */}
+        {/* ===== BOTTOM BAR — Surrender + Skill Info Panel + Controls ===== */}
         <div className="na-bottom-bar">
-          <button className="na-surrender-btn" onClick={() => { handleBattleDefeat(); setPhase('defeat'); }}>FORFEIT</button>
-          <button
-            className="na-item-btn"
-            onClick={() => setShowItems(!showItems)}
-            disabled={phase !== 'player1-turn' || usedItemThisTurn}
-          >
-            {usedItemThisTurn ? 'USED' : `ITEMS (${items.reduce((s, i) => s + i.uses, 0)})`}
-          </button>
-          {getEvolvableList().map(e => (
-            <button key={e.idx} className="na-evolve-btn" onClick={() => handleEvolveClick(e.idx)} disabled={phase !== 'player1-turn'}>
-              EVO {e.name}
+          <div className="na-bottom-left">
+            <button className="na-surrender-btn" onClick={() => { handleBattleDefeat(); setPhase('defeat'); }}>SURRENDER</button>
+            <button
+              className="na-item-btn"
+              onClick={() => setShowItems(!showItems)}
+              disabled={phase !== 'player1-turn' || usedItemThisTurn}
+            >
+              {usedItemThisTurn ? 'USED' : `ITEMS (${items.reduce((s, i) => s + i.uses, 0)})`}
             </button>
-          ))}
+            {getEvolvableList().map(e => (
+              <button key={e.idx} className="na-evolve-btn" onClick={() => handleEvolveClick(e.idx)} disabled={phase !== 'player1-turn'}>
+                EVO {e.name}
+              </button>
+            ))}
+          </div>
+          {/* Skill detail panel (shows on hover, like naruto-arena bottom panel) */}
+          <div className="na-skill-detail">
+            {skillInfoMove ? (
+              <>
+                <div className="na-detail-header">
+                  <span className="na-detail-name">{hoveredSkill?.pokemonName} {skillInfoMove.name}</span>
+                  <span className="na-detail-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
+                    {skillInfoMove.type.toUpperCase()}
+                  </span>
+                </div>
+                <div className="na-detail-desc">{skillInfoMove.description}</div>
+                <div className="na-detail-meta">
+                  <span className="na-detail-cost">
+                    ENERGY: {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
+                      <span key={i} className="na-cost-badge">
+                        {Array.from({ length: c.amount }).map((_, ai) => <EnergyIcon key={ai} type={c.type} size={14} />)}
+                      </span>
+                    )) : <span style={{ color: '#4CAF50' }}>FREE</span>}
+                  </span>
+                  <span>CLASSES: {skillInfoMove.power > 0 ? 'OFFENSIVE' : 'STATUS'}{skillInfoMove.cooldown > 0 ? `, CD:${skillInfoMove.cooldown}` : ''}{skillInfoMove.statusEffect ? `, ${skillInfoMove.statusEffect.type.toUpperCase()}` : ''}</span>
+                </div>
+              </>
+            ) : (
+              <div className="na-detail-empty">Hover a skill to see details</div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -1,8 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { Trainer, GamePhase } from '../types';
+import { EnergyType, EnergyState, Trainer, GamePhase } from '../types';
 import { RankInfo } from '@/lib/ranks';
+import { getTotalEnergy } from '../engine';
+import EnergyIcon from './EnergyIcon';
 
 const TRAINER_SPRITES: Record<string, string> = {
   'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock.png',
@@ -39,7 +41,12 @@ interface BattleTopBarProps {
   turn: number;
   timer: number;
   phase: GamePhase;
+  energy: EnergyState;
+  selectedEnergyTypes: EnergyType[];
+  onEndTurn: () => void;
   winStreak: number;
+  onExchangeEnergy?: () => void;
+  canExchange?: boolean;
 }
 
 export default function BattleTopBar({
@@ -53,7 +60,12 @@ export default function BattleTopBar({
   turn,
   timer,
   phase,
+  energy,
+  selectedEnergyTypes,
+  onEndTurn,
   winStreak,
+  onExchangeEnergy,
+  canExchange,
 }: BattleTopBarProps) {
   const trainerSprite = playerTrainer ? TRAINER_SPRITES[playerTrainer.name] : null;
   const opponentSprite = AI_TRAINER_SPRITES[Math.abs(opponentName.charCodeAt(0)) % AI_TRAINER_SPRITES.length];
@@ -73,8 +85,7 @@ export default function BattleTopBar({
         </div>
         <div className="player-details">
           <div className="player-name">{playerName}</div>
-          <div className="player-rank" style={{ color: playerRank.color }}>{playerRank.name} &middot; Lv{playerLevel}</div>
-          {playerTrainer && <div className="trainer-passive-mini" title={playerTrainer.passiveDesc}>{playerTrainer.name}: {playerTrainer.passive}</div>}
+          <div className="player-rank" style={{ color: playerRank.color }}>{playerRank.name}</div>
           {winStreak > 0 && (
             <div className={`win-streak-badge ${winStreak >= 5 ? 'hot' : ''} ${winStreak >= 10 ? 'on-fire' : ''}`}>
               {winStreak} streak
@@ -84,21 +95,34 @@ export default function BattleTopBar({
       </div>
 
       <div className="center-controls">
-        <div className="turn-info">TURN {turn}</div>
-        <div className="phase-label">
-          {phase === 'player1-turn' ? 'YOUR TURN' : phase === 'executing' ? 'EXECUTING...' : phase === 'player2-turn' ? 'OPPONENT TURN' : 'WAITING...'}
-        </div>
+        <button className="ready-btn" onClick={onEndTurn} disabled={phase !== 'player1-turn'}>
+          {phase === 'player1-turn' ? 'PRESS WHEN READY' : phase === 'executing' ? 'EXECUTING...' : phase === 'player2-turn' ? 'OPPONENT TURN...' : 'WAITING...'}
+        </button>
         <div className="timer-container">
           <div className="timer-bar">
             <div className="timer-fill" style={{ width: `${timer}%` }} />
           </div>
         </div>
+        <div className="energy-inline-row">
+          {selectedEnergyTypes.map(type => (
+            <span key={type} className={`energy-inline-item ${energy[type] === 0 ? 'empty' : ''}`}>
+              <EnergyIcon type={type} size={16} />
+              <span className="energy-inline-count">x{energy[type]}</span>
+            </span>
+          ))}
+          <span className="energy-inline-total">T x{getTotalEnergy(energy)}</span>
+        </div>
+        {phase === 'player1-turn' && onExchangeEnergy && (
+          <button className="exchange-chakra-btn" onClick={onExchangeEnergy} disabled={!canExchange}>
+            EXCHANGE ENERGY
+          </button>
+        )}
       </div>
 
       <div className="player-info right">
         <div className="player-details" style={{ textAlign: 'right' }}>
           <div className="player-name" style={{ color: opponentRank.color }}>{opponentName}</div>
-          <div className="player-rank" style={{ color: opponentRank.color }}>{opponentRank.name} &middot; Lv{opponentLevel}</div>
+          <div className="player-rank" style={{ color: opponentRank.color }}>{opponentRank.name}</div>
         </div>
         <div className="player-avatar">
           <Image src={opponentSprite} alt={opponentName} width={40} height={40} unoptimized
