@@ -6,24 +6,26 @@
   /* Battle area stacks vertically on mobile */
   .na-battle-area {
     flex-direction: column;
-    padding: 4px 8px;
-    gap: 6px;
+    padding: 4px 4px;
+    gap: 4px;
   }
   .na-column-player,
   .na-column-enemy {
     width: 100%;
-    gap: 6px;
+    gap: 4px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
   }
   .na-center-sprite { display: none; } /* hide large sprite on mobile */
 
-  .na-charicon { width: 50px; height: 50px; }
-  .enemy-portrait .na-charicon { width: 60px; height: 60px; }
-  .na-charmove { width: 40px; height: 40px; }
-  .na-move-abbrev { font-size: 8px; }
-  .na-move-energy { display: none; } /* hide energy icon on mobile to save space */
-  .na-skill-frame { padding: 2px; gap: 1px; border-width: 2px; }
-  .na-hp-text { font-size: 8px; min-width: 36px; }
-  .na-charhealth { height: 8px; }
+  .na-charicon { width: 40px; height: 40px; }
+  .enemy-portrait .na-charicon { width: 40px; height: 40px; }
+  .na-charmove { width: 34px; height: 30px; }
+  .na-move-name { font-size: 5px; }
+  .na-skill-frame { padding: 1px; gap: 1px; border-width: 2px; }
+  .na-charhealth { height: 10px; }
+  .na-hp-overlay { font-size: 7px; }
 
   /* Top bar mobile */
   .top-bar { padding: 4px 8px; min-height: 42px; flex-wrap: wrap; }
@@ -91,11 +93,11 @@
   .energy-tcg-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .energy-confirm-btn { font-size: 10px; padding: 12px 24px; }
 
-  .na-charicon { width: 42px; height: 42px; }
-  .enemy-portrait .na-charicon { width: 50px; height: 50px; }
-  .na-charmove { width: 32px; height: 32px; }
-  .na-move-abbrev { font-size: 6px; }
-  .na-skill-frame { border-width: 2px; }
+  .na-charicon { width: 34px; height: 34px; }
+  .enemy-portrait .na-charicon { width: 34px; height: 34px; }
+  .na-charmove { width: 28px; height: 26px; }
+  .na-move-name { font-size: 4px; }
+  .na-skill-frame { border-width: 1px; padding: 1px; }
 
   .top-bar { padding: 3px 6px; min-height: 38px; }
   .player-info { min-width: 60px; }
