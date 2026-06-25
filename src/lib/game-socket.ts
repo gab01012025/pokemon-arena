@@ -148,7 +148,7 @@ class GameSocketClient {
   connect(serverUrl?: string): Promise<void> {
     const defaultUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
       ? 'http://localhost:3010'
-      : 'https://game-server-production-3440.up.railway.app';
+      : 'https://pokemon-arena-server.onrender.com';
     const url = (serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || defaultUrl).trim();
 
     return new Promise((resolve, reject) => {
