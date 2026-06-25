@@ -165,16 +165,22 @@ class GameSocketClient {
       }
       this.reconnectAttempts = 0;
 
+      console.log('[GameSocket] Connecting to:', url);
       this.socket = io(url, {
         transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: 1000,
         timeout: 10000,
+        withCredentials: false,
+      });
+
+      this.socket.io.on('open', () => {
+        console.log('[GameSocket] Transport open:', this.socket?.io.engine.transport.name);
       });
 
       this.socket.on('connect', () => {
-        logger.debug('Connected to game server');
+        console.log('[GameSocket] Connected! ID:', this.socket?.id);
         this.isConnected = true;
         this.reconnectAttempts = 0;
         this.emitLocal('connectionChange', { connected: true });
@@ -182,13 +188,13 @@ class GameSocketClient {
       });
 
       this.socket.on('disconnect', (reason) => {
-        logger.debug(`Disconnected: ${reason}`);
+        console.log('[GameSocket] Disconnected:', reason);
         this.isConnected = false;
         this.emitLocal('connectionChange', { connected: false, reason });
       });
 
       this.socket.on('connect_error', (error) => {
-        logger.error(`Connection error: ${error.message}`);
+        console.error('[GameSocket] Connection error:', error.message);
         this.reconnectAttempts++;
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
           this.emitLocal('connectionChange', { connected: false, reason: 'Server unreachable' });

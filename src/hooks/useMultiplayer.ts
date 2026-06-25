@@ -366,12 +366,15 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
   // ==================== Actions ====================
 
   const connect = useCallback(async () => {
+    console.log('[Multiplayer] Starting connect...');
     setState(prev => ({ ...prev, isConnecting: true, connectionError: null }));
     try {
       await gameSocket.connect();
+      console.log('[Multiplayer] Socket connected, fetching token...');
 
       // Get JWT token from API
       const res = await fetch('/api/auth/socket-token');
+      console.log('[Multiplayer] Token response:', res.status);
       if (!res.ok) {
         setState(prev => ({
           ...prev,
@@ -382,8 +385,10 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
       }
       const tokenData = await res.json();
       tokenRef.current = tokenData.token;
+      console.log('[Multiplayer] Authenticating with server...');
       gameSocket.authenticate(tokenData.token);
     } catch (error) {
+      console.error('[Multiplayer] Connect error:', error);
       setState(prev => ({
         ...prev,
         isConnecting: false,
