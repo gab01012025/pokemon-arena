@@ -17,7 +17,7 @@ const TUTORIAL_STEPS = [
       'Energy management is the key to victory',
       'Status effects can turn the tide of battle',
     ],
-    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png',
+    image: '/pokemon-anime/25.png',
   },
   {
     id: 'team-building',
@@ -31,7 +31,7 @@ const TUTORIAL_STEPS = [
       'Consider type coverage - Fire, Water, Grass covers most weaknesses',
       'Check skill cooldowns - some Pokemon have faster rotations',
     ],
-    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png',
+    image: '/pokemon-anime/6.png',
   },
   {
     id: 'energy-system',
@@ -66,7 +66,7 @@ const TUTORIAL_STEPS = [
       '"Invulnerable" prevents being targeted that turn',
       'Status effects persist for set durations',
     ],
-    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png',
+    image: '/pokemon-anime/150.png',
   },
   {
     id: 'status-effects',
@@ -98,7 +98,7 @@ const TUTORIAL_STEPS = [
       'Use invulnerability to dodge big attacks',
       'Status effects stack - burn + poison is devastating',
     ],
-    image: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png',
+    image: '/pokemon-anime/149.png',
   },
 ];
 

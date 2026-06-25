@@ -8,7 +8,7 @@ export type GlobalType = 'Normal' | 'Fire' | 'Water' | 'Grass' | 'Electric' | 'I
   'Fighting' | 'Poison' | 'Ground' | 'Flying' | 'Psychic' | 'Bug' | 'Rock' |
   'Ghost' | 'Dragon' | 'Dark' | 'Steel' | 'Fairy';
 
-export type EnergyType = 'grass' | 'fire' | 'water' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'colorless';
+export type EnergyType = 'grass' | 'fire' | 'water' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'fairy' | 'colorless';
 
 export type StatusType =
   | 'burn' | 'poison' | 'paralyze' | 'sleep' | 'freeze' | 'confuse'
@@ -39,6 +39,7 @@ export interface EnergyState {
   fighting: number;
   darkness: number;
   metal: number;
+  fairy: number;
   colorless: number;
 }
 
@@ -134,11 +135,20 @@ export interface BattleItem {
   category: 'healing' | 'status' | 'revive' | 'boost' | 'energy' | 'special';
 }
 
+export interface BaseStats {
+  attack: number;
+  defense: number;
+  spAtk: number;
+  spDef: number;
+  speed: number;
+}
+
 export interface KantoPokemonData {
   id: number;
   name: string;
   types: PokemonType[];
   hp: number;
+  baseStats?: BaseStats;
   canEvolve: boolean;
   evolvesTo?: { id: number; name: string; hpBonus: number; statBonus: number };
   evolutionEnergyCost?: EnergyCost[];

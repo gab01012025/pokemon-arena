@@ -15,7 +15,8 @@ import {
   type ActionIntent,
   type BattleState,
   type SkillEffect,
-  
+  type Energy,
+
   // Factories
   createFighter,
   createSkill,
@@ -49,14 +50,14 @@ function createAttackSkill(
   name: string,
   owner: number,
   damageAmount: number,
-  cost: { fire?: number; water?: number; grass?: number; lightning?: number; colorless?: number },
+  cost: Partial<Energy>,
   cooldown: number = 0
 ): Skill {
   return createSkill({
     name,
     owner,
     description: `Deals ${damageAmount} damage to one enemy.`,
-    cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0, ...cost },
+    cost: { ...ZERO_ENERGY, ...cost },
     cooldown,
     start: [
       { target: 'enemy', apply: damage(damageAmount) },
@@ -75,7 +76,7 @@ function createPikachuSkills(slot: number): Skill[] {
       name: 'Thunderbolt',
       owner: slot,
       description: 'A strong electric attack that deals 30 damage.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 2, colorless: 0 },
+      cost: { ...ZERO_ENERGY, lightning: 2 },
       cooldown: 1,
       classes: ['special'],
       start: [
@@ -89,7 +90,7 @@ function createPikachuSkills(slot: number): Skill[] {
       name: 'Quick Attack',
       owner: slot,
       description: 'A fast attack that deals 15 damage. Has priority.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+      cost: { ...ZERO_ENERGY, colorless: 1 },
       cooldown: 0,
       classes: ['physical'],
       start: [
@@ -103,7 +104,7 @@ function createPikachuSkills(slot: number): Skill[] {
       name: 'Thunder Wave',
       owner: slot,
       description: 'Paralyzes the enemy, stunning them for 1 turn.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 1, colorless: 0 },
+      cost: { ...ZERO_ENERGY, lightning: 1 },
       cooldown: 2,
       classes: ['special'],
       start: [
@@ -117,7 +118,7 @@ function createPikachuSkills(slot: number): Skill[] {
       name: 'Agility',
       owner: slot,
       description: 'Becomes invulnerable for 1 turn.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 1, colorless: 0 },
+      cost: { ...ZERO_ENERGY, lightning: 1 },
       cooldown: 3,
       classes: ['mental'],
       start: [
@@ -138,7 +139,7 @@ function createMewtwoSkills(slot: number): Skill[] {
       name: 'Psystrike',
       owner: slot,
       description: 'A devastating psychic attack that deals 35 damage.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 2 },
+      cost: { ...ZERO_ENERGY, colorless: 2 },
       cooldown: 1,
       classes: ['special'],
       start: [
@@ -152,7 +153,7 @@ function createMewtwoSkills(slot: number): Skill[] {
       name: 'Confusion',
       owner: slot,
       description: 'Deals 20 damage and may stun the target.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+      cost: { ...ZERO_ENERGY, colorless: 1 },
       cooldown: 0,
       classes: ['mental'],
       start: [
@@ -167,7 +168,7 @@ function createMewtwoSkills(slot: number): Skill[] {
       name: 'Barrier',
       owner: slot,
       description: 'Creates 40 destructible defense.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+      cost: { ...ZERO_ENERGY, colorless: 1 },
       cooldown: 3,
       classes: ['mental'],
       start: [
@@ -181,7 +182,7 @@ function createMewtwoSkills(slot: number): Skill[] {
       name: 'Recover',
       owner: slot,
       description: 'Restores 30 health.',
-      cost: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+      cost: { ...ZERO_ENERGY, colorless: 1 },
       cooldown: 3,
       classes: ['unique'],
       start: [
@@ -242,8 +243,8 @@ export function runExampleBattle(): void {
   // Give starting energy
   state = {
     ...state,
-    playerEnergy: { fire: 2, water: 2, grass: 2, lightning: 2, colorless: 2 },
-    opponentEnergy: { fire: 2, water: 2, grass: 2, lightning: 2, colorless: 2 },
+    playerEnergy: { ...ZERO_ENERGY, fire: 2, water: 2, grass: 2, lightning: 2, colorless: 2 },
+    opponentEnergy: { ...ZERO_ENERGY, fire: 2, water: 2, grass: 2, lightning: 2, colorless: 2 },
   };
   
   logger.info('Battle Started!');

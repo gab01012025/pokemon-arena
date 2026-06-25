@@ -3,13 +3,53 @@ import {
   Move, BattlePokemon, KantoPokemonData,
 } from './types';
 import {
-  AI_POKEMON_POOL, getDefaultMoves, getPokemonMoves, getSpriteById, toGlobalType, toGlobalTypes,
+  AI_POKEMON_POOL, KANTO_POKEMON, EVOLUTION_DATA, getDefaultMoves, getPokemonMoves, getSpriteById, toGlobalType, toGlobalTypes,
   getWeaknessResistance,
 } from './data';
 import { getTypeEffectiveness } from '@/lib/type-effectiveness';
 
-/** Create opponent team from AI pool with varied types */
-export const createOpponentTeam = (): BattlePokemon[] => {
+/** Pre-evolve an AI Pokemon to its next stage (applies stat/hp bonuses) */
+const preEvolveAI = (poke: BattlePokemon): BattlePokemon => {
+  if (!poke.canEvolve || !poke.evolvesTo) return poke;
+  const evoData = EVOLUTION_DATA[poke.evolvesTo.id];
+  if (!evoData) return poke;
+  const bonus = poke.evolvesTo.statBonus || 0;
+  const newMaxHp = evoData.hp || (poke.maxHp + (poke.evolvesTo.hpBonus || 0));
+  const wr = getWeaknessResistance(evoData.types);
+  const newMoves = getAIMoves(evoData.id, evoData.types[0]);
+  return {
+    ...poke,
+    id: evoData.id,
+    name: evoData.name,
+    types: evoData.types,
+    sprite: getSpriteById(evoData.id),
+    maxHp: newMaxHp,
+    hp: newMaxHp,
+    attack: poke.attack + bonus,
+    defense: poke.defense + bonus,
+    spAtk: poke.spAtk + bonus,
+    spDef: poke.spDef + bonus,
+    speed: poke.speed + bonus,
+    moves: newMoves.length > 0 ? newMoves : poke.moves,
+    canEvolve: evoData.canEvolve,
+    evolvesTo: evoData.evolvesTo,
+    evolutionEnergyCost: evoData.evolutionEnergyCost,
+    evolutionOptions: evoData.evolutionOptions,
+    weakness: wr.weakness,
+    resistance: wr.resistance,
+    evoBar: 0,
+    maxEvoBar: poke.maxEvoBar + 30,
+  };
+};
+
+/** Create opponent team from AI pool with varied types.
+ *  Difficulty scales with win streak:
+ *  - Streak 0-2: base forms, normal evo speed
+ *  - Streak 3-5: 1 Pokemon starts at Stage 2
+ *  - Streak 6-9: all start at Stage 2
+ *  - Streak 10+: 1 final form + 2 Stage 2
+ */
+export const createOpponentTeam = (winStreak = 0): BattlePokemon[] => {
   const shuffled = [...AI_POKEMON_POOL].sort(() => Math.random() - 0.5);
   const selected: KantoPokemonData[] = [];
   const usedTypes = new Set<PokemonType>();
@@ -26,30 +66,55 @@ export const createOpponentTeam = (): BattlePokemon[] => {
     if (remaining) selected.push(remaining);
     else break;
   }
-  return selected.map(p => {
+  let team: BattlePokemon[] = selected.map(p => {
     const aiMoves = getAIMoves(p.id, p.types[0]);
     const wr = getWeaknessResistance(p.types);
     return {
       id: p.id,
       name: p.name,
       types: p.types,
-      hp: 100,
-      maxHp: 100,
-      attack: 45 + Math.floor(Math.random() * 15),
-      defense: 40 + Math.floor(Math.random() * 15),
-      spAtk: 45 + Math.floor(Math.random() * 15),
-      spDef: 40 + Math.floor(Math.random() * 15),
-      speed: 40 + Math.floor(Math.random() * 20),
+      hp: p.hp,
+      maxHp: p.hp,
+      attack: p.baseStats?.attack ?? 50,
+      defense: p.baseStats?.defense ?? 50,
+      spAtk: p.baseStats?.spAtk ?? 50,
+      spDef: p.baseStats?.spDef ?? 50,
+      speed: p.baseStats?.speed ?? 50,
       sprite: getSpriteById(p.id),
       moves: aiMoves,
       statusEffects: [],
-      canEvolve: false,
+      canEvolve: p.canEvolve,
+      evolvesTo: p.evolvesTo,
+      evolutionEnergyCost: p.evolutionEnergyCost,
+      evolutionOptions: p.evolutionOptions,
       weakness: wr.weakness,
       resistance: wr.resistance,
       evoBar: 0,
-      maxEvoBar: 50,
+      maxEvoBar: 90, // AI evo bar slightly slower than player (80)
     };
   });
+
+  // Apply difficulty based on win streak
+  if (winStreak >= 10) {
+    // 1 final form + 2 stage 2
+    team = team.map((p, i) => {
+      if (!p.canEvolve) return p;
+      const stage2 = preEvolveAI(p);
+      if (i === 0 && stage2.canEvolve) return preEvolveAI(stage2);
+      return stage2;
+    });
+  } else if (winStreak >= 6) {
+    // All start at stage 2
+    team = team.map(p => p.canEvolve ? preEvolveAI(p) : p);
+  } else if (winStreak >= 3) {
+    // 1 Pokemon starts at stage 2
+    const evolvableIdx = team.findIndex(p => p.canEvolve);
+    if (evolvableIdx >= 0) {
+      team[evolvableIdx] = preEvolveAI(team[evolvableIdx]);
+    }
+  }
+
+  return team;
 };
 
 /** AI-specific moves that exercise ALL status effects */
@@ -77,38 +142,34 @@ export const getAIMoves = (pokemonId: number, primaryType: PokemonType): Move[] 
 
 /** Fallback player team */
 export const createFallbackPlayerTeam = (): BattlePokemon[] => {
-  const wrFire = getWeaknessResistance(['fire']);
-  const wrWater = getWeaknessResistance(['water']);
-  const wrGrass = getWeaknessResistance(['grass', 'poison']);
-  return [
-    {
-      id: 4, name: 'Charmander', types: ['fire'], hp: 100, maxHp: 100,
-      attack: 52, defense: 43, spAtk: 60, spDef: 50, speed: 65,
-      sprite: getSpriteById(4), moves: getDefaultMoves('fire'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 0, statBonus: 10 },
-      evolutionEnergyCost: [{ type: 'fire', amount: 2 }],
-      weakness: wrFire.weakness, resistance: wrFire.resistance,
-      evoBar: 0, maxEvoBar: 50,
-    },
-    {
-      id: 7, name: 'Squirtle', types: ['water'], hp: 100, maxHp: 100,
-      attack: 48, defense: 65, spAtk: 50, spDef: 64, speed: 43,
-      sprite: getSpriteById(7), moves: getDefaultMoves('water'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 0, statBonus: 10 },
-      evolutionEnergyCost: [{ type: 'water', amount: 2 }],
-      weakness: wrWater.weakness, resistance: wrWater.resistance,
-      evoBar: 0, maxEvoBar: 50,
-    },
-    {
-      id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, maxHp: 100,
-      attack: 49, defense: 49, spAtk: 65, spDef: 65, speed: 45,
-      sprite: getSpriteById(1), moves: getDefaultMoves('grass'), statusEffects: [],
-      canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 0, statBonus: 10 },
-      evolutionEnergyCost: [{ type: 'grass', amount: 2 }],
-      weakness: wrGrass.weakness, resistance: wrGrass.resistance,
-      evoBar: 0, maxEvoBar: 50,
-    },
-  ];
+  const starterIds = [4, 7, 1];
+  return starterIds.map(id => {
+    const kanto = KANTO_POKEMON.find(k => k.id === id)!;
+    const wr = getWeaknessResistance(kanto.types);
+    return {
+      id: kanto.id,
+      name: kanto.name,
+      types: kanto.types,
+      hp: kanto.hp,
+      maxHp: kanto.hp,
+      attack: kanto.baseStats?.attack ?? 50,
+      defense: kanto.baseStats?.defense ?? 50,
+      spAtk: kanto.baseStats?.spAtk ?? 50,
+      spDef: kanto.baseStats?.spDef ?? 50,
+      speed: kanto.baseStats?.speed ?? 50,
+      sprite: getSpriteById(kanto.id),
+      moves: getDefaultMoves(kanto.types[0]),
+      statusEffects: [],
+      canEvolve: kanto.canEvolve,
+      evolvesTo: kanto.evolvesTo,
+      evolutionEnergyCost: kanto.evolutionEnergyCost,
+      evolutionOptions: kanto.evolutionOptions,
+      weakness: wr.weakness,
+      resistance: wr.resistance,
+      evoBar: 0,
+      maxEvoBar: 80,
+    };
+  });
 };
 
 /** Get type effectiveness (wrapper) */

@@ -21,6 +21,7 @@ interface BattleOverlaysProps {
   onUseItem: (item: BattleItem) => void;
   usedItemThisTurn: boolean;
   selectingMove: Move | null;
+  selectingPokemonName: string | null;
   usingItem: BattleItem | null;
   onCancelTarget: () => void;
   evolvingPokemon: { idx: number; from: string; to: string; fromId: number; toId: number } | null;
@@ -63,6 +64,7 @@ export default function BattleOverlays({
   onUseItem,
   usedItemThisTurn,
   selectingMove,
+  selectingPokemonName,
   usingItem,
   onCancelTarget,
   evolvingPokemon,
@@ -121,13 +123,21 @@ export default function BattleOverlays({
         </div>
       )}
 
-      {/* Targeting Indicator */}
+      {/* GBA-style Targeting Dialog */}
       {phase === 'targeting' && selectingMove && (
-        <div className="targeting-indicator">
-          <div className="targeting-text">
-            🎯 Click an enemy to target with <strong>{selectingMove.name}</strong>
-            <button className="cancel-target-btn" onClick={onCancelTarget}>✕ Cancel</button>
+        <div className="gba-target-dialog">
+          <div className="gba-dialog-inner">
+            <div className="gba-dialog-text">
+              <span className="gba-poke-name">{selectingPokemonName}</span> will use <span className="gba-move-name">{selectingMove.name}</span>!
+            </div>
+            <div className="gba-dialog-sub">
+              {selectingMove.targetType === 'self'
+                ? 'Click on your POKéMON to confirm.'
+                : 'Choose a target POKéMON.'}
+            </div>
+            <button className="gba-cancel-btn" onClick={onCancelTarget}>B Back</button>
           </div>
+          <div className="gba-dialog-arrow" />
         </div>
       )}
 

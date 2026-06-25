@@ -57,12 +57,12 @@ export function getSpriteId(name: string): number {
 
 export const getSpriteUrl = (name: string) => {
   const id = getSpriteId(name);
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+  return `/pokemon-anime/${id}.png`;
 };
 
 export const getSpriteUrlStatic = (name: string) => {
   const id = getSpriteId(name);
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+  return `/pokemon-anime/${id}.png`;
 };
 
 /** Fetch Pokemon roster from API */

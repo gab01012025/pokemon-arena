@@ -164,19 +164,16 @@ function getLevelTitle(level: number) {
 
 function getAvatarUrl(avatar: string): string {
   if (!avatar || avatar === 'default') {
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png'; // Pikachu default
+    return '/pokemon-anime/25.png';
   }
-  // Pokemon sprite avatar
   if (avatar.startsWith('pokemon-')) {
     const pokemonId = avatar.replace('pokemon-', '');
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
+    return `/pokemon-anime/${pokemonId}.png`;
   }
-  // External URL (imgur, etc)
   if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
     return avatar;
   }
-  // Fallback to Pikachu
-  return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+  return '/pokemon-anime/25.png';
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {

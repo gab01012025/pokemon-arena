@@ -12,7 +12,7 @@ export type BattleAction = z.infer<typeof battleActionSchema>;
 // Energy Selection Validation
 export const energySelectionSchema = z.object({
   selectedTypes: z.array(
-    z.enum(['grass', 'fire', 'water', 'electric', 'psychic', 'fighting', 'darkness', 'metal', 'dragon'])
+    z.enum(['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy', 'colorless'])
   ).length(4, 'Must select exactly 4 energy types'),
 });
 

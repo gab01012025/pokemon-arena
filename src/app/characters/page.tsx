@@ -7,6 +7,13 @@ import { getPokemonImageUrl } from '@/lib/pokemon-images';
 // Force dynamic rendering (no prerender at build time)
 export const dynamic = 'force-dynamic';
 
+interface PokemonMove {
+  id: string;
+  name: string;
+  damage: number;
+  description: string;
+}
+
 interface Pokemon {
   id: string;
   name: string;
@@ -14,6 +21,7 @@ interface Pokemon {
   category: string;
   isStarter: boolean;
   health: number;
+  moves: PokemonMove[];
 }
 
 const ENERGY_COLORS: Record<string, string> = {
@@ -30,11 +38,18 @@ const ENERGY_COLORS: Record<string, string> = {
   steel: '#B7B7CE',
   psychic: '#F95587',
   ice: '#96D9D6',
-  dragon: '#6F35FC',
   dark: '#705746',
   fairy: '#D685AD',
   normal: '#A8A77A',
   fighting: '#C22E28',
+};
+
+// TCG energy card image mapping (type → image file) — all 11 TCG types
+const TCG_ENERGY: Record<string, string> = {
+  fire: 'fire', water: 'water', grass: 'grass',
+  electric: 'lightning', psychic: 'psychic', fighting: 'fighting',
+  dark: 'darkness', steel: 'metal', fairy: 'fairy',
+  dragon: 'colorless', normal: 'colorless',
 };
 
 export default async function CharactersPage() {
@@ -45,6 +60,12 @@ export default async function CharactersPage() {
       { category: 'asc' },
       { name: 'asc' },
     ],
+    include: {
+      moves: {
+        select: { id: true, name: true, damage: true, description: true },
+        orderBy: { slot: 'asc' },
+      },
+    },
   });
 
   // Group by category
@@ -122,68 +143,110 @@ export default async function CharactersPage() {
                     </h3>
                     <div className="characters-list" style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                      gap: '15px',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                      gap: '12px',
                     }}>
                       {pokemonList.map((pokemon) => {
                         const primaryType = parseType(pokemon.types);
                         const typeColor = ENERGY_COLORS[primaryType.toLowerCase()] || '#A8A77A';
-                        
+
                         return (
-                          <Link 
-                            key={pokemon.id} 
-                            href={`/chars/${pokemon.name.toLowerCase()}`} 
+                          <Link
+                            key={pokemon.id}
+                            href={`/chars/${pokemon.name.toLowerCase()}`}
                             className="character-list-item"
                             style={{
                               display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              padding: '15px',
+                              gap: '10px',
+                              padding: '10px',
                               background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
                               borderRadius: '10px',
                               border: `2px solid ${typeColor}40`,
                               textDecoration: 'none',
                               transition: 'all 0.3s',
+                              alignItems: 'flex-start',
                             }}
                           >
-                            <div className="character-avatar" style={{
-                              width: '80px',
-                              height: '80px',
-                              borderRadius: '10px',
+                            <div style={{
+                              width: '64px',
+                              height: '64px',
+                              borderRadius: '8px',
                               overflow: 'hidden',
-                              marginBottom: '10px',
+                              flexShrink: 0,
                               background: `${typeColor}20`,
                             }}>
-                              <img 
-                                src={getPokemonImageUrl(pokemon.name, 'default')} 
+                              <img
+                                src={getPokemonImageUrl(pokemon.name, 'default')}
                                 alt={pokemon.name}
                                 style={{
                                   width: '100%',
                                   height: '100%',
-                                  objectFit: 'contain',
+                                  objectFit: 'cover',
+                                  objectPosition: 'center top',
+                                  background: typeColor,
                                 }}
                               />
                             </div>
-                            <div className="character-name" style={{
-                              color: '#fff',
-                              fontWeight: 'bold',
-                              textAlign: 'center',
-                              marginBottom: '5px',
-                            }}>
-                              {pokemon.name}
-                            </div>
-                            <div style={{
-                              fontSize: '0.8rem',
-                              color: typeColor,
-                              textTransform: 'capitalize',
-                            }}>
-                              {primaryType}
-                            </div>
-                            <div style={{
-                              fontSize: '0.75rem',
-                              color: '#888',
-                            }}>
-                              ❤️ {pokemon.health} HP
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                color: '#fff',
+                                fontWeight: 'bold',
+                                fontSize: '0.9rem',
+                                marginBottom: '2px',
+                              }}>
+                                {pokemon.name}
+                              </div>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '4px',
+                              }}>
+                                <span style={{
+                                  fontSize: '0.7rem',
+                                  color: '#fff',
+                                  background: typeColor,
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  textTransform: 'capitalize',
+                                  fontWeight: 600,
+                                }}>
+                                  {primaryType}
+                                </span>
+                                <span style={{ fontSize: '0.7rem', color: '#888' }}>
+                                  {pokemon.health} HP
+                                </span>
+                              </div>
+                              {pokemon.moves && pokemon.moves.length > 0 && (
+                                <div style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '1px',
+                                }}>
+                                  {pokemon.moves.slice(0, 4).map((move, mi) => (
+                                    <div key={move.id} style={{
+                                      fontSize: '0.65rem',
+                                      color: '#aaa',
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      gap: '4px',
+                                    }}>
+                                      <span style={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                      }}>
+                                        <span style={{ color: typeColor, fontWeight: 600 }}>{mi + 1}.</span> {move.name}
+                                      </span>
+                                      {move.damage > 0 && (
+                                        <span style={{ color: '#F44336', flexShrink: 0, fontWeight: 600 }}>
+                                          {move.damage}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </Link>
                         );
@@ -203,32 +266,35 @@ export default async function CharactersPage() {
                   gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                   gap: '15px',
                 }}>
-                  {Object.entries(ENERGY_COLORS).map(([type, color]) => (
-                    <div key={type} className="class-item" style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px 15px',
-                      background: `${color}20`,
-                      borderRadius: '8px',
-                      border: `1px solid ${color}40`,
-                    }}>
-                      <div className="class-icon" style={{
-                        width: '30px',
-                        height: '30px',
-                        borderRadius: '50%',
-                        backgroundColor: color,
+                  {Object.entries(TCG_ENERGY).map(([type, tcgFile]) => {
+                    const color = ENERGY_COLORS[type] || '#A8A77A';
+                    return (
+                      <div key={type} className="class-item" style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        gap: '10px',
+                        padding: '10px 15px',
+                        background: `${color}20`,
+                        borderRadius: '8px',
+                        border: `1px solid ${color}40`,
                       }}>
-                        {type.charAt(0).toUpperCase()}
+                        <img
+                          src={`/energy/${tcgFile}.png`}
+                          alt={type}
+                          style={{
+                            width: '28px',
+                            height: '40px',
+                            objectFit: 'contain',
+                            filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))',
+                            borderRadius: '3px',
+                          }}
+                        />
+                        <div className="class-info">
+                          <strong style={{ color: color, textTransform: 'capitalize' }}>{type}</strong>
+                        </div>
                       </div>
-                      <div className="class-info">
-                        <strong style={{ color: color, textTransform: 'capitalize' }}>{type}</strong>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -30,7 +30,7 @@ const POKEMON_IDS: Record<string, number> = {
 
 const getPokemonImage = (pokemonId: string): string => {
   const id = POKEMON_IDS[pokemonId?.toLowerCase()] || 25;
-  return `${POKEAPI_SPRITE}/${id}.png`;
+  return `/pokemon-anime/${id}.png`;
 };
 
 type GameMode = 'ladder' | 'quick' | 'private';

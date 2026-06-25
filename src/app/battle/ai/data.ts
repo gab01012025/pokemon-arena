@@ -10,30 +10,33 @@ export const toGlobalType = (t: PokemonType): GlobalType =>
 export const toGlobalTypes = (ts: PokemonType[]): GlobalType[] => ts.map(toGlobalType);
 
 // ==================== TCG POCKET ENERGY ====================
-export const ALL_SELECTABLE_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal'];
-export const ALL_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'colorless'];
+export const ALL_SELECTABLE_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy'];
+export const ALL_ENERGY_TYPES: EnergyType[] = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy', 'colorless'];
 
 export const ENERGY_ICONS: Record<EnergyType, string> = {
   grass: '🌿', fire: '🔥', water: '💧', lightning: '⚡',
-  psychic: '🔮', fighting: '👊', darkness: '🌑', metal: '⚙️', colorless: '⭐',
+  psychic: '🔮', fighting: '👊', darkness: '🌑', metal: '⚙️',
+  fairy: '🧚', colorless: '⭐',
 };
 
 export const ENERGY_NAMES: Record<EnergyType, string> = {
   grass: 'Grass', fire: 'Fire', water: 'Water', lightning: 'Lightning',
-  psychic: 'Psychic', fighting: 'Fighting', darkness: 'Darkness', metal: 'Metal', colorless: 'Colorless',
+  psychic: 'Psychic', fighting: 'Fighting', darkness: 'Darkness', metal: 'Metal',
+  fairy: 'Fairy', colorless: 'Colorless',
 };
 
 export const TYPE_TO_ENERGY: Record<PokemonType, EnergyType> = {
   fire: 'fire', water: 'water', grass: 'grass', electric: 'lightning',
   psychic: 'psychic', fighting: 'fighting', dark: 'darkness', steel: 'metal',
-  ghost: 'psychic', rock: 'fighting', ground: 'fighting', poison: 'darkness',
+  ghost: 'psychic', rock: 'fighting', ground: 'fighting', poison: 'psychic',
   bug: 'grass', ice: 'water', normal: 'colorless', flying: 'colorless',
-  dragon: 'colorless', fairy: 'psychic',
+  dragon: 'colorless', fairy: 'fairy',
 };
 
 export const EMPTY_ENERGY: EnergyState = {
   grass: 0, fire: 0, water: 0, lightning: 0,
-  psychic: 0, fighting: 0, darkness: 0, metal: 0, colorless: 0,
+  psychic: 0, fighting: 0, darkness: 0, metal: 0,
+  fairy: 0, colorless: 0,
 };
 
 // ==================== TCG POCKET WEAKNESS / RESISTANCE ====================
@@ -140,7 +143,7 @@ export const BATTLE_BACKGROUNDS = [
 ];
 
 // ==================== SPRITE HELPERS ====================
-const POKEMON_POKEDEX: Record<string, number> = {
+export const POKEMON_POKEDEX: Record<string, number> = {
   Bulbasaur: 1, Ivysaur: 2, Venusaur: 3, Charmander: 4, Charmeleon: 5, Charizard: 6,
   Squirtle: 7, Wartortle: 8, Blastoise: 9, Caterpie: 10, Metapod: 11, Butterfree: 12,
   Weedle: 13, Kakuna: 14, Beedrill: 15, Pidgey: 16, Pidgeotto: 17, Pidgeot: 18,
@@ -155,10 +158,13 @@ const POKEMON_POKEDEX: Record<string, number> = {
   Machoke: 67, Machamp: 68, Bellsprout: 69, Weepinbell: 70, Victreebel: 71,
   Tentacool: 72, Tentacruel: 73, Geodude: 74, Graveler: 75, Golem: 76,
   Ponyta: 77, Rapidash: 78, Slowpoke: 79, Slowbro: 80, Magnemite: 81, Magneton: 82,
+  Farfetchd: 83, Doduo: 84, Dodrio: 85, Seel: 86, Dewgong: 87,
+  Grimer: 88, Muk: 89, Shellder: 90, Cloyster: 91,
   Gastly: 92, Haunter: 93, Gengar: 94, Onix: 95, Drowzee: 96, Hypno: 97,
+  Krabby: 98, Kingler: 99,
   Voltorb: 100, Electrode: 101, Exeggcute: 102, Exeggutor: 103, Cubone: 104, Marowak: 105,
   Hitmonlee: 106, Hitmonchan: 107, Lickitung: 108,
-  Koffing: 109, Weezing: 110, Rhyhorn: 111, Rhydon: 112, Chansey: 113,
+  Koffing: 109, Weezing: 110, Rhyhorn: 111, Rhydon: 112, Chansey: 113, Tangela: 114,
   Kangaskhan: 115, Horsea: 116, Seadra: 117, Goldeen: 118, Seaking: 119,
   Staryu: 120, Starmie: 121, MrMime: 122, Scyther: 123, Jynx: 124,
   Electabuzz: 125, Magmar: 126, Pinsir: 127, Tauros: 128, Magikarp: 129,
@@ -171,11 +177,11 @@ const POKEMON_POKEDEX: Record<string, number> = {
 
 export const getSprite = (name: string): string => {
   const num = POKEMON_POKEDEX[name] || 25;
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${num}.gif`;
+  return `/pokemon-anime/${num}.png`;
 };
 
 export const getSpriteById = (id: number): string =>
-  `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${id}.gif`;
+  `/pokemon-anime/${id}.png`;
 
 // ==================== DEFAULT MOVES PER TYPE ====================
 export const getDefaultMoves = (type: PokemonType): Move[] => {
@@ -293,7 +299,104 @@ export const getDefaultMoves = (type: PokemonType): Move[] => {
 };
 
 // ==================== CUSTOM POKEMON MOVES ====================
+// Skills defined by client via arena-game.app Character Maker
 export const POKEMON_CUSTOM_MOVES: Record<number, Move[]> = {
+
+  // ==================== ARENA-GAME.APP DEFINITIONS ====================
+
+  // Bulbasaur — Grass/Poison starter (arena-game.app)
+  1: [
+    { id: 'blb1', name: 'Razor Leaf', type: 'grass', power: 10, accuracy: 100,
+      cost: [{ type: 'grass', amount: 1 }], cooldown: 0, currentCooldown: 0,
+      description: 'Bulbasaur directs all attacks at the enemy, dealing 10 damage. During "Sun\'s Charge", deals 5 additional damage per charge.',
+      targetType: 'enemy' },
+    { id: 'blb2', name: 'Solar Beam', type: 'grass', power: 50, accuracy: 100,
+      cost: [{ type: 'grass', amount: 3 }], cooldown: 1, currentCooldown: 0,
+      description: 'Expends all energy dealing 50 piercing damage. Bulbasaur becomes invulnerable for 1 turn. Cannot be countered.',
+      targetType: 'enemy',
+      statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+    { id: 'blb3', name: "Sun's Charge", type: 'grass', power: 0, accuracy: 100,
+      cost: [{ type: 'grass', amount: 1 }], cooldown: 0, currentCooldown: 0,
+      description: 'Charges power with the sun, healing 5 HP. "Razor Leaf" permanently deals 5 additional damage. Boosts damage 15% for 3 turns.',
+      targetType: 'self', healing: 5,
+      statusEffect: { type: 'strengthen', chance: 100, duration: 3, value: 15 } },
+    { id: 'blb4', name: 'Dodge', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 4, currentCooldown: 0,
+      description: 'Bulbasaur becomes invulnerable for 1 turn.',
+      targetType: 'self',
+      statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+  ],
+
+  // Charmander — Fire starter (arena-game.app)
+  4: [
+    { id: 'chm1', name: 'Firetail', type: 'fire', power: 10, accuracy: 100,
+      cost: [{ type: 'fire', amount: 1 }], cooldown: 0, currentCooldown: 0,
+      description: 'Deals 10 damage to one enemy. During "Tail In Fire", deals 5 additional damage.',
+      targetType: 'enemy' },
+    { id: 'chm2', name: 'Flamethrower', type: 'fire', power: 25, accuracy: 100,
+      cost: [{ type: 'fire', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0,
+      description: 'Deals 25 affliction damage. The following 2 turns, the enemy takes 25% more damage from fire skills.',
+      targetType: 'enemy',
+      statusEffect: { type: 'increase-damage', chance: 100, duration: 2, value: 25 } },
+    { id: 'chm3', name: 'Tail In Fire', type: 'fire', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 3, currentCooldown: 0,
+      description: 'Creates fire in its tail. Gains 5 damage reduction for 3 turns. "Firetail" deals 10 additional damage and "Flamethrower" is enabled.',
+      targetType: 'self',
+      statusEffect: { type: 'reduce-damage', chance: 100, duration: 3, value: 5 } },
+    { id: 'chm4', name: 'Dodge Jump', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 4, currentCooldown: 0,
+      description: 'Charmander becomes invulnerable for 1 turn.',
+      targetType: 'self',
+      statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+  ],
+
+  // Squirtle — Water starter (arena-game.app)
+  7: [
+    { id: 'sqt1', name: 'Bubble', type: 'water', power: 10, accuracy: 100,
+      cost: [{ type: 'water', amount: 1 }], cooldown: 1, currentCooldown: 0,
+      description: 'Deals 10 damage for 1 turn, and 5 damage the following turn. If the enemy uses a non-energy skill, they lose 1 fire energy.',
+      targetType: 'enemy',
+      statusEffect: { type: 'drain-hp', chance: 100, duration: 1, value: 5 } },
+    { id: 'sqt2', name: 'Rotating Shell', type: 'water', power: 10, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0,
+      description: 'Spins at one enemy dealing 10 damage, and 5 the following turn. If the enemy uses a non-physical skill, they are stunned for 1 turn.',
+      targetType: 'enemy',
+      statusEffect: { type: 'stun', chance: 50, duration: 1 } },
+    { id: 'sqt3', name: 'Hydro Pump', type: 'water', power: 20, accuracy: 100,
+      cost: [{ type: 'water', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0,
+      description: 'Deals 20 damage to one enemy. The enemy also takes 5 affliction damage the following turn.',
+      targetType: 'enemy',
+      statusEffect: { type: 'drain-hp', chance: 100, duration: 1, value: 5 } },
+    { id: 'sqt4', name: 'Jump', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 4, currentCooldown: 0,
+      description: 'Squirtle becomes invulnerable for 1 turn.',
+      targetType: 'self',
+      statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+  ],
+
+  // Chansey — Normal healer (arena-game.app)
+  113: [
+    { id: 'chn1', name: 'Dynamic Punch', type: 'fighting', power: 10, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0,
+      description: 'Punches one enemy dealing 10 piercing damage. For 1 turn, if that enemy uses a physical skill, they take 5 piercing damage. Ignores invulnerability.',
+      targetType: 'enemy',
+      statusEffect: { type: 'counter', chance: 100, duration: 1, value: 5 } },
+    { id: 'chn2', name: 'Attract', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 2 }], cooldown: 2, currentCooldown: 0,
+      description: 'Reduces all enemy physical and energy non-affliction damage by 15 for 1 turn. Cannot be countered or reflected.',
+      targetType: 'enemy',
+      statusEffect: { type: 'weaken', chance: 100, duration: 1, value: 15 } },
+    { id: 'chn3', name: 'Heal Bell', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0,
+      description: 'Heals herself or an ally for 15 HP and removes all harmful affliction effects.',
+      targetType: 'self', healing: 15 },
+    { id: 'chn4', name: 'Sing', type: 'normal', power: 0, accuracy: 100,
+      cost: [{ type: 'colorless', amount: 1 }], cooldown: 4, currentCooldown: 0,
+      description: 'Chansey becomes invulnerable for 1 turn.',
+      targetType: 'self',
+      statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+  ],
+
   // Magikarp — almost useless until evolution
   129: [
     { id: 'mk1', name: 'Splash', type: 'normal', power: 0, accuracy: 100, cost: [], cooldown: 0, currentCooldown: 0, description: 'Magikarp splashes... but nothing happened!', targetType: 'self' },
@@ -400,6 +503,215 @@ export const POKEMON_CUSTOM_MOVES: Record<number, Move[]> = {
     { id: 'kan3', name: 'Outrage', type: 'dragon', power: 55, accuracy: 100, cost: [{ type: 'colorless', amount: 3 }], cooldown: 2, currentCooldown: 0, description: 'Goes on a rampage for 55 damage.', targetType: 'enemy' },
     { id: 'kan4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 60 HP.', targetType: 'self', healing: 60 },
   ],
+
+  // ==================== EVOLVED FORM MOVESETS ====================
+
+  // === STAGE 2 INTERMEDIARIES ===
+  // Ivysaur
+  2: [
+    { id: 'ivy1', name: 'Razor Leaf', type: 'grass', power: 45, accuracy: 95, cost: [{ type: 'grass', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Sharp leaves slash for 45 damage.', targetType: 'enemy' },
+    { id: 'ivy2', name: 'Vine Whip', type: 'grass', power: 30, accuracy: 100, cost: [{ type: 'grass', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Whips with vines for 30 damage.', targetType: 'enemy' },
+    { id: 'ivy3', name: 'Poison Powder', type: 'poison', power: 0, accuracy: 80, cost: [{ type: 'darkness', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Scatters toxic pollen. Poisons the target.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 100, duration: 3 } },
+    { id: 'ivy4', name: 'Synthesis', type: 'grass', power: 0, accuracy: 100, cost: [{ type: 'grass', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Absorbs sunlight to heal 50 HP.', targetType: 'self', healing: 50 },
+  ],
+  // Charmeleon
+  5: [
+    { id: 'cml1', name: 'Flamethrower', type: 'fire', power: 50, accuracy: 100, cost: [{ type: 'fire', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A stream of fire for 50 damage.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 20, duration: 2 } },
+    { id: 'cml2', name: 'Slash', type: 'normal', power: 35, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A sharp slash for 35 damage.', targetType: 'enemy' },
+    { id: 'cml3', name: 'Dragon Rage', type: 'dragon', power: 40, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A burst of draconic fury for 40 damage.', targetType: 'enemy' },
+    { id: 'cml4', name: 'Fire Spin', type: 'fire', power: 0, accuracy: 100, cost: [{ type: 'fire', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Traps the enemy. Burns for 2 turns.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 100, duration: 2 } },
+  ],
+  // Wartortle
+  8: [
+    { id: 'wrt1', name: 'Water Pulse', type: 'water', power: 45, accuracy: 100, cost: [{ type: 'water', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A pulse of water for 45 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 20, duration: 2 } },
+    { id: 'wrt2', name: 'Bite', type: 'dark', power: 35, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Bites hard for 35 damage.', targetType: 'enemy' },
+    { id: 'wrt3', name: 'Protect', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 3, currentCooldown: 0, description: 'Protects from all damage for 1 turn.', targetType: 'self', statusEffect: { type: 'invulnerable', chance: 100, duration: 1 } },
+    { id: 'wrt4', name: 'Aqua Ring', type: 'water', power: 0, accuracy: 100, cost: [{ type: 'water', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Heals 50 HP with a water ring.', targetType: 'self', healing: 50 },
+  ],
+  // Kadabra
+  64: [
+    { id: 'kad1', name: 'Psybeam', type: 'psychic', power: 50, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A peculiar beam for 50 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 20, duration: 2 } },
+    { id: 'kad2', name: 'Shadow Ball', type: 'ghost', power: 40, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A dark orb for 40 damage.', targetType: 'enemy' },
+    { id: 'kad3', name: 'Disable', type: 'psychic', power: 0, accuracy: 85, cost: [{ type: 'psychic', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Disables the enemy. Increases cooldowns by 1.', targetType: 'enemy', statusEffect: { type: 'cooldown-increase', chance: 100, duration: 2, value: 1 } },
+    { id: 'kad4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 55 HP.', targetType: 'self', healing: 55 },
+  ],
+  // Haunter
+  93: [
+    { id: 'hnt1', name: 'Shadow Ball', type: 'ghost', power: 50, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shadowy orb for 50 damage.', targetType: 'enemy' },
+    { id: 'hnt2', name: 'Sludge Bomb', type: 'poison', power: 40, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Toxic sludge for 40 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 3 } },
+    { id: 'hnt3', name: 'Hypnosis', type: 'psychic', power: 0, accuracy: 65, cost: [{ type: 'psychic', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Puts the enemy to sleep.', targetType: 'enemy', statusEffect: { type: 'sleep', chance: 100, duration: 2 } },
+    { id: 'hnt4', name: 'Dream Eater', type: 'psychic', power: 45, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Eats dreams for 45 damage. Heals 25 HP.', targetType: 'enemy', healing: 25 },
+  ],
+  // Machoke
+  67: [
+    { id: 'mck1', name: 'Karate Chop', type: 'fighting', power: 45, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A sharp chop for 45 damage.', targetType: 'enemy' },
+    { id: 'mck2', name: 'Low Kick', type: 'fighting', power: 30, accuracy: 100, cost: [{ type: 'fighting', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A swift kick for 30 damage.', targetType: 'enemy' },
+    { id: 'mck3', name: 'Seismic Toss', type: 'fighting', power: 50, accuracy: 90, cost: [{ type: 'fighting', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Hurls the enemy for 50 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 25, duration: 1 } },
+    { id: 'mck4', name: 'Bulk Up', type: 'fighting', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Powers up. Heals 40 HP and boosts damage.', targetType: 'self', healing: 40, statusEffect: { type: 'strengthen', chance: 100, duration: 2, value: 20 } },
+  ],
+  // Graveler
+  75: [
+    { id: 'grv1', name: 'Rock Slide', type: 'rock', power: 45, accuracy: 90, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Drops rocks for 45 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 20, duration: 1 } },
+    { id: 'grv2', name: 'Earthquake', type: 'ground', power: 40, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Shakes the ground for 40 damage to all.', targetType: 'all-enemies' },
+    { id: 'grv3', name: 'Self-Destruct', type: 'normal', power: 80, accuracy: 100, cost: [{ type: 'colorless', amount: 3 }], cooldown: 99, currentCooldown: 0, description: 'Explodes for massive 80 damage. Faints the user.', targetType: 'enemy' },
+    { id: 'grv4', name: 'Rock Polish', type: 'rock', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Polishes body. Heals 45 HP.', targetType: 'self', healing: 45 },
+  ],
+  // Dragonair
+  148: [
+    { id: 'dnr1', name: 'Dragon Pulse', type: 'dragon', power: 50, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A shock wave of draconic energy for 50 damage.', targetType: 'enemy' },
+    { id: 'dnr2', name: 'Aqua Tail', type: 'water', power: 40, accuracy: 90, cost: [{ type: 'water', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A sweeping water tail for 40 damage.', targetType: 'enemy' },
+    { id: 'dnr3', name: 'Thunder Wave', type: 'electric', power: 0, accuracy: 90, cost: [{ type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'A wave that paralyzes the target.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 100, duration: 2 } },
+    { id: 'dnr4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 55 HP.', targetType: 'self', healing: 55 },
+  ],
+
+  // === FINAL FORMS ===
+  // Venusaur
+  3: [
+    { id: 'ven1', name: 'Solar Beam', type: 'grass', power: 65, accuracy: 100, cost: [{ type: 'grass', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A devastating solar beam for 65 damage.', targetType: 'enemy' },
+    { id: 'ven2', name: 'Sludge Bomb', type: 'poison', power: 50, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Toxic sludge for 50 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 35, duration: 3 } },
+    { id: 'ven3', name: 'Leech Seed', type: 'grass', power: 0, accuracy: 90, cost: [{ type: 'grass', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Drains 15 HP per turn for 3 turns.', targetType: 'enemy', statusEffect: { type: 'drain-hp', chance: 100, duration: 3, value: 15 } },
+    { id: 'ven4', name: 'Synthesis', type: 'grass', power: 0, accuracy: 100, cost: [{ type: 'grass', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Absorbs sunlight to heal 65 HP.', targetType: 'self', healing: 65 },
+  ],
+  // Charizard
+  6: [
+    { id: 'czd1', name: 'Fire Blast', type: 'fire', power: 65, accuracy: 85, cost: [{ type: 'fire', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive fire blast for 65 damage. May burn.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 35, duration: 3 } },
+    { id: 'czd2', name: 'Air Slash', type: 'flying', power: 45, accuracy: 95, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slices with air for 45 damage.', targetType: 'enemy' },
+    { id: 'czd3', name: 'Dragon Claw', type: 'dragon', power: 50, accuracy: 100, cost: [{ type: 'fire', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Rakes with draconic claws for 50 damage.', targetType: 'enemy' },
+    { id: 'czd4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 2, currentCooldown: 0, description: 'Rests to heal 65 HP.', targetType: 'self', healing: 65 },
+  ],
+  // Blastoise
+  9: [
+    { id: 'bls1', name: 'Hydro Pump', type: 'water', power: 65, accuracy: 85, cost: [{ type: 'water', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Blasts water for 65 damage.', targetType: 'enemy' },
+    { id: 'bls2', name: 'Ice Beam', type: 'ice', power: 50, accuracy: 100, cost: [{ type: 'water', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A freezing beam for 50 damage. May freeze.', targetType: 'enemy', statusEffect: { type: 'freeze', chance: 15, duration: 2 } },
+    { id: 'bls3', name: 'Flash Cannon', type: 'steel', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A focused cannon for 45 damage.', targetType: 'enemy' },
+    { id: 'bls4', name: 'Iron Defense', type: 'steel', power: 0, accuracy: 100, cost: [{ type: 'water', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Hardens shell. Heals 60 HP and reduces damage.', targetType: 'self', healing: 60, statusEffect: { type: 'reduce-damage', chance: 100, duration: 2, value: 15 } },
+  ],
+  // Alakazam
+  65: [
+    { id: 'alz1', name: 'Psychic', type: 'psychic', power: 60, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'An overwhelming psychic blast for 60 damage.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 15, duration: 2 } },
+    { id: 'alz2', name: 'Shadow Ball', type: 'ghost', power: 50, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A shadowy sphere for 50 damage.', targetType: 'enemy' },
+    { id: 'alz3', name: 'Calm Mind', type: 'psychic', power: 0, accuracy: 100, cost: [{ type: 'psychic', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Focuses mind. Boosts damage 30% for 2 turns.', targetType: 'self', statusEffect: { type: 'strengthen', chance: 100, duration: 2, value: 30 } },
+    { id: 'alz4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 65 HP.', targetType: 'self', healing: 65 },
+  ],
+  // Gengar
+  94: [
+    { id: 'gen1', name: 'Shadow Ball', type: 'ghost', power: 60, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A massive shadow orb for 60 damage.', targetType: 'enemy' },
+    { id: 'gen2', name: 'Sludge Wave', type: 'poison', power: 50, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A toxic wave for 50 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 3 } },
+    { id: 'gen3', name: 'Hypnosis', type: 'psychic', power: 0, accuracy: 65, cost: [{ type: 'psychic', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Puts the target to sleep.', targetType: 'enemy', statusEffect: { type: 'sleep', chance: 100, duration: 2 } },
+    { id: 'gen4', name: 'Dream Eater', type: 'psychic', power: 55, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 1, currentCooldown: 0, description: 'Devours dreams for 55 damage. Heals 30 HP.', targetType: 'enemy', healing: 30 },
+  ],
+  // Machamp
+  68: [
+    { id: 'mcp1', name: 'Cross Chop', type: 'fighting', power: 60, accuracy: 90, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A devastating cross chop for 60 damage.', targetType: 'enemy' },
+    { id: 'mcp2', name: 'Dynamic Punch', type: 'fighting', power: 55, accuracy: 75, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A power punch for 55 damage. Confuses on hit.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 100, duration: 2 } },
+    { id: 'mcp3', name: 'Rock Slide', type: 'rock', power: 45, accuracy: 90, cost: [{ type: 'fighting', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Drops rocks for 45 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 20, duration: 1 } },
+    { id: 'mcp4', name: 'Bulk Up', type: 'fighting', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Powers up. Heals 50 HP and boosts damage 25%.', targetType: 'self', healing: 50, statusEffect: { type: 'strengthen', chance: 100, duration: 2, value: 25 } },
+  ],
+  // Gyarados
+  130: [
+    { id: 'gya1', name: 'Hydro Pump', type: 'water', power: 65, accuracy: 85, cost: [{ type: 'water', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Blasts a torrent of water for 65 damage.', targetType: 'enemy' },
+    { id: 'gya2', name: 'Dragon Dance', type: 'dragon', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'A mystical dance. Boosts damage 30% for 2 turns.', targetType: 'self', statusEffect: { type: 'strengthen', chance: 100, duration: 2, value: 30 } },
+    { id: 'gya3', name: 'Crunch', type: 'dark', power: 50, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Crunches the enemy for 50 damage.', targetType: 'enemy' },
+    { id: 'gya4', name: 'Hurricane', type: 'flying', power: 55, accuracy: 80, cost: [{ type: 'water', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Summons a hurricane for 55 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 30, duration: 2 } },
+  ],
+  // Dragonite
+  149: [
+    { id: 'dnt1', name: 'Outrage', type: 'dragon', power: 65, accuracy: 100, cost: [{ type: 'colorless', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Goes on a furious rampage for 65 damage.', targetType: 'enemy' },
+    { id: 'dnt2', name: 'Hurricane', type: 'flying', power: 55, accuracy: 80, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Summons a hurricane for 55 damage.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 25, duration: 2 } },
+    { id: 'dnt3', name: 'Thunder Punch', type: 'electric', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'An electric punch for 45 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 20, duration: 2 } },
+    { id: 'dnt4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 2, currentCooldown: 0, description: 'Rests to heal 70 HP.', targetType: 'self', healing: 70 },
+  ],
+  // Nidoking
+  34: [
+    { id: 'ndk1', name: 'Earth Power', type: 'ground', power: 55, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Erupts the ground for 55 damage.', targetType: 'enemy' },
+    { id: 'ndk2', name: 'Sludge Wave', type: 'poison', power: 50, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A toxic wave for 50 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 3 } },
+    { id: 'ndk3', name: 'Megahorn', type: 'bug', power: 60, accuracy: 85, cost: [{ type: 'fighting', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'Charges with a massive horn for 60 damage.', targetType: 'enemy' },
+    { id: 'ndk4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 60 HP.', targetType: 'self', healing: 60 },
+  ],
+  // Nidoqueen
+  31: [
+    { id: 'ndq1', name: 'Earth Power', type: 'ground', power: 50, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Erupts the ground for 50 damage.', targetType: 'enemy' },
+    { id: 'ndq2', name: 'Poison Jab', type: 'poison', power: 45, accuracy: 100, cost: [{ type: 'darkness', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A toxic jab for 45 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 3 } },
+    { id: 'ndq3', name: 'Superpower', type: 'fighting', power: 55, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }, { type: 'colorless', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'A mighty blow for 55 damage.', targetType: 'enemy' },
+    { id: 'ndq4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 65 HP.', targetType: 'self', healing: 65 },
+  ],
+  // Golem
+  76: [
+    { id: 'glm1', name: 'Stone Edge', type: 'rock', power: 60, accuracy: 85, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Pierces with stone for 60 damage.', targetType: 'enemy' },
+    { id: 'glm2', name: 'Earthquake', type: 'ground', power: 50, accuracy: 100, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Shakes the ground for 50 damage to all.', targetType: 'all-enemies' },
+    { id: 'glm3', name: 'Explosion', type: 'normal', power: 100, accuracy: 100, cost: [{ type: 'colorless', amount: 4 }], cooldown: 99, currentCooldown: 0, description: 'A massive explosion for 100 damage. Faints the user.', targetType: 'enemy' },
+    { id: 'glm4', name: 'Rock Polish', type: 'rock', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Polishes body. Heals 50 HP.', targetType: 'self', healing: 50 },
+  ],
+  // Marowak
+  105: [
+    { id: 'mrw1', name: 'Bone Rush', type: 'ground', power: 55, accuracy: 95, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A relentless bone rush for 55 damage.', targetType: 'enemy' },
+    { id: 'mrw2', name: 'Bonemerang', type: 'ground', power: 45, accuracy: 90, cost: [{ type: 'fighting', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A bone boomerang for 45 damage.', targetType: 'enemy' },
+    { id: 'mrw3', name: 'Rock Slide', type: 'rock', power: 40, accuracy: 90, cost: [{ type: 'fighting', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Drops rocks for 40 damage. May stun.', targetType: 'enemy', statusEffect: { type: 'stun', chance: 25, duration: 1 } },
+    { id: 'mrw4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 55 HP.', targetType: 'self', healing: 55 },
+  ],
+  // Butterfree
+  12: [
+    { id: 'btf1', name: 'Bug Buzz', type: 'bug', power: 50, accuracy: 100, cost: [{ type: 'grass', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Vibrates wings for 50 damage.', targetType: 'enemy' },
+    { id: 'btf2', name: 'Psychic', type: 'psychic', power: 45, accuracy: 100, cost: [{ type: 'psychic', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A psychic blast for 45 damage.', targetType: 'enemy' },
+    { id: 'btf3', name: 'Sleep Powder', type: 'grass', power: 0, accuracy: 70, cost: [{ type: 'grass', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Scatters sleep powder. Puts the target to sleep.', targetType: 'enemy', statusEffect: { type: 'sleep', chance: 100, duration: 2 } },
+    { id: 'btf4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 55 HP.', targetType: 'self', healing: 55 },
+  ],
+  // Beedrill
+  15: [
+    { id: 'bdr1', name: 'Poison Jab', type: 'poison', power: 50, accuracy: 100, cost: [{ type: 'darkness', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Jabs with toxic stingers for 50 damage. May poison.', targetType: 'enemy', statusEffect: { type: 'poison', chance: 30, duration: 3 } },
+    { id: 'bdr2', name: 'X-Scissor', type: 'bug', power: 45, accuracy: 100, cost: [{ type: 'grass', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slashes in an X for 45 damage.', targetType: 'enemy' },
+    { id: 'bdr3', name: 'Agility', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Boosts speed. Reduces cooldowns by 1.', targetType: 'self', statusEffect: { type: 'cooldown-reduce', chance: 100, duration: 2, value: 1 } },
+    { id: 'bdr4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 50 HP.', targetType: 'self', healing: 50 },
+  ],
+  // Pidgeot
+  18: [
+    { id: 'pdg1', name: 'Hurricane', type: 'flying', power: 55, accuracy: 80, cost: [{ type: 'colorless', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'Summons a hurricane for 55 damage. May confuse.', targetType: 'enemy', statusEffect: { type: 'confuse', chance: 30, duration: 2 } },
+    { id: 'pdg2', name: 'Aerial Ace', type: 'flying', power: 40, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A swift aerial strike for 40 damage.', targetType: 'enemy' },
+    { id: 'pdg3', name: 'Quick Attack', type: 'normal', power: 30, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'A quick strike for 30 damage.', targetType: 'enemy' },
+    { id: 'pdg4', name: 'Roost', type: 'flying', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 2, currentCooldown: 0, description: 'Rests to heal 60 HP.', targetType: 'self', healing: 60 },
+  ],
+  // Arcanine
+  59: [
+    { id: 'arc1', name: 'Flare Blitz', type: 'fire', power: 65, accuracy: 100, cost: [{ type: 'fire', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A blazing charge for 65 damage.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 25, duration: 2 } },
+    { id: 'arc2', name: 'Extreme Speed', type: 'normal', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A blindingly fast strike for 45 damage.', targetType: 'enemy' },
+    { id: 'arc3', name: 'Crunch', type: 'dark', power: 40, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Crunches with fangs for 40 damage.', targetType: 'enemy' },
+    { id: 'arc4', name: 'Morning Sun', type: 'fire', power: 0, accuracy: 100, cost: [{ type: 'fire', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Absorbs morning light. Heals 65 HP.', targetType: 'self', healing: 65 },
+  ],
+  // Ninetales
+  38: [
+    { id: 'ntl1', name: 'Fire Blast', type: 'fire', power: 60, accuracy: 85, cost: [{ type: 'fire', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive fire blast for 60 damage. May burn.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 35, duration: 3 } },
+    { id: 'ntl2', name: 'Hex', type: 'ghost', power: 45, accuracy: 100, cost: [{ type: 'fire', amount: 1 }, { type: 'colorless', amount: 1 }], cooldown: 0, currentCooldown: 0, description: 'Curses the target for 45 damage.', targetType: 'enemy' },
+    { id: 'ntl3', name: 'Will-O-Wisp', type: 'fire', power: 0, accuracy: 80, cost: [{ type: 'fire', amount: 1 }], cooldown: 1, currentCooldown: 0, description: 'A ghostly flame. Burns the target.', targetType: 'enemy', statusEffect: { type: 'burn', chance: 100, duration: 3 } },
+    { id: 'ntl4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 60 HP.', targetType: 'self', healing: 60 },
+  ],
+  // Poliwrath
+  62: [
+    { id: 'plw1', name: 'Hydro Pump', type: 'water', power: 55, accuracy: 85, cost: [{ type: 'water', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A torrent of water for 55 damage.', targetType: 'enemy' },
+    { id: 'plw2', name: 'Submission', type: 'fighting', power: 50, accuracy: 90, cost: [{ type: 'fighting', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A grappling attack for 50 damage.', targetType: 'enemy' },
+    { id: 'plw3', name: 'Hypnosis', type: 'psychic', power: 0, accuracy: 65, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Puts the target to sleep.', targetType: 'enemy', statusEffect: { type: 'sleep', chance: 100, duration: 2 } },
+    { id: 'plw4', name: 'Recover', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Recovers 60 HP.', targetType: 'self', healing: 60 },
+  ],
+  // Raichu
+  26: [
+    { id: 'rai1', name: 'Thunder', type: 'electric', power: 60, accuracy: 75, cost: [{ type: 'lightning', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive thunderbolt for 60 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 40, duration: 2 } },
+    { id: 'rai2', name: 'Thunderbolt', type: 'electric', power: 50, accuracy: 100, cost: [{ type: 'lightning', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful bolt for 50 damage. May paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 25, duration: 2 } },
+    { id: 'rai3', name: 'Iron Tail', type: 'steel', power: 45, accuracy: 85, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'Slams with iron tail for 45 damage.', targetType: 'enemy' },
+    { id: 'rai4', name: 'Agility', type: 'normal', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Boosts speed. Heals 40 HP and reduces cooldowns.', targetType: 'self', healing: 40, statusEffect: { type: 'cooldown-reduce', chance: 100, duration: 2, value: 1 } },
+  ],
+  // Magneton
+  82: [
+    { id: 'mgt1', name: 'Thunder', type: 'electric', power: 60, accuracy: 75, cost: [{ type: 'lightning', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive thunderstorm for 60 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 40, duration: 2 } },
+    { id: 'mgt2', name: 'Flash Cannon', type: 'steel', power: 50, accuracy: 100, cost: [{ type: 'metal', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A focused cannon for 50 damage.', targetType: 'enemy' },
+    { id: 'mgt3', name: 'Tri Attack', type: 'normal', power: 45, accuracy: 100, cost: [{ type: 'colorless', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A triple beam for 45 damage. May burn/freeze/paralyze.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 20, duration: 2 } },
+    { id: 'mgt4', name: 'Iron Defense', type: 'steel', power: 0, accuracy: 100, cost: [{ type: 'metal', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Hardens body. Heals 55 HP.', targetType: 'self', healing: 55 },
+  ],
+  // Electrode
+  101: [
+    { id: 'elc1', name: 'Thunder', type: 'electric', power: 60, accuracy: 75, cost: [{ type: 'lightning', amount: 3 }], cooldown: 1, currentCooldown: 0, description: 'A massive thunderbolt for 60 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 40, duration: 2 } },
+    { id: 'elc2', name: 'Thunderbolt', type: 'electric', power: 50, accuracy: 100, cost: [{ type: 'lightning', amount: 2 }], cooldown: 0, currentCooldown: 0, description: 'A powerful bolt for 50 damage.', targetType: 'enemy', statusEffect: { type: 'paralyze', chance: 25, duration: 2 } },
+    { id: 'elc3', name: 'Explosion', type: 'normal', power: 100, accuracy: 100, cost: [{ type: 'colorless', amount: 4 }], cooldown: 99, currentCooldown: 0, description: 'A massive explosion for 100 damage. Faints the user.', targetType: 'enemy' },
+    { id: 'elc4', name: 'Charge', type: 'electric', power: 0, accuracy: 100, cost: [{ type: 'colorless', amount: 1 }], cooldown: 2, currentCooldown: 0, description: 'Charges power. Heals 40 HP.', targetType: 'self', healing: 40 },
+  ],
 };
 
 /** Get moves for a specific Pokemon — custom if available, else default by type */
@@ -410,147 +722,244 @@ export const getPokemonMoves = (pokemonId: number, primaryType: PokemonType): Mo
 // ==================== KANTO POKEMON ====================
 // All Pokemon have 100 HP as per game design. Evolution bar (evoBarMax) controls evolution speed.
 export const KANTO_POKEMON: KantoPokemonData[] = [
-  // === STARTERS ===
-  { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  { id: 4, name: 'Charmander', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 7, name: 'Squirtle', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  // === STARTERS === (balanced, good growth potential)
+  { id: 1, name: 'Bulbasaur', types: ['grass', 'poison'], hp: 100, baseStats: { attack: 45, defense: 45, spAtk: 55, spDef: 55, speed: 40 }, canEvolve: true, evolvesTo: { id: 2, name: 'Ivysaur', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 4, name: 'Charmander', types: ['fire'], hp: 100, baseStats: { attack: 48, defense: 38, spAtk: 55, spDef: 42, speed: 55 }, canEvolve: true, evolvesTo: { id: 5, name: 'Charmeleon', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 7, name: 'Squirtle', types: ['water'], hp: 100, baseStats: { attack: 42, defense: 55, spAtk: 45, spDef: 55, speed: 38 }, canEvolve: true, evolvesTo: { id: 8, name: 'Wartortle', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
   // === ICONIC ===
-  { id: 25, name: 'Pikachu', types: ['electric'], hp: 100, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
-  { id: 133, name: 'Eevee', types: ['normal'], hp: 100, canEvolve: true, evolutionOptions: [
-    { id: 134, name: 'Vaporeon', types: ['water'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'water', amount: 2 }] },
-    { id: 135, name: 'Jolteon', types: ['electric'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'lightning', amount: 2 }] },
-    { id: 136, name: 'Flareon', types: ['fire'], hpBonus: 0, statBonus: 15, energyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 25, name: 'Pikachu', types: ['electric'], hp: 100, baseStats: { attack: 50, defense: 35, spAtk: 50, spDef: 40, speed: 65 }, canEvolve: true, evolvesTo: { id: 26, name: 'Raichu', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 133, name: 'Eevee', types: ['normal'], hp: 100, baseStats: { attack: 50, defense: 45, spAtk: 50, spDef: 50, speed: 50 }, canEvolve: true, evolutionOptions: [
+    { id: 134, name: 'Vaporeon', types: ['water'], hpBonus: 20, statBonus: 20, energyCost: [{ type: 'water', amount: 2 }] },
+    { id: 135, name: 'Jolteon', types: ['electric'], hpBonus: 10, statBonus: 20, energyCost: [{ type: 'lightning', amount: 2 }] },
+    { id: 136, name: 'Flareon', types: ['fire'], hpBonus: 10, statBonus: 20, energyCost: [{ type: 'fire', amount: 2 }] },
   ] },
-  { id: 52, name: 'Meowth', types: ['normal'], hp: 100, canEvolve: true, evolvesTo: { id: 53, name: 'Persian', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
-  // === EARLY ROUTES ===
-  { id: 10, name: 'Caterpie', types: ['bug'], hp: 100, canEvolve: true, evolvesTo: { id: 11, name: 'Metapod', hpBonus: 0, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
-  { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 14, name: 'Kakuna', hpBonus: 0, statBonus: 5 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
-  { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 17, name: 'Pidgeotto', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
-  { id: 19, name: 'Rattata', types: ['normal'], hp: 100, canEvolve: true, evolvesTo: { id: 20, name: 'Raticate', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
-  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 22, name: 'Fearow', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 52, name: 'Meowth', types: ['normal'], hp: 100, baseStats: { attack: 40, defense: 35, spAtk: 40, spDef: 35, speed: 60 }, canEvolve: true, evolvesTo: { id: 53, name: 'Persian', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  // === EARLY ROUTES === (weak base, evolve to be useful)
+  { id: 10, name: 'Caterpie', types: ['bug'], hp: 100, baseStats: { attack: 25, defense: 30, spAtk: 25, spDef: 25, speed: 35 }, canEvolve: true, evolvesTo: { id: 11, name: 'Metapod', hpBonus: 10, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
+  { id: 13, name: 'Weedle', types: ['bug', 'poison'], hp: 100, baseStats: { attack: 30, defense: 25, spAtk: 25, spDef: 25, speed: 35 }, canEvolve: true, evolvesTo: { id: 14, name: 'Kakuna', hpBonus: 10, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 1 }] },
+  { id: 16, name: 'Pidgey', types: ['normal', 'flying'], hp: 100, baseStats: { attack: 40, defense: 35, spAtk: 35, spDef: 30, speed: 50 }, canEvolve: true, evolvesTo: { id: 17, name: 'Pidgeotto', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 19, name: 'Rattata', types: ['normal'], hp: 100, baseStats: { attack: 50, defense: 30, spAtk: 30, spDef: 30, speed: 60 }, canEvolve: true, evolvesTo: { id: 20, name: 'Raticate', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 21, name: 'Spearow', types: ['normal', 'flying'], hp: 100, baseStats: { attack: 55, defense: 30, spAtk: 30, spDef: 30, speed: 55 }, canEvolve: true, evolvesTo: { id: 22, name: 'Fearow', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === NIDORAN LINES ===
-  { id: 29, name: 'NidoranF', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 30, name: 'Nidorina', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
-  { id: 32, name: 'NidoranM', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 33, name: 'Nidorino', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 29, name: 'NidoranF', types: ['poison'], hp: 100, baseStats: { attack: 42, defense: 42, spAtk: 38, spDef: 38, speed: 38 }, canEvolve: true, evolvesTo: { id: 30, name: 'Nidorina', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 32, name: 'NidoranM', types: ['poison'], hp: 100, baseStats: { attack: 50, defense: 35, spAtk: 38, spDef: 35, speed: 42 }, canEvolve: true, evolvesTo: { id: 33, name: 'Nidorino', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
   // === FAIRY ===
-  { id: 35, name: 'Clefairy', types: ['fairy'], hp: 100, canEvolve: true, evolvesTo: { id: 36, name: 'Clefable', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 39, name: 'Jigglypuff', types: ['normal', 'fairy'], hp: 100, canEvolve: true, evolvesTo: { id: 40, name: 'Wigglytuff', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 35, name: 'Clefairy', types: ['fairy'], hp: 100, baseStats: { attack: 40, defense: 45, spAtk: 55, spDef: 55, speed: 30 }, canEvolve: true, evolvesTo: { id: 36, name: 'Clefable', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 39, name: 'Jigglypuff', types: ['normal', 'fairy'], hp: 100, baseStats: { attack: 40, defense: 30, spAtk: 40, spDef: 30, speed: 25 }, canEvolve: true, evolvesTo: { id: 40, name: 'Wigglytuff', hpBonus: 25, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
   // === FIRE ===
-  { id: 37, name: 'Vulpix', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 38, name: 'Ninetales', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 58, name: 'Growlithe', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 59, name: 'Arcanine', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
-  { id: 77, name: 'Ponyta', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 78, name: 'Rapidash', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 37, name: 'Vulpix', types: ['fire'], hp: 100, baseStats: { attack: 38, defense: 35, spAtk: 55, spDef: 55, speed: 55 }, canEvolve: true, evolvesTo: { id: 38, name: 'Ninetales', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 58, name: 'Growlithe', types: ['fire'], hp: 100, baseStats: { attack: 55, defense: 40, spAtk: 55, spDef: 42, speed: 50 }, canEvolve: true, evolvesTo: { id: 59, name: 'Arcanine', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
+  { id: 77, name: 'Ponyta', types: ['fire'], hp: 100, baseStats: { attack: 50, defense: 40, spAtk: 50, spDef: 55, speed: 60 }, canEvolve: true, evolvesTo: { id: 78, name: 'Rapidash', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fire', amount: 2 }] },
   // === GRASS/POISON ===
-  { id: 43, name: 'Oddish', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 44, name: 'Gloom', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 43, name: 'Oddish', types: ['grass', 'poison'], hp: 100, baseStats: { attack: 40, defense: 45, spAtk: 55, spDef: 50, speed: 25 }, canEvolve: true, evolvesTo: { id: 44, name: 'Gloom', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
   // === WATER ===
-  { id: 60, name: 'Poliwag', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 61, name: 'Poliwhirl', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
-  { id: 79, name: 'Slowpoke', types: ['water', 'psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 80, name: 'Slowbro', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 116, name: 'Horsea', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 117, name: 'Seadra', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
-  { id: 129, name: 'Magikarp', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 130, name: 'Gyarados', hpBonus: 0, statBonus: 25 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  { id: 60, name: 'Poliwag', types: ['water'], hp: 100, baseStats: { attack: 40, defense: 35, spAtk: 38, spDef: 35, speed: 55 }, canEvolve: true, evolvesTo: { id: 61, name: 'Poliwhirl', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 79, name: 'Slowpoke', types: ['water', 'psychic'], hp: 100, baseStats: { attack: 55, defense: 55, spAtk: 35, spDef: 35, speed: 15 }, canEvolve: true, evolvesTo: { id: 80, name: 'Slowbro', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 116, name: 'Horsea', types: ['water'], hp: 100, baseStats: { attack: 35, defense: 45, spAtk: 55, spDef: 30, speed: 50 }, canEvolve: true, evolvesTo: { id: 117, name: 'Seadra', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 129, name: 'Magikarp', types: ['water'], hp: 100, baseStats: { attack: 20, defense: 45, spAtk: 15, spDef: 25, speed: 55 }, canEvolve: true, evolvesTo: { id: 130, name: 'Gyarados', hpBonus: 25, statBonus: 30 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
   // === PSYCHIC/GHOST ===
-  { id: 63, name: 'Abra', types: ['psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 64, name: 'Kadabra', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
-  { id: 92, name: 'Gastly', types: ['ghost', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 93, name: 'Haunter', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 63, name: 'Abra', types: ['psychic'], hp: 100, baseStats: { attack: 25, defense: 20, spAtk: 65, spDef: 45, speed: 60 }, canEvolve: true, evolvesTo: { id: 64, name: 'Kadabra', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 92, name: 'Gastly', types: ['ghost', 'poison'], hp: 100, baseStats: { attack: 30, defense: 25, spAtk: 65, spDef: 30, speed: 55 }, canEvolve: true, evolvesTo: { id: 93, name: 'Haunter', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
   // === FIGHTING/ROCK/GROUND ===
-  { id: 66, name: 'Machop', types: ['fighting'], hp: 100, canEvolve: true, evolvesTo: { id: 67, name: 'Machoke', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
-  { id: 74, name: 'Geodude', types: ['rock', 'ground'], hp: 100, canEvolve: true, evolvesTo: { id: 75, name: 'Graveler', hpBonus: 0, statBonus: 10 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
-  { id: 104, name: 'Cubone', types: ['ground'], hp: 100, canEvolve: true, evolvesTo: { id: 105, name: 'Marowak', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 66, name: 'Machop', types: ['fighting'], hp: 100, baseStats: { attack: 60, defense: 40, spAtk: 30, spDef: 30, speed: 30 }, canEvolve: true, evolvesTo: { id: 67, name: 'Machoke', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 74, name: 'Geodude', types: ['rock', 'ground'], hp: 100, baseStats: { attack: 55, defense: 65, spAtk: 25, spDef: 25, speed: 20 }, canEvolve: true, evolvesTo: { id: 75, name: 'Graveler', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 104, name: 'Cubone', types: ['ground'], hp: 100, baseStats: { attack: 45, defense: 60, spAtk: 35, spDef: 42, speed: 30 }, canEvolve: true, evolvesTo: { id: 105, name: 'Marowak', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
   // === ELECTRIC/STEEL ===
-  { id: 81, name: 'Magnemite', types: ['electric', 'steel'], hp: 100, canEvolve: true, evolvesTo: { id: 82, name: 'Magneton', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
-  { id: 100, name: 'Voltorb', types: ['electric'], hp: 100, canEvolve: true, evolvesTo: { id: 101, name: 'Electrode', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 81, name: 'Magnemite', types: ['electric', 'steel'], hp: 100, baseStats: { attack: 30, defense: 55, spAtk: 60, spDef: 45, speed: 35 }, canEvolve: true, evolvesTo: { id: 82, name: 'Magneton', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
+  { id: 100, name: 'Voltorb', types: ['electric'], hp: 100, baseStats: { attack: 30, defense: 40, spAtk: 45, spDef: 45, speed: 65 }, canEvolve: true, evolvesTo: { id: 101, name: 'Electrode', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'lightning', amount: 2 }] },
   // === POISON ===
-  { id: 23, name: 'Ekans', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 24, name: 'Arbok', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
-  { id: 109, name: 'Koffing', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 110, name: 'Weezing', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 23, name: 'Ekans', types: ['poison'], hp: 100, baseStats: { attack: 50, defense: 38, spAtk: 35, spDef: 42, speed: 45 }, canEvolve: true, evolvesTo: { id: 24, name: 'Arbok', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 109, name: 'Koffing', types: ['poison'], hp: 100, baseStats: { attack: 55, defense: 60, spAtk: 50, spDef: 38, speed: 30 }, canEvolve: true, evolvesTo: { id: 110, name: 'Weezing', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
   // === DRAGON ===
-  { id: 147, name: 'Dratini', types: ['dragon'], hp: 100, canEvolve: true, evolvesTo: { id: 148, name: 'Dragonair', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 147, name: 'Dratini', types: ['dragon'], hp: 100, baseStats: { attack: 50, defense: 40, spAtk: 45, spDef: 42, speed: 42 }, canEvolve: true, evolvesTo: { id: 148, name: 'Dragonair', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+
+  // === STANDALONE GEN 1 (no evolution in Gen 1) ===
+  { id: 83, name: 'Farfetchd', types: ['normal', 'flying'], hp: 100, baseStats: { attack: 55, defense: 50, spAtk: 48, spDef: 50, speed: 50 }, canEvolve: false },
+  { id: 84, name: 'Doduo', types: ['normal', 'flying'], hp: 100, baseStats: { attack: 55, defense: 35, spAtk: 30, spDef: 30, speed: 55 }, canEvolve: true, evolvesTo: { id: 85, name: 'Dodrio', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 2 }] },
+  { id: 86, name: 'Seel', types: ['water'], hp: 100, baseStats: { attack: 40, defense: 45, spAtk: 40, spDef: 55, speed: 35 }, canEvolve: true, evolvesTo: { id: 87, name: 'Dewgong', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 88, name: 'Grimer', types: ['poison'], hp: 100, baseStats: { attack: 55, defense: 45, spAtk: 35, spDef: 40, speed: 20 }, canEvolve: true, evolvesTo: { id: 89, name: 'Muk', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  { id: 90, name: 'Shellder', types: ['water'], hp: 100, baseStats: { attack: 55, defense: 80, spAtk: 35, spDef: 20, speed: 35 }, canEvolve: true, evolvesTo: { id: 91, name: 'Cloyster', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 98, name: 'Krabby', types: ['water'], hp: 100, baseStats: { attack: 65, defense: 55, spAtk: 25, spDef: 25, speed: 40 }, canEvolve: true, evolvesTo: { id: 99, name: 'Kingler', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 114, name: 'Tangela', types: ['grass'], hp: 100, baseStats: { attack: 45, defense: 65, spAtk: 65, spDef: 35, speed: 50 }, canEvolve: false },
+
+  // === MISSING GEN 1 — GROUND ===
+  { id: 27, name: 'Sandshrew', types: ['ground'], hp: 100, baseStats: { attack: 55, defense: 65, spAtk: 25, spDef: 30, speed: 35 }, canEvolve: true, evolvesTo: { id: 28, name: 'Sandslash', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 50, name: 'Diglett', types: ['ground'], hp: 100, baseStats: { attack: 45, defense: 20, spAtk: 30, spDef: 35, speed: 70 }, canEvolve: true, evolvesTo: { id: 51, name: 'Dugtrio', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 111, name: 'Rhyhorn', types: ['ground', 'rock'], hp: 100, baseStats: { attack: 60, defense: 70, spAtk: 25, spDef: 25, speed: 20 }, canEvolve: true, evolvesTo: { id: 112, name: 'Rhydon', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  // === POISON/FLYING ===
+  { id: 41, name: 'Zubat', types: ['poison', 'flying'], hp: 100, baseStats: { attack: 40, defense: 30, spAtk: 25, spDef: 35, speed: 50 }, canEvolve: true, evolvesTo: { id: 42, name: 'Golbat', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 2 }] },
+  // === BUG ===
+  { id: 46, name: 'Paras', types: ['bug', 'grass'], hp: 100, baseStats: { attack: 55, defense: 45, spAtk: 40, spDef: 45, speed: 20 }, canEvolve: true, evolvesTo: { id: 47, name: 'Parasect', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 48, name: 'Venonat', types: ['bug', 'poison'], hp: 100, baseStats: { attack: 45, defense: 40, spAtk: 35, spDef: 45, speed: 40 }, canEvolve: true, evolvesTo: { id: 49, name: 'Venomoth', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  { id: 123, name: 'Scyther', types: ['bug', 'flying'], hp: 100, baseStats: { attack: 65, defense: 50, spAtk: 40, spDef: 50, speed: 65 }, canEvolve: false },
+  { id: 127, name: 'Pinsir', types: ['bug'], hp: 100, baseStats: { attack: 70, defense: 60, spAtk: 40, spDef: 45, speed: 55 }, canEvolve: false },
+  // === WATER ===
+  { id: 54, name: 'Psyduck', types: ['water'], hp: 100, baseStats: { attack: 42, defense: 38, spAtk: 55, spDef: 40, speed: 45 }, canEvolve: true, evolvesTo: { id: 55, name: 'Golduck', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 72, name: 'Tentacool', types: ['water', 'poison'], hp: 100, baseStats: { attack: 35, defense: 30, spAtk: 40, spDef: 65, speed: 55 }, canEvolve: true, evolvesTo: { id: 73, name: 'Tentacruel', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 118, name: 'Goldeen', types: ['water'], hp: 100, baseStats: { attack: 55, defense: 45, spAtk: 35, spDef: 40, speed: 50 }, canEvolve: true, evolvesTo: { id: 119, name: 'Seaking', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 120, name: 'Staryu', types: ['water'], hp: 100, baseStats: { attack: 40, defense: 45, spAtk: 55, spDef: 45, speed: 60 }, canEvolve: true, evolvesTo: { id: 121, name: 'Starmie', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 131, name: 'Lapras', types: ['water', 'ice'], hp: 100, baseStats: { attack: 50, defense: 55, spAtk: 60, spDef: 60, speed: 40 }, canEvolve: false },
+  // === FIGHTING ===
+  { id: 56, name: 'Mankey', types: ['fighting'], hp: 100, baseStats: { attack: 55, defense: 30, spAtk: 30, spDef: 35, speed: 55 }, canEvolve: true, evolvesTo: { id: 57, name: 'Primeape', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 2 }] },
+  { id: 106, name: 'Hitmonlee', types: ['fighting'], hp: 100, baseStats: { attack: 65, defense: 40, spAtk: 30, spDef: 60, speed: 60 }, canEvolve: false },
+  { id: 107, name: 'Hitmonchan', types: ['fighting'], hp: 100, baseStats: { attack: 65, defense: 55, spAtk: 30, spDef: 60, speed: 50 }, canEvolve: false },
+  // === GRASS/POISON ===
+  { id: 69, name: 'Bellsprout', types: ['grass', 'poison'], hp: 100, baseStats: { attack: 55, defense: 30, spAtk: 55, spDef: 25, speed: 35 }, canEvolve: true, evolvesTo: { id: 70, name: 'Weepinbell', hpBonus: 15, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  // === PSYCHIC ===
+  { id: 96, name: 'Drowzee', types: ['psychic'], hp: 100, baseStats: { attack: 38, defense: 40, spAtk: 38, spDef: 60, speed: 38 }, canEvolve: true, evolvesTo: { id: 97, name: 'Hypno', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 2 }] },
+  { id: 122, name: 'MrMime', types: ['psychic', 'fairy'], hp: 100, baseStats: { attack: 35, defense: 55, spAtk: 65, spDef: 65, speed: 55 }, canEvolve: false },
+  { id: 124, name: 'Jynx', types: ['ice', 'psychic'], hp: 100, baseStats: { attack: 40, defense: 30, spAtk: 65, spDef: 60, speed: 60 }, canEvolve: false },
+  // === GRASS/PSYCHIC ===
+  { id: 102, name: 'Exeggcute', types: ['grass', 'psychic'], hp: 100, baseStats: { attack: 35, defense: 55, spAtk: 50, spDef: 35, speed: 35 }, canEvolve: true, evolvesTo: { id: 103, name: 'Exeggutor', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  // === ROCK ===
+  { id: 95, name: 'Onix', types: ['rock', 'ground'], hp: 100, baseStats: { attack: 40, defense: 80, spAtk: 25, spDef: 35, speed: 50 }, canEvolve: false },
+  { id: 138, name: 'Omanyte', types: ['rock', 'water'], hp: 100, baseStats: { attack: 35, defense: 65, spAtk: 60, spDef: 45, speed: 25 }, canEvolve: true, evolvesTo: { id: 139, name: 'Omastar', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 140, name: 'Kabuto', types: ['rock', 'water'], hp: 100, baseStats: { attack: 55, defense: 65, spAtk: 35, spDef: 30, speed: 40 }, canEvolve: true, evolvesTo: { id: 141, name: 'Kabutops', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 2 }] },
+  { id: 142, name: 'Aerodactyl', types: ['rock', 'flying'], hp: 100, baseStats: { attack: 65, defense: 55, spAtk: 45, spDef: 50, speed: 70 }, canEvolve: false },
+  // === NORMAL ===
+  { id: 108, name: 'Lickitung', types: ['normal'], hp: 100, baseStats: { attack: 45, defense: 55, spAtk: 50, spDef: 55, speed: 25 }, canEvolve: false },
+  { id: 113, name: 'Chansey', types: ['normal'], hp: 100, baseStats: { attack: 15, defense: 15, spAtk: 30, spDef: 65, speed: 45 }, canEvolve: false },
+  { id: 115, name: 'Kangaskhan', types: ['normal'], hp: 100, baseStats: { attack: 60, defense: 55, spAtk: 35, spDef: 55, speed: 55 }, canEvolve: false },
+  { id: 128, name: 'Tauros', types: ['normal'], hp: 100, baseStats: { attack: 65, defense: 60, spAtk: 35, spDef: 50, speed: 65 }, canEvolve: false },
+  { id: 132, name: 'Ditto', types: ['normal'], hp: 100, baseStats: { attack: 45, defense: 45, spAtk: 45, spDef: 45, speed: 45 }, canEvolve: false },
+  { id: 137, name: 'Porygon', types: ['normal'], hp: 100, baseStats: { attack: 50, defense: 55, spAtk: 60, spDef: 55, speed: 35 }, canEvolve: false },
+  { id: 143, name: 'Snorlax', types: ['normal'], hp: 100, baseStats: { attack: 65, defense: 55, spAtk: 55, spDef: 65, speed: 15 }, canEvolve: false },
+  // === ELECTRIC ===
+  { id: 125, name: 'Electabuzz', types: ['electric'], hp: 100, baseStats: { attack: 58, defense: 48, spAtk: 60, spDef: 55, speed: 65 }, canEvolve: false },
+  // === FIRE ===
+  { id: 126, name: 'Magmar', types: ['fire'], hp: 100, baseStats: { attack: 60, defense: 48, spAtk: 65, spDef: 55, speed: 58 }, canEvolve: false },
 ];
 
 export const AI_POKEMON_POOL: KantoPokemonData[] = KANTO_POKEMON;
 
 export const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
-  // All evolved forms also have 100 HP
+  // Evolved forms: hp field = maxHp of that form (base 100 + accumulated hpBonus)
   // === Bulbasaur line ===
-  2: { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
-  3: { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 100, canEvolve: false },
+  2: { id: 2, name: 'Ivysaur', types: ['grass', 'poison'], hp: 115, canEvolve: true, evolvesTo: { id: 3, name: 'Venusaur', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  3: { id: 3, name: 'Venusaur', types: ['grass', 'poison'], hp: 135, canEvolve: false },
   // === Charmander line ===
-  5: { id: 5, name: 'Charmeleon', types: ['fire'], hp: 100, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
-  6: { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 100, canEvolve: false },
+  5: { id: 5, name: 'Charmeleon', types: ['fire'], hp: 115, canEvolve: true, evolvesTo: { id: 6, name: 'Charizard', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fire', amount: 3 }] },
+  6: { id: 6, name: 'Charizard', types: ['fire', 'flying'], hp: 135, canEvolve: false },
   // === Squirtle line ===
-  8: { id: 8, name: 'Wartortle', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
-  9: { id: 9, name: 'Blastoise', types: ['water'], hp: 100, canEvolve: false },
+  8: { id: 8, name: 'Wartortle', types: ['water'], hp: 115, canEvolve: true, evolvesTo: { id: 9, name: 'Blastoise', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  9: { id: 9, name: 'Blastoise', types: ['water'], hp: 135, canEvolve: false },
   // === Caterpie line ===
-  11: { id: 11, name: 'Metapod', types: ['bug'], hp: 100, canEvolve: true, evolvesTo: { id: 12, name: 'Butterfree', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  12: { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 100, canEvolve: false },
+  11: { id: 11, name: 'Metapod', types: ['bug'], hp: 110, canEvolve: true, evolvesTo: { id: 12, name: 'Butterfree', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  12: { id: 12, name: 'Butterfree', types: ['bug', 'flying'], hp: 125, canEvolve: false },
   // === Weedle line ===
-  14: { id: 14, name: 'Kakuna', types: ['bug', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 15, name: 'Beedrill', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
-  15: { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 100, canEvolve: false },
+  14: { id: 14, name: 'Kakuna', types: ['bug', 'poison'], hp: 110, canEvolve: true, evolvesTo: { id: 15, name: 'Beedrill', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 2 }] },
+  15: { id: 15, name: 'Beedrill', types: ['bug', 'poison'], hp: 125, canEvolve: false },
   // === Pidgey line ===
-  17: { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 100, canEvolve: true, evolvesTo: { id: 18, name: 'Pidgeot', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
-  18: { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 100, canEvolve: false },
+  17: { id: 17, name: 'Pidgeotto', types: ['normal', 'flying'], hp: 115, canEvolve: true, evolvesTo: { id: 18, name: 'Pidgeot', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
+  18: { id: 18, name: 'Pidgeot', types: ['normal', 'flying'], hp: 135, canEvolve: false },
   // === Rattata line ===
-  20: { id: 20, name: 'Raticate', types: ['normal'], hp: 100, canEvolve: false },
+  20: { id: 20, name: 'Raticate', types: ['normal'], hp: 115, canEvolve: false },
   // === Spearow line ===
-  22: { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 100, canEvolve: false },
+  22: { id: 22, name: 'Fearow', types: ['normal', 'flying'], hp: 115, canEvolve: false },
   // === Ekans line ===
-  24: { id: 24, name: 'Arbok', types: ['poison'], hp: 100, canEvolve: false },
+  24: { id: 24, name: 'Arbok', types: ['poison'], hp: 115, canEvolve: false },
   // === Pikachu line ===
-  26: { id: 26, name: 'Raichu', types: ['electric'], hp: 100, canEvolve: false },
+  26: { id: 26, name: 'Raichu', types: ['electric'], hp: 115, canEvolve: false },
   // === Sandshrew line ===
-  28: { id: 28, name: 'Sandslash', types: ['ground'], hp: 100, canEvolve: false },
+  28: { id: 28, name: 'Sandslash', types: ['ground'], hp: 115, canEvolve: false },
   // === NidoranF line ===
-  30: { id: 30, name: 'Nidorina', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 31, name: 'Nidoqueen', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
-  31: { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 100, canEvolve: false },
+  30: { id: 30, name: 'Nidorina', types: ['poison'], hp: 115, canEvolve: true, evolvesTo: { id: 31, name: 'Nidoqueen', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
+  31: { id: 31, name: 'Nidoqueen', types: ['poison', 'ground'], hp: 135, canEvolve: false },
   // === NidoranM line ===
-  33: { id: 33, name: 'Nidorino', types: ['poison'], hp: 100, canEvolve: true, evolvesTo: { id: 34, name: 'Nidoking', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
-  34: { id: 34, name: 'Nidoking', types: ['poison', 'ground'], hp: 100, canEvolve: false },
+  33: { id: 33, name: 'Nidorino', types: ['poison'], hp: 115, canEvolve: true, evolvesTo: { id: 34, name: 'Nidoking', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'darkness', amount: 3 }] },
+  34: { id: 34, name: 'Nidoking', types: ['poison', 'ground'], hp: 135, canEvolve: false },
   // === Clefairy line ===
-  36: { id: 36, name: 'Clefable', types: ['fairy'], hp: 100, canEvolve: false },
+  36: { id: 36, name: 'Clefable', types: ['fairy'], hp: 120, canEvolve: false },
   // === Vulpix line ===
-  38: { id: 38, name: 'Ninetales', types: ['fire'], hp: 100, canEvolve: false },
+  38: { id: 38, name: 'Ninetales', types: ['fire'], hp: 115, canEvolve: false },
   // === Jigglypuff line ===
-  40: { id: 40, name: 'Wigglytuff', types: ['normal', 'fairy'], hp: 100, canEvolve: false },
+  40: { id: 40, name: 'Wigglytuff', types: ['normal', 'fairy'], hp: 125, canEvolve: false },
   // === Oddish line ===
-  44: { id: 44, name: 'Gloom', types: ['grass', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 45, name: 'Vileplume', hpBonus: 0, statBonus: 12 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
-  45: { id: 45, name: 'Vileplume', types: ['grass', 'poison'], hp: 100, canEvolve: false },
+  44: { id: 44, name: 'Gloom', types: ['grass', 'poison'], hp: 115, canEvolve: true, evolvesTo: { id: 45, name: 'Vileplume', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  45: { id: 45, name: 'Vileplume', types: ['grass', 'poison'], hp: 135, canEvolve: false },
   // === Meowth line ===
-  53: { id: 53, name: 'Persian', types: ['normal'], hp: 100, canEvolve: false },
+  53: { id: 53, name: 'Persian', types: ['normal'], hp: 115, canEvolve: false },
   // === Growlithe line ===
-  59: { id: 59, name: 'Arcanine', types: ['fire'], hp: 100, canEvolve: false },
+  59: { id: 59, name: 'Arcanine', types: ['fire'], hp: 120, canEvolve: false },
   // === Poliwag line ===
-  61: { id: 61, name: 'Poliwhirl', types: ['water'], hp: 100, canEvolve: true, evolvesTo: { id: 62, name: 'Poliwrath', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
-  62: { id: 62, name: 'Poliwrath', types: ['water', 'fighting'], hp: 100, canEvolve: false },
+  61: { id: 61, name: 'Poliwhirl', types: ['water'], hp: 115, canEvolve: true, evolvesTo: { id: 62, name: 'Poliwrath', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'water', amount: 3 }] },
+  62: { id: 62, name: 'Poliwrath', types: ['water', 'fighting'], hp: 135, canEvolve: false },
   // === Abra line ===
-  64: { id: 64, name: 'Kadabra', types: ['psychic'], hp: 100, canEvolve: true, evolvesTo: { id: 65, name: 'Alakazam', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  65: { id: 65, name: 'Alakazam', types: ['psychic'], hp: 100, canEvolve: false },
+  64: { id: 64, name: 'Kadabra', types: ['psychic'], hp: 115, canEvolve: true, evolvesTo: { id: 65, name: 'Alakazam', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
+  65: { id: 65, name: 'Alakazam', types: ['psychic'], hp: 130, canEvolve: false },
   // === Machop line ===
-  67: { id: 67, name: 'Machoke', types: ['fighting'], hp: 100, canEvolve: true, evolvesTo: { id: 68, name: 'Machamp', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
-  68: { id: 68, name: 'Machamp', types: ['fighting'], hp: 100, canEvolve: false },
+  67: { id: 67, name: 'Machoke', types: ['fighting'], hp: 115, canEvolve: true, evolvesTo: { id: 68, name: 'Machamp', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
+  68: { id: 68, name: 'Machamp', types: ['fighting'], hp: 135, canEvolve: false },
   // === Geodude line ===
-  75: { id: 75, name: 'Graveler', types: ['rock', 'ground'], hp: 100, canEvolve: true, evolvesTo: { id: 76, name: 'Golem', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
-  76: { id: 76, name: 'Golem', types: ['rock', 'ground'], hp: 100, canEvolve: false },
+  75: { id: 75, name: 'Graveler', types: ['rock', 'ground'], hp: 115, canEvolve: true, evolvesTo: { id: 76, name: 'Golem', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'fighting', amount: 3 }] },
+  76: { id: 76, name: 'Golem', types: ['rock', 'ground'], hp: 135, canEvolve: false },
   // === Ponyta line ===
-  78: { id: 78, name: 'Rapidash', types: ['fire'], hp: 100, canEvolve: false },
+  78: { id: 78, name: 'Rapidash', types: ['fire'], hp: 115, canEvolve: false },
   // === Slowpoke line ===
-  80: { id: 80, name: 'Slowbro', types: ['water', 'psychic'], hp: 100, canEvolve: false },
+  80: { id: 80, name: 'Slowbro', types: ['water', 'psychic'], hp: 120, canEvolve: false },
   // === Magnemite line ===
-  82: { id: 82, name: 'Magneton', types: ['electric', 'steel'], hp: 100, canEvolve: false },
+  82: { id: 82, name: 'Magneton', types: ['electric', 'steel'], hp: 115, canEvolve: false },
+  // === Doduo line ===
+  85: { id: 85, name: 'Dodrio', types: ['normal', 'flying'], hp: 115, canEvolve: false },
+  // === Seel line ===
+  87: { id: 87, name: 'Dewgong', types: ['water', 'ice'], hp: 120, canEvolve: false },
+  // === Grimer line ===
+  89: { id: 89, name: 'Muk', types: ['poison'], hp: 115, canEvolve: false },
+  // === Shellder line ===
+  91: { id: 91, name: 'Cloyster', types: ['water', 'ice'], hp: 115, canEvolve: false },
   // === Gastly line ===
-  93: { id: 93, name: 'Haunter', types: ['ghost', 'poison'], hp: 100, canEvolve: true, evolvesTo: { id: 94, name: 'Gengar', hpBonus: 0, statBonus: 15 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
-  94: { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 100, canEvolve: false },
+  93: { id: 93, name: 'Haunter', types: ['ghost', 'poison'], hp: 115, canEvolve: true, evolvesTo: { id: 94, name: 'Gengar', hpBonus: 15, statBonus: 20 }, evolutionEnergyCost: [{ type: 'psychic', amount: 3 }] },
+  94: { id: 94, name: 'Gengar', types: ['ghost', 'poison'], hp: 130, canEvolve: false },
+  // === Krabby line ===
+  99: { id: 99, name: 'Kingler', types: ['water'], hp: 115, canEvolve: false },
   // === Voltorb line ===
-  101: { id: 101, name: 'Electrode', types: ['electric'], hp: 100, canEvolve: false },
+  101: { id: 101, name: 'Electrode', types: ['electric'], hp: 115, canEvolve: false },
   // === Cubone line ===
-  105: { id: 105, name: 'Marowak', types: ['ground'], hp: 100, canEvolve: false },
+  105: { id: 105, name: 'Marowak', types: ['ground'], hp: 115, canEvolve: false },
   // === Koffing line ===
-  110: { id: 110, name: 'Weezing', types: ['poison'], hp: 100, canEvolve: false },
+  110: { id: 110, name: 'Weezing', types: ['poison'], hp: 115, canEvolve: false },
   // === Horsea line ===
-  117: { id: 117, name: 'Seadra', types: ['water'], hp: 100, canEvolve: false },
+  117: { id: 117, name: 'Seadra', types: ['water'], hp: 115, canEvolve: false },
   // === Magikarp line ===
-  130: { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 100, canEvolve: false },
+  130: { id: 130, name: 'Gyarados', types: ['water', 'flying'], hp: 125, canEvolve: false },
   // === Eevee evolutions ===
-  134: { id: 134, name: 'Vaporeon', types: ['water'], hp: 100, canEvolve: false },
-  135: { id: 135, name: 'Jolteon', types: ['electric'], hp: 100, canEvolve: false },
-  136: { id: 136, name: 'Flareon', types: ['fire'], hp: 100, canEvolve: false },
+  134: { id: 134, name: 'Vaporeon', types: ['water'], hp: 120, canEvolve: false },
+  135: { id: 135, name: 'Jolteon', types: ['electric'], hp: 110, canEvolve: false },
+  136: { id: 136, name: 'Flareon', types: ['fire'], hp: 110, canEvolve: false },
+  // === Zubat line ===
+  42: { id: 42, name: 'Golbat', types: ['poison', 'flying'], hp: 115, canEvolve: false },
+  // === Paras line ===
+  47: { id: 47, name: 'Parasect', types: ['bug', 'grass'], hp: 115, canEvolve: false },
+  // === Venonat line ===
+  49: { id: 49, name: 'Venomoth', types: ['bug', 'poison'], hp: 115, canEvolve: false },
+  // === Diglett line ===
+  51: { id: 51, name: 'Dugtrio', types: ['ground'], hp: 115, canEvolve: false },
+  // === Psyduck line ===
+  55: { id: 55, name: 'Golduck', types: ['water'], hp: 115, canEvolve: false },
+  // === Mankey line ===
+  57: { id: 57, name: 'Primeape', types: ['fighting'], hp: 115, canEvolve: false },
+  // === Bellsprout line ===
+  70: { id: 70, name: 'Weepinbell', types: ['grass', 'poison'], hp: 115, canEvolve: true, evolvesTo: { id: 71, name: 'Victreebel', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'grass', amount: 3 }] },
+  71: { id: 71, name: 'Victreebel', types: ['grass', 'poison'], hp: 135, canEvolve: false },
+  // === Tentacool line ===
+  73: { id: 73, name: 'Tentacruel', types: ['water', 'poison'], hp: 115, canEvolve: false },
+  // === Drowzee line ===
+  97: { id: 97, name: 'Hypno', types: ['psychic'], hp: 115, canEvolve: false },
+  // === Exeggcute line ===
+  103: { id: 103, name: 'Exeggutor', types: ['grass', 'psychic'], hp: 120, canEvolve: false },
+  // === Rhyhorn line ===
+  112: { id: 112, name: 'Rhydon', types: ['ground', 'rock'], hp: 120, canEvolve: false },
+  // === Goldeen line ===
+  119: { id: 119, name: 'Seaking', types: ['water'], hp: 115, canEvolve: false },
+  // === Staryu line ===
+  121: { id: 121, name: 'Starmie', types: ['water', 'psychic'], hp: 115, canEvolve: false },
+  // === Omanyte line ===
+  139: { id: 139, name: 'Omastar', types: ['rock', 'water'], hp: 115, canEvolve: false },
+  // === Kabuto line ===
+  141: { id: 141, name: 'Kabutops', types: ['rock', 'water'], hp: 115, canEvolve: false },
   // === Dratini line ===
-  148: { id: 148, name: 'Dragonair', types: ['dragon'], hp: 100, canEvolve: true, evolvesTo: { id: 149, name: 'Dragonite', hpBonus: 0, statBonus: 18 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
-  149: { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 100, canEvolve: false },
+  148: { id: 148, name: 'Dragonair', types: ['dragon'], hp: 115, canEvolve: true, evolvesTo: { id: 149, name: 'Dragonite', hpBonus: 20, statBonus: 20 }, evolutionEnergyCost: [{ type: 'colorless', amount: 3 }] },
+  149: { id: 149, name: 'Dragonite', types: ['dragon', 'flying'], hp: 135, canEvolve: false },
 };
 
 // ==================== TRAINERS ====================

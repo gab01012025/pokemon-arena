@@ -19,13 +19,18 @@
  * - tai   -> lightning (taijutsu -> lightning type)
  * - rand  -> colorless (any type)
  */
-export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'colorless';
+export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'fairy' | 'colorless';
 
 export interface Energy {
   fire: number;
   water: number;
   grass: number;
   lightning: number;
+  psychic: number;
+  fighting: number;
+  darkness: number;
+  metal: number;
+  fairy: number;
   colorless: number;
 }
 
@@ -34,6 +39,11 @@ export const ZERO_ENERGY: Energy = {
   water: 0,
   grass: 0,
   lightning: 0,
+  psychic: 0,
+  fighting: 0,
+  darkness: 0,
+  metal: 0,
+  fairy: 0,
   colorless: 0,
 };
 
@@ -515,8 +525,8 @@ export function createBattleState(
     turnNumber: 1,
     phase: 'START_TURN',
     currentPlayer: 'player',
-    playerEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
-    opponentEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 1 },
+    playerEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, fairy: 0, colorless: 1 },
+    opponentEnergy: { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, fairy: 0, colorless: 1 },
     victor: null,
     forfeit: false,
     seed,

@@ -11,6 +11,16 @@ export function AccountBox() {
   
   useEffect(() => {
     checkSession();
+    // Listen for login from popup window
+    try {
+      const bc = new BroadcastChannel('pokearena-auth');
+      bc.onmessage = (e) => {
+        if (e.data?.type === 'login') {
+          checkSession();
+        }
+      };
+      return () => bc.close();
+    } catch { /* BroadcastChannel not supported */ }
   }, [checkSession]);
   
   const handleLogout = async () => {

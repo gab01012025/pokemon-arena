@@ -2,17 +2,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 import { NewsFeed } from '@/components/NewsFeed';
+import { PopupLink } from '@/components/PopupLink';
+import { LobbyMusic } from '@/components/LobbyMusic';
 
 export default function Home() {
   return (
     <div className="page-wrapper">
+      <LobbyMusic />
       <div className="main-container">
         {/* Header Section - same as login page */}
         <div className="header-section">
           <div className="header-left">
             <div className="nav-buttons-top">
               <Link href="/" className="nav-btn-top active">Startpage</Link>
-              <Link href="/play" className="nav-btn-top">Start Playing</Link>
+              <PopupLink href="/play" className="nav-btn-top">Start Playing</PopupLink>
               <Link href="/game-manual" className="nav-btn-top">Game Manual</Link>
               <Link href="/ladders" className="nav-btn-top">Ladders</Link>
               <Link href="/pokemon-missions" className="nav-btn-top">Pokemon Missions</Link>
@@ -36,21 +39,21 @@ export default function Home() {
               <div className="home-welcome-hero">
                 <div className="home-welcome-pokemon">
                   <Image
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png"
+                    src="/pokemon-anime/6.png"
                     alt="Charizard"
                     width={120}
                     height={120}
                     unoptimized
                   />
                   <Image
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png"
+                    src="/pokemon-anime/150.png"
                     alt="Mewtwo"
                     width={140}
                     height={140}
                     unoptimized
                   />
                   <Image
-                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png"
+                    src="/pokemon-anime/9.png"
                     alt="Blastoise"
                     width={120}
                     height={120}
@@ -61,8 +64,8 @@ export default function Home() {
                   Strategic turn-based 3v3 battles. Choose your team of Pokemon, master energy types, and climb the ranked ladder to become the ultimate Champion.
                 </p>
                 <div className="home-welcome-actions">
-                  <Link href="/play" className="home-btn-play">Start Playing</Link>
-                  <Link href="/multiplayer" className="home-btn-register" style={{ background: '#e53935', borderColor: '#ff5252' }}>PvP Battle</Link>
+                  <PopupLink href="/play" className="home-btn-play">Start Playing</PopupLink>
+                  <PopupLink href="/multiplayer" className="home-btn-register" width={900} height={600}>PvP Battle</PopupLink>
                   <Link href="/register" className="home-btn-register">Create Account</Link>
                   <Link href="/the-basics" className="home-btn-tutorial">Learn the Basics</Link>
                 </div>
@@ -97,7 +100,7 @@ export default function Home() {
                 ].map((pokemon) => (
                   <Link key={pokemon.id} href="/characters" className="home-pokemon-card">
                     <Image
-                      src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`}
+                      src={`/pokemon-anime/${pokemon.id}.png`}
                       alt={pokemon.name}
                       width={80}
                       height={80}

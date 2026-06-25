@@ -77,25 +77,120 @@ export const pokemonNameToId: Record<string, number> = {
   'garchomp': 445,
   'greninja': 658,
   'mimikyu': 778,
+
+  // Gen 2-8 Mission Rewards
+  'mareep': 179,
+  'flaaffy': 180,
+  'ampharos': 181,
+  'larvitar': 246,
+  'pupitar': 247,
+  'ralts': 280,
+  'kirlia': 281,
+  'gardevoir': 282,
+  'absol': 359,
+  'bagon': 371,
+  'shelgon': 372,
+  'salamence': 373,
+  'beldum': 374,
+  'metang': 375,
+  'metagross': 376,
+  'shinx': 403,
+  'luxio': 404,
+  'luxray': 405,
+  'gible': 443,
+  'gabite': 444,
+  'riolu': 447,
+  'zorua': 570,
+  'zoroark': 571,
+  'axew': 610,
+  'fraxure': 611,
+  'haxorus': 612,
+  'deino': 633,
+  'zweilous': 634,
+  'hydreigon': 635,
+  'larvesta': 636,
+  'volcarona': 637,
+  'froakie': 656,
+  'frogadier': 657,
+  'honedge': 679,
+  'doublade': 680,
+  'aegislash': 681,
+  'rowlet': 722,
+  'dartrix': 723,
+  'decidueye': 724,
+  'dreepy': 885,
+  'drakloak': 886,
+  'dragapult': 887,
   
-  // Geração 1 - Outros
+  // Geração 1 - Base forms
   'pidgey': 16,
   'rattata': 19,
+  'spearow': 21,
+  'meowth': 52,
+  'caterpie': 10,
+  'weedle': 13,
   'geodude': 74,
   'onix': 95,
+  'exeggcute': 102,
+  'exeggutor': 103,
+  'horsea': 116,
+  'scizor': 212,
   'snorlax': 143,
   'lapras': 131,
   'ditto': 132,
   'magikarp': 129,
-  
+  'dratini': 147,
+
+  // Geração 1 - Missing standalone/evolution lines
+  'farfetchd': 83,
+  "farfetch'd": 83,
+  'doduo': 84,
+  'dodrio': 85,
+  'seel': 86,
+  'dewgong': 87,
+  'shellder': 90,
+  'cloyster': 91,
+  'krabby': 98,
+  'kingler': 99,
+
+  // Geração 1 - Evoluções (mid-stage)
+  'metapod': 11,
+  'kakuna': 14,
+  'pidgeotto': 17,
+  'raticate': 20,
+  'fearow': 22,
+  'arbok': 24,
+  'sandslash': 28,
+  'clefable': 36,
+  'wigglytuff': 40,
+  'gloom': 44,
+  'persian': 53,
+  'poliwhirl': 61,
+  'machoke': 67,
+  'graveler': 75,
+  'slowbro': 80,
+  'magneton': 82,
+  'electrode': 101,
+  'marowak': 105,
+  'weezing': 110,
+  'seadra': 117,
+  'dragonair': 148,
+
+  // Geração 1 - Evoluções finais
+  'butterfree': 12,
+  'beedrill': 15,
+  'pidgeot': 18,
+  'vileplume': 45,
+  'poliwrath': 62,
+
   // Ghost types
   'gastly': 92,
   'haunter': 93,
-  
+
   // Psychic types
   'abra': 63,
   'kadabra': 64,
-  
+
   // Water types
   'psyduck': 54,
   'golduck': 55,
@@ -103,7 +198,7 @@ export const pokemonNameToId: Record<string, number> = {
   'tentacool': 72,
   'slowpoke': 79,
   'staryu': 120,
-  
+
   // Fire types
   'vulpix': 37,
   'ninetales': 38,
@@ -112,51 +207,93 @@ export const pokemonNameToId: Record<string, number> = {
   'ponyta': 77,
   'rapidash': 78,
   'magmar': 126,
-  
+
   // Electric types
   'magnemite': 81,
   'voltorb': 100,
   'electabuzz': 125,
-  
+
   // Grass types
   'oddish': 43,
   'bellsprout': 69,
-  'exeggcute': 102,
   'tangela': 114,
-  
+
   // Fighting types
   'mankey': 56,
   'machop': 66,
   'hitmonlee': 106,
   'hitmonchan': 107,
-  
+
   // Rock/Ground types
   'sandshrew': 27,
   'diglett': 50,
   'cubone': 104,
   'rhyhorn': 111,
-  
+
   // Normal types
   'jigglypuff': 39,
   'clefairy': 35,
   'chansey': 113,
-  
+
   // Poison types
   'ekans': 23,
   'nidoran': 29,
+  'nidoranf': 29,
+  'nidoranm': 32,
+  'nidoran♀': 29,
+  'nidoran♂': 32,
+  'nidorina': 30,
+  'nidorino': 33,
+  'nidoking': 34,
+  'nidoqueen': 31,
   'zubat': 41,
   'grimer': 88,
   'koffing': 109,
+
+  // Missing Gen 1 Pokemon
+  'golbat': 42,
+  'paras': 46,
+  'parasect': 47,
+  'venonat': 48,
+  'venomoth': 49,
+  'dugtrio': 51,
+  'primeape': 57,
+  'golem': 76,
+  'weepinbell': 70,
+  'victreebel': 71,
+  'tentacruel': 73,
+  'drowzee': 96,
+  'hypno': 97,
+  'lickitung': 108,
+  'rhydon': 112,
+  'kangaskhan': 115,
+  'goldeen': 118,
+  'seaking': 119,
+  'starmie': 121,
+  'mrmime': 122,
+  'mr.mime': 122,
+  'scyther': 123,
+  'jynx': 124,
+  'pinsir': 127,
+  'tauros': 128,
+  'porygon': 137,
+  'omanyte': 138,
+  'omastar': 139,
+  'kabuto': 140,
+  'kabutops': 141,
+  'aerodactyl': 142,
 };
 
 // Tipo de sprite para exibir
-export type SpriteType = 
-  | 'default'           // Frente normal
+export type SpriteType =
+  | 'default'           // Anime-style artwork local (padrão)
   | 'back'              // Costas normal
   | 'shiny'             // Frente shiny
   | 'back-shiny'        // Costas shiny
   | 'animated'          // GIF animado (só alguns)
-  | 'artwork'           // Arte oficial (maior qualidade)
+  | 'artwork'           // Arte oficial Ken Sugimori
+  | 'home'              // Pokemon HOME 3D render
+  | 'anime'             // Anime-style artwork local
   | 'icon';             // Ícone pequeno
 
 /**
@@ -186,10 +323,15 @@ export function getPokemonImageUrl(
       return `${POKEAPI_SPRITE_URL}/versions/generation-v/black-white/animated/${pokemonId}.gif`;
     case 'artwork':
       return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonId}.png`;
+    case 'home':
+      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${pokemonId}.png`;
     case 'icon':
       return `${POKEAPI_SPRITE_URL}/versions/generation-viii/icons/${pokemonId}.png`;
+    case 'anime':
+      return `/pokemon-anime/${pokemonId}.png`;
     default:
-      return `${POKEAPI_SPRITE_URL}/${pokemonId}.png`;
+      // Anime-style artwork (local) — fallback to pokemon.com CDN if local missing
+      return `/pokemon-anime/${pokemonId}.png`;
   }
 }
 
@@ -204,6 +346,8 @@ export function getPokemonSprites(nameOrId: string | number): Record<SpriteType,
     'back-shiny': getPokemonImageUrl(nameOrId, 'back-shiny'),
     animated: getPokemonImageUrl(nameOrId, 'animated'),
     artwork: getPokemonImageUrl(nameOrId, 'artwork'),
+    home: getPokemonImageUrl(nameOrId, 'home'),
+    anime: getPokemonImageUrl(nameOrId, 'anime'),
     icon: getPokemonImageUrl(nameOrId, 'icon'),
   };
 }

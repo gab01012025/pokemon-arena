@@ -17,15 +17,16 @@ const SECTIONS: { id: Section; title: string }[] = [
 ];
 
 const ENERGY_TYPES = [
-  { name: 'Grass', color: '#78C850' },
-  { name: 'Fire', color: '#F08030' },
-  { name: 'Water', color: '#6890F0' },
-  { name: 'Lightning', color: '#F8D030' },
-  { name: 'Psychic', color: '#F85888' },
-  { name: 'Fighting', color: '#C03028' },
-  { name: 'Darkness', color: '#705848' },
-  { name: 'Metal', color: '#B8B8D0' },
-  { name: 'Colorless', color: '#C0C0B8' },
+  { name: 'Grass', color: '#78C850', file: 'grass' },
+  { name: 'Fire', color: '#F08030', file: 'fire' },
+  { name: 'Water', color: '#6890F0', file: 'water' },
+  { name: 'Lightning', color: '#F8D030', file: 'lightning' },
+  { name: 'Psychic', color: '#F85888', file: 'psychic' },
+  { name: 'Fighting', color: '#C03028', file: 'fighting' },
+  { name: 'Darkness', color: '#705848', file: 'darkness' },
+  { name: 'Metal', color: '#B8B8D0', file: 'metal' },
+  { name: 'Fairy', color: '#EE99AC', file: 'fairy' },
+  { name: 'Colorless', color: '#C0C0B8', file: 'colorless' },
 ];
 
 const TYPE_CHART: { type: string; weakness: string; resistance: string }[] = [
@@ -209,15 +210,19 @@ export default function GameManual() {
                 <p style={{ color: '#ccc', fontSize: '13px', lineHeight: 1.6, marginBottom: '12px' }}>
                   Pokemon Arena uses a TCG (Trading Card Game) energy system. Each move costs energy to use. You generate energy of your chosen type each turn, plus colorless energy.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '8px' }}>
                   {ENERGY_TYPES.map(e => (
                     <div key={e.name} style={{
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      padding: '8px 12px', background: '#0a0d1c', borderRadius: '6px',
-                      borderLeft: `3px solid ${e.color}`,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                      padding: '10px 6px', background: '#0a0d1c', borderRadius: '8px',
+                      border: `1px solid ${e.color}25`,
                     }}>
-                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: e.color, flexShrink: 0 }} />
-                      <span style={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}>{e.name}</span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/energy/${e.file}.png`} alt={e.name} style={{
+                        width: '36px', height: '50px', objectFit: 'cover', borderRadius: '3px',
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                      }} />
+                      <span style={{ color: e.color, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{e.name}</span>
                     </div>
                   ))}
                 </div>
@@ -239,14 +244,16 @@ export default function GameManual() {
                   {[
                     ['Fire → Fire', 'Water → Water'],
                     ['Grass → Grass', 'Electric → Lightning'],
-                    ['Psychic/Fairy → Psychic', 'Fighting/Rock/Ground → Fighting'],
-                    ['Dark/Poison → Darkness', 'Steel → Metal'],
-                    ['Normal/Flying/Dragon → Colorless', 'Ghost → Psychic'],
+                    ['Psychic/Ghost/Poison → Psychic', 'Fighting/Rock/Ground → Fighting'],
+                    ['Dark → Darkness', 'Steel → Metal'],
+                    ['Fairy → Fairy', 'Normal/Flying/Dragon → Colorless'],
                     ['Bug → Grass', 'Ice → Water'],
                   ].map((row, i) => row.map((item, j) => (
-                    <div key={`${i}-${j}`} style={{ padding: '4px 8px', background: '#0a0d1c', borderRadius: '4px', color: '#aaa' }}>
-                      {item}
-                    </div>
+                    item ? (
+                      <div key={`${i}-${j}`} style={{ padding: '4px 8px', background: '#0a0d1c', borderRadius: '4px', color: '#aaa' }}>
+                        {item}
+                      </div>
+                    ) : <div key={`${i}-${j}`} />
                   )))}
                 </div>
               </div>

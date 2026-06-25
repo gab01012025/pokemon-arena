@@ -409,11 +409,16 @@ export async function updateMissionProgress(
       }
 
       if (completed && tm.mission.rewardPokemon) {
-        // Unlock reward Pokemon
+        // Unlock reward Pokemon — rewardPokemon stores name, need to find ID
         try {
-          await db.trainerPokemon.create({
-            data: { trainerId, pokemonId: tm.mission.rewardPokemon },
+          const rewardPokemon = await db.pokemon.findFirst({
+            where: { name: { equals: tm.mission.rewardPokemon, mode: 'insensitive' } },
           });
+          if (rewardPokemon) {
+            await db.trainerPokemon.create({
+              data: { trainerId, pokemonId: rewardPokemon.id, obtainedMethod: 'mission', isNew: true },
+            });
+          }
         } catch {
           // Already unlocked
         }

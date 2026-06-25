@@ -6,62 +6,67 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
 
-// Avatares pré-definidos baseados em Pokémon (removidos trainers para evitar confusão)
+const TYPE_BG: Record<string, string> = {
+  electric: '#F8D030', fire: '#F08030', water: '#6890F0', grass: '#78C850',
+  psychic: '#F85888', ghost: '#705898', dragon: '#7038F8', ice: '#98D8D8',
+  normal: '#A8A878', fighting: '#C03028', poison: '#A040A0', ground: '#E0C068',
+  flying: '#A890F0', bug: '#A8B820', rock: '#B8A038', dark: '#705848',
+  steel: '#B8B8D0', fairy: '#EE99AC',
+};
+
 const PREDEFINED_AVATARS = [
-  // Pokemon populares (usando sprites da PokeAPI)
-  { id: 'pokemon-25', name: 'Pikachu', pokemonId: 25 },
-  { id: 'pokemon-6', name: 'Charizard', pokemonId: 6 },
-  { id: 'pokemon-150', name: 'Mewtwo', pokemonId: 150 },
-  { id: 'pokemon-151', name: 'Mew', pokemonId: 151 },
-  { id: 'pokemon-149', name: 'Dragonite', pokemonId: 149 },
-  { id: 'pokemon-94', name: 'Gengar', pokemonId: 94 },
-  { id: 'pokemon-131', name: 'Lapras', pokemonId: 131 },
-  { id: 'pokemon-143', name: 'Snorlax', pokemonId: 143 },
-  { id: 'pokemon-3', name: 'Venusaur', pokemonId: 3 },
-  { id: 'pokemon-9', name: 'Blastoise', pokemonId: 9 },
-  { id: 'pokemon-130', name: 'Gyarados', pokemonId: 130 },
-  { id: 'pokemon-59', name: 'Arcanine', pokemonId: 59 },
-  { id: 'pokemon-65', name: 'Alakazam', pokemonId: 65 },
-  { id: 'pokemon-68', name: 'Machamp', pokemonId: 68 },
-  { id: 'pokemon-76', name: 'Golem', pokemonId: 76 },
-  { id: 'pokemon-144', name: 'Articuno', pokemonId: 144 },
-  { id: 'pokemon-145', name: 'Zapdos', pokemonId: 145 },
-  { id: 'pokemon-146', name: 'Moltres', pokemonId: 146 },
-  { id: 'pokemon-1', name: 'Bulbasaur', pokemonId: 1 },
-  { id: 'pokemon-4', name: 'Charmander', pokemonId: 4 },
-  { id: 'pokemon-7', name: 'Squirtle', pokemonId: 7 },
-  { id: 'pokemon-133', name: 'Eevee', pokemonId: 133 },
-  { id: 'pokemon-134', name: 'Vaporeon', pokemonId: 134 },
-  { id: 'pokemon-135', name: 'Jolteon', pokemonId: 135 },
-  { id: 'pokemon-136', name: 'Flareon', pokemonId: 136 },
-  // Mais Pokémon
-  { id: 'pokemon-26', name: 'Raichu', pokemonId: 26 },
-  { id: 'pokemon-38', name: 'Ninetales', pokemonId: 38 },
-  { id: 'pokemon-39', name: 'Jigglypuff', pokemonId: 39 },
-  { id: 'pokemon-52', name: 'Meowth', pokemonId: 52 },
-  { id: 'pokemon-54', name: 'Psyduck', pokemonId: 54 },
-  { id: 'pokemon-79', name: 'Slowpoke', pokemonId: 79 },
-  { id: 'pokemon-92', name: 'Gastly', pokemonId: 92 },
-  { id: 'pokemon-93', name: 'Haunter', pokemonId: 93 },
-  { id: 'pokemon-95', name: 'Onix', pokemonId: 95 },
-  { id: 'pokemon-103', name: 'Exeggutor', pokemonId: 103 },
-  { id: 'pokemon-115', name: 'Kangaskhan', pokemonId: 115 },
-  { id: 'pokemon-121', name: 'Starmie', pokemonId: 121 },
-  { id: 'pokemon-123', name: 'Scyther', pokemonId: 123 },
-  { id: 'pokemon-127', name: 'Pinsir', pokemonId: 127 },
-  { id: 'pokemon-137', name: 'Porygon', pokemonId: 137 },
-  { id: 'pokemon-139', name: 'Omastar', pokemonId: 139 },
-  { id: 'pokemon-141', name: 'Kabutops', pokemonId: 141 },
-  { id: 'pokemon-142', name: 'Aerodactyl', pokemonId: 142 },
-  { id: 'pokemon-147', name: 'Dratini', pokemonId: 147 },
-  { id: 'pokemon-148', name: 'Dragonair', pokemonId: 148 },
+  { id: 'pokemon-25', name: 'Pikachu', pokemonId: 25, type: 'electric' },
+  { id: 'pokemon-6', name: 'Charizard', pokemonId: 6, type: 'fire' },
+  { id: 'pokemon-150', name: 'Mewtwo', pokemonId: 150, type: 'psychic' },
+  { id: 'pokemon-151', name: 'Mew', pokemonId: 151, type: 'psychic' },
+  { id: 'pokemon-149', name: 'Dragonite', pokemonId: 149, type: 'dragon' },
+  { id: 'pokemon-94', name: 'Gengar', pokemonId: 94, type: 'ghost' },
+  { id: 'pokemon-131', name: 'Lapras', pokemonId: 131, type: 'water' },
+  { id: 'pokemon-143', name: 'Snorlax', pokemonId: 143, type: 'normal' },
+  { id: 'pokemon-3', name: 'Venusaur', pokemonId: 3, type: 'grass' },
+  { id: 'pokemon-9', name: 'Blastoise', pokemonId: 9, type: 'water' },
+  { id: 'pokemon-130', name: 'Gyarados', pokemonId: 130, type: 'water' },
+  { id: 'pokemon-59', name: 'Arcanine', pokemonId: 59, type: 'fire' },
+  { id: 'pokemon-65', name: 'Alakazam', pokemonId: 65, type: 'psychic' },
+  { id: 'pokemon-68', name: 'Machamp', pokemonId: 68, type: 'fighting' },
+  { id: 'pokemon-76', name: 'Golem', pokemonId: 76, type: 'rock' },
+  { id: 'pokemon-144', name: 'Articuno', pokemonId: 144, type: 'ice' },
+  { id: 'pokemon-145', name: 'Zapdos', pokemonId: 145, type: 'electric' },
+  { id: 'pokemon-146', name: 'Moltres', pokemonId: 146, type: 'fire' },
+  { id: 'pokemon-1', name: 'Bulbasaur', pokemonId: 1, type: 'grass' },
+  { id: 'pokemon-4', name: 'Charmander', pokemonId: 4, type: 'fire' },
+  { id: 'pokemon-7', name: 'Squirtle', pokemonId: 7, type: 'water' },
+  { id: 'pokemon-133', name: 'Eevee', pokemonId: 133, type: 'normal' },
+  { id: 'pokemon-134', name: 'Vaporeon', pokemonId: 134, type: 'water' },
+  { id: 'pokemon-135', name: 'Jolteon', pokemonId: 135, type: 'electric' },
+  { id: 'pokemon-136', name: 'Flareon', pokemonId: 136, type: 'fire' },
+  { id: 'pokemon-26', name: 'Raichu', pokemonId: 26, type: 'electric' },
+  { id: 'pokemon-38', name: 'Ninetales', pokemonId: 38, type: 'fire' },
+  { id: 'pokemon-39', name: 'Jigglypuff', pokemonId: 39, type: 'fairy' },
+  { id: 'pokemon-52', name: 'Meowth', pokemonId: 52, type: 'normal' },
+  { id: 'pokemon-54', name: 'Psyduck', pokemonId: 54, type: 'water' },
+  { id: 'pokemon-79', name: 'Slowpoke', pokemonId: 79, type: 'water' },
+  { id: 'pokemon-92', name: 'Gastly', pokemonId: 92, type: 'ghost' },
+  { id: 'pokemon-93', name: 'Haunter', pokemonId: 93, type: 'ghost' },
+  { id: 'pokemon-95', name: 'Onix', pokemonId: 95, type: 'rock' },
+  { id: 'pokemon-103', name: 'Exeggutor', pokemonId: 103, type: 'grass' },
+  { id: 'pokemon-115', name: 'Kangaskhan', pokemonId: 115, type: 'normal' },
+  { id: 'pokemon-121', name: 'Starmie', pokemonId: 121, type: 'water' },
+  { id: 'pokemon-123', name: 'Scyther', pokemonId: 123, type: 'bug' },
+  { id: 'pokemon-127', name: 'Pinsir', pokemonId: 127, type: 'bug' },
+  { id: 'pokemon-137', name: 'Porygon', pokemonId: 137, type: 'normal' },
+  { id: 'pokemon-139', name: 'Omastar', pokemonId: 139, type: 'rock' },
+  { id: 'pokemon-141', name: 'Kabutops', pokemonId: 141, type: 'rock' },
+  { id: 'pokemon-142', name: 'Aerodactyl', pokemonId: 142, type: 'rock' },
+  { id: 'pokemon-147', name: 'Dratini', pokemonId: 147, type: 'dragon' },
+  { id: 'pokemon-148', name: 'Dragonair', pokemonId: 148, type: 'dragon' },
 ];
 
 function getAvatarUrl(avatar: { id: string; pokemonId?: number }): string {
   if (avatar.pokemonId) {
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${avatar.pokemonId}.png`;
+    return `/pokemon-anime/${avatar.pokemonId}.png`;
   }
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png`; // fallback to Pikachu
+  return `/pokemon-anime/25.png`;
 }
 
 export default function ChangeAvatarPage() {
@@ -146,13 +151,13 @@ export default function ChangeAvatarPage() {
 
   const getCurrentAvatarUrl = () => {
     if (customUrl) return customUrl;
-    if (selectedAvatar === 'default') return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+    if (selectedAvatar === 'default') return `/pokemon-anime/25.png`;
     if (selectedAvatar.startsWith('pokemon-')) {
       const pokemonId = selectedAvatar.replace('pokemon-', '');
-      return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonId}.png`;
+      return `/pokemon-anime/${pokemonId}.png`;
     }
     if (selectedAvatar.startsWith('http')) return selectedAvatar;
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png`;
+    return `/pokemon-anime/25.png`;
   };
 
   if (!user) {
@@ -218,9 +223,15 @@ export default function ChangeAvatarPage() {
                   height={96}
                   className="rounded-lg mx-auto"
                   unoptimized
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: 'center top',
+                    background: TYPE_BG[PREDEFINED_AVATARS.find(a => a.id === selectedAvatar)?.type || 'normal'] || '#666',
+                    border: '3px solid #444',
+                  }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = '/images/ash-ketchum.webp';
+                    target.src = '/pokemon-anime/25.png';
                   }}
                 />
               </div>
@@ -302,9 +313,15 @@ export default function ChangeAvatarPage() {
                       height={64}
                       className="rounded"
                       unoptimized
+                      style={{
+                        objectFit: 'cover',
+                        objectPosition: 'center top',
+                        background: TYPE_BG[avatar.type || 'normal'] || '#666',
+                        border: '2px solid #333',
+                      }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '/images/ash-ketchum.webp';
+                        target.src = '/pokemon-anime/25.png';
                       }}
                     />
                     {selectedAvatar === avatar.id && (

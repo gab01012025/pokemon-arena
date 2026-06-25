@@ -132,9 +132,8 @@ export async function getPokemon(idOrName: number | string): Promise<PokemonBasi
     id: data.id,
     name: data.name,
     types: data.types.map((t: any) => t.type.name),
-    sprite: data.sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${data.id}.png`,
-    artwork: data.sprites.other?.['official-artwork']?.front_default || 
-             `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${data.id}.png`,
+    sprite: `/pokemon-anime/${data.id}.png`,
+    artwork: `/pokemon-anime/${data.id}.png`,
     animatedSprite: data.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default,
   };
 }
@@ -346,7 +345,7 @@ export async function getEvolutionChain(pokemonId: number): Promise<EvolutionSta
       stages.push({
         id,
         name: chain.species.name,
-        sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+        sprite: `/pokemon-anime/${id}.png`,
         minLevel: chain.evolution_details[0]?.min_level,
         trigger: chain.evolution_details[0]?.trigger?.name,
       });

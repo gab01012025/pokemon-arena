@@ -83,14 +83,14 @@ export function initBattle(
  * Generate initial energy pool (all zeros)
  */
 function generateInitialEnergy(): EnergyPool {
-  return { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, colorless: 0 };
+  return { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, fairy: 0, colorless: 0 };
 }
 
 /**
  * Generate random energy for a turn based on team composition
  */
 export function generateEnergy(team: BattlePokemon[]): EnergyPool {
-  const pool: EnergyPool = { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, colorless: 0 };
+  const pool: EnergyPool = { fire: 0, water: 0, grass: 0, lightning: 0, psychic: 0, fighting: 0, darkness: 0, metal: 0, fairy: 0, colorless: 0 };
   
   // Get energy types based on alive Pokemon types
   const aliveTypes: EnergyType[] = [];
@@ -133,6 +133,7 @@ export function addEnergy(current: EnergyPool, generated: EnergyPool): EnergyPoo
     fighting: current.fighting + generated.fighting,
     darkness: current.darkness + generated.darkness,
     metal: current.metal + generated.metal,
+    fairy: current.fairy + generated.fairy,
     colorless: current.colorless + generated.colorless,
   };
 }
@@ -144,7 +145,7 @@ export function canPayCost(available: EnergyPool, cost: Partial<Record<EnergyTyp
   const tempPool = { ...available };
   
   // First check specific energy types
-  const types: EnergyType[] = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal'];
+  const types: EnergyType[] = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy'];
   for (const type of types) {
     const needed = cost[type] || 0;
     if (tempPool[type] < needed) return false;
@@ -153,7 +154,7 @@ export function canPayCost(available: EnergyPool, cost: Partial<Record<EnergyTyp
 
   // Then check colorless (can be paid with any remaining energy)
   const colorlessNeeded = cost.colorless || 0;
-  const totalRemaining = tempPool.fire + tempPool.water + tempPool.grass + tempPool.lightning + tempPool.psychic + tempPool.fighting + tempPool.darkness + tempPool.metal + tempPool.colorless;
+  const totalRemaining = tempPool.fire + tempPool.water + tempPool.grass + tempPool.lightning + tempPool.psychic + tempPool.fighting + tempPool.darkness + tempPool.metal + tempPool.fairy + tempPool.colorless;
   
   return totalRemaining >= colorlessNeeded;
 }
@@ -173,10 +174,11 @@ export function payEnergyCost(pool: EnergyPool, cost: Partial<Record<EnergyType,
   result.fighting -= cost.fighting || 0;
   result.darkness -= cost.darkness || 0;
   result.metal -= cost.metal || 0;
+  result.fairy -= cost.fairy || 0;
 
   // Pay colorless from any remaining
   let colorlessToPay = cost.colorless || 0;
-  const types: EnergyType[] = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'colorless'];
+  const types: EnergyType[] = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy', 'colorless'];
   
   for (const type of types) {
     while (colorlessToPay > 0 && result[type] > 0) {

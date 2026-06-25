@@ -1,5 +1,5 @@
 // ==================== ENERGY TYPES (Pokemon TCG Pocket Style) ====================
-export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'colorless';
+export type EnergyType = 'fire' | 'water' | 'grass' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'fairy' | 'colorless';
 
 export interface EnergyCost {
   fire?: number;
@@ -10,6 +10,7 @@ export interface EnergyCost {
   fighting?: number;
   darkness?: number;
   metal?: number;
+  fairy?: number;
   colorless?: number;
 }
 
@@ -22,6 +23,7 @@ export interface EnergyPool {
   fighting: number;
   darkness: number;
   metal: number;
+  fairy: number;
   colorless: number;
 }
 

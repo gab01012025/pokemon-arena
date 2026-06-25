@@ -69,23 +69,23 @@ export default function TrainerSelectScreen({
               {isSelected && <span className="checkmark">✓</span>}
               {sprite && (
                 <div style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 14,
+                  width: 68,
+                  height: 68,
+                  borderRadius: 10,
                   background: `linear-gradient(180deg, ${color}30 0%, ${color}10 100%)`,
                   border: `2px solid ${color}55`,
                   display: 'flex',
                   alignItems: 'flex-end',
                   justifyContent: 'center',
-                  marginBottom: 6,
+                  marginBottom: 3,
                   overflow: 'hidden',
                   boxShadow: `0 4px 16px ${color}33`,
                 }}>
                   <Image
                     src={sprite}
                     alt={trainer.name}
-                    width={88}
-                    height={88}
+                    width={60}
+                    height={60}
                     unoptimized
                     style={{ objectFit: 'contain', objectPosition: 'bottom', filter: `drop-shadow(0 2px 8px ${color}66)` }}
                   />
@@ -102,7 +102,7 @@ export default function TrainerSelectScreen({
                   <div className="trainer-items-row">
                     {TRAINER_ITEMS[trainer.name].map((item, i) => (
                       <div key={i} className="trainer-item-icon" title={`${item.name} x${item.maxUses} - ${item.description}`}>
-                        <Image src={item.icon} alt={item.name} width={22} height={22} unoptimized />
+                        <Image src={item.icon} alt={item.name} width={18} height={18} unoptimized />
                         {item.maxUses > 1 && <span className="trainer-item-count">x{item.maxUses}</span>}
                       </div>
                     ))}

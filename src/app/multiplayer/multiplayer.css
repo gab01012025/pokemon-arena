@@ -204,7 +204,7 @@
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid #FFD700;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .team-slot span { font-size: 12px; text-align: center; }
@@ -251,7 +251,7 @@
   object-fit: cover;
   border-radius: 50%;
   margin-bottom: 8px;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .pokemon-card .pokemon-name { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; }
@@ -457,7 +457,7 @@
   border-radius: 50%;
   border: 3px solid #FFD700;
   animation: float 2s ease-in-out infinite;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 .team-preview-slot:nth-child(2) img { animation-delay: 0.3s; }
@@ -502,7 +502,7 @@
 
 .vs-screen-name { font-family: var(--font-pixel); font-size: 14px; color: #fff; text-shadow: 0 0 10px rgba(100, 200, 255, 0.5); }
 .vs-screen-team { display: flex; gap: 10px; }
-.vs-screen-team img { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); image-rendering: pixelated; }
+.vs-screen-team img { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); image-rendering: auto; object-fit: contain; }
 
 .vs-text {
   font-family: var(--font-pixel);
@@ -1071,7 +1071,7 @@
   width: 100%;
   height: 70%;
   object-fit: contain;
-  image-rendering: pixelated;
+  image-rendering: auto;
   display: block;
   margin: 0 auto;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));

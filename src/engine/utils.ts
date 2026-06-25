@@ -154,11 +154,11 @@ export function cloneStatus(status: Status): Status {
  */
 export function addEnergy(a: Energy, b: Energy): Energy {
   return {
-    fire: a.fire + b.fire,
-    water: a.water + b.water,
-    grass: a.grass + b.grass,
-    lightning: a.lightning + b.lightning,
-    colorless: a.colorless + b.colorless,
+    fire: a.fire + b.fire, water: a.water + b.water, grass: a.grass + b.grass,
+    lightning: a.lightning + b.lightning, psychic: a.psychic + b.psychic,
+    fighting: a.fighting + b.fighting, darkness: a.darkness + b.darkness,
+    metal: a.metal + b.metal,
+    fairy: a.fairy + b.fairy, colorless: a.colorless + b.colorless,
   };
 }
 
@@ -167,11 +167,11 @@ export function addEnergy(a: Energy, b: Energy): Energy {
  */
 export function subtractEnergy(a: Energy, b: Energy): Energy {
   return {
-    fire: a.fire - b.fire,
-    water: a.water - b.water,
-    grass: a.grass - b.grass,
-    lightning: a.lightning - b.lightning,
-    colorless: a.colorless - b.colorless,
+    fire: a.fire - b.fire, water: a.water - b.water, grass: a.grass - b.grass,
+    lightning: a.lightning - b.lightning, psychic: a.psychic - b.psychic,
+    fighting: a.fighting - b.fighting, darkness: a.darkness - b.darkness,
+    metal: a.metal - b.metal,
+    fairy: a.fairy - b.fairy, colorless: a.colorless - b.colorless,
   };
 }
 
@@ -180,27 +180,24 @@ export function subtractEnergy(a: Energy, b: Energy): Energy {
  * Random energy can substitute for any specific type
  */
 export function canAfford(available: Energy, cost: Energy): boolean {
-  // Calculate specific costs after using available specific energy
-  let fireNeeded = Math.max(0, cost.fire - available.fire);
-  let waterNeeded = Math.max(0, cost.water - available.water);
-  let grassNeeded = Math.max(0, cost.grass - available.grass);
-  let lightningNeeded = Math.max(0, cost.lightning - available.lightning);
-  
-  // Total specific energy still needed
-  const specificNeeded = fireNeeded + waterNeeded + grassNeeded + lightningNeeded;
-  
-  // Calculate leftover specific energy that can be used for random cost
-  const fireLeftover = Math.max(0, available.fire - cost.fire);
-  const waterLeftover = Math.max(0, available.water - cost.water);
-  const grassLeftover = Math.max(0, available.grass - cost.grass);
-  const lightningLeftover = Math.max(0, available.lightning - cost.lightning);
-  const specificLeftover = fireLeftover + waterLeftover + grassLeftover + lightningLeftover;
-  
+  // Specific energy types (everything except colorless)
+  const specificTypes = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy'] as const;
+
+  // Calculate shortfall for each specific type
+  let specificNeeded = 0;
+  let specificLeftover = 0;
+  for (const t of specificTypes) {
+    const needed = Math.max(0, cost[t] - available[t]);
+    const leftover = Math.max(0, available[t] - cost[t]);
+    specificNeeded += needed;
+    specificLeftover += leftover;
+  }
+
   // Total random available (actual random + leftover specific)
   const totalRandom = available.colorless + specificLeftover;
-  
+
   // Can we cover the specific shortfall and the random cost?
-  return specificNeeded <= available.colorless && 
+  return specificNeeded <= available.colorless &&
          cost.colorless <= (totalRandom - specificNeeded);
 }
 
@@ -210,51 +207,40 @@ export function canAfford(available: Energy, cost: Energy): boolean {
  */
 export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRandom): Energy {
   const result = { ...available };
-  
+  const specificTypes = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy'] as const;
+
   // Pay specific costs first
-  result.fire -= cost.fire;
-  result.water -= cost.water;
-  result.grass -= cost.grass;
-  result.lightning -= cost.lightning;
-  
-  // Use random energy to cover any negative values
-  const shortfall = 
-    Math.max(0, -result.fire) + 
-    Math.max(0, -result.water) + 
-    Math.max(0, -result.grass) + 
-    Math.max(0, -result.lightning);
-  
+  for (const t of specificTypes) {
+    result[t] -= cost[t];
+  }
+
+  // Use colorless energy to cover any negative values
+  let shortfall = 0;
+  for (const t of specificTypes) {
+    shortfall += Math.max(0, -result[t]);
+  }
   result.colorless -= shortfall;
-  
-  // Fix negative specific values (they were covered by random)
-  result.fire = Math.max(0, result.fire);
-  result.water = Math.max(0, result.water);
-  result.grass = Math.max(0, result.grass);
-  result.lightning = Math.max(0, result.lightning);
-  
-  // Pay random cost from leftover specific energy
+
+  // Fix negative specific values (they were covered by colorless)
+  for (const t of specificTypes) {
+    result[t] = Math.max(0, result[t]);
+  }
+
+  // Pay colorless cost from leftover specific energy
   let randomCost = cost.colorless;
   while (randomCost > 0) {
-    // Prefer using random energy first
     if (result.colorless > 0) {
       result.colorless--;
       randomCost--;
     } else {
-      // Use specific energy (pick randomly for fairness)
-      const available: ('fire' | 'water' | 'grass' | 'lightning')[] = [];
-      if (result.fire > 0) available.push('fire');
-      if (result.water > 0) available.push('water');
-      if (result.grass > 0) available.push('grass');
-      if (result.lightning > 0) available.push('lightning');
-      
-      if (available.length === 0) break; // Shouldn't happen if canAfford was checked
-      
-      const type = rng.pick(available)!;
+      const avail = specificTypes.filter(t => result[t] > 0);
+      if (avail.length === 0) break;
+      const type = rng.pick([...avail])!;
       result[type]--;
       randomCost--;
     }
   }
-  
+
   return result;
 }
 
@@ -262,7 +248,9 @@ export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRan
  * Get total energy count
  */
 export function totalEnergy(energy: Energy): number {
-  return energy.fire + energy.water + energy.grass + energy.lightning + energy.colorless;
+  return energy.fire + energy.water + energy.grass + energy.lightning +
+    energy.psychic + energy.fighting + energy.darkness + energy.metal +
+    energy.fairy + energy.colorless;
 }
 
 /**

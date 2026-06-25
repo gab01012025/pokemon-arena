@@ -16,6 +16,7 @@ const energyEmoji: Record<EnergyType, string> = {
   fighting: 'K',
   darkness: 'D',
   metal: 'M',
+  fairy: 'Y',
   colorless: 'C',
 };
 
@@ -28,6 +29,7 @@ const energyColors: Record<EnergyType, string> = {
   fighting: 'var(--type-fighting, #C03028)',
   darkness: 'var(--type-dark, #705848)',
   metal: 'var(--type-steel, #B8B8D0)',
+  fairy: '#EE99AC',
   colorless: '#A8A878',
 };
 

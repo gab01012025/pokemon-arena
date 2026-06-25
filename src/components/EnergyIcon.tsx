@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-export type EnergyType = 'grass' | 'fire' | 'water' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'colorless';
+export type EnergyType = 'grass' | 'fire' | 'water' | 'lightning' | 'psychic' | 'fighting' | 'darkness' | 'metal' | 'fairy' | 'colorless';
 
 interface EnergyIconProps {
   type: EnergyType;
@@ -19,6 +19,7 @@ const ENERGY_SYMBOLS: Record<EnergyType, string> = {
   fighting: '👊',
   darkness: '🌑',
   metal: '⚙️',
+  fairy: '🧚',
   colorless: '⭐',
 };
 
@@ -31,6 +32,7 @@ const ENERGY_COLORS: Record<EnergyType, string> = {
   fighting: '#C03028',
   darkness: '#705848',
   metal: '#B8B8D0',
+  fairy: '#EE99AC',
   colorless: '#A8A878',
 };
 
@@ -97,6 +99,10 @@ export function EnergyIconSVG({ type, size = 24, className = '' }: EnergyIconPro
       case 'metal':
         return (
           <path d="M12 2L2 7V17L12 22L22 17V7L12 2ZM12 4.18L19.5 8L12 11.82L4.5 8L12 4.18ZM4 10.18L11 13.82V19.82L4 16.18V10.18ZM13 19.82V13.82L20 10.18V16.18L13 19.82Z" fill="currentColor" />
+        );
+      case 'fairy':
+        return (
+          <path d="M12 2L14 8H20L15 12L17 18L12 14L7 18L9 12L4 8H10L12 2ZM12 7L11 10H8L10.5 12L9.5 15L12 13L14.5 15L13.5 12L16 10H13L12 7Z" fill="currentColor" />
         );
       case 'colorless':
         return (

@@ -1509,6 +1509,57 @@ a:hover {
   margin-bottom: 5px;
 }
 
+/* ===== POKEDEX CHARACTER DETAIL ===== */
+.pdx-stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(26, 32, 44, 0.6);
+  border: 1px solid rgba(45, 55, 72, 0.5);
+  border-radius: 10px;
+  padding: 6px 14px;
+  min-width: 60px;
+}
+
+.pdx-stat-label {
+  color: #718096;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.pdx-stat-val {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pdx-move-card {
+  background: linear-gradient(135deg, #111630 0%, #0e1228 100%);
+  border: 1px solid #1e2340;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pdx-move-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(135deg, #141938 0%, #101430 100%);
+}
+
+/* Hero card responsive */
+@media (max-width: 600px) {
+  .pdx-hero > div:nth-child(2) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
 /* ===== SEARCH BOX ===== */
 .search-box {
   margin-bottom: 15px;
@@ -4883,10 +4934,10 @@ input[type="checkbox"] {
   font-size: 1.3rem !important;
 }
 
-/* Battle Container */
+/* Battle Container — fills the popup window */
 .battle-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .battle-header {

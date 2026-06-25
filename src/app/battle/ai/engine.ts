@@ -23,30 +23,30 @@ export const getHpClass = (current: number, max: number): string => {
 /**
  * Generate energy based on selected types + alive Pokemon
  * CRITICAL: Energy ACCUMULATES, doesn't reset!
+ *
+ * Each alive Pokemon generates 1 energy per turn.
+ * The energy type is randomly picked from the player's selected types.
+ *
+ * Turn 1: only 1 energy (to reduce first-player advantage).
  */
 export const generateTurnEnergy = (
   team: BattlePokemon[],
-  _selectedEnergyTypes: EnergyType[],
+  selectedEnergyTypes: EnergyType[],
   turn: number
 ): EnergyState => {
   const energy: EnergyState = { ...EMPTY_ENERGY };
   const alive = team.filter(p => p.hp > 0);
+  const selected = selectedEnergyTypes.length > 0 ? selectedEnergyTypes : ['colorless' as EnergyType];
 
-  // Turn 1: ONLY 1 energy (first player advantage)
-  // Turn 2+: 1 energy per alive Pokemon, based on their TYPE
-  if (turn === 1) {
-    if (alive.length > 0) {
-      const primaryType = alive[0].types[0] as PokemonType;
-      const mapped: EnergyType = TYPE_TO_ENERGY[primaryType] || 'colorless';
-      energy[mapped]++;
-    }
-  } else {
-    for (const poke of alive) {
-      const primaryType = poke.types[0] as PokemonType;
-      const mapped: EnergyType = TYPE_TO_ENERGY[primaryType] || 'colorless';
-      energy[mapped]++;
-    }
+  // How many energy to generate this turn
+  const count = turn === 1 ? 1 : alive.length;
+
+  // Randomly pick from selected types for each energy point
+  for (let i = 0; i < count; i++) {
+    const randomIndex = Math.floor(Math.random() * selected.length);
+    energy[selected[randomIndex]]++;
   }
+
   return energy;
 };
 
@@ -99,20 +99,30 @@ export const canAffordMove = (energy: EnergyState, alreadySpent: SelectedAction[
   for (const a of alreadySpent) {
     temp = spendEnergyForMove(temp, a.move);
   }
-  // Process specific-type costs first, then colorless — avoids greedy over-spending
+  // Mirror spendEnergyForMove logic: specific costs first, then colorless
   const specificCosts = move.cost.filter(c => c.type !== 'colorless');
   const colorlessCosts = move.cost.filter(c => c.type === 'colorless');
   for (const cost of [...specificCosts, ...colorlessCosts]) {
     if (cost.type === 'colorless') {
+      // Colorless: need enough total energy (any type)
       if (getTotalEnergy(temp) < cost.amount) return false;
+      // Deduct from colorless first, then other types (same as spendEnergyForMove)
       let remaining = cost.amount;
+      if (temp.colorless >= remaining) {
+        temp.colorless -= remaining;
+        continue;
+      }
+      remaining -= temp.colorless;
+      temp.colorless = 0;
       for (const t of ALL_ENERGY_TYPES) {
+        if (t === 'colorless') continue;
         const spend = Math.min(temp[t], remaining);
         temp[t] -= spend;
         remaining -= spend;
         if (remaining <= 0) break;
       }
     } else {
+      // Specific type: can use that type + colorless to pay
       const available = temp[cost.type] + temp.colorless;
       if (available < cost.amount) return false;
       const spend = Math.min(temp[cost.type], cost.amount);
@@ -268,7 +278,7 @@ export const processStatusEffects = (
 };
 
 /** Check if Pokemon can act (blocked by stun/freeze/sleep/paralyze) */
-export const canAct = (poke: BattlePokemon): boolean => {
+export const canAct = (poke: BattlePokemon, isExecutionPhase = false): boolean => {
   for (const effect of poke.statusEffects) {
     // Stun: always prevents action
     if (effect.type === 'stun') return false;
@@ -276,9 +286,9 @@ export const canAct = (poke: BattlePokemon): boolean => {
     if (effect.type === 'sleep') return false;
     // Freeze: always prevents action (thaw is handled in processStatusEffects)
     if (effect.type === 'freeze') return false;
-    // Paralyze: 25% chance of not acting
+    // Paralyze: 25% chance of not acting — only roll during execution to avoid double-random
     if (effect.type === 'paralyze') {
-      if (Math.random() < 0.25) return false;
+      if (isExecutionPhase && Math.random() < 0.25) return false;
     }
   }
   return true;
@@ -311,6 +321,11 @@ export interface DamageResult {
   effectivenessText: string;   // "Weakness! (+20)" etc.
 }
 
+// Physical vs Special move classification
+const SPECIAL_TYPES: Set<PokemonType> = new Set(['fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'fairy']);
+
+export const isSpecialMove = (type: PokemonType): boolean => SPECIAL_TYPES.has(type);
+
 export const calculateBattleDamage = (
   basePower: number,
   moveType: PokemonType,
@@ -319,6 +334,8 @@ export const calculateBattleDamage = (
   defenderResistance: PokemonType | undefined,
   attackerEffects: StatusEffect[],
   defenderEffects: StatusEffect[],
+  attackerStats?: { attack: number; spAtk: number },
+  defenderStats?: { defense: number; spDef: number },
 ): DamageResult => {
   // 1. STAB
   const stab = attackerTypes.includes(moveType) ? STAB_MULTIPLIER : 1;
@@ -327,8 +344,21 @@ export const calculateBattleDamage = (
   const isCrit = rollCriticalHit();
   const critMul = isCrit ? CRITICAL_HIT_MULTIPLIER : 1;
 
-  // 3. Base damage (predictable)
-  let damage = Math.floor(basePower * stab * critMul);
+  // 3. Stat modifier — makes evolution/species stats matter
+  // BASELINE=50 matches average unevolved stats so moves deal close to stated power
+  const BASELINE = 50;
+  let statMod = 1;
+  let defMod = 1;
+  if (attackerStats && defenderStats) {
+    const isSpecial = isSpecialMove(moveType);
+    const atkStat = isSpecial ? attackerStats.spAtk : attackerStats.attack;
+    const defStat = isSpecial ? defenderStats.spDef : defenderStats.defense;
+    statMod = atkStat / BASELINE;
+    defMod = BASELINE / (BASELINE + defStat * 0.3);
+  }
+
+  // 4. Base damage with stat scaling
+  let damage = Math.floor(basePower * statMod * defMod * stab * critMul);
 
   // 4. TCG Pocket weakness / resistance (flat ±20)
   const isWeak = !!defenderWeakness && moveType === defenderWeakness;

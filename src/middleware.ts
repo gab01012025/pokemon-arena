@@ -59,7 +59,11 @@ export async function middleware(request: NextRequest) {
   
   // Redirecionar usuários não autenticados de rotas protegidas
   if (isProtectedRoute && !isAuthenticated) {
-    const loginUrl = new URL('/login', request.url);
+    // Popup routes get compact popup login (no sidebars/header)
+    const popupRoutes = ['/play', '/battle', '/multiplayer'];
+    const isPopupRoute = popupRoutes.some((r) => pathname.startsWith(r));
+    const loginPath = isPopupRoute ? '/popup-login' : '/login';
+    const loginUrl = new URL(loginPath, request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }

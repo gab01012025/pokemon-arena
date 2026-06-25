@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LeftSidebar, RightSidebar } from '@/components/layout/Sidebar';
+import { POKEMON_CUSTOM_MOVES, POKEMON_POKEDEX } from '@/app/battle/ai/data';
 
 interface Move {
   id: string;
@@ -14,6 +15,7 @@ interface Move {
   energyCost: string;
   cooldown: number;
   effect: string | null;
+  icon?: string;
 }
 
 interface Pokemon {
@@ -55,6 +57,29 @@ const POKEMON_IDS: Record<string, number> = {
   scizor:212,lucario:448,garchomp:445,tyranitar:248,
 };
 
+/** Convert data.ts battle moves to select-team Move format */
+const getCustomMoves = (pokemonName: string): Move[] | null => {
+  const dex = POKEMON_POKEDEX[pokemonName];
+  if (!dex) return null;
+  const custom = POKEMON_CUSTOM_MOVES[dex];
+  if (!custom || custom.length === 0) return null;
+  return custom.map((m, idx) => ({
+    id: m.id,
+    name: m.name,
+    description: m.description,
+    damage: m.power || 0,
+    cooldown: m.cooldown || 0,
+    energyCost: JSON.stringify(
+      m.cost.reduce((acc: Record<string, number>, c) => {
+        acc[c.type] = (acc[c.type] || 0) + c.amount;
+        return acc;
+      }, {})
+    ),
+    effect: m.statusEffect ? JSON.stringify(m.statusEffect) : null,
+    icon: `/skills/${dex}/${idx}.png`,
+  }));
+};
+
 const normalizeTypes = (pokemon: Record<string, unknown>): string => {
   if (typeof pokemon.types === 'string') {
     if (pokemon.types.startsWith('[')) {
@@ -85,11 +110,25 @@ export default function SelectTeamPage() {
         const res = await fetch('/api/pokemon?starters=true&includeMoves=true');
         if (res.ok) {
           const data = await res.json();
-          const normalized = data.map((p: Record<string, unknown>) => ({
-            ...p,
-            types: normalizeTypes(p),
-          }));
-          setStarters(normalized);
+          const normalized = data.map((p: Record<string, unknown>) => {
+            const name = p.name as string;
+            const types = normalizeTypes(p);
+            const base: Record<string, unknown> = { ...p, types };
+            // Overlay arena-game.app custom moves when available
+            const custom = getCustomMoves(name);
+            if (custom) {
+              base.moves = custom;
+            } else if (base.moves && Array.isArray(base.moves)) {
+              // Add skill icon paths for database moves
+              const dex = POKEMON_POKEDEX[name] || 0;
+              base.moves = (base.moves as Move[]).map((m, idx) => ({
+                ...m,
+                icon: dex ? `/skills/${dex}/${idx}.png` : undefined,
+              }));
+            }
+            return base;
+          });
+          setStarters(normalized as Pokemon[]);
         }
       } catch {
         setError('Falha ao carregar Pokémon');
@@ -148,7 +187,7 @@ export default function SelectTeamPage() {
 
   const getImage = (name: string) => {
     const id = POKEMON_IDS[name?.toLowerCase() || 'pikachu'] || 25;
-    return `${POKEAPI_SPRITE}/${id}.png`;
+    return `/pokemon-anime/${id}.png`;
   };
 
   const parseEnergyCost = (costStr: string): Record<string, number> => {
@@ -227,7 +266,7 @@ export default function SelectTeamPage() {
                           {pokemon ? (
                             <>
                               <img src={getImage(pokemon.name)} alt={pokemon.name}
-                                style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', marginBottom: '4px' }} />
+                                style={{ width: '48px', height: '48px', objectFit: 'cover', objectPosition: 'center top', borderRadius: '6px', marginBottom: '4px', background: TYPE_COLORS[pokemon.types?.split(',')[0]?.toLowerCase() || 'normal'] || '#555', border: '2px solid #333' }} />
                               <span style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>{pokemon.name}</span>
                               <div style={{ display: 'flex', gap: '3px', marginTop: '3px' }}>
                                 {pokemon.types.split(',').filter(t => t).map((type, i) => (
@@ -303,8 +342,10 @@ export default function SelectTeamPage() {
                         >
                           <img src={getImage(pokemon.name)} alt={pokemon.name}
                             style={{
-                              width: '100%', height: '100%', objectFit: 'contain',
-                              imageRendering: 'pixelated', padding: '4px',
+                              width: '100%', height: '100%', objectFit: 'cover',
+                              objectPosition: 'center top', padding: '2px',
+                              background: TYPE_COLORS[pokemon.types?.split(',')[0]?.toLowerCase() || 'normal'] || '#555',
+                              borderRadius: '4px',
                             }} />
                           {isSelected && (
                             <div style={{
@@ -352,7 +393,15 @@ export default function SelectTeamPage() {
                               <div key={move.id} style={{
                                 background: 'rgba(255,255,255,0.03)', borderRadius: '6px', padding: '8px',
                                 border: '1px solid rgba(255,255,255,0.04)',
+                                display: 'flex', gap: '8px', alignItems: 'flex-start',
                               }}>
+                                {move.icon && (
+                                  <img src={move.icon} alt={move.name}
+                                    style={{ width: 40, height: 40, borderRadius: 4, border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0 }}
+                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                  />
+                                )}
+                                <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
                                   <span style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>
                                     {idx + 1}. {move.name}
@@ -379,6 +428,7 @@ export default function SelectTeamPage() {
                                 <p style={{ fontSize: '10px', color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
                                   {move.description}
                                 </p>
+                                </div>
                               </div>
                             );
                           })}
@@ -417,7 +467,7 @@ export default function SelectTeamPage() {
                     border: `2px solid ${getTypeColor(pokemon.types)}`, marginBottom: '4px',
                   }}>
                     <img src={getImage(pokemon.name)} alt={pokemon.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', background: TYPE_COLORS[pokemon.types?.split(',')[0]?.toLowerCase() || 'normal'] || '#555' }} />
                   </div>
                   <span style={{ fontSize: '10px', color: '#94a3b8' }}>#{idx + 1}</span>
                   <div style={{ fontSize: '11px', fontWeight: 600, color: '#e2e8f0' }}>{pokemon.name}</div>

@@ -33,37 +33,72 @@ export const GET = apiHandler(async (req: NextRequest) => {
   });
 
   let userProgress: Record<string, { status: string; progress: string }> = {};
-  
+  let completedMissionNames = new Set<string>();
+  let trainerLevel = 0;
+  let trainerWins = 0;
+
   if (userId && myProgress) {
     const trainerMissions = await prisma.trainerMission.findMany({
       where: { trainerId: userId },
-      select: {
-        missionId: true,
-        status: true,
-        progress: true,
-      }
+      include: { mission: { select: { name: true } } },
     });
-    
+
     userProgress = trainerMissions.reduce((acc, tm) => {
       acc[tm.missionId] = { status: tm.status, progress: tm.progress };
+      if (tm.status === 'completed') {
+        completedMissionNames.add(tm.mission.name);
+      }
       return acc;
     }, {} as Record<string, { status: string; progress: string }>);
+
+    const trainer = await prisma.trainer.findUnique({
+      where: { id: userId },
+      select: { level: true, wins: true },
+    });
+    if (trainer) {
+      trainerLevel = trainer.level;
+      trainerWins = trainer.wins;
+    }
   }
 
-  const formattedMissions = missions.map(m => ({
-    id: m.id,
-    name: m.name,
-    description: m.description,
-    category: m.category,
-    difficulty: m.difficulty,
-    requirements: JSON.parse(m.requirements),
-    objectives: JSON.parse(m.objectives),
-    rewardExp: m.rewardExp,
-    rewardPokemon: m.rewardPokemon,
-    rewardItems: m.rewardItems ? JSON.parse(m.rewardItems) : null,
-    userStatus: userProgress[m.id]?.status || 'locked',
-    userProgress: userProgress[m.id]?.progress ? JSON.parse(userProgress[m.id].progress) : null,
-  }));
+  const formattedMissions = missions.map(m => {
+    const requirements = JSON.parse(m.requirements);
+    const existingStatus = userProgress[m.id]?.status;
+
+    let userStatus: string;
+    if (existingStatus) {
+      userStatus = existingStatus;
+    } else if (!userId || !myProgress) {
+      userStatus = 'locked';
+    } else {
+      // Determine status based on prerequisites
+      const levelOk = !requirements.level || trainerLevel >= requirements.level;
+      const winsOk = !requirements.wins || trainerWins >= requirements.wins;
+      const prereqMissions: string[] = requirements.completedMissions || [];
+      const prereqsOk = prereqMissions.every((name: string) => completedMissionNames.has(name));
+
+      if (levelOk && winsOk && prereqsOk) {
+        userStatus = 'available';
+      } else {
+        userStatus = 'locked';
+      }
+    }
+
+    return {
+      id: m.id,
+      name: m.name,
+      description: m.description,
+      category: m.category,
+      difficulty: m.difficulty,
+      requirements,
+      objectives: JSON.parse(m.objectives),
+      rewardExp: m.rewardExp,
+      rewardPokemon: m.rewardPokemon,
+      rewardItems: m.rewardItems ? JSON.parse(m.rewardItems) : null,
+      userStatus,
+      userProgress: userProgress[m.id]?.progress ? JSON.parse(userProgress[m.id].progress) : null,
+    };
+  });
 
   const grouped = formattedMissions.reduce((acc, m) => {
     if (!acc[m.category]) acc[m.category] = [];
@@ -112,6 +147,33 @@ export const POST = apiHandler(async (req: NextRequest) => {
     }
     if (requirements.wins && trainer.wins < requirements.wins) {
       throw APIErrors.badRequest(`Requires ${requirements.wins} wins`);
+    }
+  }
+
+  // Check prerequisite missions
+  const prereqMissions: string[] = requirements.completedMissions || [];
+  if (prereqMissions.length > 0) {
+    const completedPrereqs = await prisma.trainerMission.findMany({
+      where: {
+        trainerId: userId,
+        status: 'completed',
+        mission: { name: { in: prereqMissions } },
+      },
+    });
+    const completedNames = new Set(completedPrereqs.map(tm => tm.missionId));
+    // Need to check by mission name, so get the mission records
+    const prereqMissionRecords = await prisma.mission.findMany({
+      where: { name: { in: prereqMissions } },
+      select: { id: true, name: true },
+    });
+    const completedPrereqNames = new Set<string>();
+    for (const pm of prereqMissionRecords) {
+      const tm = completedPrereqs.find(t => t.missionId === pm.id);
+      if (tm) completedPrereqNames.add(pm.name);
+    }
+    const missing = prereqMissions.filter(name => !completedPrereqNames.has(name));
+    if (missing.length > 0) {
+      throw APIErrors.badRequest(`Complete first: ${missing.join(', ')}`);
     }
   }
 

@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { EnergyType, BattlePokemon } from '../types';
 import { ALL_SELECTABLE_ENERGY_TYPES, ENERGY_NAMES, TYPE_TO_ENERGY } from '../data';
-import EnergyIcon from './EnergyIcon';
+import EnergyIcon, { EnergyOrb } from './EnergyIcon';
 
 interface EnergySelectScreenProps {
   playerTeam: BattlePokemon[];
@@ -49,7 +49,7 @@ export default function EnergySelectScreen({
             <div key={p.id} className="energy-select-pokemon">
               <Image src={p.sprite} alt={p.name} width={56} height={56} unoptimized />
               <span>{p.name}</span>
-              <div style={{ display: 'flex', gap: 3, marginTop: 2 }}>
+              <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
                 {pokemonEnergies.map(e => (
                   <span
                     key={e}
@@ -59,7 +59,7 @@ export default function EnergySelectScreen({
                       filter: selectedEnergyTypes.includes(e) || e === 'colorless' ? 'none' : 'grayscale(1) opacity(0.5)',
                     }}
                   >
-                    <EnergyIcon type={e} size={16} />
+                    <EnergyOrb type={e} size={18} />
                   </span>
                 ))}
               </div>
@@ -96,7 +96,7 @@ export default function EnergySelectScreen({
                 {isSelected && <span className="energy-tcg-check">&#10003;</span>}
                 {isNeeded && !isSelected && <span className="energy-tcg-rec">REC</span>}
                 <div className="energy-tcg-symbol">
-                  <EnergyIcon type={type} size={72} />
+                  <EnergyIcon type={type} size={72} variant="card" />
                 </div>
                 <span className="energy-tcg-name">{ENERGY_NAMES[type]}</span>
               </div>
@@ -109,13 +109,13 @@ export default function EnergySelectScreen({
       <div className="energy-select-summary">
         <span>Selected:</span>
         {selectedEnergyTypes.length === 0 ? (
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>None</span>
+          <span style={{ color: 'rgba(90,42,16,0.4)' }}>None</span>
         ) : (
           selectedEnergyTypes.map((e, i) => (
             <EnergyIcon key={`${e}-${i}`} type={e} size={24} />
           ))
         )}
-        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+        <span style={{ color: 'rgba(90,42,16,0.5)', fontSize: 12 }}>
           ({selectedEnergyTypes.length}/4)
         </span>
       </div>

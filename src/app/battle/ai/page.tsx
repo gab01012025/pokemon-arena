@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import './battle.css';
 import './mobile.css';
@@ -26,7 +26,7 @@ import {
   spendEnergyForMove, canAffordMove, processStatusEffects, canAct,
   calculateBattleDamage, STAB_MULTIPLIER,
 } from './engine';
-import { createOpponentTeam, createFallbackPlayerTeam } from './ai';
+import { createOpponentTeam, createFallbackPlayerTeam, getAIMoves } from './ai';
 import {
   LoadingScreen,
   TrainerSelectScreen,
@@ -35,6 +35,21 @@ import {
   BattleOverlays,
 } from './components';
 import EnergyIcon from './components/EnergyIcon';
+import { useSounds } from '@/components/SoundManager';
+
+// ==================== DESCRIPTION COLORIZER (NA-style colored text) ====================
+function colorizeDescription(text: string): React.ReactNode {
+  // NA-style: numbers/damage in RED, effect keywords in GREEN
+  const regex = /(\b\d+%?\b(?:\s+(?:damage|additional damage|turns?|points?))?|(?:invulnerable|stun(?:ned|s)?|poison(?:ed|s)?|burn(?:ed|ing|s)?|frozen|freeze|paralyz(?:ed|e)|sleep|confus(?:ed|ion)|reduce[sd]?|reduction|increase[sd]?|heal(?:ed|s|ing)?|shield[sd]?|counter[sd]?|immune|block(?:ed|s)?|protect(?:ed|s)?|absorb(?:ed|s)?|vulnerable|weaken(?:ed|s)?|boost(?:ed|s)?|drain(?:ed|s)?|flinch(?:ed|es)?|trap(?:ped|s)?)\b)/gi;
+  const parts = text.split(regex);
+  if (parts.length <= 1) return text;
+  return <>{parts.map((part, i) => {
+    if (!part) return null;
+    if (/^\d/.test(part)) return <span key={i} className="desc-highlight-num">{part}</span>;
+    if (/invulnerable|stun|poison|burn|frozen|freeze|paralyz|sleep|confus|reduce|increase|heal|shield|counter|immune|block|protect|absorb|vulnerable|weaken|boost|drain|flinch|trap/i.test(part)) return <span key={i} className="desc-highlight-key">{part}</span>;
+    return part;
+  })}</>;
+}
 
 // ==================== AI ENERGY HELPER ====================
 /** Pick up to 3 selectable energy types based on ALL types from alive pokemon, deduped */
@@ -54,6 +69,7 @@ function getAiEnergyTypes(team: BattlePokemon[]): EnergyType[] {
 
 // ==================== MAIN COMPONENT ====================
 export default function AIBattlePage() {
+  const { playBgm } = useSounds();
   // Core battle state
   const [playerTeam, setPlayerTeam] = useState<BattlePokemon[]>([]);
   const [opponentTeam, setOpponentTeam] = useState<BattlePokemon[]>([]);
@@ -64,6 +80,7 @@ export default function AIBattlePage() {
   const [selectingPokemon, setSelectingPokemon] = useState<number | null>(null);
   const [selectingMove, setSelectingMove] = useState<Move | null>(null);
   const [hoveredSkill, setHoveredSkill] = useState<{ move: Move; pokemonName: string; pokemonTypes?: PokemonType[]; sprite?: string } | null>(null);
+  const [skillTooltip, setSkillTooltip] = useState<{ move: Move; pokemonId: number; moveIdx: number; rect: { left: number; top: number; width: number; height: number } } | null>(null);
   const [battleLog, setBattleLog] = useState<LogEntry[]>([]);
   const [timer, setTimer] = useState(100);
   const [battleBackground, setBattleBackground] = useState('');
@@ -106,6 +123,9 @@ export default function AIBattlePage() {
   // Combat animations (applied briefly to character cards)
   const [playerAnims, setPlayerAnims] = useState<string[]>(['', '', '']);
   const [enemyAnims, setEnemyAnims] = useState<string[]>(['', '', '']);
+  const [screenShake, setScreenShake] = useState('');
+  const [damageFloats, setDamageFloats] = useState<{ id: number; text: string; type: string; side: 'player' | 'enemy'; idx: number }[]>([]);
+  const [battleBg] = useState(() => Math.random() < 0.5 ? 1 : 2);
 
   // Enemy skills viewing
   const [viewingEnemySkills, setViewingEnemySkills] = useState<BattlePokemon | null>(null);
@@ -190,7 +210,11 @@ export default function AIBattlePage() {
                 types: kantoData?.types || [primaryType] as PokemonType[],
                 hp: 100,
                 maxHp: 100,
-                attack: 80, defense: 70, spAtk: 85, spDef: 75, speed: 60,
+                attack: kantoData?.baseStats?.attack ?? 50,
+                defense: kantoData?.baseStats?.defense ?? 50,
+                spAtk: kantoData?.baseStats?.spAtk ?? 50,
+                spDef: kantoData?.baseStats?.spDef ?? 50,
+                speed: kantoData?.baseStats?.speed ?? 50,
                 sprite: getSprite(p.name),
                 moves,
                 statusEffects: [],
@@ -201,7 +225,7 @@ export default function AIBattlePage() {
                 weakness: wr.weakness,
                 resistance: wr.resistance,
                 evoBar: 0,
-                maxEvoBar: 50,
+                maxEvoBar: 80,
               };
             });
             setPlayerTeam(battleTeam);
@@ -227,7 +251,8 @@ export default function AIBattlePage() {
         setPlayerTeam(createFallbackPlayerTeam());
       }
 
-      setOpponentTeam(createOpponentTeam());
+      const streak = parseInt(localStorage.getItem('winStreak') || '0', 10);
+      setOpponentTeam(createOpponentTeam(streak));
       setBattleBackground(BATTLE_BACKGROUNDS[Math.floor(Math.random() * BATTLE_BACKGROUNDS.length)]);
       setPhase('trainer-select');
     };
@@ -293,6 +318,7 @@ export default function AIBattlePage() {
       });
     }
     setPhase('player1-turn');
+    playBgm('battle');
     addLog('Battle Start! Player 1 turn!', 'info');
     addLog('Turn 1 - Gained 1 energy!', 'info');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -314,11 +340,11 @@ export default function AIBattlePage() {
 
   const handleSkillClick = (pIdx: number, move: Move) => {
     if (!canUseMove(move, pIdx)) return;
-    if (move.targetType === 'self' || move.targetType === 'all-enemies') {
-      const targetIndex = move.targetType === 'self' ? pIdx : 0;
-      setSelectedActions(prev => [...prev, { pokemonIndex: pIdx, move, targetIndex }]);
+    if (move.targetType === 'all-enemies') {
+      setSelectedActions(prev => [...prev, { pokemonIndex: pIdx, move, targetIndex: 0 }]);
       addLog(`${playerTeam[pIdx].name} will use ${move.name}!`, 'info');
     } else {
+      // Both 'enemy' and 'self' enter targeting mode (NA style)
       setSelectingPokemon(pIdx);
       setSelectingMove(move);
       setPhase('targeting');
@@ -328,7 +354,11 @@ export default function AIBattlePage() {
   const handleTargetSelect = (tIdx: number) => {
     if (selectingPokemon === null || !selectingMove) return;
     setSelectedActions(prev => [...prev, { pokemonIndex: selectingPokemon, move: selectingMove, targetIndex: tIdx }]);
-    addLog(`${playerTeam[selectingPokemon].name} targets ${opponentTeam[tIdx].name} with ${selectingMove.name}!`, 'info');
+    if (selectingMove.targetType === 'self') {
+      addLog(`${playerTeam[selectingPokemon].name} will use ${selectingMove.name}!`, 'info');
+    } else {
+      addLog(`${playerTeam[selectingPokemon].name} targets ${opponentTeam[tIdx].name} with ${selectingMove.name}!`, 'info');
+    }
     setSelectingPokemon(null);
     setSelectingMove(null);
     setPhase('player1-turn');
@@ -693,7 +723,7 @@ export default function AIBattlePage() {
         defense: p.defense + statBonus,
         spAtk: p.spAtk + statBonus,
         spDef: p.spDef + statBonus,
-        speed: p.speed + Math.floor(statBonus / 2),
+        speed: p.speed + statBonus,
         sprite: getSpriteById(evoId),
         types: resolvedTypes,
         canEvolve: kantoData?.canEvolve || false,
@@ -844,6 +874,19 @@ export default function AIBattlePage() {
     setTimeout(() => setter(prev => prev.map((a, i) => i === idx ? '' : a)), duration);
   };
 
+  /** Trigger screen shake */
+  const triggerScreenShake = (heavy = false) => {
+    setScreenShake(heavy ? 'screen-shake-heavy' : 'screen-shake');
+    setTimeout(() => setScreenShake(''), heavy ? 500 : 400);
+  };
+
+  /** Show floating damage/heal number */
+  const showDamageFloat = (text: string, type: string, side: 'player' | 'enemy', idx: number) => {
+    const id = Date.now() + Math.random();
+    setDamageFloats(prev => [...prev, { id, text, type, side, idx }]);
+    setTimeout(() => setDamageFloats(prev => prev.filter(f => f.id !== id)), 1300);
+  };
+
   const executeAction = async (action: SelectedAction, isPlayer: boolean) => {
     const atkTeam = isPlayer ? playerTeamRef.current : opponentTeamRef.current;
     const defTeam = isPlayer ? opponentTeamRef.current : playerTeamRef.current;
@@ -853,7 +896,7 @@ export default function AIBattlePage() {
     const move = action.move;
     if (!atk || atk.hp <= 0) return;
 
-    if (!canAct(atk)) {
+    if (!canAct(atk, true)) {
       const blockStatus = atk.statusEffects.find(e => ['stun', 'freeze', 'sleep', 'paralyze'].includes(e.type));
       if (blockStatus) {
         addLog(`${atk.name} can't move due to ${blockStatus.type}!`, 'status');
@@ -867,6 +910,8 @@ export default function AIBattlePage() {
     }
     // accuracy >= 100 → never miss
     if (accuracy < 100 && Math.random() * 100 > accuracy) {
+      triggerAnim(isPlayer, action.pokemonIndex, 'attacking', 600);
+      showDamageFloat('MISS', 'miss', isPlayer ? 'enemy' : 'player', action.targetIndex);
       addLog(`${atk.name}'s ${move.name} missed!`, 'info');
       return;
     }
@@ -881,9 +926,11 @@ export default function AIBattlePage() {
           const newHp = Math.min(atk.maxHp, atk.hp + healAmount);
           const healed = newHp - atk.hp;
           setAtkTeam(prev => prev.map((p, i) => i === action.pokemonIndex ? { ...p, hp: newHp } : p));
-          triggerAnim(isPlayer, action.pokemonIndex, 'healed', 800);
-          if (healed > 0) addLog(`${atk.name} used ${move.name}! Healed ${healed} HP!`, 'heal');
-          else addLog(`${atk.name} used ${move.name}! HP is already full!`, 'info');
+          triggerAnim(isPlayer, action.pokemonIndex, 'healed', 900);
+          if (healed > 0) {
+            showDamageFloat(`+${healed}`, 'heal', isPlayer ? 'player' : 'enemy', action.pokemonIndex);
+            addLog(`${atk.name} used ${move.name}! Healed ${healed} HP!`, 'heal');
+          } else addLog(`${atk.name} used ${move.name}! HP is already full!`, 'info');
         }
       } else {
         addLog(`${atk.name} used ${move.name}!`, 'effect');
@@ -935,7 +982,7 @@ export default function AIBattlePage() {
           }
         }
 
-        // TCG Pocket damage: power × STAB × crit ± weakness/resistance
+        // TCG Pocket damage: power × statMod × defMod × STAB × crit ± weakness/resistance
         const damageResult = calculateBattleDamage(
           move.power,
           move.type as PokemonType,
@@ -944,6 +991,8 @@ export default function AIBattlePage() {
           def.resistance,
           atk.statusEffects,
           def.statusEffects,
+          { attack: atk.attack, spAtk: atk.spAtk },
+          { defense: def.defense, spDef: def.spDef },
         );
 
         let finalDamage = damageResult.damage;
@@ -1001,18 +1050,27 @@ export default function AIBattlePage() {
         setDefTeam(prev => prev.map((p, i) => i === tIdx ? { ...p, hp: newHp } : p));
 
         // Trigger visual feedback animations
-        triggerAnim(isPlayer, action.pokemonIndex, 'attacking', 500);
-        triggerAnim(!isPlayer, tIdx, damageResult.isCrit ? 'critical' : 'damaged', 600);
+        triggerAnim(isPlayer, action.pokemonIndex, 'attacking', 600);
+        triggerAnim(!isPlayer, tIdx, damageResult.isCrit ? 'critical' : 'damaged', damageResult.isCrit ? 700 : 550);
+
+        // Screen shake on hit (heavier for crits)
+        triggerScreenShake(damageResult.isCrit);
+
+        // Floating damage number
+        const floatType = damageResult.isCrit ? 'critical'
+          : damageResult.effectivenessText?.includes('super') ? 'super-effective'
+          : 'normal';
+        showDamageFloat(`-${finalDamage}`, floatType, isPlayer ? 'enemy' : 'player', tIdx);
+
+        // Faint animation
+        if (newHp <= 0) {
+          setTimeout(() => triggerAnim(!isPlayer, tIdx, 'fainted', 800), 300);
+        }
 
         let logMsg = `${atk.name}'s ${move.name} dealt ${finalDamage} damage to ${def.name}!`;
         if (damageResult.isCrit) logMsg += ' Critical hit!';
         if (damageResult.effectivenessText) logMsg += ` ${damageResult.effectivenessText}`;
         addLog(logMsg, damageResult.isCrit ? 'critical' : 'damage');
-
-        // Sound effect placeholders
-        // if (damageResult.isCrit) playSound('critical');
-        // else playSound('hit');
-        // if (damageResult.effectivenessText?.includes('super')) playSound('super-effective');
 
         // Track battle stats
         setBattleTracker(prev => {
@@ -1033,17 +1091,17 @@ export default function AIBattlePage() {
           return newTracker;
         });
 
-        // Evolution bar: attacker gains +15, defender gains +10
+        // Evolution bar: attacker gains +10, defender gains +8
         if (finalDamage > 0) {
           setAtkTeam(prev => prev.map((p, i) => {
             if (i !== action.pokemonIndex || p.hp <= 0) return p;
-            const newEvo = Math.min(p.evoBar + 15, p.maxEvoBar);
+            const newEvo = Math.min(p.evoBar + 10, p.maxEvoBar);
             return { ...p, evoBar: newEvo };
           }));
           if (newHp > 0) {
             setDefTeam(prev => prev.map((p, i) => {
               if (i !== tIdx || p.hp <= 0) return p;
-              const newEvo = Math.min(p.evoBar + 10, p.maxEvoBar);
+              const newEvo = Math.min(p.evoBar + 8, p.maxEvoBar);
               return { ...p, evoBar: newEvo };
             }));
           }
@@ -1502,6 +1560,7 @@ export default function AIBattlePage() {
     if (opponentTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleVictory();
       setPhase('victory');
+      playBgm('victory');
       isExecutingRef.current = false;
       return;
     }
@@ -1519,6 +1578,7 @@ export default function AIBattlePage() {
     if (playerTeamRef.current.filter(p => p.hp > 0).length === 0) {
       handleBattleDefeat();
       setPhase('defeat');
+      playBgm('lobby');
       isExecutingRef.current = false;
       return;
     }
@@ -1558,11 +1618,13 @@ export default function AIBattlePage() {
     if (opponentDeadAfterStatus) {
       handleBattleVictory();
       setPhase('victory');
+      playBgm('victory');
       return;
     }
     if (playerDeadAfterStatus) {
       handleBattleDefeat();
       setPhase('defeat');
+      playBgm('lobby');
       return;
     }
 
@@ -1603,19 +1665,21 @@ export default function AIBattlePage() {
             addLog(`${p.name}'s evolution bar is full! Evolving into ${p.evolvesTo.name}!`, 'effect');
             const newMoves = getPokemonMoves(evoData.id, evoData.types[0]);
             const wr = getWeaknessResistance(evoData.types);
+            const newMaxHp = evoData.hp || (p.maxHp + (p.evolvesTo.hpBonus || 0));
+            const bonus = p.evolvesTo.statBonus || 0;
             return {
               ...p,
               id: evoData.id,
               name: evoData.name,
               types: evoData.types,
               sprite: getSpriteById(evoData.id),
-              maxHp: 100,
-              hp: Math.min(p.hp + 20, 100), // Heal 20 on evolution
-              attack: p.attack + (p.evolvesTo.statBonus || 0),
-              defense: p.defense + Math.floor((p.evolvesTo.statBonus || 0) / 2),
-              spAtk: p.spAtk + (p.evolvesTo.statBonus || 0),
-              spDef: p.spDef + Math.floor((p.evolvesTo.statBonus || 0) / 2),
-              speed: p.speed + Math.floor((p.evolvesTo.statBonus || 0) / 2),
+              maxHp: newMaxHp,
+              hp: Math.min(p.hp + (p.evolvesTo.hpBonus || 15), newMaxHp),
+              attack: p.attack + bonus,
+              defense: p.defense + bonus,
+              spAtk: p.spAtk + bonus,
+              spDef: p.spDef + bonus,
+              speed: p.speed + bonus,
               moves: newMoves.length > 0 ? newMoves : p.moves,
               canEvolve: evoData.canEvolve,
               evolvesTo: evoData.evolvesTo,
@@ -1624,7 +1688,7 @@ export default function AIBattlePage() {
               weakness: wr.weakness,
               resistance: wr.resistance,
               evoBar: 0,
-              maxEvoBar: p.maxEvoBar + 20, // Each evolution requires more
+              maxEvoBar: p.maxEvoBar + 30, // Each evolution requires more
             };
           }
         } else if (p.evolutionOptions) {
@@ -1641,6 +1705,49 @@ export default function AIBattlePage() {
       }
     }));
 
+    // Check evolution bars for AI team (auto-evolve, single-path only)
+    setOpponentTeam(prev => prev.map(p => {
+      if (p.hp <= 0 || p.evoBar < p.maxEvoBar) return p;
+      if (p.canEvolve && p.evolvesTo && !p.evolutionOptions) {
+        const evoData = EVOLUTION_DATA[p.evolvesTo.id];
+        if (evoData) {
+          addLog(`Enemy ${p.name} evolved into ${p.evolvesTo.name}!`, 'effect');
+          const newMoves = getAIMoves(evoData.id, evoData.types[0]);
+          const wr = getWeaknessResistance(evoData.types);
+          const newMaxHp = evoData.hp || (p.maxHp + (p.evolvesTo.hpBonus || 0));
+          const bonus = p.evolvesTo.statBonus || 0;
+          return {
+            ...p,
+            id: evoData.id,
+            name: evoData.name,
+            types: evoData.types,
+            sprite: getSpriteById(evoData.id),
+            maxHp: newMaxHp,
+            hp: Math.min(p.hp + (p.evolvesTo.hpBonus || 15), newMaxHp),
+            attack: p.attack + bonus,
+            defense: p.defense + bonus,
+            spAtk: p.spAtk + bonus,
+            spDef: p.spDef + bonus,
+            speed: p.speed + bonus,
+            moves: newMoves.length > 0 ? newMoves : p.moves,
+            canEvolve: evoData.canEvolve,
+            evolvesTo: evoData.evolvesTo,
+            evolutionEnergyCost: evoData.evolutionEnergyCost,
+            evolutionOptions: evoData.evolutionOptions,
+            weakness: wr.weakness,
+            resistance: wr.resistance,
+            evoBar: 0,
+            maxEvoBar: p.maxEvoBar + 30,
+          };
+        }
+      }
+      // Final form or can't evolve: reset bar (no energy bonus for AI)
+      if (!p.canEvolve || (!p.evolvesTo && !p.evolutionOptions)) {
+        return { ...p, evoBar: 0 };
+      }
+      return p;
+    }));
+
     setSelectedActions([]);
     setUsedItemThisTurn(false);
     setUsedExchangeThisTurn(false);
@@ -1650,8 +1757,8 @@ export default function AIBattlePage() {
 
   // ==================== REMATCH / CHANGE TEAM ====================
   const handleRematch = () => {
-    // Keep team, get new opponent
-    setOpponentTeam(createOpponentTeam());
+    // Keep team, get new opponent (scaled by win streak)
+    setOpponentTeam(createOpponentTeam(winStreak));
     setOpponentName(AI_TRAINER_NAMES[Math.floor(Math.random() * AI_TRAINER_NAMES.length)]);
     // Harder opponents every 5 wins (streak scaling)
     const streakBonus = Math.floor(winStreak / 5) * 5;
@@ -1751,9 +1858,19 @@ export default function AIBattlePage() {
           canExchange={!usedExchangeThisTurn && phase === 'player1-turn'}
         />
 
-        {/* ===== BATTLE AREA — naruto-arena EXACT: portrait + 4 skills horizontal row ===== */}
-        <div className="na-battle-area">
-          {/* === PLAYER COLUMN (left) === */}
+        {/* ===== BATTLE AREA — naruto-unison exact structure ===== */}
+        <div className={`na-battle-area ${screenShake}`}>
+          {/* Battle background video + image fallback */}
+          <video
+            className="battle-bg-video"
+            src={`/battle-bg/bg${battleBg}.mp4`}
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={`/battle-bg/bg${battleBg}.jpg`}
+          />
+          {/* === PLAYER COLUMN (left, absolute positioned) === */}
           <div className="na-column-player">
             {[0, 1, 2].map(idx => {
               const poke = playerTeam[idx];
@@ -1764,145 +1881,150 @@ export default function AIBattlePage() {
               const pEvoPercent = poke.maxEvoBar > 0 ? Math.min((poke.evoBar / poke.maxEvoBar) * 100, 100) : 0;
 
               return (
-                <div key={idx} className={`na-char-slot ${poke.hp <= 0 ? 'dead' : ''} ${playerAnims[idx] || ''}`}>
-                  {/* Row: [Portrait] [Skill1] [Skill2] [Skill3] [Skill4] */}
-                  <div className="na-char-row">
-                    <div
-                      className={`na-portrait ${phase === 'item-target' && poke.hp > 0 ? 'highlighted' : ''}`}
-                      onClick={() => phase === 'item-target' && poke.hp > 0 && applyItemToTarget(idx)}
-                    >
-                      <Image src={poke.sprite} alt={poke.name} width={96} height={96} unoptimized className="na-charicon flipped" />
-                      {poke.statusEffects.length > 0 && (
-                        <div className="na-status-icons">
-                          {poke.statusEffects.map((se, si) => (
-                            <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="na-skill-frame">
-                      {poke.moves.slice(0, 4).map(move => {
-                        const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
-                        const moveTypeColor = TYPE_COLORS[move.type] || TYPE_COLORS['normal'];
-                        const canUse = canUseMove(move, idx);
-                        const isQueued = hasAction && selectedMoveForPoke?.id === move.id;
-                        const onCd = move.currentCooldown > 0;
-                        return (
-                          <div
-                            key={move.id}
-                            className={`na-charmove ${canUse ? 'click' : 'noclick'} ${isQueued ? 'queued' : ''} ${onCd ? 'oncd' : ''}`}
-                            data-cd={onCd ? move.currentCooldown : undefined}
-                            style={{ background: moveTypeColor.bg, borderColor: moveTypeColor.border }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (poke.hp > 0) {
-                                if (hasAction) { removeAction(idx); }
-                                else { handleSkillClick(idx, move); }
-                              }
-                            }}
-                            onMouseEnter={() => setHoveredSkill({ move, pokemonName: poke.name, pokemonTypes: poke.types, sprite: poke.sprite })}
-                            onMouseLeave={() => setHoveredSkill(null)}
-                            title={move.name}
-                          >
-                            <EnergyIcon type={energyType} size={18} />
-                            {isQueued && <span className="na-queued-marker">?</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  {/* HP bar full width under the row */}
-                  <div className="na-hp-under">
+                <div key={idx} className={`na-char-slot ${poke.hp <= 0 ? 'dead' : ''} ${hasAction ? 'has-action' : ''} ${playerAnims[idx] || ''}`}>
+                  {/* Floating damage numbers */}
+                  {damageFloats.filter(f => f.side === 'player' && f.idx === idx).map(f => (
+                    <span key={f.id} className={`damage-float ${f.type}`}>{f.text}</span>
+                  ))}
+                  {/* Portrait column: avatar + HP bar + evo bar */}
+                  <div
+                    className={`na-portrait ${phase === 'item-target' && poke.hp > 0 ? 'highlighted' : ''} ${phase === 'targeting' && selectingMove?.targetType === 'self' && idx === selectingPokemon && poke.hp > 0 ? 'highlighted' : ''}`}
+                    onClick={() => {
+                      if (phase === 'item-target' && poke.hp > 0) applyItemToTarget(idx);
+                      else if (phase === 'targeting' && selectingMove?.targetType === 'self' && idx === selectingPokemon && poke.hp > 0) handleTargetSelect(idx);
+                    }}
+                  >
+                    {/* GBA-style bouncing target arrow for self-targeting */}
+                    {phase === 'targeting' && selectingMove?.targetType === 'self' && idx === selectingPokemon && poke.hp > 0 && (
+                      <div className="gba-target-arrow">&#9660;</div>
+                    )}
+                    <Image src={poke.sprite} alt={poke.name} width={75} height={75} unoptimized className="na-charicon" style={{ background: (TYPE_COLORS[poke.types?.[0] || 'normal'] || TYPE_COLORS.normal).bg }} />
+                    {poke.statusEffects.length > 0 && (
+                      <div className="na-status-icons">
+                        {poke.statusEffects.map((se, si) => (
+                          <span key={si} className="status-badge">{STATUS_ICONS[se.type]}
+                            <span className="status-tooltip">{se.source || se.type.toUpperCase()}: {se.type.replace(/-/g, ' ').toUpperCase()}{se.value ? ` (${se.value})` : ''} — {se.duration === 999 ? 'INFINITE' : `${se.duration} TURN${se.duration > 1 ? 'S' : ''} LEFT`}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* HP bar below portrait */}
                     <div className="na-charhealth">
                       <div className={`na-hp-fill ${getHpClass(poke.hp, poke.maxHp)}`} style={{ width: `${(poke.hp / poke.maxHp) * 100}%` }} />
                       <span className="na-hp-overlay">{poke.hp}/{poke.maxHp}</span>
                     </div>
+                    {poke.hp > 0 && poke.maxEvoBar > 0 && (
+                      <div className="na-evo-bar">
+                        <div className={`na-evo-fill ${pEvoPercent >= 100 ? 'full' : ''}`} style={{ width: `${pEvoPercent}%` }} />
+                      </div>
+                    )}
                   </div>
-                  {poke.hp > 0 && poke.maxEvoBar > 0 && (
-                    <div className="na-evo-bar">
-                      <div className={`na-evo-fill ${pEvoPercent >= 100 ? 'full' : ''}`} style={{ width: `${pEvoPercent}%` }} />
+                  {/* 1 queued slot + 4 Skills next to portrait */}
+                  <div className="na-skill-frame">
+                    {/* 1st slot: shows queued move or "?" */}
+                    <div
+                      className={`na-charmove queued-slot ${hasAction ? 'queued-active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (hasAction) removeAction(idx);
+                      }}
+                      title={hasAction ? `${selectedMoveForPoke?.name} (click to cancel)` : 'No move selected'}
+                    >
+                      {hasAction && selectedMoveForPoke ? (
+                        <>
+                          <img
+                            src={`/skills/${poke.id}/${poke.moves.findIndex(m => m.id === selectedMoveForPoke.id)}.png`}
+                            alt={selectedMoveForPoke.name}
+                            width={50}
+                            height={50}
+                            className="skill-artwork"
+                            onError={(e) => { (e.target as HTMLImageElement).src = poke.sprite; }}
+                          />
+                          <span className="skill-name-label">{selectedMoveForPoke.name}</span>
+                        </>
+                      ) : (
+                        <span className="enemy-skill-question">?</span>
+                      )}
                     </div>
-                  )}
+                    {poke.moves.slice(0, 4).map((move, mIdx) => {
+                      const moveTypeColor = TYPE_COLORS[move.type] || TYPE_COLORS['normal'];
+                      const canUse = canUseMove(move, idx);
+                      const isQueued = hasAction && selectedMoveForPoke?.id === move.id;
+                      const onCd = move.currentCooldown > 0;
+                      const skillIcon = `/skills/${poke.id}/${mIdx}.png`;
+                      return (
+                        <div
+                          key={move.id}
+                          className={`na-charmove ${canUse ? 'click' : 'noclick'} ${isQueued ? 'queued' : ''} ${onCd ? 'oncd' : ''}`}
+                          data-cd={onCd ? move.currentCooldown : undefined}
+                          style={{ background: moveTypeColor.bg }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHoveredSkill({ move, pokemonName: poke.name, pokemonTypes: poke.types, sprite: poke.sprite });
+                            if (poke.hp > 0) {
+                              if (hasAction) { removeAction(idx); }
+                              else { handleSkillClick(idx, move); }
+                            }
+                          }}
+                          onMouseEnter={(e) => {
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                            setSkillTooltip({ move, pokemonId: poke.id, moveIdx: mIdx, rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height } });
+                          }}
+                          onMouseLeave={() => setSkillTooltip(null)}
+                        >
+                          <img
+                            src={skillIcon}
+                            alt={move.name}
+                            width={50}
+                            height={50}
+                            className="skill-artwork"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* === CENTER — Large Pokemon sprite === */}
-          <div className="na-center-sprite">
-            {hoveredSkill?.sprite ? (
-              <Image src={hoveredSkill.sprite} alt={hoveredSkill.pokemonName} width={280} height={280} unoptimized className="na-big-sprite" />
-            ) : playerTeam[0]?.hp > 0 ? (
-              <Image src={playerTeam[0].sprite} alt={playerTeam[0].name} width={280} height={280} unoptimized className="na-big-sprite" />
-            ) : null}
-          </div>
+          {/* Center sprite removed per client request */}
 
-          {/* === ENEMY COLUMN (right) — mirrored: [Skill4] [Skill3] [Skill2] [Skill1] [Portrait] === */}
+          {/* === ENEMY COLUMN (right, absolute positioned, text-align: right) === */}
           <div className="na-column-enemy">
             {[0, 1, 2].map(idx => {
               const enemy = opponentTeam[idx];
               if (!enemy) return null;
-              const eEvoPercent = enemy.maxEvoBar > 0 ? Math.min((enemy.evoBar / enemy.maxEvoBar) * 100, 100) : 0;
               const attackersOnThis = selectedActions.filter(a => a.targetIndex === idx && a.move.targetType !== 'self');
 
               return (
                 <div key={idx} className={`na-char-slot enemy-slot ${enemy.hp <= 0 ? 'dead' : ''} ${attackersOnThis.length > 0 ? 'being-targeted' : ''} ${enemyAnims[idx] || ''}`}>
-                  {/* Row: [Skill1] [Skill2] [Skill3] [Skill4] [Portrait] */}
-                  <div className="na-char-row enemy-row">
-                    <div className="na-skill-frame enemy-skills">
-                      {enemy.moves.slice(0, 4).map(move => {
-                        const energyType = move.cost.length > 0 ? move.cost[0].type : 'colorless';
-                        const moveTypeColor = TYPE_COLORS[move.type] || TYPE_COLORS['normal'];
-                        return (
-                          <div
-                            key={move.id}
-                            className="na-charmove enemy-move"
-                            style={{ background: moveTypeColor.bg, borderColor: moveTypeColor.border }}
-                            onMouseEnter={() => setHoveredSkill({ move, pokemonName: enemy.name, pokemonTypes: enemy.types, sprite: enemy.sprite })}
-                            onMouseLeave={() => setHoveredSkill(null)}
-                            title={move.name}
-                          >
-                            <EnergyIcon type={energyType} size={18} />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <div
-                      className={`na-portrait enemy-portrait ${phase === 'targeting' && enemy.hp > 0 ? 'highlighted' : ''} ${phase === 'targeting' && enemy.hp <= 0 ? 'nohighlight' : ''}`}
-                      onClick={() => {
-                        if (phase === 'targeting' && enemy.hp > 0) {
-                          handleTargetSelect(idx);
-                        } else if (enemy.hp > 0) {
-                          setViewingEnemySkills(enemy);
-                        }
-                      }}
-                      style={{ cursor: enemy.hp > 0 ? 'pointer' : 'default' }}
-                    >
-                      <Image src={enemy.sprite} alt={enemy.name} width={96} height={96} unoptimized className="na-charicon" />
-                      {enemy.statusEffects.length > 0 && (
-                        <div className="na-status-icons">
-                          {enemy.statusEffects.map((se, si) => (
-                            <span key={si} className="status-badge" title={`${se.type} (${se.duration}t)`}>{STATUS_ICONS[se.type]}</span>
-                          ))}
-                        </div>
-                      )}
-                      {attackersOnThis.length > 0 && (
-                        <div className="na-target-count">{attackersOnThis.length}</div>
-                      )}
-                    </div>
-                  </div>
-                  {/* HP bar full width under the row */}
-                  <div className="na-hp-under">
+                  {/* Floating damage numbers */}
+                  {damageFloats.filter(f => f.side === 'enemy' && f.idx === idx).map(f => (
+                    <span key={f.id} className={`damage-float ${f.type}`}>{f.text}</span>
+                  ))}
+                  {/* Enemy — only Pokemon image + HP */}
+                  <div
+                    className={`na-portrait enemy-portrait ${phase === 'targeting' && selectingMove?.targetType !== 'self' && enemy.hp > 0 ? 'highlighted' : ''} ${phase === 'targeting' && selectingMove?.targetType !== 'self' && enemy.hp <= 0 ? 'nohighlight' : ''}`}
+                    onClick={() => {
+                      if (phase === 'targeting' && selectingMove?.targetType !== 'self' && enemy.hp > 0) {
+                        handleTargetSelect(idx);
+                      } else if (enemy.hp > 0) {
+                        setViewingEnemySkills(enemy);
+                      }
+                    }}
+                    style={{ cursor: enemy.hp > 0 ? 'pointer' : 'default' }}
+                  >
+                    {phase === 'targeting' && selectingMove?.targetType !== 'self' && enemy.hp > 0 && (
+                      <div className="gba-target-arrow">&#9660;</div>
+                    )}
+                    <Image src={enemy.sprite} alt={enemy.name} width={75} height={75} unoptimized className="na-charicon" style={{ background: (TYPE_COLORS[enemy.types?.[0] || 'normal'] || TYPE_COLORS.normal).bg }} />
                     <div className="na-charhealth">
                       <div className={`na-hp-fill ${getHpClass(enemy.hp, enemy.maxHp)}`} style={{ width: `${(enemy.hp / enemy.maxHp) * 100}%` }} />
                       <span className="na-hp-overlay">{enemy.hp}/{enemy.maxHp}</span>
                     </div>
                   </div>
-                  {enemy.hp > 0 && enemy.maxEvoBar > 0 && (
-                    <div className="na-evo-bar">
-                      <div className={`na-evo-fill ${eEvoPercent >= 100 ? 'full' : ''}`} style={{ width: `${eEvoPercent}%` }} />
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -1912,7 +2034,7 @@ export default function AIBattlePage() {
         {/* ===== BOTTOM BAR — Surrender + Skill Info Panel + Controls ===== */}
         <div className="na-bottom-bar">
           <div className="na-bottom-left">
-            <button className="na-surrender-btn" onClick={() => { handleBattleDefeat(); setPhase('defeat'); }}>SURRENDER</button>
+            <button className="na-surrender-btn" onClick={() => { handleBattleDefeat(); setPhase('defeat'); playBgm('lobby'); }}>SURRENDER</button>
             <button
               className="na-item-btn"
               onClick={() => setShowItems(!showItems)}
@@ -1926,30 +2048,54 @@ export default function AIBattlePage() {
               </button>
             ))}
           </div>
-          {/* Skill detail panel (shows on hover, like naruto-arena bottom panel) */}
+          {/* Skill detail panel — Budokai Arena style */}
           <div className="na-skill-detail">
             {skillInfoMove ? (
               <>
-                <div className="na-detail-header">
-                  <span className="na-detail-name">{hoveredSkill?.pokemonName} {skillInfoMove.name}</span>
-                  <span className="na-detail-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
-                    {skillInfoMove.type.toUpperCase()}
-                  </span>
+                {/* Skill artwork thumbnail */}
+                <div className="na-detail-artwork">
+                  {hoveredSkill?.sprite ? (
+                    <Image src={hoveredSkill.sprite} alt={hoveredSkill.pokemonName} width={56} height={56} unoptimized />
+                  ) : (
+                    <div className="na-detail-artwork-placeholder" />
+                  )}
                 </div>
-                <div className="na-detail-desc">{skillInfoMove.description}</div>
-                <div className="na-detail-meta">
-                  <span className="na-detail-cost">
-                    ENERGY: {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
-                      <span key={i} className="na-cost-badge">
-                        {Array.from({ length: c.amount }).map((_, ai) => <EnergyIcon key={ai} type={c.type} size={14} />)}
-                      </span>
-                    )) : <span style={{ color: '#4CAF50' }}>FREE</span>}
-                  </span>
-                  <span>CLASSES: {skillInfoMove.power > 0 ? 'OFFENSIVE' : 'STATUS'}{skillInfoMove.cooldown > 0 ? `, CD:${skillInfoMove.cooldown}` : ''}{skillInfoMove.statusEffect ? `, ${skillInfoMove.statusEffect.type.toUpperCase()}` : ''}</span>
+                {/* Skill info body */}
+                <div className="na-detail-body">
+                  <div className="na-detail-header">
+                    <span className="na-detail-name">{skillInfoMove.name}</span>
+                    <span className="na-detail-type" style={{ background: skillInfoColors?.bg, color: skillInfoColors?.text }}>
+                      {skillInfoMove.type.toUpperCase()}
+                    </span>
+                    {skillInfoMove.power > 0 && (
+                      <span className="na-detail-dmg">{skillInfoMove.power} DMG</span>
+                    )}
+                    <span className="na-detail-energy-inline">
+                      <span className="na-meta-label">ENERGY:</span>
+                      {skillInfoMove.cost.length > 0 ? skillInfoMove.cost.map((c, i) => (
+                        <span key={i} className="na-cost-badge">
+                          {Array.from({ length: c.amount }).map((_, ai) => (
+                            <span key={ai} className="na-energy-square" style={{ background: (TYPE_COLORS[c.type] || TYPE_COLORS.normal).bg }} title={c.type} />
+                          ))}
+                        </span>
+                      )) : <span className="na-detail-free">NONE</span>}
+                    </span>
+                  </div>
+                  <div className="na-detail-desc">{colorizeDescription(skillInfoMove.description)}</div>
+                  <div className="na-detail-footer">
+                    <span className="na-footer-item">
+                      <span className="na-meta-label">CLASSES:</span>
+                      <span className="na-meta-value">{skillInfoMove.power > 0 ? 'OFFENSIVE' : 'STATUS'}{skillInfoMove.statusEffect ? `, ${skillInfoMove.statusEffect.type.toUpperCase()}` : ''}{skillInfoMove.healing ? ', HEALING' : ''}</span>
+                    </span>
+                    <span className="na-footer-item">
+                      <span className="na-meta-label">COOLDOWN:</span>
+                      <span className="na-meta-value">{skillInfoMove.cooldown > 0 ? skillInfoMove.cooldown : 'NONE'}</span>
+                    </span>
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="na-detail-empty">Hover a skill to see details</div>
+              <div className="na-detail-empty">Click a skill to see details</div>
             )}
           </div>
         </div>
@@ -1960,10 +2106,10 @@ export default function AIBattlePage() {
         <div className="enemy-skills-overlay" onClick={() => setViewingEnemySkills(null)}>
           <div className="enemy-skills-panel" onClick={e => e.stopPropagation()}>
             <div className="enemy-skills-header">
-              <img src={viewingEnemySkills.sprite} alt={viewingEnemySkills.name} width={48} height={48} style={{ imageRendering: 'pixelated' }} />
+              <img src={viewingEnemySkills.sprite} alt={viewingEnemySkills.name} width={48} height={48} style={{ objectFit: 'contain' }} />
               <div>
                 <div className="enemy-skills-name">{viewingEnemySkills.name}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+                <div style={{ fontSize: 11, color: '#6a4020' }}>
                   {viewingEnemySkills.types.join(' / ')} &middot; HP: {viewingEnemySkills.hp}/{viewingEnemySkills.maxHp}
                 </div>
               </div>
@@ -1979,6 +2125,16 @@ export default function AIBattlePage() {
                     </span>
                   </div>
                   <div className="enemy-skill-desc">{move.description}</div>
+                  <div className="enemy-skill-cost-row">
+                    <span className="na-cost-label">ENERGY:</span>
+                    {move.cost.length > 0 ? move.cost.map((c, i) => (
+                      <span key={i} className="na-cost-badge">
+                        {Array.from({ length: c.amount }).map((_, ai) => (
+                          <span key={ai} className="na-energy-square" style={{ background: (TYPE_COLORS[c.type] || TYPE_COLORS.normal).bg }} title={c.type} />
+                        ))}
+                      </span>
+                    )) : <span style={{ color: '#4CAF50', fontSize: 11, fontWeight: 700 }}>FREE</span>}
+                  </div>
                   <div className="enemy-skill-stats">
                     <span>PWR: {move.power || '-'}</span>
                     <span>ACC: {move.accuracy}%</span>
@@ -2057,6 +2213,7 @@ export default function AIBattlePage() {
         onUseItem={useItem}
         usedItemThisTurn={usedItemThisTurn}
         selectingMove={selectingMove}
+        selectingPokemonName={selectingPokemon !== null ? playerTeam[selectingPokemon]?.name || null : null}
         usingItem={usingItem}
         onCancelTarget={cancelTarget}
         evolvingPokemon={evolvingPokemon}
@@ -2076,6 +2233,60 @@ export default function AIBattlePage() {
         onRematch={handleRematch}
         onChangeTeam={handleChangeTeam}
       />
+
+      {/* Skill Tooltip Popup — appears near hovered skill box */}
+      {skillTooltip && (() => {
+        const ttMove = skillTooltip.move;
+        const ttColors = TYPE_COLORS[ttMove.type] || TYPE_COLORS.normal;
+        return (
+          <div
+            className="skill-tooltip-popup"
+            style={{
+              position: 'fixed',
+              left: `${skillTooltip.rect.left + skillTooltip.rect.width / 2}px`,
+              top: `${skillTooltip.rect.top - 8}px`,
+              transform: 'translate(-50%, -100%)',
+              zIndex: 9999,
+            }}
+          >
+            <div className="skill-tooltip-inner">
+              <div className="skill-tooltip-header">
+                <img
+                  src={`/skills/${skillTooltip.pokemonId}/${skillTooltip.moveIdx}.png`}
+                  alt={ttMove.name}
+                  width={36}
+                  height={36}
+                  className="skill-tooltip-img"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+                <div className="skill-tooltip-title">
+                  <span className="skill-tooltip-name">{ttMove.name}</span>
+                  <span className="skill-tooltip-type-badge" style={{ background: ttColors.bg, color: ttColors.text }}>
+                    {ttMove.type.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              <div className="skill-tooltip-desc">{colorizeDescription(ttMove.description)}</div>
+              <div className="skill-tooltip-meta">
+                {ttMove.power > 0 && <span className="skill-tooltip-dmg">{ttMove.power} DMG</span>}
+                {ttMove.healing && ttMove.healing > 0 && <span className="skill-tooltip-heal">+{ttMove.healing} HP</span>}
+                <span className="skill-tooltip-cd">CD: {ttMove.cooldown > 0 ? ttMove.cooldown : 'None'}</span>
+                <span className="skill-tooltip-energy-row">
+                  <span className="skill-tooltip-energy-label">ENERGY:</span>
+                  {ttMove.cost.length > 0 ? ttMove.cost.map((c, ci) => (
+                    <span key={ci} className="skill-tooltip-cost-badge">
+                      {Array.from({ length: c.amount }).map((_, ai) => (
+                        <span key={ai} className="na-energy-square" style={{ background: (TYPE_COLORS[c.type] || TYPE_COLORS.normal).bg }} />
+                      ))}
+                    </span>
+                  )) : <span className="skill-tooltip-free">FREE</span>}
+                </span>
+              </div>
+            </div>
+            <div className="skill-tooltip-arrow" />
+          </div>
+        );
+      })()}
     </div>
   );
 }
