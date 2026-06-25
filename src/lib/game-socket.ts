@@ -166,7 +166,7 @@ class GameSocketClient {
       this.reconnectAttempts = 0;
 
       this.socket = io(url, {
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: 1000,
