@@ -4,7 +4,7 @@ export async function GET() {
   try {
     // Fetch live battles from game server
     const gameServerUrl = process.env.NEXT_PUBLIC_GAME_SERVER_URL
-      || 'https://game-server-production-3440.up.railway.app';
+      || 'https://pokemon-arena-server.onrender.com';
 
     const res = await fetch(`${gameServerUrl}/health`, {
       next: { revalidate: 5 },
