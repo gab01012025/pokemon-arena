@@ -204,8 +204,9 @@ export function canAfford(available: Energy, cost: Energy): boolean {
 /**
  * Pay for a skill cost, using random energy to cover shortfalls
  * Returns the new energy state after payment
+ * @param playerChoice - optional map of energy types the player chose to spend for colorless cost
  */
-export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRandom): Energy {
+export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRandom, playerChoice?: Partial<Energy>): Energy {
   const result = { ...available };
   const specificTypes = ['fire', 'water', 'grass', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'fairy'] as const;
 
@@ -226,8 +227,23 @@ export function payEnergy(available: Energy, cost: Energy, rng: DeterministicRan
     result[t] = Math.max(0, result[t]);
   }
 
-  // Pay colorless cost from leftover specific energy
+  // Pay colorless cost - use player's choice if provided, otherwise random
   let randomCost = cost.colorless;
+
+  if (playerChoice && randomCost > 0) {
+    // Use player's chosen energy types for colorless cost
+    for (const t of [...specificTypes, 'colorless' as const]) {
+      const chosenAmount = (playerChoice as Record<string, number>)[t] || 0;
+      if (chosenAmount > 0 && result[t] > 0) {
+        const deduct = Math.min(chosenAmount, result[t], randomCost);
+        result[t] -= deduct;
+        randomCost -= deduct;
+      }
+      if (randomCost <= 0) break;
+    }
+  }
+
+  // Fallback: pay remaining colorless cost randomly
   while (randomCost > 0) {
     if (result.colorless > 0) {
       result.colorless--;

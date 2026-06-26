@@ -23,6 +23,8 @@ export interface ActionIntent {
   userSlot: number;
   skillIndex: number;
   targetSlot: number;
+  /** Player's choice for colorless energy spend (e.g. { fire: 1 } to pay 1 colorless with fire) */
+  energySpend?: Partial<Energy>;
 }
 
 /** Fighter as seen by client */

@@ -18,6 +18,7 @@ import {
   OpponentPanel,
   BattleLog,
   SurrenderModal,
+  EnergyPicker,
 } from './components';
 
 // Battle background images - random selection per battle
@@ -49,6 +50,15 @@ function MultiplayerPageContent() {
   // Battle state - intents per fighter slot (0, 1, 2)
   const [intents, setIntents] = useState<Record<number, ActionIntent | null>>({});
   const [targetingSlot, setTargetingSlot] = useState<{ fighterIdx: number; skillIdx: number } | null>(null);
+
+  // Energy picker popup for colorless cost
+  const [energyPickerState, setEnergyPickerState] = useState<{
+    fighterIdx: number;
+    skillIdx: number;
+    targetSlot: number;
+    colorlessCost: number;
+    skillName: string;
+  } | null>(null);
 
   // Private room
   const [privateRoomCode, setPrivateRoomCode] = useState('');
@@ -145,6 +155,31 @@ function MultiplayerPageContent() {
   }, [selectedTeam, queueType, actions, buildTeamData]);
 
   // Move selection (skill click on your fighter)
+  // Finalize an intent, showing energy picker if needed
+  const finalizeIntent = useCallback((fighterIdx: number, skillIdx: number, targetSlot: number) => {
+    const fighter = state.yourFighters[fighterIdx];
+    if (!fighter) return;
+    const skill = fighter.skills[skillIdx];
+    if (!skill) return;
+
+    // Check if skill has colorless cost and player has multiple energy types
+    const colorlessCost = skill.cost.colorless || 0;
+    if (colorlessCost > 0) {
+      // Check if player has more than one type of energy available (otherwise auto-pick)
+      const energy = state.yourEnergy;
+      const typesWithEnergy = Object.entries(energy).filter(([, v]) => v > 0);
+      if (typesWithEnergy.length > 1) {
+        setEnergyPickerState({ fighterIdx, skillIdx, targetSlot, colorlessCost, skillName: skill.name });
+        return;
+      }
+    }
+
+    setIntents(prev => ({
+      ...prev,
+      [fighterIdx]: { userSlot: fighter.slot, skillIndex: skillIdx, targetSlot },
+    }));
+  }, [state.yourFighters, state.yourEnergy]);
+
   const handleSkillSelect = useCallback((fighterIdx: number, skillIdx: number) => {
     const fighter = state.yourFighters[fighterIdx];
     if (!fighter) return;
@@ -161,22 +196,16 @@ function MultiplayerPageContent() {
     }
 
     if (skill.target === 'self') {
-      setIntents(prev => ({
-        ...prev,
-        [fighterIdx]: { userSlot: fighter.slot, skillIndex: skillIdx, targetSlot: fighter.slot },
-      }));
+      finalizeIntent(fighterIdx, skillIdx, fighter.slot);
       setTargetingSlot(null);
     } else if (skill.target === 'all-enemies' || skill.target === 'enemies') {
       const firstEnemy = state.opponentFighters.find(f => f.alive);
-      setIntents(prev => ({
-        ...prev,
-        [fighterIdx]: { userSlot: fighter.slot, skillIndex: skillIdx, targetSlot: firstEnemy?.slot ?? 3 },
-      }));
+      finalizeIntent(fighterIdx, skillIdx, firstEnemy?.slot ?? 3);
       setTargetingSlot(null);
     } else {
       setTargetingSlot({ fighterIdx, skillIdx });
     }
-  }, [state.yourFighters, state.opponentFighters, intents]);
+  }, [state.yourFighters, state.opponentFighters, intents, finalizeIntent]);
 
   // Target selection (click an enemy)
   const handleTargetSelect = useCallback((enemyIdx: number) => {
@@ -185,16 +214,9 @@ function MultiplayerPageContent() {
     const enemy = state.opponentFighters[enemyIdx];
     if (!fighter || !enemy) return;
 
-    setIntents(prev => ({
-      ...prev,
-      [targetingSlot.fighterIdx]: {
-        userSlot: fighter.slot,
-        skillIndex: targetingSlot.skillIdx,
-        targetSlot: enemy.slot,
-      },
-    }));
+    finalizeIntent(targetingSlot.fighterIdx, targetingSlot.skillIdx, enemy.slot);
     setTargetingSlot(null);
-  }, [targetingSlot, state.yourFighters, state.opponentFighters]);
+  }, [targetingSlot, state.yourFighters, state.opponentFighters, finalizeIntent]);
 
   // Submit turn
   const handleSubmitMoves = useCallback(() => {
@@ -376,6 +398,30 @@ function MultiplayerPageContent() {
               <SurrenderModal
                 onConfirm={handleSurrender}
                 onCancel={() => setShowSurrenderModal(false)}
+              />
+            )}
+
+            {energyPickerState && (
+              <EnergyPicker
+                needed={energyPickerState.colorlessCost}
+                available={state.yourEnergy}
+                skillName={energyPickerState.skillName}
+                onConfirm={(spend) => {
+                  const fighter = state.yourFighters[energyPickerState.fighterIdx];
+                  if (fighter) {
+                    setIntents(prev => ({
+                      ...prev,
+                      [energyPickerState.fighterIdx]: {
+                        userSlot: fighter.slot,
+                        skillIndex: energyPickerState.skillIdx,
+                        targetSlot: energyPickerState.targetSlot,
+                        energySpend: spend,
+                      },
+                    }));
+                  }
+                  setEnergyPickerState(null);
+                }}
+                onCancel={() => setEnergyPickerState(null)}
               />
             )}
           </div>

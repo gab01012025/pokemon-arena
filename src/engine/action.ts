@@ -208,17 +208,17 @@ export function executeAction(
     { source: user.slot, target: target.slot, skillName: skill.name }
   ));
   
-  // Pay energy cost
+  // Pay energy cost (use player's energy choice if provided)
   const isPlayer = isPlayerSlot(user.slot);
   if (isPlayer) {
     newState = {
       ...newState,
-      playerEnergy: Utils.payEnergy(newState.playerEnergy, skill.cost, rng),
+      playerEnergy: Utils.payEnergy(newState.playerEnergy, skill.cost, rng, intent.energySpend),
     };
   } else {
     newState = {
       ...newState,
-      opponentEnergy: Utils.payEnergy(newState.opponentEnergy, skill.cost, rng),
+      opponentEnergy: Utils.payEnergy(newState.opponentEnergy, skill.cost, rng, intent.energySpend),
     };
   }
   

@@ -11,3 +11,4 @@ export { default as BattleTopBar } from './BattleTopBar';
 export { default as PlayerPanel } from './PlayerPanel';
 export { default as OpponentPanel } from './OpponentPanel';
 export { default as BattleLog } from './BattleLog';
+export { default as EnergyPicker } from './EnergyPicker';

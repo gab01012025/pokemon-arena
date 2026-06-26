@@ -404,6 +404,7 @@ export interface ActionIntent {
   userSlot: number;       // Which fighter is acting
   skillIndex: number;     // Which skill (0-3)
   targetSlot: number;     // Target fighter slot
+  energySpend?: Partial<Energy>;  // Player's choice for colorless energy spend
 }
 
 /**

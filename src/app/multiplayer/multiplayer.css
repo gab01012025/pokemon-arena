@@ -1593,6 +1593,181 @@
 
 .chat-input button:hover { background: rgba(255, 215, 0, 0.25); }
 
+/* ==================== ENERGY PICKER MODAL ==================== */
+.energy-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  animation: overlay-in 0.2s ease;
+}
+
+.energy-picker-modal {
+  background: linear-gradient(135deg, rgba(10, 15, 35, 0.98), rgba(20, 25, 50, 0.98));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 300px;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.energy-picker-title {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: #FFD700;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.energy-picker-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin: 0 0 16px;
+}
+
+.energy-picker-count {
+  color: #FFD700;
+  font-weight: 700;
+}
+
+.energy-picker-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.energy-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.energy-picker-square {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.energy-picker-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  flex: 1;
+  font-weight: 600;
+}
+
+.energy-picker-avail {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.energy-picker-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.energy-picker-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.energy-picker-btn:hover:not(:disabled) {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.4);
+}
+
+.energy-picker-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.energy-picker-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFD700;
+  width: 20px;
+  text-align: center;
+}
+
+.energy-picker-status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.energy-picker-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.energy-picker-cancel {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.energy-picker-cancel:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.energy-picker-confirm {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 8px;
+  background: rgba(76, 175, 80, 0.15);
+  color: #4CAF50;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.energy-picker-confirm:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.25);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.2);
+}
+
+.energy-picker-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ==================== SURRENDER MODAL ==================== */
 .surrender-modal-overlay {
   position: fixed;
