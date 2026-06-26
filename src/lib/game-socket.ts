@@ -149,7 +149,8 @@ class GameSocketClient {
     const defaultUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
       ? 'http://localhost:3010'
       : 'https://pokemon-arena-server.onrender.com';
-    const url = (serverUrl || process.env.NEXT_PUBLIC_GAME_SERVER_URL || defaultUrl).trim();
+    const envUrl = process.env.NEXT_PUBLIC_GAME_SERVER_URL;
+    const url = (serverUrl || (envUrl && envUrl.length > 0 ? envUrl : null) || defaultUrl).trim();
 
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
@@ -166,13 +167,24 @@ class GameSocketClient {
       this.reconnectAttempts = 0;
 
       console.log('[GameSocket] Connecting to:', url);
+
+      // Manual timeout - if connect doesn't happen in 20s, reject
+      let settled = false;
+      const connectTimeout = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          console.error('[GameSocket] Connection timeout after 20s');
+          this.emitLocal('connectionChange', { connected: false, reason: 'Connection timeout. Server may be waking up - try again.' });
+          reject(new Error('Connection timeout. The server may be starting up. Please try again in a few seconds.'));
+        }
+      }, 20000);
+
       this.socket = io(url, {
         transports: ['polling', 'websocket'],
-        reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: 1000,
-        timeout: 10000,
+        reconnection: false,
+        timeout: 15000,
         withCredentials: false,
+        forceNew: true,
       });
 
       this.socket.io.on('open', () => {
@@ -180,6 +192,9 @@ class GameSocketClient {
       });
 
       this.socket.on('connect', () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(connectTimeout);
         console.log('[GameSocket] Connected! ID:', this.socket?.id);
         this.isConnected = true;
         this.reconnectAttempts = 0;
@@ -195,8 +210,9 @@ class GameSocketClient {
 
       this.socket.on('connect_error', (error) => {
         console.error('[GameSocket] Connection error:', error.message);
-        this.reconnectAttempts++;
-        if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        if (!settled) {
+          settled = true;
+          clearTimeout(connectTimeout);
           this.emitLocal('connectionChange', { connected: false, reason: 'Server unreachable' });
           reject(new Error('Failed to connect to game server. Please try again later.'));
         }

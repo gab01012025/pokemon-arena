@@ -258,8 +258,12 @@ const io = new Server(httpServer, {
   cors: {
     origin: CORS_ORIGINS,
     methods: ['GET', 'POST'],
-    credentials: true,
+    credentials: false,
   },
+  // Explicit transport config
+  transports: ['polling', 'websocket'],
+  pingTimeout: 30000,
+  pingInterval: 25000,
 });
 
 console.log('🎮 Pokemon Arena Game Server v2 starting...');

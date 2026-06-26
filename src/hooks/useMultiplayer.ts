@@ -392,9 +392,9 @@ export function useMultiplayer(): [UseMultiplayerState, UseMultiplayerActions] {
       setState(prev => ({
         ...prev,
         isConnecting: false,
-        connectionError: error instanceof Error ? error.message : 'Connection failed',
+        connectionError: error instanceof Error ? error.message : 'Connection failed. Click to retry.',
       }));
-      throw error;
+      // Don't re-throw — let the UI show the error with retry button
     }
   }, []);
 
