@@ -36,7 +36,7 @@ import {
   type TurnResult,
   type BattleLogEvent,
 } from '../engine';
-import { damage, heal, applyStatus, stun } from '../engine/action';
+import { damage, heal, applyStatus, stun, invulnerable, defense } from '../engine/action';
 
 // =============================================================================
 // CONFIGURATION
@@ -95,7 +95,7 @@ interface SkillData {
   healing: number;
   target: string;
   cost: Record<string, number>;
-  effects: Array<{ type: string; duration?: number; value?: number }>;
+  effects: Array<{ type: string; duration?: number; value?: number; classes?: string[] }>;
   classes: string[];
   cooldown: number;
 }
@@ -758,12 +758,16 @@ function pokemonToFighter(pokemon: PokemonSelection, slot: number): Fighter {
       }
     }
 
-    const classes = s.classes.map(c => {
-      if (c === 'melee' || c === 'physical') return 'physical' as const;
-      if (c === 'ranged' || c === 'special') return 'special' as const;
-      if (c === 'strategic' || c === 'status') return 'mental' as const;
-      return 'all' as const;
-    });
+    const classMap: Record<string, import('../engine/types').SkillClass> = {
+      'physical': 'physical', 'melee': 'physical', 'contact': 'physical',
+      'special': 'special', 'ranged': 'special',
+      'status': 'mental', 'strategic': 'mental',
+      'bypassing': 'bypassing', 'piercing': 'piercing',
+      'affliction': 'affliction', 'unique': 'unique',
+    };
+    const classes = s.classes
+      .map(c => classMap[c.toLowerCase()])
+      .filter((c): c is import('../engine/types').SkillClass => c !== undefined);
 
     return createSkill({
       name: s.name,
@@ -807,6 +811,9 @@ function buildSkillEffects(skill: SkillData, ownerSlot: number) {
     : skill.target === 'all-enemies' ? 'enemies'
     : 'enemy';
 
+  // Offensive target (for debuffs applied via self-targeted skills)
+  const offensiveTarget: TargetType = targetType === 'self' ? 'enemy' : targetType;
+
   if (skill.damage > 0) {
     effects.push({ target: targetType, apply: damage(skill.damage) });
   }
@@ -817,16 +824,167 @@ function buildSkillEffects(skill: SkillData, ownerSlot: number) {
 
   if (skill.effects) {
     for (const eff of skill.effects) {
-      if (eff.type === 'burn' || eff.type === 'poison') {
-        effects.push({
-          target: targetType === 'self' ? 'enemy' : targetType,
-          apply: applyStatus(eff.type, eff.duration || 2, [{ type: 'afflict' as const, value: eff.value || 10 }]),
-        });
-      } else if (['paralysis', 'stun', 'freeze', 'sleep'].includes(eff.type)) {
-        effects.push({
-          target: targetType === 'self' ? 'enemy' : targetType,
-          apply: stun(eff.duration || 1, ['physical']),
-        });
+      const dur = eff.duration || 1;
+      const val = eff.value || 0;
+
+      switch (eff.type) {
+        // Damage over time (burn, poison)
+        case 'burn':
+        case 'poison':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus(eff.type, dur, [{ type: 'afflict' as const, value: val || 10 }]),
+          });
+          break;
+
+        // Stun / disable effects
+        case 'paralysis':
+        case 'stun':
+        case 'freeze':
+        case 'sleep':
+          effects.push({
+            target: offensiveTarget,
+            apply: stun(dur, ['all']),
+          });
+          break;
+
+        // Damage reduction (on self)
+        case 'reduce':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Damage Reduction', dur, [{ type: 'reduce' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Strengthen (boost damage dealt)
+        case 'strengthen':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Empowered', dur, [{ type: 'strengthen' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Weaken (reduce enemy damage dealt)
+        case 'weaken':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Weakened', dur, [{ type: 'weaken' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Expose (increase damage taken by target)
+        case 'expose':
+        case 'bleed':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Exposed', dur, [{ type: 'bleed' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Invulnerability
+        case 'invulnerable':
+          effects.push({
+            target: 'self',
+            apply: invulnerable(dur, eff.classes || ['all']),
+          });
+          break;
+
+        // Destructible defense (absorbs damage)
+        case 'destructibleDefense':
+        case 'shield':
+          effects.push({
+            target: 'self',
+            apply: defense(skill.name, val),
+          });
+          break;
+
+        // Heal over time
+        case 'heal':
+        case 'regen':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Regeneration', dur, [{ type: 'heal' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Absorb / drain
+        case 'absorb':
+        case 'drain':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Drain', dur, [{ type: 'afflict' as const, value: val, duration: dur }]),
+          });
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Life Drain', dur, [{ type: 'heal' as const, value: Math.floor(val / 2), duration: dur }]),
+          });
+          break;
+
+        // Counter (reflect damage back)
+        case 'counter':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Counter', dur, [{ type: 'counter' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Reflect (bounce skill to user)
+        case 'reflect':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Reflect', dur, [{ type: 'reflect' as const, value: val, duration: dur }]),
+          });
+          break;
+
+        // Endure (cannot go below 1 HP)
+        case 'endure':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Endure', dur, [{ type: 'endure' as const, duration: dur }]),
+          });
+          break;
+
+        // Pierce (ignore defense)
+        case 'pierce':
+          effects.push({
+            target: 'self',
+            apply: applyStatus('Piercing', dur, [{ type: 'pierce' as const, duration: dur }]),
+          });
+          break;
+
+        // Silence (prevent non-damage effects)
+        case 'silence':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Silenced', dur, [{ type: 'silence' as const, duration: dur }]),
+          });
+          break;
+
+        // Snare (increase cooldowns)
+        case 'snare':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Snared', dur, [{ type: 'snare' as const, value: val || 1, duration: dur }]),
+          });
+          break;
+
+        // Taunt (force attacks to user)
+        case 'taunt':
+          effects.push({
+            target: offensiveTarget,
+            apply: applyStatus('Taunted', dur, [{ type: 'taunt' as const, duration: dur }]),
+          });
+          break;
+
+        // Damage type (already handled above, skip duplicate)
+        case 'damage':
+          if (val > 0 && skill.damage === 0) {
+            effects.push({ target: targetType, apply: damage(val) });
+          }
+          break;
+
+        default:
+          break;
       }
     }
   }
