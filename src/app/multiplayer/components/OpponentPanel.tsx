@@ -13,7 +13,7 @@ export default function OpponentPanel({ fighters, isTargeting, onTargetSelect }:
   const dummyEnergy = { fire: 0, water: 0, grass: 0, lightning: 0, colorless: 0 };
 
   return (
-    <div className="battle-side">
+    <div className="na-column na-column-enemy">
       {fighters.map((fighter, idx) => (
         <BattlePokemonCard
           key={idx}

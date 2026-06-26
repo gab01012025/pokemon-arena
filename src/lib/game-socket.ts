@@ -45,6 +45,8 @@ export interface ClientSkill {
   currentCooldown: number;
   classes: string[];
   target: string;
+  damage: number;
+  healing: number;
 }
 
 export interface ClientLogEntry {
@@ -139,8 +141,6 @@ export interface SkillData {
 class GameSocketClient {
   private socket: Socket | null = null;
   private listeners: Map<string, Set<Function>> = new Map();
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
 
   public isConnected = false;
   public trainerId: string | null = null;
@@ -164,16 +164,12 @@ class GameSocketClient {
         this.socket.disconnect();
         this.socket = null;
       }
-      this.reconnectAttempts = 0;
-
-      console.log('[GameSocket] Connecting to:', url);
 
       // Manual timeout - if connect doesn't happen in 20s, reject
       let settled = false;
       const connectTimeout = setTimeout(() => {
         if (!settled) {
           settled = true;
-          console.error('[GameSocket] Connection timeout after 20s');
           this.emitLocal('connectionChange', { connected: false, reason: 'Connection timeout. Server may be waking up - try again.' });
           reject(new Error('Connection timeout. The server may be starting up. Please try again in a few seconds.'));
         }
@@ -187,29 +183,21 @@ class GameSocketClient {
         forceNew: true,
       });
 
-      this.socket.io.on('open', () => {
-        console.log('[GameSocket] Transport open:', this.socket?.io.engine.transport.name);
-      });
-
       this.socket.on('connect', () => {
         if (settled) return;
         settled = true;
         clearTimeout(connectTimeout);
-        console.log('[GameSocket] Connected! ID:', this.socket?.id);
         this.isConnected = true;
-        this.reconnectAttempts = 0;
         this.emitLocal('connectionChange', { connected: true });
         resolve();
       });
 
       this.socket.on('disconnect', (reason) => {
-        console.log('[GameSocket] Disconnected:', reason);
         this.isConnected = false;
         this.emitLocal('connectionChange', { connected: false, reason });
       });
 
       this.socket.on('connect_error', (error) => {
-        console.error('[GameSocket] Connection error:', error.message);
         if (!settled) {
           settled = true;
           clearTimeout(connectTimeout);

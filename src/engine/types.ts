@@ -264,6 +264,8 @@ export interface Skill {
   owner: number;                 // Fighter slot that owns this skill
   variationIndex: number;        // Current variation (for skills with alternates)
   variations?: Skill[];          // Alternate versions of this skill
+  damage: number;                // Display metadata: base damage value
+  healing: number;               // Display metadata: base healing value
 }
 
 /**
@@ -285,6 +287,8 @@ export function createSkill(partial: Partial<Skill> & { name: string; owner: num
     effects: [],
     interrupt: [],
     variationIndex: 0,
+    damage: 0,
+    healing: 0,
     ...partial,
   };
 }

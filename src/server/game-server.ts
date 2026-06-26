@@ -165,6 +165,8 @@ interface ClientSkill {
   currentCooldown: number;
   classes: string[];
   target: string;
+  damage: number;
+  healing: number;
 }
 
 interface ClientLogEntry {
@@ -771,6 +773,8 @@ function pokemonToFighter(pokemon: PokemonSelection, slot: number): Fighter {
       cooldown: s.cooldown,
       classes: classes.length > 0 ? classes : ['all'],
       start: buildSkillEffects(s, slot),
+      damage: s.damage || 0,
+      healing: s.healing || 0,
     });
   });
 
@@ -1072,6 +1076,8 @@ function fighterToClient(f: Fighter, isOwn: boolean): ClientFighter {
       currentCooldown: 0,
       classes: [] as string[],
       target: 'enemy',
+      damage: 0,
+      healing: 0,
     })),
     statuses: f.statuses
       .filter(s => isOwn || s.visible)
@@ -1098,6 +1104,8 @@ function skillToClient(s: Skill): ClientSkill {
     currentCooldown: s.currentCooldown,
     classes: [...s.classes],
     target,
+    damage: s.damage,
+    healing: s.healing,
   };
 }
 

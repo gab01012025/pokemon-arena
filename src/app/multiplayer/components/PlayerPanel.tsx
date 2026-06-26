@@ -12,7 +12,7 @@ interface PlayerPanelProps {
 
 export default function PlayerPanel({ fighters, selectedSkills, energy, onSkillSelect }: PlayerPanelProps) {
   return (
-    <div className="battle-side">
+    <div className="na-column na-column-player">
       {fighters.map((fighter, idx) => (
         <BattlePokemonCard
           key={idx}
