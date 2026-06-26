@@ -965,99 +965,6 @@ export const EVOLUTION_DATA: Record<number, KantoPokemonData> = {
 // ==================== TRAINERS ====================
 export const TRAINERS: Trainer[] = [
   {
-    name: 'Brock',
-    passive: 'Sturdy Defense',
-    passiveDesc: 'Rock/Ground Pokemon take 15 less damage',
-    passiveDesc2: 'Applied automatically when Rock/Ground Pokemon are attacked',
-    applyPassive: ({ addLog }) => { addLog('Brock\'s Sturdy Defense is active!', 'effect'); },
-  },
-  {
-    name: 'Misty',
-    passive: 'Tidal Surge',
-    passiveDesc: '+1 Water energy every 2 turns',
-    passiveDesc2: 'Water Pokemon deal +10% damage on Water moves',
-    applyPassive: ({ setEnergy, turn, addLog }) => {
-      if (turn > 1 && turn % 2 === 0) {
-        setEnergy((prev: EnergyState) => ({ ...prev, water: prev.water + 1 }));
-        addLog('Misty\'s Tidal Surge: +1 Water energy!', 'effect');
-      }
-    },
-  },
-  {
-    name: 'Lt. Surge',
-    passive: 'Lightning Rod',
-    passiveDesc: '+1 Electric energy every 2 turns',
-    passiveDesc2: 'Electric Pokemon are immune to Paralyze',
-    applyPassive: ({ setEnergy, turn, addLog }) => {
-      if (turn > 1 && turn % 2 === 0) {
-        setEnergy((prev: EnergyState) => ({ ...prev, lightning: prev.lightning + 1 }));
-        addLog('Lt. Surge\'s Lightning Rod: +1 Lightning energy!', 'effect');
-      }
-    },
-  },
-  {
-    name: 'Erika',
-    passive: 'Natural Cure',
-    passiveDesc: 'Grass Pokemon heal 10 HP each turn',
-    passiveDesc2: 'Grass Pokemon are immune to Poison',
-    applyPassive: ({ playerTeam, setPlayerTeam, addLog }) => {
-      const heals: { idx: number; heal: number; name: string }[] = [];
-      playerTeam.forEach((p, i) => {
-        if (p.hp > 0 && p.types.includes('grass')) {
-          const heal = Math.min(10, p.maxHp - p.hp);
-          if (heal > 0) heals.push({ idx: i, heal, name: p.name });
-        }
-      });
-      if (heals.length > 0) {
-        setPlayerTeam(prev => prev.map((p, i) => {
-          const h = heals.find(x => x.idx === i);
-          return h ? { ...p, hp: p.hp + h.heal } : p;
-        }));
-        heals.forEach(h => addLog(`Erika's Natural Cure: ${h.name} healed ${h.heal} HP!`, 'heal'));
-      }
-    },
-  },
-  {
-    name: 'Sabrina',
-    passive: 'Mind Reader',
-    passiveDesc: 'Psychic moves have +10% accuracy',
-    passiveDesc2: 'Psychic Pokemon deal +5 extra damage on Psychic moves',
-    applyPassive: ({ addLog }) => { addLog('Sabrina\'s Mind Reader is active!', 'effect'); },
-  },
-  {
-    name: 'Koga',
-    passive: 'Toxic Master',
-    passiveDesc: 'Poison status lasts 1 extra turn',
-    passiveDesc2: 'Poison moves have +20% chance to poison',
-    applyPassive: ({ addLog }) => { addLog('Koga\'s Toxic Master is active!', 'effect'); },
-  },
-  {
-    name: 'Blaine',
-    passive: 'Flame Body',
-    passiveDesc: 'Fire moves have +20% burn chance',
-    passiveDesc2: 'Fire Pokemon take 25% less damage from Fire moves',
-    applyPassive: ({ addLog }) => { addLog('Blaine\'s Flame Body is active!', 'effect'); },
-  },
-  {
-    name: 'Giovanni',
-    passive: 'Intimidate',
-    passiveDesc: 'Enemy Pokemon deal 10% less damage',
-    passiveDesc2: 'On turn 1, removes 1 random energy from opponent',
-    applyPassive: ({ addLog }) => { addLog('Giovanni\'s Intimidate is active!', 'effect'); },
-    onBattleStart: ({ setAiEnergy, addLog }) => {
-      setAiEnergy((prev: EnergyState) => {
-        const e = { ...prev };
-        const types: EnergyType[] = ALL_ENERGY_TYPES.filter(t => e[t] > 0);
-        if (types.length > 0) {
-          const picked = types[Math.floor(Math.random() * types.length)];
-          e[picked]--;
-          addLog(`Giovanni's Intimidate: Removed 1 ${picked} energy from opponent!`, 'effect');
-        }
-        return e;
-      });
-    },
-  },
-  {
     name: 'Professor Oak',
     passive: 'Pokemon Research',
     passiveDesc: '+1 Colorless energy every turn',
@@ -1069,6 +976,18 @@ export const TRAINERS: Trainer[] = [
     onBattleStart: ({ playerTeam, setPlayerTeam, addLog }) => {
       setPlayerTeam(prev => prev.map(p => ({ ...p, hp: p.hp + 5, maxHp: p.maxHp + 5 })));
       addLog('Prof. Oak\'s Research: All Pokemon gained +5 max HP!', 'effect');
+    },
+  },
+  {
+    name: 'Misty',
+    passive: 'Tidal Surge',
+    passiveDesc: '+1 Water energy every 2 turns',
+    passiveDesc2: 'Water Pokemon deal +10% damage on Water moves',
+    applyPassive: ({ setEnergy, turn, addLog }) => {
+      if (turn > 1 && turn % 2 === 0) {
+        setEnergy((prev: EnergyState) => ({ ...prev, water: prev.water + 1 }));
+        addLog('Misty\'s Tidal Surge: +1 Water energy!', 'effect');
+      }
     },
   },
   {
@@ -1089,30 +1008,6 @@ export const TRAINERS: Trainer[] = [
           }
         }
       }
-    },
-  },
-  {
-    name: 'Lance',
-    passive: 'Dragon Master',
-    passiveDesc: 'Dragon Pokemon deal +20% damage',
-    passiveDesc2: 'If Dragonite is on the team, its moves gain +1 base power',
-    applyPassive: ({ addLog }) => { addLog('Lance\'s Dragon Master is active!', 'effect'); },
-  },
-  {
-    name: 'Red',
-    passive: 'Champion\'s Spirit',
-    passiveDesc: 'When an ally faints, others gain +10% damage permanently',
-    passiveDesc2: 'Start with +1 energy of each selected type',
-    applyPassive: ({ addLog }) => { addLog('Red\'s Champion\'s Spirit burns bright!', 'effect'); },
-    onBattleStart: ({ setEnergy, addLog }) => {
-      setEnergy((prev: EnergyState) => {
-        const e = { ...prev };
-        for (const t of ALL_ENERGY_TYPES) {
-          if (e[t] > 0) e[t] += 1;
-        }
-        return e;
-      });
-      addLog('Red\'s Champion\'s Spirit: +1 energy of each selected type!', 'effect');
     },
   },
 ];
@@ -1136,71 +1031,21 @@ export const DEFAULT_ITEMS: BattleItem[] = [
 
 // Trainer-specific item loadouts — balanced per trainer specialty
 export const TRAINER_ITEMS: Record<string, BattleItem[]> = {
-  'Brock': [
-    { id: 'potion', name: 'Potion', description: 'Heals 30 HP', icon: ITEM_SPRITE('potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'x-defense', name: 'X Defense', description: '-20 damage taken for 3 turns', icon: ITEM_SPRITE('x-defense'), uses: 2, maxUses: 2, category: 'boost' },
-    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
-    { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 1, maxUses: 1, category: 'status' },
-  ],
-  'Misty': [
-    { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 2, maxUses: 2, category: 'status' },
-    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
-  ],
-  'Lt. Surge': [
-    { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: ITEM_SPRITE('super-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 2, maxUses: 2, category: 'boost' },
-    { id: 'paralyze-heal', name: 'Paralyze Heal', description: 'Removes Paralyze', icon: ITEM_SPRITE('paralyze-heal'), uses: 2, maxUses: 2, category: 'status' },
-  ],
-  'Erika': [
-    { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: ITEM_SPRITE('super-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'antidote', name: 'Antidote', description: 'Removes Poison', icon: ITEM_SPRITE('antidote'), uses: 3, maxUses: 3, category: 'status' },
-    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
-    { id: 'energy-boost', name: 'Energy Boost', description: '+1 Colorless energy', icon: ITEM_SPRITE('pp-up'), uses: 1, maxUses: 1, category: 'energy' },
-  ],
-  'Sabrina': [
-    { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 1, maxUses: 1, category: 'healing' },
-    { id: 'x-special', name: 'X Special', description: '+30% special damage for 3 turns', icon: ITEM_SPRITE('x-sp-atk'), uses: 2, maxUses: 2, category: 'boost' },
-    { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 2, maxUses: 2, category: 'status' },
-  ],
-  'Koga': [
-    { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: ITEM_SPRITE('super-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'antidote', name: 'Antidote', description: 'Removes Poison', icon: ITEM_SPRITE('antidote'), uses: 3, maxUses: 3, category: 'status' },
-    { id: 'poke-doll', name: 'Poke Doll', description: 'Invulnerable for 1 turn', icon: ITEM_SPRITE('poke-doll'), uses: 1, maxUses: 1, category: 'special' },
-    { id: 'x-speed', name: 'X Speed', description: '+1 action priority for 3 turns', icon: ITEM_SPRITE('x-speed'), uses: 1, maxUses: 1, category: 'boost' },
-  ],
-  'Blaine': [
-    { id: 'super-potion', name: 'Super Potion', description: 'Heals 60 HP', icon: ITEM_SPRITE('super-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'burn-heal', name: 'Burn Heal', description: 'Removes Burn', icon: ITEM_SPRITE('burn-heal'), uses: 3, maxUses: 3, category: 'status' },
-    { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 2, maxUses: 2, category: 'boost' },
-  ],
-  'Giovanni': [
-    { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 1, maxUses: 1, category: 'boost' },
-    { id: 'x-defense', name: 'X Defense', description: '-20 damage taken for 3 turns', icon: ITEM_SPRITE('x-defense'), uses: 1, maxUses: 1, category: 'boost' },
-    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
-  ],
   'Professor Oak': [
     { id: 'max-potion', name: 'Max Potion', description: 'Fully heals HP', icon: ITEM_SPRITE('max-potion'), uses: 1, maxUses: 1, category: 'healing' },
     { id: 'rare-candy', name: 'Rare Candy', description: 'Evolve without energy cost', icon: ITEM_SPRITE('rare-candy'), uses: 2, maxUses: 2, category: 'energy' },
     { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 1, maxUses: 1, category: 'status' },
     { id: 'energy-boost', name: 'Energy Boost', description: '+1 Colorless energy', icon: ITEM_SPRITE('pp-up'), uses: 2, maxUses: 2, category: 'energy' },
   ],
+  'Misty': [
+    { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 2, maxUses: 2, category: 'healing' },
+    { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 2, maxUses: 2, category: 'status' },
+    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
+  ],
   'Nurse Joy': [
     { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 3, maxUses: 3, category: 'healing' },
     { id: 'full-restore', name: 'Full Restore', description: 'Fully heals HP + removes status', icon: ITEM_SPRITE('full-restore'), uses: 1, maxUses: 1, category: 'healing' },
     { id: 'max-revive', name: 'Max Revive', description: 'Revives with 100% HP', icon: ITEM_SPRITE('max-revive'), uses: 1, maxUses: 1, category: 'revive' },
     { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 2, maxUses: 2, category: 'status' },
-  ],
-  'Lance': [
-    { id: 'hyper-potion', name: 'Hyper Potion', description: 'Heals 120 HP', icon: ITEM_SPRITE('hyper-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 2, maxUses: 2, category: 'boost' },
-    { id: 'revive', name: 'Revive', description: 'Revives with 50% HP', icon: ITEM_SPRITE('revive'), uses: 1, maxUses: 1, category: 'revive' },
-  ],
-  'Red': [
-    { id: 'max-potion', name: 'Max Potion', description: 'Fully heals HP', icon: ITEM_SPRITE('max-potion'), uses: 2, maxUses: 2, category: 'healing' },
-    { id: 'max-revive', name: 'Max Revive', description: 'Revives with 100% HP', icon: ITEM_SPRITE('max-revive'), uses: 1, maxUses: 1, category: 'revive' },
-    { id: 'x-attack', name: 'X Attack', description: '+30% damage for 3 turns', icon: ITEM_SPRITE('x-attack'), uses: 1, maxUses: 1, category: 'boost' },
-    { id: 'full-heal', name: 'Full Heal', description: 'Removes all status effects', icon: ITEM_SPRITE('full-heal'), uses: 1, maxUses: 1, category: 'status' },
   ],
 };

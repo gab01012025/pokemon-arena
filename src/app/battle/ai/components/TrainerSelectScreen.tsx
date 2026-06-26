@@ -6,33 +6,15 @@ import { TRAINER_ITEMS } from '../data';
 
 // Modern trainer artwork - Pokémon Showdown default (latest gen) trainer sprites
 const TRAINER_SPRITES: Record<string, string> = {
-  'Brock': 'https://play.pokemonshowdown.com/sprites/trainers/brock.png',
-  'Misty': 'https://play.pokemonshowdown.com/sprites/trainers/misty.png',
-  'Lt. Surge': 'https://play.pokemonshowdown.com/sprites/trainers/ltsurge.png',
-  'Erika': 'https://play.pokemonshowdown.com/sprites/trainers/erika.png',
-  'Sabrina': 'https://play.pokemonshowdown.com/sprites/trainers/sabrina.png',
-  'Koga': 'https://play.pokemonshowdown.com/sprites/trainers/koga.png',
-  'Blaine': 'https://play.pokemonshowdown.com/sprites/trainers/blaine.png',
-  'Giovanni': 'https://play.pokemonshowdown.com/sprites/trainers/giovanni.png',
   'Professor Oak': 'https://play.pokemonshowdown.com/sprites/trainers/oak.png',
+  'Misty': 'https://play.pokemonshowdown.com/sprites/trainers/misty.png',
   'Nurse Joy': 'https://play.pokemonshowdown.com/sprites/trainers/pokemonbreeder.png',
-  'Lance': 'https://play.pokemonshowdown.com/sprites/trainers/lance.png',
-  'Red': 'https://play.pokemonshowdown.com/sprites/trainers/red.png',
 };
 
 const TRAINER_COLORS: Record<string, string> = {
-  'Brock': '#C03028',
-  'Misty': '#6890F0',
-  'Lt. Surge': '#F8D030',
-  'Erika': '#78C850',
-  'Sabrina': '#F85888',
-  'Koga': '#A040A0',
-  'Blaine': '#F08030',
-  'Giovanni': '#705848',
   'Professor Oak': '#A8A878',
+  'Misty': '#6890F0',
   'Nurse Joy': '#EE99AC',
-  'Lance': '#7038F8',
-  'Red': '#FF4444',
 };
 
 interface TrainerSelectScreenProps {
